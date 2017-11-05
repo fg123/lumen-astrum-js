@@ -1,0 +1,192 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    font-family: "Roboto Slab", serif;
+    font-size: 16px;
+}
+* {
+    box-sizing: border-box;
+}
+canvas {
+    position:absolute;
+    width:100%;
+    height:100%;
+    z-index: 0;
+    cursor: none;
+}
+div.overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+div.content, div.inQueue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+div.inQueue {
+    color: #FFF;
+}
+
+div.joinGameDialog {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(0, -50%);
+    text-align: right;
+}
+
+div.button.medium {
+    padding: 1em 2em;
+}
+div.button.large {
+    padding: 1.2em 3em;
+}
+div.loginForm {
+    text-align:right;
+    width: 40%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hide {
+    display: none;
+}
+
+div.button {
+    position: relative;
+    display: inline-block;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 0.3em 1.5em;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    color: white;
+    background: linear-gradient(135deg, #18a3c5, #c01313);
+    background-size: 400%, 400%;
+    border-radius: 4px;
+    transition: box-shadow .5s ease, transform .2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+    -webkit-animation: SlowMovement 8s ease infinite;
+    -moz-animation: SlowMovement 8s ease infinite;
+    animation: SlowMovement 8s ease infinite;
+}
+
+@-webkit-keyframes SlowMovement {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes SlowMovement {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes SlowMovement {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+div.button:hover {
+    background: linear-gradient(135deg, rgb(29, 183, 214), #f51818);
+    background-size: 400%, 400%;
+}
+
+div.button:active {
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, .3);
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px;
+    border: 2px solid black;
+    outline: none;
+    font-weight: bold;
+}
+
+div.errorMessage {
+    color: #ff4a4a;
+    padding: 5px;
+    display: none;
+}
+div.clientMain div.content {
+    padding: 50px 200px;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(0, rgba(0, 140, 255, 0.041),
+        rgba(43, 128, 255, 0.171)); /* Standard syntax (must be last) */
+    position: relative;
+}
+
+div.topLeft {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+div.topRight {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+div.usernameDisplay {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFF;
+}
+
+.loader,
+.loader:after {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+}
+.loader {
+  margin: 60px auto;
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+  border-left: 1.1em solid #ffffff;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}

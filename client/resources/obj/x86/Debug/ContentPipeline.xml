@@ -1,0 +1,887 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Pipeline="Microsoft.Xna.Framework.Content.Pipeline">
+  <Asset Type="Pipeline:BuildItemCollection">
+    <Item>
+      <Source>attack\exploding.png</Source>
+      <Name>attack\exploding</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\attack\exploding.xnb</Output>
+      <Time>2016-01-04T21:59:47.9204745-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\defaultTile.png</Source>
+      <Name>groundTexture\defaultTile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\defaultTile.xnb</Output>
+      <Time>2016-01-06T19:15:15.9342958-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\brushTile.png</Source>
+      <Name>groundTexture\brushTile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\brushTile.xnb</Output>
+      <Time>2016-01-01T22:23:59.9974954-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\commandcenter.png</Source>
+      <Name>structures\commandcenter</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\commandcenter.xnb</Output>
+      <Time>2016-01-04T19:35:54.1292271-08:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\background.png</Source>
+      <Name>menu\background</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\background.xnb</Output>
+      <Time>2015-04-06T12:20:18.0960687-07:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\logo.png</Source>
+      <Name>menu\logo</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\logo.xnb</Output>
+      <Time>2014-08-01T14:33:22.6776841-07:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\badgeNormal.png</Source>
+      <Name>menu\badgeNormal</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\badgeNormal.xnb</Output>
+      <Time>2015-02-03T20:31:02.7899017-08:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\badgeBronze.png</Source>
+      <Name>menu\badgeBronze</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\badgeBronze.xnb</Output>
+      <Time>2015-02-03T20:31:02.7959062-08:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\badgeGold.png</Source>
+      <Name>menu\badgeGold</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\badgeGold.xnb</Output>
+      <Time>2015-02-03T20:31:02.8019105-08:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\badgeSilver.png</Source>
+      <Name>menu\badgeSilver</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\badgeSilver.xnb</Output>
+      <Time>2015-02-03T20:31:02.7989085-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\redOverlay.png</Source>
+      <Name>groundTexture\redOverlay</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\redOverlay.xnb</Output>
+      <Time>2016-01-04T20:23:07.1331566-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\greenOverlay.png</Source>
+      <Name>groundTexture\greenOverlay</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\greenOverlay.xnb</Output>
+      <Time>2016-01-04T20:23:04.187074-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\blueOverlay.png</Source>
+      <Name>groundTexture\blueOverlay</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\blueOverlay.xnb</Output>
+      <Time>2016-01-01T22:01:19.3807559-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\lancer.png</Source>
+      <Name>units\lancer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\lancer.xnb</Output>
+      <Time>2014-08-01T14:33:21.6646009-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\reconteam.png</Source>
+      <Name>units\reconteam</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\reconteam.xnb</Output>
+      <Time>2014-08-01T14:33:22.6716795-07:00</Time>
+    </Item>
+    <Item>
+      <Source>gui\icons.png</Source>
+      <Name>gui\icons</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\gui\icons.xnb</Output>
+      <Time>2015-02-03T20:31:03.3910979-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\fogOfWar.png</Source>
+      <Name>groundTexture\fogOfWar</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\fogOfWar.xnb</Output>
+      <Time>2014-08-01T14:33:23.3091413-07:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\barracks.png</Source>
+      <Name>structures\barracks</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\barracks.xnb</Output>
+      <Time>2016-01-04T19:35:50.2865124-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\aicore.png</Source>
+      <Name>structures\aicore</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\aicore.xnb</Output>
+      <Time>2016-01-04T19:35:38.034854-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\armory.png</Source>
+      <Name>structures\armory</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\armory.xnb</Output>
+      <Time>2016-01-04T19:35:41.7034463-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\yellowOverlay.png</Source>
+      <Name>groundTexture\yellowOverlay</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\yellowOverlay.xnb</Output>
+      <Time>2016-01-01T22:01:18.4801191-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\artillerybay.png</Source>
+      <Name>structures\artillerybay</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\artillerybay.xnb</Output>
+      <Time>2016-01-04T19:35:44.1721911-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\automationfactory.png</Source>
+      <Name>structures\automationfactory</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\automationfactory.xnb</Output>
+      <Time>2016-01-04T19:35:47.6366394-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\factory.png</Source>
+      <Name>structures\factory</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\factory.xnb</Output>
+      <Time>2016-01-04T19:35:58.3692243-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\techlab.png</Source>
+      <Name>structures\techlab</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\techlab.xnb</Output>
+      <Time>2016-01-04T19:36:12.343099-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\guardians.png</Source>
+      <Name>units\guardians</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\guardians.xnb</Output>
+      <Time>2014-08-01T14:33:21.6576027-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\marinesquad.png</Source>
+      <Name>units\marinesquad</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\marinesquad.xnb</Output>
+      <Time>2014-08-01T14:33:22.6666762-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\pioneersquad.png</Source>
+      <Name>units\pioneersquad</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\pioneersquad.xnb</Output>
+      <Time>2014-08-01T14:33:22.6626733-07:00</Time>
+    </Item>
+    <Item>
+      <Source>textBox.png</Source>
+      <Name>textBox</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\textBox.xnb</Output>
+      <Time>2014-08-01T14:33:20.2253159-07:00</Time>
+    </Item>
+    <Item>
+      <Source>background.png</Source>
+      <Name>background</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\background.xnb</Output>
+      <Time>2014-08-01T14:33:22.8047753-07:00</Time>
+    </Item>
+    <Item>
+      <Source>gui\bottomLeft.png</Source>
+      <Name>gui\bottomLeft</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\gui\bottomLeft.xnb</Output>
+      <Time>2014-11-13T20:38:21.3584312-08:00</Time>
+    </Item>
+    <Item>
+      <Source>gui\bottomRight.png</Source>
+      <Name>gui\bottomRight</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\gui\bottomRight.xnb</Output>
+      <Time>2015-07-01T19:56:32.3493148-07:00</Time>
+    </Item>
+    <Item>
+      <Source>gui\topRight.png</Source>
+      <Name>gui\topRight</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\gui\topRight.xnb</Output>
+      <Time>2015-07-01T20:23:42.6109973-07:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\deployoutpost.png</Source>
+      <Name>structures\deployoutpost</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\deployoutpost.xnb</Output>
+      <Time>2016-01-04T19:35:55.6713177-08:00</Time>
+    </Item>
+    <Item>
+      <Source>attack\attack.png</Source>
+      <Name>attack\attack</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\attack\attack.xnb</Output>
+      <Time>2014-08-01T14:33:22.8017716-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\medic.png</Source>
+      <Name>units\medic</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\medic.xnb</Output>
+      <Time>2014-08-01T14:33:21.669604-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\mainDrone.png</Source>
+      <Name>units\mainDrone</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\mainDrone.xnb</Output>
+      <Time>2014-08-01T14:33:21.6666017-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\legionnaire.png</Source>
+      <Name>units\legionnaire</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\legionnaire.xnb</Output>
+      <Time>2014-08-01T14:33:21.654611-07:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\badgeDiamond.png</Source>
+      <Name>menu\badgeDiamond</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\badgeDiamond.xnb</Output>
+      <Time>2015-02-03T20:31:02.7929039-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\reaver.png</Source>
+      <Name>units\reaver</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\reaver.xnb</Output>
+      <Time>2015-06-21T17:15:44.1652294-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\combatEngineer.png</Source>
+      <Name>units\combatEngineer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\combatEngineer.xnb</Output>
+      <Time>2014-08-01T14:33:21.6595969-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\ocelotTeam.png</Source>
+      <Name>units\ocelotTeam</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\ocelotTeam.xnb</Output>
+      <Time>2014-08-01T14:33:21.647588-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\golem.png</Source>
+      <Name>units\golem</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\golem.xnb</Output>
+      <Time>2014-08-01T14:33:24.5241461-07:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\mineralTile.png</Source>
+      <Name>groundTexture\mineralTile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\mineralTile.xnb</Output>
+      <Time>2016-01-01T22:20:25.3831788-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\harvester.png</Source>
+      <Name>structures\harvester</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\harvester.xnb</Output>
+      <Time>2016-01-04T19:36:00.9870743-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\turret.png</Source>
+      <Name>units\turret</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\turret.xnb</Output>
+      <Time>2015-06-21T17:14:03.7737662-07:00</Time>
+    </Item>
+    <Item>
+      <Source>cursor.png</Source>
+      <Name>cursor</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\cursor.xnb</Output>
+      <Time>2014-11-13T20:38:21.5225475-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\probe.png</Source>
+      <Name>units\probe</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\probe.xnb</Output>
+      <Time>2014-08-01T14:33:21.6495898-07:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\scoutingTower.png</Source>
+      <Name>structures\scoutingTower</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\scoutingTower.xnb</Output>
+      <Time>2016-01-04T19:36:05.8455076-08:00</Time>
+    </Item>
+    <Item>
+      <Source>cameraCursor.png</Source>
+      <Name>cameraCursor</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\cameraCursor.xnb</Output>
+      <Time>2014-08-01T14:33:24.4701075-07:00</Time>
+    </Item>
+    <Item>
+      <Source>gui\tierIcon.png</Source>
+      <Name>gui\tierIcon</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\gui\tierIcon.xnb</Output>
+      <Time>2014-08-01T14:33:24.4811148-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\shadowHuntress.png</Source>
+      <Name>units\shadowHuntress</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\shadowHuntress.xnb</Output>
+      <Time>2015-06-21T17:12:45.5193558-07:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\militaryAcademy.png</Source>
+      <Name>structures\militaryAcademy</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\militaryAcademy.xnb</Output>
+      <Time>2016-01-04T19:36:03.1846267-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\specOp.png</Source>
+      <Name>structures\specOp</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\specOp.xnb</Output>
+      <Time>2016-01-04T19:36:08.960709-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\width1Build.png</Source>
+      <Name>structures\width1Build</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\width1Build.xnb</Output>
+      <Time>2016-01-04T19:36:23.1097082-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\width1BuildAnimation.png</Source>
+      <Name>structures\width1BuildAnimation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\width1BuildAnimation.xnb</Output>
+      <Time>2016-01-04T19:36:28.3023777-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\width0Build.png</Source>
+      <Name>structures\width0Build</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\width0Build.xnb</Output>
+      <Time>2016-01-04T19:36:14.9099138-08:00</Time>
+    </Item>
+    <Item>
+      <Source>structures\width0BuildAnimation.png</Source>
+      <Name>structures\width0BuildAnimation</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\structures\width0BuildAnimation.xnb</Output>
+      <Time>2016-01-04T19:36:19.290009-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\observer.png</Source>
+      <Name>units\observer</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\observer.xnb</Output>
+      <Time>2014-08-01T14:33:21.6716057-07:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\bigMineralTile.png</Source>
+      <Name>groundTexture\bigMineralTile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\bigMineralTile.xnb</Output>
+      <Time>2016-01-01T22:20:32.2560358-08:00</Time>
+    </Item>
+    <Item>
+      <Source>attack\rocket.png</Source>
+      <Name>attack\rocket</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\attack\rocket.xnb</Output>
+      <Time>2015-02-03T20:31:03.1873128-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\highTile.png</Source>
+      <Name>groundTexture\highTile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\highTile.xnb</Output>
+      <Time>2016-01-01T22:20:15.5202089-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\lowTile.png</Source>
+      <Name>groundTexture\lowTile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\lowTile.xnb</Output>
+      <Time>2016-01-01T22:06:46.3003189-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\rock.png</Source>
+      <Name>groundTexture\rock</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\rock.xnb</Output>
+      <Time>2016-01-01T21:17:31.3956313-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\idetrooper.png</Source>
+      <Name>units\idetrooper</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\idetrooper.xnb</Output>
+      <Time>2015-02-03T20:31:02.6592051-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\mantis.png</Source>
+      <Name>units\mantis</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\mantis.xnb</Output>
+      <Time>2014-08-01T14:33:21.6616162-07:00</Time>
+    </Item>
+    <Item>
+      <Source>units\praetorian.png</Source>
+      <Name>units\praetorian</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\praetorian.xnb</Output>
+      <Time>2015-02-03T20:31:02.6542196-08:00</Time>
+    </Item>
+    <Item>
+      <Source>units\raider.png</Source>
+      <Name>units\raider</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\units\raider.xnb</Output>
+      <Time>2015-02-03T20:31:02.6572176-08:00</Time>
+    </Item>
+    <Item>
+      <Source>groundTexture\wallShadow.png</Source>
+      <Name>groundTexture\wallShadow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\groundTexture\wallShadow.xnb</Output>
+      <Time>2016-01-04T20:07:08.396754-08:00</Time>
+    </Item>
+    <Item>
+      <Source>effects\BloomCombine.fx</Source>
+      <Name>effects\BloomCombine</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\effects\BloomCombine.xnb</Output>
+      <Time>2014-08-01T14:33:16.028733-07:00</Time>
+    </Item>
+    <Item>
+      <Source>effects\BloomExtract.fx</Source>
+      <Name>effects\BloomExtract</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\effects\BloomExtract.xnb</Output>
+      <Time>2014-08-01T14:33:21.5695417-07:00</Time>
+    </Item>
+    <Item>
+      <Source>effects\GaussianBlur.fx</Source>
+      <Name>effects\GaussianBlur</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\effects\GaussianBlur.xnb</Output>
+      <Time>2014-08-01T14:33:19.4737399-07:00</Time>
+    </Item>
+    <Item>
+      <Source>effects\greyscale.fx</Source>
+      <Name>effects\greyscale</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\effects\greyscale.xnb</Output>
+      <Time>2014-08-01T14:33:23.3001275-07:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\debug.spritefont</Source>
+      <Name>fonts\debug</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\debug.xnb</Output>
+      <Time>2014-11-13T20:38:21.4234784-08:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\notify.spritefont</Source>
+      <Name>fonts\notify</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\notify.xnb</Output>
+      <Time>2016-01-01T22:14:49.5218263-08:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\money.spritefont</Source>
+      <Name>fonts\money</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\money.xnb</Output>
+      <Time>2016-01-01T22:13:14.861785-08:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\displayName.spritefont</Source>
+      <Name>fonts\displayName</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\displayName.xnb</Output>
+      <Time>2016-01-01T22:14:52.3938576-08:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\statFont.spritefont</Source>
+      <Name>fonts\statFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\statFont.xnb</Output>
+      <Time>2015-07-01T20:55:26.4322751-07:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\description.spritefont</Source>
+      <Name>fonts\description</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\description.xnb</Output>
+      <Time>2016-01-01T22:13:35.7675586-08:00</Time>
+    </Item>
+    <Item>
+      <Source>fonts\gameTime.spritefont</Source>
+      <Name>fonts\gameTime</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\fonts\gameTime.xnb</Output>
+      <Time>2016-01-01T22:13:07.433535-08:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\MenuFont.spritefont</Source>
+      <Name>menu\MenuFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\MenuFont.xnb</Output>
+      <Time>2014-08-01T14:33:22.7917771-07:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\TitleFont.spritefont</Source>
+      <Name>menu\TitleFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\TitleFont.xnb</Output>
+      <Time>2014-08-01T14:33:24.5321508-07:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\TooltipFont.spritefont</Source>
+      <Name>menu\TooltipFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\TooltipFont.xnb</Output>
+      <Time>2014-08-01T14:33:24.4631024-07:00</Time>
+    </Item>
+    <Item>
+      <Source>menu\StatusBar.spritefont</Source>
+      <Name>menu\StatusBar</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\menu\StatusBar.xnb</Output>
+      <Time>2014-08-01T14:33:22.8077762-07:00</Time>
+    </Item>
+    <Item>
+      <Source>MasterUnitList.xml</Source>
+      <Name>MasterUnitList</Name>
+      <Importer>XmlImporter</Importer>
+      <Processor>PassThroughProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\MasterUnitList.xnb</Output>
+      <Time>2016-01-08T23:17:33.3691998-08:00</Time>
+    </Item>
+    <Item>
+      <Source>MasterStructureList.xml</Source>
+      <Name>MasterStructureList</Name>
+      <Importer>XmlImporter</Importer>
+      <Processor>PassThroughProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\MasterStructureList.xnb</Output>
+      <Time>2016-01-09T22:12:53.8333265-08:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\MenuMouseOver.mp3</Source>
+      <Name>sounds\MenuMouseOver</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\MenuMouseOver.xnb</Output>
+      <Time>2014-08-01T14:33:24.4761118-07:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\MenuSelect.mp3</Source>
+      <Name>sounds\MenuSelect</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\MenuSelect.xnb</Output>
+      <Time>2015-06-22T20:52:12.9256012-07:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\MouseOver.mp3</Source>
+      <Name>sounds\MouseOver</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\MouseOver.xnb</Output>
+      <Time>2014-08-01T14:33:24.5491633-07:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\gameMouseOver\mouseOver1.mp3</Source>
+      <Name>sounds\gameMouseOver\mouseOver1</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\gameMouseOver\mouseOver1.xnb</Output>
+      <Time>2014-08-01T14:33:25.4868271-07:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\gameMouseOver\mouseOver2.mp3</Source>
+      <Name>sounds\gameMouseOver\mouseOver2</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\gameMouseOver\mouseOver2.xnb</Output>
+      <Time>2014-08-01T14:33:24.5611712-07:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\gameMouseOver\mouseOver3.mp3</Source>
+      <Name>sounds\gameMouseOver\mouseOver3</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\gameMouseOver\mouseOver3.xnb</Output>
+      <Time>2014-08-01T14:33:25.4938322-07:00</Time>
+    </Item>
+    <Item>
+      <Source>sounds\gameMouseOver\mouseOver4.mp3</Source>
+      <Name>sounds\gameMouseOver\mouseOver4</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\sounds\gameMouseOver\mouseOver4.xnb</Output>
+      <Time>2014-08-01T14:33:25.4918304-07:00</Time>
+    </Item>
+    <BuildSuccessful>true</BuildSuccessful>
+    <Settings>
+      <TargetPlatform>Windows</TargetPlatform>
+      <TargetProfile>HiDef</TargetProfile>
+      <BuildConfiguration>Debug</BuildConfiguration>
+      <CompressContent>false</CompressContent>
+      <RootDirectory>D:\Documents\Visual Studio\ProjectSpace\trunk\ProjectSpace\ProjectSpaceContent\</RootDirectory>
+      <LoggerRootDirectory>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\</LoggerRootDirectory>
+      <IntermediateDirectory>D:\Documents\Visual Studio\ProjectSpace\trunk\ProjectSpace\ProjectSpaceContent\obj\x86\Debug\</IntermediateDirectory>
+      <OutputDirectory>D:\Documents\Visual Studio\ProjectSpace\trunk\Content Manager\bin\x86\Debug\GameData\</OutputDirectory>
+    </Settings>
+    <Assemblies>
+      <Assembly>
+        <Key>D:\Documents\Visual Studio\ProjectSpace\trunk\ProjectSpaceDataTypes\bin\x86\Debug\ProjectSpaceDataTypes.dll</Key>
+        <Value>2016-01-13T17:42:14.1228496-08:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.XImporter.dll</Key>
+        <Value>2010-08-23T12:41:18-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.VideoImporters.dll</Key>
+        <Value>2010-08-23T12:41:18-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.TextureImporter.dll</Key>
+        <Value>2010-08-23T12:41:18-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.FBXImporter.dll</Key>
+        <Value>2010-08-23T12:41:18-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll</Key>
+        <Value>2010-08-23T12:41:18-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.AudioImporters.dll</Key>
+        <Value>2010-08-23T12:41:18-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Windows\Microsoft.Net\assembly\GAC_32\Microsoft.Xna.Framework.Content.Pipeline\v4.0_4.0.0.0__842cf8be1de50553\Microsoft.Xna.Framework.Content.Pipeline.dll</Key>
+        <Value>2015-06-30T21:36:56.4702011-07:00</Value>
+      </Assembly>
+    </Assemblies>
+  </Asset>
+</XnaContent>
