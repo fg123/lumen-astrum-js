@@ -8,11 +8,11 @@ var movementIndex = 0;
 var screenWidth = 0;
 var screenHeight = 0;
 
-var mouseDown = false;
 var mouseDownLocation;
 var mouseLocation;
 
 function checkInput() {
+    if (currentScreen != GAME_SCREEN) return;
     if (keyState[KEY_A]) {
         state.camera.delta.x = -35;
     }
@@ -25,17 +25,166 @@ function checkInput() {
     if (keyState[KEY_S]) {
         state.camera.delta.y = 35;
     }
-    mouseState.tile = toTileCoord(toWorldCoord(mouseState.position));
+    if (keyState[KEY_ESCAPE] && !prevKeyState[KEY_ESCAPE]) {
+        if (state.buildingStructure || state.spawningUnit) {
+            state.buildingStructure = null;
+            state.spawningUnit = null;
+        }
+        else if (state.selectedObject) {
+            state.selectedObject = null;
+        }
+    }
+    for (var i = 0; i < DIGIT_KEYS.length; i++) {
+        if (keyState[DIGIT_KEYS[i]] && !prevKeyState[DIGIT_KEYS[i]]) {
+            if (state.selectedObject) {
+                var baseObj = getBaseObject(state.selectedObject.name);
+                if (i < baseObj.options.length) {
+                    handleOptionClicked(baseObj.options[i]);
+                }
+            }
+        }
+    }
+    if (keyState[KEY_SPACE]) {
+        selectObject(state.commandCenter);
+    }
+    prevKeyState = keyState.slice(0);
 }
 
+function handleOptionClicked(option) {
+    if (state.side != state.gameState.currentTurn) {
+        // Cannot Exercise Option If Not Your Turn
+        pushAlertMessage("Wait for your turn!");
+        return;
+    }
+    // Check for Gold Cost and Prereqs
+    // TODO: Prereqs
+    if (option.cost > getGold()) {
+        pushAlertMessage("Not enough gold!");
+        return;
+    }
+    // TODO: Use Constants
+    // Parse command
+    var parts = option.command.split("-");
+    switch (parts[0]) {
+        case "spawn":
+            state.spawningUnit = parts[1];
+            state.buildingStructure = null;
+            break;
+        case "build":
+            state.buildingStructure = parts[1];
+            state.spawningUnit = null;
+            break;
+    }
+    return;
+}
+
+function gameUIClickEvent(button) {
+    if (currentScreen != GAME_SCREEN) return false;
+    if (state.hoveredOption) {
+        handleOptionClicked(state.hoveredOption);
+        return true;
+    }
+    if (state.hoveringEndTurn) {
+        sendStateChange(createStateChange(state.side, "turn-passover", {
+            isUserInitiated: true
+        }));
+        return true;
+    }
+    return false;
+}
+
+function gameObjectClickEvent(button) {
+    if (currentScreen != GAME_SCREEN) return false;
+    if (button == LEFT_MOUSE_BUTTON && withinMap(mouseState.tile)) {
+        // Could be a Placement
+        if (state.buildingStructure || state.spawningUnit) {
+            if (state.allowedToBuildOrSpawn) {
+                if (state.buildingStructure) {
+                    sendStateChange(createStateChange(state.side, "build-structure", {
+                        name: state.buildingStructure,
+                        position: mouseState.tile
+                    }));
+                }
+                else {
+                    sendStateChange(createStateChange(state.side, "spawn-unit", {
+                        name: state.spawningUnit,
+                        position: mouseState.tile
+                    }));
+                }
+                state.buildingStructure = null;
+                state.spawningUnit = null;
+                return true;
+            }
+            return false;
+        }
+        else {
+            let obj = null;
+            let occupiedPoint = state.gameState.occupied[mouseState.tile.y][mouseState.tile.x];
+            // Check that it's actually occupied by an object
+            if (occupiedPoint && occupiedPoint !== true) {
+                obj = state.gameState.mapObjects[occupiedPoint.y][occupiedPoint.x];
+            }
+            selectObject(obj);
+            return true;
+        }
+    }
+    return false;
+}
+
+function checkLegalityOfBuildOrSpawn() {
+    // TODO Add Checking for Units and Add Checking for Building Range
+    if (state.buildingStructure) {
+        state.allowedToBuildOrSpawn = true;
+        let baseObj = getBaseObject(state.buildingStructure);
+        let surrounding = getSurrounding(mouseState.tile, baseObj.width);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (!withinMap(surrounding[i]) ||
+                state.gameState.occupied[surrounding[i].y][surrounding[i].x] ||
+                map[surrounding[i].y][surrounding[i].x].displayType == 2 ||
+                !state.gameState.allowedBuilding[surrounding[i].y][surrounding[i].x]) {
+                state.allowedToBuildOrSpawn = false;
+            }
+        }
+    }
+    else if (state.spawningUnit) {
+        state.allowedToBuildOrSpawn = false;
+        let baseObj = getBaseObject(state.selectedObject.name);
+        let surrounding = getSurrounding(state.selectedObject.position,
+            baseObj.width + 1);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i]) &&
+                !state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
+                map[surrounding[i].y][surrounding[i].x].displayType != 2) {
+                if (mouseState.tile.x == surrounding[i].x && mouseState.tile.y == surrounding[i].y) {
+                    state.allowedToBuildOrSpawn = true;
+                }
+            }
+        }
+    }
+}
+function calculateTurnTimeRemainingIfTurn() {
+    if (state.gameState.currentTurn == state.side) {
+        let diff = state.gameState.turnEndTime - Date.now();
+        // Diff in Millis
+        diff = Math.ceil(diff / 1000);
+        // Diff in Seconds
+        state.turnTimer = ("0" + Math.floor(diff / 60)).slice(-2) + ":" + ("0" + (diff % 60)).slice(-2);
+    }
+    else {
+        state.turnTimer = "00:00";
+    }
+}
 function update() {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
     var now = Date.now();
     DELTA_TIME = 1000 / (now - PREV_TIME);
-    if (currentScreen == GAME_SCREEN) {
-        checkInput();
-    }
+
+    mouseState.tile = toTileCoord(toWorldCoord(mouseState.position));
+
+    checkInput();
+    checkLegalityOfBuildOrSpawn();
+    calculateTurnTimeRemainingIfTurn();
 
     var change = mouseState.scrollDelta.y / 50;
     var oldScale = state.camera.scale;
@@ -44,10 +193,10 @@ function update() {
     var actualChange = Math.abs(oldScale - state.camera.scale);
     state.camera.position.x += (mouseState.position.x - (screenWidth / 2)) * 2 * actualChange + state.camera.delta.x;
     state.camera.position.y += (mouseState.position.y - (screenHeight / 2)) * 2 * actualChange + state.camera.delta.y;
-    mouseState.scrollDelta.x *= 0.9;
-    mouseState.scrollDelta.y *= 0.9;
-    state.camera.delta.x *= 0.9;
-    state.camera.delta.y *= 0.9;
+    mouseState.scrollDelta.x *= 0.7;
+    mouseState.scrollDelta.y *= 0.7;
+    state.camera.delta.x *= 0.7;
+    state.camera.delta.y *= 0.7;
     if (currentScreen != GAME_SCREEN) {
         var d = distance(state.camera.position, movement[movementIndex]);
         if (d < 1) {
@@ -60,12 +209,10 @@ function update() {
         state.camera.position.x += a.x / d * 1;
         state.camera.position.y += a.y / d * 1;
     }
-    //console.log(state.camera.position);
     PREV_TIME = now;
 }
-    startPhysicsLoop();
-   // update();
 
+startPhysicsLoop();
 
 var physicsLoop;
 function startPhysicsLoop() {

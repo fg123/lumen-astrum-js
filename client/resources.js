@@ -16,8 +16,12 @@ const RESOURCE_LOW_TILE = "resources/groundTexture/lowTile.png";
 const RESOURCE_UI_TOP_RIGHT = "resources/gui/topRight.png";
 const RESOURCE_UI_BOTTOM_LEFT = "resources/gui/bottomLeft.png";
 const RESOURCE_UI_BOTTOM_RIGHT = "resources/gui/bottomRight.png";
+const RESOURCE_UI_ICONS = "resources/gui/icons.png";
 const RESOURCE_CURSOR = "resources/cursor.png";
 const RESOURCE_BACKGROUND = "resources/background.png";
+
+const RESOURCE_WIDTH_1_BUILD = "resources/structures/width1Build.png";
+const RESOURCE_WIDTH_0_BUILD = "resources/structures/width0Build.png";
 
 var resourcesToLoad = [RESOURCE_BACKGROUND,
     RESOURCE_BLUE_OVERLAY,
@@ -35,7 +39,10 @@ var resourcesToLoad = [RESOURCE_BACKGROUND,
     RESOURCE_UI_TOP_RIGHT,
     RESOURCE_UI_BOTTOM_LEFT,
     RESOURCE_UI_BOTTOM_RIGHT,
-    RESOURCE_CURSOR];
+    RESOURCE_CURSOR,
+    RESOURCE_UI_ICONS,
+    RESOURCE_WIDTH_0_BUILD,
+    RESOURCE_WIDTH_1_BUILD];
 
 var resources = {};
 
@@ -69,7 +76,6 @@ function loadResources(deferArr) {
         var url = "resources/structures/" + name.toLowerCase().replace(/ /g, '') + ".png";
         loadResource(structures[name], "image", url, deferArr);
     });
-    console.log(structures);
     Object.keys(units).forEach(function (name) {
         var url = "resources/units/" + name.toLowerCase().replace(/ /g, '') + ".png";
         loadResource(units[name], "image", url, deferArr);

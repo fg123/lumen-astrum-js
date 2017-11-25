@@ -1,3 +1,10 @@
+const RED_SIDE = "red";
+const BLUE_SIDE = "blue";
+const NONE_SIDE = "none";
+const BUILD_RANGE = 4;
+
+const RED_SIDE_COMMAND_CENTER_LOC = createTuple(6, 19);
+const BLUE_SIDE_COMMAND_CENTER_LOC = createTuple(47, 6);
 
 if (typeof module !== 'undefined') {
     map = require("../map");
@@ -7,7 +14,12 @@ if (typeof module !== 'undefined') {
     module.exports = {
         createGameState: createGameState,
         simulateState: simulateState,
-        createStateChange: createStateChange
+        createStateChange: createStateChange,
+        verifyStateChange: verifyStateChange,
+        availableTurnTime: availableTurnTime,
+        RED_SIDE,
+        BLUE_SIDE,
+        NONE_SIDE
     };
 }
 
@@ -20,8 +32,22 @@ function createStateChange(from, type, data) {
     };
 }
 
+var tupleCache = new Array(1000 * 900);
+var zeroTuple = { x: 0, y: 0 };
+var negOneTuple = { x: -1, y: -1 };
+
 function createTuple(x, y) {
-    return { x: x, y: y };
+    // Cache Tuples
+    var index = x * 100 + y;
+    if (index > 0 && index < 100) {
+        if (!tupleCache[index]) {
+            tupleCache[index] = { x: x, y: y };
+        }
+        return tupleCache[index];
+    }
+    else {
+        return { x: x, y: y };
+    }
 }
 
 function createTriple(x, y, z) {
@@ -43,40 +69,102 @@ function convertToOffsetCoordinates(p) {
     return createTuple(cubex, cubey);
 }
 
-function createStructure(name, side) {
+function createStructure(name, side, position) {
     return {
         name: name,
         side: side,
+        position: position,
+        turnsUntilBuilt: structures[name].turnsToBuild,
+        width: structures[name].width,
         currentHealth: structures[name].health,
         currentShield: structures[name].shield
     };
 }
 
-function createUnit(name, side) {
+function createUnit(name, side, position) {
     return {
         name: name,
         side: side,
+        position: position,
+        turnsUntilBuilt: units[name].turnsToBuild,
+        width: 1,
         currentHealth: units[name].health,
         currentShield: units[name].shield
     };
 }
 
+function withinMap(tile) {
+    return !(tile.x < 0 || tile.y < 0 &&
+        tile.x >= map[0].length || tile.y >= map.length);
+}
+
+function isConstructionBuilding(name) {
+    return name == "Command Base" || name == "Deployment Outpost";
+}
+
+function insertMapObject(state, location, name, side) {
+    if (name in structures) {
+        var structure = createStructure(name, side, location);
+        state.mapObjects[location.y][location.x] = structure;
+        state.structures.push(structure);
+        let surrounding = getSurrounding(location, structures[name].width);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i])) {
+                state.occupied[surrounding[i].y][surrounding[i].x] = location;
+            }
+        }
+        if (isConstructionBuilding(name)) {
+            let surrounding = getSurrounding(location, structures[name].width + BUILD_RANGE);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (withinMap(surrounding[i])) {
+                    state.allowedBuilding[surrounding[i].y][surrounding[i].x] = true;
+                }
+            }
+        }
+    }
+    else if (name in units) {
+        var unit = createUnit(name, side, location);
+        state.mapObjects[location.y][location.x] = unit;
+        state.units.push(unit);
+        state.occupied[location.y][location.x] = location;
+    }
+}
+
 function createGameState(gameStartTime) {
-    var state = {
+    var gameState = {
         mapObjects: [],
         visibility: [],
-        gameStartTime: gameStartTime
+        occupied: [],
+        allowedBuilding: [],
+        structures: [],
+        units: [],
+        gameStartTime: gameStartTime,
+        turnEndTime: 0,
+        redTurnCount: 0,
+        blueTurnCount: 0,
+        redGold: 1000,
+        blueGold: 1000,
+        currentTurn: NONE_SIDE
     };
     for (var i = 0; i < map.length; i++) {
-        state.mapObjects.push([]);
-        state.visibility.push([]);
+        gameState.mapObjects.push([]);
+        gameState.visibility.push([]);
+        gameState.occupied.push([]);
+        gameState.allowedBuilding.push([]);
     }
-    state.mapObjects[19][6] = createStructure("Command Base", "red");
-    state.mapObjects[6][47] = createStructure("Command Base", "blue");
-    var visibilityRed = getNeighbours(convertToCubeCoordinates(createTuple(6, 19)));
-    var visibilityBlue = getNeighbours(convertToCubeCoordinates(createTuple(47, 6)));
+    for (let y = 0; y < map.length; y++) {
+        for (let x = 0; x < map[0].length; x++) {
+            if (map[y][x].displayType == 0 || map[y][x].displayType == 5) {
+                gameState.occupied[y][x] = true;
+            }
+        }
+    }
+    insertMapObject(gameState, RED_SIDE_COMMAND_CENTER_LOC, "Command Base", RED_SIDE);
+    insertMapObject(gameState, BLUE_SIDE_COMMAND_CENTER_LOC, "Command Base", BLUE_SIDE);
+    //var visibilityRed = getNeighbours(convertToCubeCoordinates(RED_SIDE_COMMAND_CENTER_LOC));
+    //var visibilityBlue = getNeighbours(convertToCubeCoordinates(BLUE_SIDE_COMMAND_CENTER_LOC));
 
-    return state;
+    return gameState;
 }
 
 // A and B are triples!
@@ -97,6 +185,20 @@ function getNeighbours(a) {
     return neighbours;
 }
 
+function getSurrounding(a, width) {
+    a = convertToCubeCoordinates(a);
+    var results = [];
+    for (var dx = -width; dx <= width; dx++) {
+        for (var dy = Math.max(-width, -dx - width);
+            dy <= Math.min(width, -dx + width); dy++) {
+            var dz = -dx - dy;
+            results.push(convertToOffsetCoordinates(
+                createTriple(a.x + dx, a.y + dy, a.z + dz)));
+        }
+    }
+    return results;
+}
+
 function nodeInList(a, list) {
     for (var i = 0; i < list.length; i++) {
         if (list[i].x == a.x && list[i].y == a.y && list[i].z == a.z) {
@@ -112,22 +214,58 @@ function pathFind(a, b, state) {
 
 }
 
+function verifyStateChange(state, stateChange) {
+    return true;
+}
+
 function simulateState(state, stateChange) {
+    // State is GameState
+    console.log("Simulating State: " + JSON.stringify(stateChange));
+    var pos;
     if (stateChange.type == "build-structure") {
-        var pos = stateChange.data.position;
-        state.mapObjects[pos.y][pos.x] =
-            createStructure(stateChange.data.name, stateChange.from);
+        pos = stateChange.data.position;
+        insertMapObject(state, pos, stateChange.data.name, stateChange.from);
     }
     else if (stateChange.type == "spawn-unit") {
-        var pos = stateChange.data.position;
-        state.mapObjects[pos.y][pos.x] =
-            createUnit(stateChange.data.name, stateChange.from);
+        pos = stateChange.data.position;
+        insertMapObject(state, pos, stateChange.data.name, stateChange.from);
     }
     else if (stateChange.type == "move-unit") {
-        var pos = stateChange.data.fromPosition;
+        pos = stateChange.data.fromPosition;
         var to = stateChange.data.toPosition;
     }
     else if (stateChange.type == "turn-passover") {
+        if (stateChange.from == RED_SIDE) {
+            state.currentTurn = BLUE_SIDE;
+            state.blueTurnCount++;
+        }
+        else {
+            state.currentTurn = RED_SIDE;
+            state.redTurnCount++;
+        }
+        state.turnEndTime = Date.now() + availableTurnTime(state, state.currentTurn);
 
+        // Turn End Procedures, Buildings!
+        for (let i = 0; i < state.structures.length; i++) {
+            if (state.structures[i].side == stateChange.from &&
+                state.structures[i].turnsUntilBuilt != 0) {
+                state.structures[i].turnsUntilBuilt -= 1;
+            }
+        }
+        for (let i = 0; i < state.units.length; i++) {
+            if (state.units[i].side == stateChange.from &&
+                state.units[i].turnsUntilBuilt != 0) {
+                state.units[i].turnsUntilBuilt -= 1;
+            }
+        }
+    }
+}
+
+function availableTurnTime(state, side) {
+    if (side == RED_SIDE) {
+        return 1000 * ((30) + (state.redTurnCount - 1) * 5);
+    }
+    else {
+        return 1000 * ((30) + (state.blueTurnCount - 1) * 5);
     }
 }

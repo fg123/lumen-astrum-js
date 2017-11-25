@@ -1,25 +1,28 @@
 {
-    "name": "lumen-astrum",
-    "version": "1.0.0",
-    "description": "Top down turn based RTS game",
-    "scripts": {
-        "start": "node -r dotenv/config server/index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/fg123/lumen-astrum.git"
-    },
-    "author": "Felix Guo",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/fg123/lumen-astrum/issues"
-    },
-    "dependencies": {
-        "dotenv": "^4.0.0",
-        "express": "^4.15.4",
-        "pg": "^6.1.0",
-        "socket.io": "^2.0.3"
-    },
-    "homepage": "https://github.com/fg123/lumen-astrum#readme"
+  "name": "lumen-astrum",
+  "version": "1.0.0",
+  "description": "Top down turn based RTS game",
+  "scripts": {
+    "start": "node -r dotenv/config server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fg123/lumen-astrum.git"
+  },
+  "author": "Felix Guo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fg123/lumen-astrum/issues"
+  },
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "express": "^4.15.4",
+    "pg": "^6.1.0",
+    "socket.io": "^2.0.3"
+  },
+  "homepage": "https://github.com/fg123/lumen-astrum#readme",
+  "devDependencies": {
+    "jshint": "^2.9.5"
+  }
 }

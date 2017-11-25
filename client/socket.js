@@ -12,6 +12,10 @@ function leaveQueue() {
     socket.emit("leave-queue");
 }
 
+function sendStateChange(stateChange) {
+    socket.emit("state-change", stateChange);
+}
+
 socket.on("login-failed", function () {
     $(".errorMessage").show();
 });
@@ -34,18 +38,29 @@ socket.on("login-success", function (user) {
 });
 
 socket.on("state-change", function (stateChange) {
-    if (stateChange.type == "turn-passover") {
-        if (stateChange.data.from == "server") {
-            state.currentTurn = "red";
-        }
-        state.lastTurnTime = stateChange.data.timestamp;
-    }
     simulateState(state.gameState, stateChange);
+    if (stateChange.type == "turn-passover") {
+        state.buildingStructure = null;
+        state.spawningUnit = null;
+    }
+});
+
+socket.on("invalid-state-change", function () {
+    // Should never happen since UI should prevent it, but if so...
+    pushAlertMessage("Invalid action!");
 });
 
 socket.on("game-start", function (side, gameStartTime) {
     state.side = side;
     state.gameState = createGameState(gameStartTime);
+    if (side == RED_SIDE) {
+        state.commandCenter = state.gameState.mapObjects[RED_SIDE_COMMAND_CENTER_LOC.y]
+            [RED_SIDE_COMMAND_CENTER_LOC.x];
+    }
+    else {
+        state.commandCenter = state.gameState.mapObjects[BLUE_SIDE_COMMAND_CENTER_LOC.y]
+            [BLUE_SIDE_COMMAND_CENTER_LOC.x];
+    }
     loadScreen(GAME_SCREEN);
     var interval = setInterval(function () {
         var seconds = parseInt(10 - (Date.now() - state.gameState.gameStartTime) / 1000);
