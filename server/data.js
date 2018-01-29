@@ -235,6 +235,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         },
         "Factory": {
             "description": "Unit production building, trains Ocelot Teams, Golems, Mantis Swarm, and Lancers.",
@@ -288,6 +289,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         },
         "Automation Factory": {
             "description": "Support facility, required for building turrets.",
@@ -295,6 +297,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         },
         "Tech Lab": {
             "description": "Support facility, used for accessing tier 3 units.",
@@ -302,6 +305,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         },
         "Mech Facility": {
             "description": "Unit production building, trains Annihilators and Dragons.",
@@ -337,6 +341,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         },
         "Spec Ops Facility": {
             "description": "Unit production building, trains Shadow Huntresses.",
@@ -372,6 +377,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         },
         "Scouting Tower": {
             "description": "Scouting facility. Can create probes or observers.",
@@ -407,6 +413,7 @@ module.exports = {
             "shield": 0,
             "width": 0,
             "turnsToBuild": 1,
+            "options": [],
         }
     },
     "units": {

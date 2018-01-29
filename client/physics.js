@@ -108,7 +108,8 @@ function gameObjectClickEvent(button) {
                 else {
                     sendStateChange(createStateChange(state.side, "spawn-unit", {
                         name: state.spawningUnit,
-                        position: mouseState.tile
+                        position: mouseState.tile,
+                        from: state.selectedObject
                     }));
                 }
                 state.buildingStructure = null;
@@ -134,32 +135,10 @@ function gameObjectClickEvent(button) {
 function checkLegalityOfBuildOrSpawn() {
     // TODO Add Checking for Units and Add Checking for Building Range
     if (state.buildingStructure) {
-        state.allowedToBuildOrSpawn = true;
-        let baseObj = getBaseObject(state.buildingStructure);
-        let surrounding = getSurrounding(mouseState.tile, baseObj.width);
-        for (let i = 0; i < surrounding.length; i++) {
-            if (!withinMap(surrounding[i]) ||
-                state.gameState.occupied[surrounding[i].y][surrounding[i].x] ||
-                map[surrounding[i].y][surrounding[i].x].displayType == 2 ||
-                !state.gameState.allowedBuilding[surrounding[i].y][surrounding[i].x]) {
-                state.allowedToBuildOrSpawn = false;
-            }
-        }
+        state.allowedToBuildOrSpawn = canBuildStructureAt(state.gameState, state.buildingStructure, mouseState.tile);
     }
     else if (state.spawningUnit) {
-        state.allowedToBuildOrSpawn = false;
-        let baseObj = getBaseObject(state.selectedObject.name);
-        let surrounding = getSurrounding(state.selectedObject.position,
-            baseObj.width + 1);
-        for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i]) &&
-                !state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
-                map[surrounding[i].y][surrounding[i].x].displayType != 2) {
-                if (mouseState.tile.x == surrounding[i].x && mouseState.tile.y == surrounding[i].y) {
-                    state.allowedToBuildOrSpawn = true;
-                }
-            }
-        }
+        state.allowedToBuildOrSpawn = canSpawnUnitAt(state.gameState, state.selectedObject, mouseState.tile);
     }
 }
 function calculateTurnTimeRemainingIfTurn() {

@@ -1,73 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title>Lumen Astrum</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Asap' rel='stylesheet'>
-    <link rel="stylesheet" href="main.css"/>
+	<meta charset="utf8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	<title>Lumen Astrum</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Asap' rel='stylesheet'>
+	<link rel="stylesheet" href="main.css"/>
 </head>
-<body>
-    <div class="overlay welcome">
-        <div class="content">
-            <img src="resources/menu/logo.png">
-            <br><br>
-            <div class="button play large">PLAY</div>
-        </div>
-    </div>
-    <div class="overlay login hide">
-        <div class="content">
-            <img src="resources/menu/logo.png">
-            <br>
-            <br>
-            <div class="errorMessage">Username or password was incorrect.</div>
-            <div class="loginForm">
-                <input type="text" placeholder="Username" class="username"><br>
-                <input type="password" placeholder="Password" class="password"><br>
-                <div class="button login" style="margin-top: 5px; margin-right: 0px;">LOGIN</div>
-            </div>
-        </div>
-    </div>
-    <div class="overlay clientMain hide">
-        <div class="content">
-            <div style="position:relative; width: 100%; height: 100%">
-                <div class="topLeft">
-                    <img src="resources/menu/logo.png" style="width: 400px">
-                </div>
-                <div class="joinGameDialog">
-                    <div class="notInQueue">
-                        <div class="button rankedJoin medium">Join Ranked Queue</div><br><br>
-                        <div class="button unrankedJoin medium">Join Unranked Queue</div>
-                    </div>
-                </div>
-                <div class="inQueue hide">
-                    <div class="loader"></div>
-                    <div style="margin-bottom: 25px;"><b>Looking for a match... (<span class="queueTimer">0.00</span>)</b></div>
-                    <div class="button leaveQueue medium">Leave Queue</div>
-                </div>
-                <div class="topRight" style="top: 10px">
-                    <div class="usernameDisplay">Arasseo (ELO)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <canvas id="canvas" class="game"></canvas>
-    <script type="text/javascript" src="socket.io-1.4.5.js"></script>
-    <script type="text/javascript" src="jquery.js"></script>
-    <script type="text/javascript" src="jquery.mousewheel.min.js"></script>
-    <script type="text/javascript" src="shared/game.js"></script>
-    <script type="text/javascript" src="socket.js"></script>
-    <script type="text/javascript" src="client.js"></script>
-    <script type="text/javascript" src="map.js"></script>
-    <script type="text/javascript" src="data.js"></script>
-    <script type="text/javascript" src="resources.js"></script>
-    <script type="text/javascript" src="util.js"></script>
-    <script type="text/javascript" src="state.js"></script>
-    <script type="text/javascript" src="input.js"></script>
-    <script type="text/javascript" src="physics.js"></script>
-    <script type="text/javascript" src="graphics.js"></script>
-    <script type="text/javascript" src="eventBindings.js"></script>
+<body oncontextmenu="return false">
+	<div class="overlay welcome">
+		<div class="content">
+			<img src="resources/menu/logo.png">
+			<br><br>
+			<div class="button play large">PLAY</div>
+		</div>
+	</div>
+	<div class="overlay login hide">
+		<div class="content">
+			<img src="resources/menu/logo.png">
+			<br>
+			<br>
+			<div class="errorMessage">Username or password was incorrect.</div>
+			<div class="loginForm">
+				<input type="text" placeholder="Username" class="username"><br>
+				<input type="password" placeholder="Password" class="password"><br>
+				<div class="button login" style="margin-top: 5px; margin-right: 0px;">LOGIN</div>
+			</div>
+		</div>
+	</div>
+	<div class="overlay clientMain hide">
+		<div class="content">
+			<div style="position:relative; width: 100%; height: 100%">
+				<div class="topLeft">
+					<img src="resources/menu/logo.png" style="width: 400px">
+				</div>
+				<div class="joinGameDialog">
+					<div class="notInQueue">
+						<div class="button rankedJoin medium">Join Ranked Queue</div><br><br>
+						<div class="button unrankedJoin medium">Join Unranked Queue</div>
+					</div>
+				</div>
+				<div class="inQueue hide">
+					<div class="loader"></div>
+					<div style="margin-bottom: 25px;"><b>Looking for a match... (<span class="queueTimer">0.00</span>)</b></div>
+					<div class="button leaveQueue medium">Leave Queue</div>
+				</div>
+				<div class="topRight" style="top: 10px">
+					<div class="usernameDisplay">Arasseo (ELO)</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<canvas id="canvas" class="game"></canvas>
+	<script type="text/javascript" src="socket.io-1.4.5.js"></script>
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="jquery.mousewheel.min.js"></script>
+	<script type="text/javascript" src="shared/game.js"></script>
+	<script type="text/javascript" src="socket.js"></script>
+	<script type="text/javascript" src="client.js"></script>
+	<script type="text/javascript" src="map.js"></script>
+	<script type="text/javascript" src="data.js"></script>
+	<script type="text/javascript" src="resources.js"></script>
+	<script type="text/javascript" src="util.js"></script>
+	<script type="text/javascript" src="state.js"></script>
+	<script type="text/javascript" src="input.js"></script>
+	<script type="text/javascript" src="physics.js"></script>
+	<script type="text/javascript" src="graphics.js"></script>
+	<script type="text/javascript" src="eventBindings.js"></script>
 </body>
 </html>

@@ -87,7 +87,7 @@ function createUnit(name, side, position) {
         side: side,
         position: position,
         turnsUntilBuilt: units[name].turnsToBuild,
-        width: 1,
+        width: 0,
         currentHealth: units[name].health,
         currentShield: units[name].shield
     };
@@ -215,6 +215,12 @@ function pathFind(a, b, state) {
 }
 
 function verifyStateChange(state, stateChange) {
+    if (stateChange.type == "build-structure") {
+        return canBuildStructureAt(state, stateChange.data.name, stateChange.data.position);
+    }
+    else if (stateChange.type == "spawn-unit") {
+        return canSpawnUnitAt(state, stateChange.data.from, stateChange.data.position);
+    }
     return true;
 }
 
@@ -268,4 +274,56 @@ function availableTurnTime(state, side) {
     else {
         return 1000 * ((30) + (state.blueTurnCount - 1) * 5);
     }
+}
+
+function getBaseObject(name) {
+    if (name in structures) {
+        return structures[name];
+    }
+    else if (name in units) {
+        return units[name];
+    }
+    return null;
+}
+
+function canBuildStructureAt(state, structureName, location) {
+    let baseObj = getBaseObject(structureName);
+    let surrounding = getSurrounding(location, baseObj.width);
+    for (let i = 0; i < surrounding.length; i++) {
+        if (!withinMap(surrounding[i]) ||
+            state.occupied[surrounding[i].y][surrounding[i].x] ||
+            map[surrounding[i].y][surrounding[i].x].displayType == 2 ||
+            !state.allowedBuilding[surrounding[i].y][surrounding[i].x]) {
+            return false;
+        }
+        else if (structureName == "Harvester") {
+            if (map[surrounding[i].y][surrounding[i].x].displayType != 3 &&
+                map[surrounding[i].y][surrounding[i].x].displayType != 4) {
+                // Harvester must be on mineral
+                return false;
+            }
+        }
+        else {
+            if (map[surrounding[i].y][surrounding[i].x].displayType == 3 ||
+                map[surrounding[i].y][surrounding[i].x].displayType == 4) {
+                // Nothing else can be on mineral
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function canSpawnUnitAt(state, buildingFrom, location) {
+    let surrounding = getSurrounding(buildingFrom.position, buildingFrom.width + 1);
+    for (let i = 0; i < surrounding.length; i++) {
+        if (withinMap(surrounding[i]) &&
+            !state.occupied[surrounding[i].y][surrounding[i].x] &&
+            map[surrounding[i].y][surrounding[i].x].displayType != 2) {
+            if (location.x == surrounding[i].x && location.y == surrounding[i].y) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

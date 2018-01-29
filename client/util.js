@@ -89,13 +89,3 @@ function toDegrees(angle) {
 function distance(pos1, pos2) {
     return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
 }
-
-function getBaseObject(name) {
-    if (name in structures) {
-        return structures[name];
-    }
-    else if (name in units) {
-        return units[name];
-    }
-    return null;
-}
