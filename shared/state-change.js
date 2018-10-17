@@ -89,7 +89,7 @@ class BuildStructureStateChange extends StateChange {
     _simulateStateChange(state) {
         state.insertMapObject(this.data.position,
             this.data.structureName,
-            this.stateChange.from);
+            this.from);
     }
 }
 StateChange.registerSubClass(BuildStructureStateChange);
@@ -113,12 +113,13 @@ class SpawnUnitStateChange extends StateChange {
         }
         let surrounding = getSurrounding(
             this.data.fromBuilding.position,
-            this.data.buildingFrom.width + 1);
+            this.data.fromBuilding.width + 1);
         for (let i = 0; i < surrounding.length; i++) {
             if (withinMap(surrounding[i]) &&
                 !state.occupied[surrounding[i].y][surrounding[i].x] &&
                 map[surrounding[i].y][surrounding[i].x].displayType != Tiles.BRUSH) {
-                if (this.data.position.equals(surrounding[i])) {
+                if (this.data.position.x === surrounding[i].x &&
+                    this.data.position.y === surrounding[i].y) {
                     return true;
                 }
             }
@@ -129,7 +130,7 @@ class SpawnUnitStateChange extends StateChange {
     _simulateStateChange(state) {
         state.insertMapObject(this.data.position,
             this.data.unitName,
-            this.stateChange.from);
+            this.from);
     }
 }
 StateChange.registerSubClass(SpawnUnitStateChange);

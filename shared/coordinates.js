@@ -11,10 +11,6 @@ class Tuple {
         return new Triple(cubex, cubey, cubez);
     }
 
-    equals(otherTuple) {
-        return this.x === otherTuple.x && this.y === otherTuple.y;
-    }
-
     toTileCoord() {
         const XYVertex = false;
         const s = 64;

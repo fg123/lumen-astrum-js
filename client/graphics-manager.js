@@ -30,7 +30,6 @@ module.exports = class GraphicsManager {
             screenHeight: 0
         };
 
-
         this.fps = {
             frameTime: 0,
             lastLoop: new Date(),
