@@ -10,7 +10,8 @@ module.exports = class InputManager {
             scrollDelta: new Tuple(0, 0),
             tile: new Tuple(0, 0),
             mouseDown: [],
-            mouseMove: []
+            mouseMove: [],
+            mouseUp: []
         };
         this.keyState = [];
         this.prevKeyState = [];
@@ -40,8 +41,10 @@ module.exports = class InputManager {
             this.mouseState.tile =
                 camera.toWorldCoord(this.mouseState.position).toTileCoord();
         });
-        $(document).mouseup(() => {
-            // TODO To be Implemented
+        $(document).mouseup((e) => {
+            this.mouseState.mouseUp.some((fn) => {
+                return fn(e.which);
+            });
         });
         $(document).mousewheel((event) => {
             this.mouseState.scrollDelta.x = event.deltaX;
@@ -59,6 +62,10 @@ module.exports = class InputManager {
 
     attachMouseMoveObserver(fn) {
         this.mouseState.mouseMove.push(fn);
+    }
+
+    attachMouseUpObserver(fn) {
+        this.mouseState.mouseUp.push(fn);
     }
 
     attachInputPollingListener(listener) {
