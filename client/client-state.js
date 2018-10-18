@@ -1,5 +1,5 @@
 const Constants = require('../shared/constants');
-const { getSurrounding } = require('../shared/coordinates');
+const { getReachable } = require('../shared/coordinates');
 const { getBaseObject } = require('../shared/data');
 const {
     withinMap,
@@ -252,7 +252,12 @@ module.exports = class ClientState {
         this.selectedObject = object;
         if (object && object.isUnit) {
             this.unitMoveRange =
-                getSurrounding(object.position, this[object.name].moverange);
+                getReachable(object.position,
+                    getBaseObject(object.name).moverange,
+                    (pos) => {
+                        // It's blocked if it's not in the map, or occupied
+                        return !withinMap(pos) || this.gameState.occupied[pos.y][pos.x];
+                    });
         }
     }
 

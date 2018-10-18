@@ -81,19 +81,53 @@ class Triple {
         const cubey = this.z + (this.x - this.x % 2) / 2;
         return new Tuple(cubex, cubey);
     }
+
+    getNeighbours() {
+        return surroundingTriple(this, 1);
+    }
 }
 
 module.exports.Triple = Triple;
 
-module.exports.getSurrounding = (a, width) => {
-    a = new Tuple(a.x, a.y).toCubeCoordinates();
+function surroundingTriple(a, width) {
     const results = [];
     for (let dx = -width; dx <= width; dx++) {
         for (let dy = Math.max(-width, -dx - width);
             dy <= Math.min(width, -dx + width); dy++) {
             const dz = -dx - dy;
-            results.push(new Triple(a.x + dx, a.y + dy, a.z + dz).toOffsetCoordinates());
+            results.push(new Triple(a.x + dx, a.y + dy, a.z + dz));
         }
     }
     return results;
+}
+module.exports.getSurrounding = (a, width) => {
+    a = new Tuple(a.x, a.y).toCubeCoordinates();
+    return surroundingTriple(a, width).map(n => n.toOffsetCoordinates());
+};
+
+module.exports.getReachable = (start, max, isBlock) => {
+    start = new Tuple(start.x, start.y).toCubeCoordinates();
+    /* Distance limited flood fill */
+    const visited = new Set();
+    const result = [];
+    visited.add(JSON.stringify(start));
+    result.push(start.toOffsetCoordinates());
+    const fringes = [];
+    fringes.push([start]);
+
+    for (let i = 0; i < max; i++) {
+        fringes.push([]);
+        fringes[i].forEach((hex) => {
+            hex.getNeighbours().forEach((neighbour) => {
+                const neighbourString = JSON.stringify(neighbour);
+                if (!visited.has(neighbourString) &&
+                    !isBlock(neighbour.toOffsetCoordinates())) {
+                    visited.add(neighbourString);
+                    result.push(neighbour.toOffsetCoordinates());
+                    fringes[i + 1].push(neighbour);
+                }
+            });
+        });
+    }
+    return result;
 };

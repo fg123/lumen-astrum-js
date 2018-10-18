@@ -117,7 +117,7 @@ class SpawnUnitStateChange extends StateChange {
         for (let i = 0; i < surrounding.length; i++) {
             if (withinMap(surrounding[i]) &&
                 !state.occupied[surrounding[i].y][surrounding[i].x] &&
-                map[surrounding[i].y][surrounding[i].x].displayType != Tiles.BRUSH) {
+                map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH) {
                 if (this.data.position.x === surrounding[i].x &&
                     this.data.position.y === surrounding[i].y) {
                     return true;

@@ -22,16 +22,4 @@ module.exports = class PathFinder {
         return parseInt(Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y),
             Math.abs(a.z - b.z)));
     }
-
-    // a is a triple!
-    static getNeighbours(a) {
-        return [
-            new Triple(a.x + 1, a.y, a.z),
-            new Triple(a.x - 1, a.y, a.z),
-            new Triple(a.x, a.y + 1, a.z),
-            new Triple(a.x, a.y - 1, a.z),
-            new Triple(a.x, a.y, a.z + 1),
-            new Triple(a.x, a.y, a.z - 1)
-        ];
-    }
 };
