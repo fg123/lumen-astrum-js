@@ -192,11 +192,21 @@ module.exports = class ClientState {
                 this.commandCenter = this.gameState.mapObjects[
                     RED_SIDE_COMMAND_CENTER_LOC.y][
                     RED_SIDE_COMMAND_CENTER_LOC.x];
+                this.camera.position = new Tuple(
+                    RED_SIDE_COMMAND_CENTER_LOC.x * 96,
+                    RED_SIDE_COMMAND_CENTER_LOC.y * 111 +
+                        (RED_SIDE_COMMAND_CENTER_LOC.x % 2) * 55
+                );
             }
             else {
                 this.commandCenter = this.gameState.mapObjects[
                     BLUE_SIDE_COMMAND_CENTER_LOC.y][
                     BLUE_SIDE_COMMAND_CENTER_LOC.x];
+                this.camera.position = new Tuple(
+                    BLUE_SIDE_COMMAND_CENTER_LOC.x * 96,
+                    BLUE_SIDE_COMMAND_CENTER_LOC.y * 111 +
+                        (BLUE_SIDE_COMMAND_CENTER_LOC.x % 2) * 55
+                );
             }
             this.ui.loadScreen(this.ui.Screen.GAME_SCREEN);
             const interval = setInterval(() => {
