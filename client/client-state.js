@@ -131,7 +131,7 @@ module.exports = class ClientState {
                                     new InPlaceSpriteAnimation(
                                         this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
                                         10,
-                                        10
+                                        1
                                     )
                                 );
                             }
@@ -140,7 +140,7 @@ module.exports = class ClientState {
                                     new InPlaceSpriteAnimation(
                                         this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
                                         6,
-                                        10
+                                        1
                                     )
                                 );
                             }
@@ -159,8 +159,17 @@ module.exports = class ClientState {
                         change.data.posTo
                     );
                     path.unshift(change.data.posFrom);
+                    // Hide move range indicator for now.
+                    const currentlySelected =
+                        this.selectedObject.position.x === change.data.posFrom.x &&
+                        this.selectedObject.position.y === change.data.posFrom.y;
+                    if (currentlySelected) {
+                        this.unitMoveRange = [];
+                    }
                     unit.animationManager.addAnimation(
-                        new MoveUnitAnimation(path, 60)
+                        new MoveUnitAnimation(path, 10, () => {
+                            if (currentlySelected) this.selectObject(unit);
+                        })
                     );
                 }
             }

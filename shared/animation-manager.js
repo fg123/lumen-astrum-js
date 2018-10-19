@@ -17,7 +17,12 @@ module.exports = class AnimationManager {
     tick() {
         /* Each animation ticks. If the animation returns false the callback
          * has already been called */
-        this.animations = this.animations.filter(animation => animation.tick());
+        let i = this.animations.length;
+        while (i--) {
+            if (!this.animations[i].tick()) {
+                this.animations.splice(i, 1);
+            }
+        }
     }
 
     draw(graphicsManager, defaultPosition) {
