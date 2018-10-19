@@ -1,11 +1,69 @@
-const { Triple } = require('./coordinates');
+const TinyQueue = require('tinyqueue');
+const { Tuple } = require('./coordinates');
+const { withinMap } = require('./map');
+
+class Node {
+    constructor(position, costToEnd) {
+        this.position = position;
+        this.costToEnd = costToEnd;
+    }
+}
 
 module.exports = class PathFinder {
-    static findPath(state, a, b) {
-        //const openNodes = [a];
-        //const visited = [];
-        // TODO(fg123): Implement rest of pathfinding system.
-        return [a, b];
+    static findPath(gameState, start, end) {
+        start = new Tuple(start.x, start.y).toCubeCoordinates();
+        end = new Tuple(end.x, end.y).toCubeCoordinates();
+        console.log('Pathfind start: ');
+        console.log(start);
+        console.log('Pathfind end: ');
+        console.log(end);
+
+        const startNode = new Node(start, this.manhattanDistance(start, end));
+        const frontier = new TinyQueue(
+            [startNode],
+            function (a, b) {
+                return a.costToEnd - b.costToEnd;
+            }
+        );
+        const cameFrom = {};
+        const costSoFar = {};
+        cameFrom[start.hash()] = undefined;
+        costSoFar[start.hash()] = 0;
+
+        let endNode = undefined;
+        while (frontier.length !== 0) {
+            const current = frontier.pop();
+            console.log('Iteration');
+            console.log(current);
+            if (current.position.equals(end)) {
+                endNode = current;
+                break;
+            }
+
+            current.position.getNeighbours().filter(node => {
+                const offset = node.toOffsetCoordinates();
+                return withinMap(offset) && !gameState.occupied[offset.y][offset.x];
+            }).forEach(next => {
+                const newCost = costSoFar[current.position.hash()] + 5;
+                if (costSoFar[next.hash()] === undefined || newCost < costSoFar[next.hash()]) {
+                    costSoFar[next.hash()] = newCost;
+                    const priority = newCost + this.manhattanDistance(current.position, next);
+                    frontier.push(new Node(next, priority));
+                    cameFrom[next.hash()] = current;
+                }
+            });
+        }
+
+        if (endNode) {
+            const result = [];
+            while (!endNode.position.equals(start)) {
+                result.unshift(endNode.position.toOffsetCoordinates());
+                endNode = cameFrom[endNode.position.hash()];
+            }
+            return result;
+        } else {
+            return [];
+        }
     }
 
     static nodeInList(a, list) {
@@ -19,7 +77,7 @@ module.exports = class PathFinder {
 
     // A and B are triples!
     static manhattanDistance(a, b) {
-        return parseInt(Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y),
-            Math.abs(a.z - b.z)));
+        return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y),
+            Math.abs(a.z - b.z));
     }
 };

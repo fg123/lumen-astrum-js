@@ -9,9 +9,11 @@ module.exports = class InputManager {
             position: new Tuple(0, 0),
             scrollDelta: new Tuple(0, 0),
             tile: new Tuple(0, 0),
-            mouseDown: [],
-            mouseMove: [],
-            mouseUp: []
+            mouseDownListeners: [],
+            mouseMoveListeners: [],
+            mouseUpListeners: [],
+
+            mouseDown: []
         };
         this.keyState = [];
         this.prevKeyState = [];
@@ -27,24 +29,26 @@ module.exports = class InputManager {
             this.keyState[code] = false;
         });
         $(document).mousedown((e) => {
-            this.mouseState.mouseDown.some((fn) => {
+            this.mouseState.mouseDownListeners.some((fn) => {
                 return fn(e.which);
             });
+            this.mouseState.mouseDown[e.which] = true;
         });
         $(document).mousemove((e) => {
             const rect = canvas.getBoundingClientRect();
             this.mouseState.position.x = e.clientX - rect.left;
             this.mouseState.position.y = e.clientY - rect.top;
-            this.mouseState.mouseMove.some((fn) => {
+            this.mouseState.mouseMoveListeners.some((fn) => {
                 return fn();
             });
             this.mouseState.tile =
                 camera.toWorldCoord(this.mouseState.position).toTileCoord();
         });
         $(document).mouseup((e) => {
-            this.mouseState.mouseUp.some((fn) => {
+            this.mouseState.mouseUpListeners.some((fn) => {
                 return fn(e.which);
             });
+            this.mouseState.mouseDown[e.which] = false;
         });
         $(document).mousewheel((event) => {
             this.mouseState.scrollDelta.x = event.deltaX;
@@ -57,15 +61,15 @@ module.exports = class InputManager {
     }
 
     attachMouseDownObserver(fn) {
-        this.mouseState.mouseDown.push(fn);
+        this.mouseState.mouseDownListeners.push(fn);
     }
 
     attachMouseMoveObserver(fn) {
-        this.mouseState.mouseMove.push(fn);
+        this.mouseState.mouseMoveListeners.push(fn);
     }
 
     attachMouseUpObserver(fn) {
-        this.mouseState.mouseUp.push(fn);
+        this.mouseState.mouseUpListeners.push(fn);
     }
 
     attachInputPollingListener(listener) {

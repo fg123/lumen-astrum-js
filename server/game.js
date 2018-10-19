@@ -19,7 +19,7 @@ module.exports = class Game {
             this.processStateChange(
                 TurnPassoverStateChange.create(
                     Constants.BLUE_SIDE, false));
-        }, 10000);
+        }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
     }
 
     verifyStateChange(stateChange) {

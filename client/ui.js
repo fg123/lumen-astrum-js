@@ -14,12 +14,20 @@ module.exports = class UI {
             this.loadScreen(Screen.LOGIN);
         });
 
+        $('.loginForm .username, .loginForm .password').keydown((e) => {
+            const key = e.keyCode || e.which;
+            if (key === 13) {
+                $('.login.button').click();
+            }
+        });
+
         $('.login.button').click(() => {
             socket.emit('login',
                 $('.loginForm .username').val(),
                 $('.loginForm .password').val()
             );
         });
+
         socket.on('login-success', (user) => {
             this.loadScreen(Screen.MAIN);
             $('.usernameDisplay').text(user.username + ' (' + user.elo + ')');

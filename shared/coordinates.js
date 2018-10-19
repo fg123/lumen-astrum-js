@@ -11,6 +11,14 @@ class Tuple {
         return new Triple(cubex, cubey, cubez);
     }
 
+    equals(other) {
+        return this.x === other.x && this.y === other.y;
+    }
+
+    hash() {
+        return JSON.stringify(this);
+    }
+
     toTileCoord() {
         const XYVertex = false;
         const s = 64;
@@ -84,6 +92,14 @@ class Triple {
 
     getNeighbours() {
         return surroundingTriple(this, 1);
+    }
+
+    equals(other) {
+        return this.x === other.x && this.y === other.y && this.z === other.z;
+    }
+
+    hash() {
+        return JSON.stringify(this);
     }
 }
 

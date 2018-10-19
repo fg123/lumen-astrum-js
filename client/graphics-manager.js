@@ -3,6 +3,7 @@ const { Resource, tiles } = require('./resources');
 const { getBaseObject, structureList, unitList, units, structures } = require('../shared/data');
 const { Structure } = require('../shared/map-objects');
 const { map, withinMap } = require('../shared/map');
+const PathFinder = require('../shared/path-finder');
 
 const Utils = require('./utils');
 
@@ -11,6 +12,8 @@ const FPS_FILTER_STRENGTH = 20;
 const UNITS_BOTTOM_RIGHT_STATS = ['Health:', 'Shield:', 'Attack Damage:', 'Move Range:', 'Attack Range:', 'Sight Range'];
 const STRUCTURS_BOTTOM_RIGHT_STATS = ['Health:', 'Shield:'];
 const SMALL_ALERT_SHOW_TIME = 2 * 1000;
+
+const LEFT_MOUSE_BUTTON = 1;
 
 module.exports = class GraphicsManager {
     constructor(canvas, targetInterval, ui, camera, state, resourceManager, inputManager) {
@@ -466,7 +469,22 @@ module.exports = class GraphicsManager {
                         (this.state.unitMoveRange[i].y * 111) + (this.state.unitMoveRange[i].x % 2) * 55);
                 }
             }
+            /* Draw path if mouse is down and moved over somewhere */
+            if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON] &&
+                /* Since most times this path is taken, it will be when the
+                 * player clicks a unit, we shortcircuit so we don't have to run
+                 * the expensive pathfinding algorithm */
+                !this.inputManager.mouseState.tile.equals(this.state.selectedObject.position)) {
+
+                const path = PathFinder.findPath(this.state.gameState,
+                    this.state.selectedObject.position, this.inputManager.mouseState.tile);
+                path.forEach(node => {
+                    this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
+                        (node.x * 96),
+                        (node.y * 111) + (node.x % 2) * 55);
+                });
+                this.state.cursorMessage = 'Move Here';
+            }
         }
     }
-
 };

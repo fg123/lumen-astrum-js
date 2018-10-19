@@ -32,7 +32,7 @@ module.exports.Tiles =  {
 };
 
 module.exports.withinMap = (tile) => {
-    return !(tile.x < 0 || tile.y < 0 &&
+    return !(tile.x < 0 || tile.y < 0 ||
         tile.x >= map[0].length || tile.y >= map.length);
 };
 

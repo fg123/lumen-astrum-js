@@ -130,7 +130,7 @@ module.exports = class ClientState {
             }
             this.ui.loadScreen(this.ui.Screen.GAME_SCREEN);
             const interval = setInterval(() => {
-                const seconds = parseInt(10 - (Date.now() - this.gameState.gameStartTime) / 1000);
+                const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);
                 this.bigMessage = 'Game starting in ' + seconds + ' seconds';
                 if (seconds === 0) {
                     clearInterval(interval);
@@ -272,6 +272,11 @@ module.exports = class ClientState {
             return true;
         }
         return false;
+    }
+
+    gameObjectUpEvent(button) {
+        // If the mouse is released and a unit is selected, we want to perform
+        // a movement state.
     }
 
     gameObjectClickEvent(button) {
