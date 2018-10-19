@@ -23,13 +23,14 @@ module.exports = class Game {
     }
 
     verifyStateChange(stateChange) {
+        console.log('Verifying State Change');
+        console.log(stateChange);
         return stateChange &&
             stateChange.verifyStateChange(this.state);
     }
 
     processStateChange(stateChange) {
         console.log('Processing State Change');
-        console.log(stateChange);
         stateChange.simulateStateChange(this.state);
         if (stateChange instanceof TurnPassoverStateChange) {
             const nextSide = stateChange.from === Constants.RED_SIDE ?

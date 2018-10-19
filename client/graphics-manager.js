@@ -238,7 +238,7 @@ module.exports = class GraphicsManager {
                 });
                 if (this.state.selectedObject.name in units) {
                     // Could also use concat here but will create more garbage but will be speedier
-                    Array.prototype.push.apply(rightSide, [baseObj.damage, baseObj.moverange, baseObj.attackrange, baseObj.sightrange]);
+                    Array.prototype.push.apply(rightSide, [baseObj.damage, this.state.selectedObject.moveRange + '/' + baseObj.moverange, baseObj.attackrange, baseObj.sightrange]);
                 }
                 rightSide.forEach((val, index) => {
                     this.drawText(val, 'black', 13, 176 - 10,
@@ -459,31 +459,45 @@ module.exports = class GraphicsManager {
             }
         }
 
+        this.state.canCurrentUnitMoveToPosition = false;
         if (this.state.selectedObject && this.state.selectedObject.isUnit &&
-            this.objectOnMySide(this.state.selectedObject)) {
+            this.objectOnMySide(this.state.selectedObject) &&
+            this.state.selectedObject.turnsUntilBuilt === 0) {
+            /* This value is used in the calculation below, but we calculate it
+             * here since we're already doing a traversal of the unitmoverange
+             * array */
+            let isMouseOverOnUnitMoveRange = false;
             for (let i = 0; i < this.state.unitMoveRange.length; i++) {
                 if (withinMap(this.state.unitMoveRange[i]) &&
                 !this.state.gameState.occupied[this.state.unitMoveRange[i].y][this.state.unitMoveRange[i].x]) {
                     this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
                         (this.state.unitMoveRange[i].x * 96),
                         (this.state.unitMoveRange[i].y * 111) + (this.state.unitMoveRange[i].x % 2) * 55);
+                    if (this.inputManager.mouseState.tile.equals(this.state.unitMoveRange[i])) {
+                        isMouseOverOnUnitMoveRange = true;
+                    }
                 }
             }
             /* Draw path if mouse is down and moved over somewhere */
-            if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON] &&
+            if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
                 /* Since most times this path is taken, it will be when the
                  * player clicks a unit, we shortcircuit so we don't have to run
                  * the expensive pathfinding algorithm */
-                !this.inputManager.mouseState.tile.equals(this.state.selectedObject.position)) {
+                if (!this.inputManager.mouseState.tile.equals(this.state.selectedObject.position) &&
+                isMouseOverOnUnitMoveRange) {
 
-                const path = PathFinder.findPath(this.state.gameState,
-                    this.state.selectedObject.position, this.inputManager.mouseState.tile);
-                path.forEach(node => {
-                    this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
-                        (node.x * 96),
-                        (node.y * 111) + (node.x % 2) * 55);
-                });
-                this.state.cursorMessage = 'Move Here';
+                    const path = PathFinder.findPath(this.state.gameState,
+                        this.state.selectedObject.position, this.inputManager.mouseState.tile);
+                    path.forEach(node => {
+                        this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
+                            (node.x * 96),
+                            (node.y * 111) + (node.x % 2) * 55);
+                    });
+                    this.state.canCurrentUnitMoveToPosition = true;
+                    this.state.cursorMessage = 'Move Here';
+                } else {
+                    this.state.cursorMessage = 'Can\'t move here!';
+                }
             }
         }
     }

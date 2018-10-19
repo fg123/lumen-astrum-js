@@ -42,6 +42,8 @@ const { getBaseObject } = require('./data');
 const { getSurrounding } = require('./coordinates');
 const { withinMap, map, Tiles } = require('./map');
 const Constants = require('./constants');
+const PathFinder = require('./path-finder');
+const Data = require('./data');
 
 class BuildStructureStateChange extends StateChange {
     static create(from, structureName, position) {
@@ -146,6 +148,36 @@ class MoveUnitStateChange extends StateChange {
             )
         );
     }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+            return false;
+        }
+        /* Is there a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+        /* Find a path from A to B */
+        const path = PathFinder.findPath(state, this.data.posFrom, this.data.posTo);
+        if (path.length > unit.moveRange) {
+            return false;
+        }
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        /* Client Side will want to implement animations here, or we can store
+         * the path onto the map object for the client to interpolate */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        /* This can probably be cached between verify and simulate */
+        const path = PathFinder.findPath(state, this.data.posFrom, this.data.posTo);
+        unit.moveRange -= path.length;
+
+        state.moveUnit(this.data.posFrom, this.data.posTo);
+    }
 }
 StateChange.registerSubClass(MoveUnitStateChange);
 
@@ -188,6 +220,8 @@ class TurnPassoverStateChange extends StateChange {
 				state.units[i].turnsUntilBuilt != 0) {
                 state.units[i].turnsUntilBuilt -= 1;
             }
+            /* Reset move range at the end of the turn */
+            state.units[i].moveRange = Data.units[state.units[i].name].moverange;
         }
     }
 }

@@ -29,5 +29,7 @@ module.exports.Unit = class {
         this.currentShield = Data.units[name].shield;
         this.isStructure = false;
         this.isUnit = true;
+        /* This is a local copy that changes based on state */
+        this.moveRange = Data.units[name].moverange;
     }
 };

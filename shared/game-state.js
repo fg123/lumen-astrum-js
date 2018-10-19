@@ -73,6 +73,18 @@ module.exports = class GameState {
         }
     }
 
+    moveUnit(from, to) {
+        /* Assumes the coordinates are verified. */
+        const unit = this.mapObjects[from.y][from.x];
+        unit.position = to;
+
+        this.mapObjects[to.y][to.x] = unit;
+        this.mapObjects[from.y][from.x] = undefined;
+
+        this.occupied[from.y][from.x] = false;
+        this.occupied[to.y][to.x] = to;
+    }
+
     calculateNextTurnAvailableTime(side) {
         if (side === Constants.RED_SIDE) {
             return 1000 * ((30) + (this.redTurnCount - 1) * 5);

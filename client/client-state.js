@@ -10,6 +10,7 @@ const {
     StateChange,
     BuildStructureStateChange,
     SpawnUnitStateChange,
+    MoveUnitStateChange,
     TurnPassoverStateChange,
 } = require('../shared/state-change');
 const GameState = require('../shared/game-state');
@@ -44,6 +45,7 @@ module.exports = class ClientState {
         this.smallAlert = { current: null, queue: [], lastShownTime: 0 };
         this.commandCenter = null;
         this.unitMoveRange = [];
+        this.canCurrentUnitMoveToPosition = false;
         this.buildingStructure = null;
         this.spawningUnit = null;
         this.allowedToBuildOrSpawn = false;
@@ -94,6 +96,12 @@ module.exports = class ClientState {
 
         inputManager.attachMouseDownObserver((button) => {
             this.gameObjectClickEvent(button);
+        });
+
+        inputManager.attachMouseUpObserver((button) => {
+            if (button === LEFT_MOUSE_BUTTON) {
+                this.potentialMoveUnitEvent();
+            }
         });
 
         socket.on('state-change', (stateChange) => {
@@ -207,7 +215,7 @@ module.exports = class ClientState {
     }
 
     handleOptionClicked(option) {
-        if (this.side != this.gameState.currentTurn) {
+        if (this.side !== this.gameState.currentTurn) {
             // Cannot Exercise Option If Not Your Turn
             this.pushAlertMessage('Wait for your turn!');
             return;
@@ -234,6 +242,21 @@ module.exports = class ClientState {
         return;
     }
 
+    potentialMoveUnitEvent() {
+        // Check if is unit:
+        if (this.selectedObject && this.selectedObject.isUnit &&
+            this.objectOnMySide(this.selectedObject) &&
+            this.selectedObject.turnsUntilBuilt === 0) {
+            if (this.canCurrentUnitMoveToPosition) {
+                this.sendStateChange(
+                    MoveUnitStateChange.create(
+                        this.side,
+                        this.selectedObject.position,
+                        this.inputManager.mouseState.tile));
+            }
+        }
+    }
+
     getGold() {
         // GameState gold will not be guaranteed to reflect the correct amount
         //   of the opposite side.
@@ -253,7 +276,7 @@ module.exports = class ClientState {
         if (object && object.isUnit) {
             this.unitMoveRange =
                 getReachable(object.position,
-                    getBaseObject(object.name).moverange,
+                    object.moveRange,
                     (pos) => {
                         // It's blocked if it's not in the map, or occupied
                         return !withinMap(pos) || this.gameState.occupied[pos.y][pos.x];
@@ -272,11 +295,6 @@ module.exports = class ClientState {
             return true;
         }
         return false;
-    }
-
-    gameObjectUpEvent(button) {
-        // If the mouse is released and a unit is selected, we want to perform
-        // a movement state.
     }
 
     gameObjectClickEvent(button) {

@@ -13,10 +13,6 @@ module.exports = class PathFinder {
     static findPath(gameState, start, end) {
         start = new Tuple(start.x, start.y).toCubeCoordinates();
         end = new Tuple(end.x, end.y).toCubeCoordinates();
-        console.log('Pathfind start: ');
-        console.log(start);
-        console.log('Pathfind end: ');
-        console.log(end);
 
         const startNode = new Node(start, this.manhattanDistance(start, end));
         const frontier = new TinyQueue(
@@ -33,8 +29,6 @@ module.exports = class PathFinder {
         let endNode = undefined;
         while (frontier.length !== 0) {
             const current = frontier.pop();
-            console.log('Iteration');
-            console.log(current);
             if (current.position.equals(end)) {
                 endNode = current;
                 break;
