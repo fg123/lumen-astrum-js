@@ -19,7 +19,7 @@ $(document).ready(() => {
         const camera = new Camera();
         const inputManager = new InputManager(canvas, ui, camera, TIME_BETWEEN_FRAMES);
 
-        const clientState = new ClientState(socket, camera, inputManager, ui);
+        const clientState = new ClientState(socket, camera, inputManager, ui, resourceManager);
 
         new GraphicsManager(
             canvas,

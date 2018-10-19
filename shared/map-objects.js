@@ -1,4 +1,5 @@
 const Data = require('./data');
+const AnimationManager = require('./animation-manager');
 
 module.exports.Structure = class {
     constructor(name, side, position) {
@@ -11,6 +12,8 @@ module.exports.Structure = class {
         this.currentShield = Data.structures[name].shield;
         this.isStructure = true;
         this.isUnit = false;
+
+        this.animationManager = new AnimationManager();
     }
 
     static isConstructionBuilding(name) {
@@ -29,6 +32,9 @@ module.exports.Unit = class {
         this.currentShield = Data.units[name].shield;
         this.isStructure = false;
         this.isUnit = true;
+
+        this.animationManager = new AnimationManager();
+
         /* This is a local copy that changes based on state */
         this.moveRange = Data.units[name].moverange;
     }

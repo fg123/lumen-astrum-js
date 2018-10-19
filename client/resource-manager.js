@@ -12,7 +12,11 @@ module.exports = class ResourceManager {
     }
 
     get(key) {
-        return this.resources[key];
+        const resource = this.resources[key];
+        if (!resource) {
+            console.error('Resource ' + key + ' not found!');
+        }
+        return resource;
     }
 
     loadResource(location, key, url, deferArr) {

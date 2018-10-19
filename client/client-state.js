@@ -16,6 +16,12 @@ const {
 const GameState = require('../shared/game-state');
 const Utils = require('./utils');
 const { Tuple } = require('../shared/coordinates');
+const PathFinder = require('../shared/path-finder');
+const {
+    InPlaceSpriteAnimation,
+    MoveUnitAnimation
+} = require('./animation');
+const { Resource } = require('./resources');
 
 const movement = [new Tuple(500, 500), new Tuple(2250, 1320), new Tuple(4092, 296), new Tuple(4733, 2323), new Tuple(2000, 2387)];
 let movementIndex = 0;
@@ -32,11 +38,13 @@ const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 const INTERNAL_TICK_INTERVAL = 16;
 
 module.exports = class ClientState {
-    constructor(socket, camera, inputManager, ui) {
+    constructor(socket, camera, inputManager, ui, resourceManager) {
         this.ui = ui;
         this.socket = socket;
         this.camera = camera;
         this.inputManager = inputManager;
+        this.resourceManager = resourceManager;
+
         this.side = Constants.NONE_SIDE;
         this.gameState = undefined;
         this.selectedObject = null;
@@ -107,13 +115,58 @@ module.exports = class ClientState {
         socket.on('state-change', (stateChange) => {
             console.log('State Change!');
             console.log(stateChange);
-            StateChange
-                .deserialize(stateChange)
-                .simulateStateChange(this.gameState);
-            if (stateChange.type === 'turn-passover') {
+            const change = StateChange
+                .deserialize(stateChange);
+
+            if (change instanceof TurnPassoverStateChange) {
                 this.buildingStructure = null;
                 this.spawningUnit = null;
+                /* Spawn Animations for buildings being constructed */
+                const animationSpawner = mapObject => {
+                    if (mapObject.side === change.from) {
+                        if (mapObject.turnsUntilBuilt === 1) {
+                            /* About to turn, let's start an animation. */
+                            if (mapObject.width === 1) {
+                                mapObject.animationManager.addAnimation(
+                                    new InPlaceSpriteAnimation(
+                                        this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
+                                        10,
+                                        10
+                                    )
+                                );
+                            }
+                            else if (mapObject.width === 0) {
+                                mapObject.animationManager.addAnimation(
+                                    new InPlaceSpriteAnimation(
+                                        this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
+                                        6,
+                                        10
+                                    )
+                                );
+                            }
+                        }
+                    }
+                };
+                this.gameState.structures.forEach(animationSpawner);
+                this.gameState.units.forEach(animationSpawner);
+            } else if (change instanceof MoveUnitStateChange) {
+                const unit = this.gameState.mapObjects[
+                    change.data.posFrom.y][change.data.posFrom.x];
+                if (unit) {
+                    const path = PathFinder.findPath(
+                        this.gameState,
+                        change.data.posFrom,
+                        change.data.posTo
+                    );
+                    path.unshift(change.data.posFrom);
+                    unit.animationManager.addAnimation(
+                        new MoveUnitAnimation(path, 60)
+                    );
+                }
             }
+
+            /* Trust Server */
+            change.simulateStateChange(this.gameState);
         });
 
         socket.on('invalid-state-change', () => {
@@ -178,6 +231,11 @@ module.exports = class ClientState {
 
             this.tickCamera(window.innerWidth, window.innerHeight);
         }, INTERNAL_TICK_INTERVAL);
+    }
+
+    isMyTurn() {
+        return this.gameState.currentTurn !== Constants.NONE_SIDE &&
+                this.gameState.currentTurn === this.side;
     }
 
     tickCamera(screenWidth, screenHeight) {

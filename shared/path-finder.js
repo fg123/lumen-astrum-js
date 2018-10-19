@@ -10,6 +10,7 @@ class Node {
 }
 
 module.exports = class PathFinder {
+    /* Does not include start */
     static findPath(gameState, start, end) {
         start = new Tuple(start.x, start.y).toCubeCoordinates();
         end = new Tuple(end.x, end.y).toCubeCoordinates();

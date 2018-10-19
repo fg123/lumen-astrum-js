@@ -7,7 +7,7 @@ const PathFinder = require('../shared/path-finder');
 
 const Utils = require('./utils');
 
-const DRAW_PADDING = 2;
+const DRAW_PADDING = 3;
 const FPS_FILTER_STRENGTH = 20;
 const UNITS_BOTTOM_RIGHT_STATS = ['Health:', 'Shield:', 'Attack Damage:', 'Move Range:', 'Attack Range:', 'Sight Range'];
 const STRUCTURS_BOTTOM_RIGHT_STATS = ['Health:', 'Shield:'];
@@ -356,55 +356,78 @@ module.exports = class GraphicsManager {
                     this.context.globalCompositeOperation = 'source-over';
                     if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN &&
                         this.state.gameState.mapObjects[y][x]) {
-                        let selected = this.state.gameState.mapObjects[y][x] === this.state.selectedObject;
-                        let mouseOver = false;
-                        if (withinMap(this.inputManager.mouseState.tile)) {
-                            let mouseOverCenter =
-                                this.state.gameState.occupied[
-                                    this.inputManager.mouseState.tile.y
-                                ][this.inputManager.mouseState.tile.x];
-                            if (mouseOverCenter) {
-                                mouseOver = (x === mouseOverCenter.x && y === mouseOverCenter.y);
-                            }
-                        }
-                        let name = this.state.gameState.mapObjects[y][x].name;
-                        this.context.shadowBlur = 0;
-                        if (selected && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
-                            this.context.shadowBlur = 10;
-                            this.context.shadowColor = 'black';
-                        }
-                        else if (mouseOver && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
-                            this.context.shadowBlur = 10;
-                            this.context.shadowColor = 'green';
-                        }
-                        else if (selected || mouseOver) {
-                            this.context.shadowBlur = 10;
-                            this.context.shadowColor = '#a40000';
-                        }
+                        const animationManager =
+                            this.state.gameState.mapObjects[y][x].animationManager;
 
-                        if (this.state.gameState.mapObjects[y][x].turnsUntilBuilt === 0) {
-                            if (name in structures) {
-                                this.drawImage(structures[name].image, (x * 96), (y * 111) + yOffset);
-                            }
-                            else if (name in units) {
-                                if (this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
-                                    this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), (x * 96), (y * 111) + yOffset);
+                        let name = this.state.gameState.mapObjects[y][x].name;
+                        if (animationManager.hasAnimation()) {
+                            const possiblePositionChange =
+                                animationManager.draw(this, new Tuple(
+                                    (x * 96), (y * 111) + yOffset
+                                ));
+                            if (possiblePositionChange) {
+                                /* No animation drew! */
+                                if (name in structures) {
+                                    this.drawImage(structures[name].image,
+                                        possiblePositionChange.x, possiblePositionChange.y);
                                 }
-                                else {
-                                    this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY), (x * 96), (y * 111) + yOffset);
+                                else if (name in units) {
+                                    this.drawImage(units[name].image,
+                                        possiblePositionChange.x, possiblePositionChange.y);
                                 }
-                                this.drawImage(units[name].image, (x * 96), (y * 111) + yOffset);
                             }
+                            animationManager.tick();
                         }
                         else {
-                            if (this.state.gameState.mapObjects[y][x].width === 0) {
-                                this.drawImage(this.resourceManager.get(Resource.WIDTH_0_BUILD), (x * 96), (y * 111) + yOffset);
+                            let selected = this.state.gameState.mapObjects[y][x] === this.state.selectedObject;
+                            let mouseOver = false;
+                            if (withinMap(this.inputManager.mouseState.tile)) {
+                                let mouseOverCenter =
+                                    this.state.gameState.occupied[
+                                        this.inputManager.mouseState.tile.y
+                                    ][this.inputManager.mouseState.tile.x];
+                                if (mouseOverCenter) {
+                                    mouseOver = (x === mouseOverCenter.x && y === mouseOverCenter.y);
+                                }
+                            }
+                            this.context.shadowBlur = 0;
+                            if (selected && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
+                                this.context.shadowBlur = 10;
+                                this.context.shadowColor = 'black';
+                            }
+                            else if (mouseOver && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
+                                this.context.shadowBlur = 10;
+                                this.context.shadowColor = 'green';
+                            }
+                            else if (selected || mouseOver) {
+                                this.context.shadowBlur = 10;
+                                this.context.shadowColor = '#a40000';
+                            }
+
+                            if (this.state.gameState.mapObjects[y][x].turnsUntilBuilt === 0) {
+                                if (name in structures) {
+                                    this.drawImage(structures[name].image, (x * 96), (y * 111) + yOffset);
+                                }
+                                else if (name in units) {
+                                    if (this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
+                                        this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), (x * 96), (y * 111) + yOffset);
+                                    }
+                                    else {
+                                        this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY), (x * 96), (y * 111) + yOffset);
+                                    }
+                                    this.drawImage(units[name].image, (x * 96), (y * 111) + yOffset);
+                                }
                             }
                             else {
-                                this.drawImage(this.resourceManager.get(Resource.WIDTH_1_BUILD), (x * 96), (y * 111) + yOffset);
+                                if (this.state.gameState.mapObjects[y][x].width === 0) {
+                                    this.drawImage(this.resourceManager.get(Resource.WIDTH_0_BUILD), (x * 96), (y * 111) + yOffset);
+                                }
+                                else {
+                                    this.drawImage(this.resourceManager.get(Resource.WIDTH_1_BUILD), (x * 96), (y * 111) + yOffset);
+                                }
                             }
+                            this.context.shadowBlur = 0;
                         }
-                        this.context.shadowBlur = 0;
                     }
                 }
             }
@@ -478,8 +501,7 @@ module.exports = class GraphicsManager {
                     }
                 }
             }
-            /* Draw path if mouse is down and moved over somewhere */
-            if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
+            if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON] && this.state.isMyTurn()) {
                 /* Since most times this path is taken, it will be when the
                  * player clicks a unit, we shortcircuit so we don't have to run
                  * the expensive pathfinding algorithm */
