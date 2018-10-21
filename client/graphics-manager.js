@@ -311,7 +311,7 @@ module.exports = class GraphicsManager {
         return this.state.selectedObject &&
             Structure.isConstructionBuilding(this.state.selectedObject.name) &&
             this.objectOnMySide(this.state.selectedObject) &&
-            this.state.gameState.allowedBuilding[y][x] === this.state.side;
+            this.state.gameState.isAllowedBuilding(x, y, this.state.side);
     }
 
     drawState(screenWidth, screenHeight) {

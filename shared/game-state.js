@@ -2,6 +2,7 @@ const Constants = require('./constants');
 const {
     map,
     withinMap,
+    Tiles,
     RED_SIDE_COMMAND_CENTER_LOC,
     BLUE_SIDE_COMMAND_CENTER_LOC
 } = require('./map');
@@ -14,7 +15,8 @@ module.exports = class GameState {
         this.mapObjects = [];
         this.visibility = [];
         this.occupied = [];
-        this.allowedBuilding = [];
+        this.redAllowedBuilding = [];
+        this.blueAllowedBuilding = [];
         this.structures = [];
         this.units = [];
         this.gameStartTime = gameStartTime;
@@ -30,7 +32,8 @@ module.exports = class GameState {
             this.mapObjects.push([]);
             this.visibility.push([]);
             this.occupied.push([]);
-            this.allowedBuilding.push([]);
+            this.redAllowedBuilding.push([]);
+            this.blueAllowedBuilding.push([]);
         }
         for (let y = 0; y < map.length; y++) {
             for (let x = 0; x < map[0].length; x++) {
@@ -45,22 +48,47 @@ module.exports = class GameState {
         this.insertMapObject(BLUE_SIDE_COMMAND_CENTER_LOC, 'Command Base', Constants.BLUE_SIDE);
     }
 
+    isAllowedBuilding(x, y, side) {
+        const arr = (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+        if (arr[y][x]) {
+            return arr[y][x] !== 0;
+        } else {
+            return false;
+        }
+    }
+
+    setAllowedBuilding(x, y, side) {
+        const arr = (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+        if (arr[y][x]) {
+            arr[y][x] += 1;
+        } else {
+            arr[y][x] = 1;
+        }
+    }
+
+    revokeAllowedBuilding(x, y, side) {
+        const arr = (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+        arr[y][x] -= 1;
+    }
+
     insertMapObject(location, name, side) {
         if (name in Data.structures) {
             const structure = new Structure(name, side, location);
             this.mapObjects[location.y][location.x] = structure;
             this.structures.push(structure);
-            let surrounding = getSurrounding(location, Data.structures[name].width);
+            let surrounding = getSurrounding(location, structure.width);
             for (let i = 0; i < surrounding.length; i++) {
                 if (withinMap(surrounding[i])) {
                     this.occupied[surrounding[i].y][surrounding[i].x] = location;
                 }
             }
             if (Structure.isConstructionBuilding(name)) {
-                let surrounding = getSurrounding(location, Data.structures[name].width + Constants.BUILD_RANGE);
+                let surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
                 for (let i = 0; i < surrounding.length; i++) {
-                    if (withinMap(surrounding[i])) {
-                        this.allowedBuilding[surrounding[i].y][surrounding[i].x] = side;
+                    if (withinMap(surrounding[i]) &&
+                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, side);
                     }
                 }
             }
@@ -70,6 +98,49 @@ module.exports = class GameState {
             this.mapObjects[location.y][location.x] = unit;
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
+        }
+    }
+
+    removeMapObject(location) {
+        const mapObject = this.mapObjects[location.y][location.x];
+        if (!mapObject) {
+            console.error('Tried to remove map object that didn\'t exist!');
+            return;
+        }
+        this.mapObjects[location.y][location.x] = undefined;
+        let surrounding = getSurrounding(location, mapObject.width);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i])) {
+                this.occupied[surrounding[i].y][surrounding[i].x] = false;
+            }
+        }
+        if (mapObject.name in Data.structures) {
+            for (let i = 0; i < this.structures.length; i++) {
+                if (this.structures[i].position.x === location.x &&
+                    this.structures[i].position.y === location.y) {
+                    this.structures.splice(i, 1);
+                    break;
+                }
+            }
+            if (Structure.isConstructionBuilding(mapObject.name)) {
+                let surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
+                for (let i = 0; i < surrounding.length; i++) {
+                    if (withinMap(surrounding[i]) &&
+                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.side);
+                    }
+                }
+            }
+        }
+        else if (mapObject.name in Data.units) {
+            for (let i = 0; i < this.units.length; i++) {
+                if (this.units[i].position.x === location.x &&
+                    this.units[i].position.y === location.y) {
+                    this.units.splice(i, 1);
+                    break;
+                }
+            }
         }
     }
 

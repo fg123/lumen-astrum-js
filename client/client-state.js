@@ -226,7 +226,8 @@ module.exports = class ClientState {
                 this.allowedToBuildOrSpawn = BuildStructureStateChange.create(
                     this.side,
                     this.buildingStructure,
-                    this.inputManager.mouseState.tile
+                    this.inputManager.mouseState.tile,
+                    (this.selectedObject.isUnit ? this.selectedObject.position : undefined)
                 ).verifyStateChange(this.gameState);
             }
             else if (this.spawningUnit) {
@@ -385,7 +386,8 @@ module.exports = class ClientState {
                             BuildStructureStateChange.create(
                                 this.side,
                                 this.buildingStructure,
-                                this.inputManager.mouseState.tile
+                                this.inputManager.mouseState.tile,
+                                (this.selectedObject.isUnit ? this.selectedObject.position : undefined)
                             )
                         );
                     }

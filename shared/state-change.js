@@ -46,12 +46,15 @@ const PathFinder = require('./path-finder');
 const Data = require('./data');
 
 class BuildStructureStateChange extends StateChange {
-    static create(from, structureName, position) {
+    /* Built-by is undefined if from a structure, otherwise the position of the
+     * unit that built it */
+    static create(from, structureName, position, builtBy) {
         return new BuildStructureStateChange(
             StateChange.create(
                 from, 'BuildStructureStateChange', {
                     structureName: structureName,
-                    position: position
+                    position: position,
+                    builtBy: builtBy
                 }
             )
         );
@@ -66,8 +69,11 @@ class BuildStructureStateChange extends StateChange {
         for (let i = 0; i < surrounding.length; i++) {
             if (!withinMap(surrounding[i]) ||
                 state.occupied[surrounding[i].y][surrounding[i].x] ||
-                map[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH ||
-                state.allowedBuilding[surrounding[i].y][surrounding[i].x] !== this.from) {
+                map[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
+                return false;
+            }
+            else if (this.data.builtBy === undefined &&
+                state.isAllowedBuilding(surrounding[i].x, surrounding[i].x, this.from)) {
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
@@ -83,6 +89,26 @@ class BuildStructureStateChange extends StateChange {
                     // Nothing else can be on mineral
                     return false;
                 }
+            }
+        }
+        if (this.data.builtBy) {
+            // Check if building place is near a builder!
+            const builder = state.mapObjects[this.data.builtBy.y][this.data.builtBy.x];
+            if (!builder) {
+                return false;
+            }
+            if (builder.name !== 'Combat Engineer') {
+                return false;
+            }
+            let surrounding = getSurrounding(builder.position, 1);
+            let found = false;
+            for (let i = 0; i < surrounding.length; i++) {
+                if (surrounding[i].equals(this.data.position)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                return false;
             }
         }
         return true;
