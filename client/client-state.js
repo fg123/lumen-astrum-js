@@ -160,7 +160,7 @@ module.exports = class ClientState {
                     );
                     path.unshift(change.data.posFrom);
                     // Hide move range indicator for now.
-                    const currentlySelected =
+                    const currentlySelected = this.selectedObject &&
                         this.selectedObject.position.x === change.data.posFrom.x &&
                         this.selectedObject.position.y === change.data.posFrom.y;
                     if (currentlySelected) {
