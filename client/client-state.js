@@ -99,11 +99,11 @@ module.exports = class ClientState {
         });
 
         inputManager.attachMouseDownObserver((button) => {
-            this.gameUIClickEvent(button);
+            return this.gameUIClickEvent(button);
         });
 
         inputManager.attachMouseDownObserver((button) => {
-            this.gameObjectClickEvent(button);
+            return this.gameObjectClickEvent(button);
         });
 
         inputManager.attachMouseUpObserver((button) => {
