@@ -30,6 +30,8 @@ module.exports.Unit = class {
         this.width = 0;
         this.currentHealth = Data.units[name].health;
         this.currentShield = Data.units[name].shield;
+        this.attackRange = Data.units[name].attackrange;
+        this.attackDamage = Data.units[name].damage;
         this.isStructure = false;
         this.isUnit = true;
 
@@ -37,5 +39,6 @@ module.exports.Unit = class {
 
         /* This is a local copy that changes based on state */
         this.moveRange = Data.units[name].moverange;
+        this.attacksThisTurn = 0;
     }
 };

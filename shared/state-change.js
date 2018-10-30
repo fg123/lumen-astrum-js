@@ -1,7 +1,10 @@
+const Constants = require('./constants');
+
 class StateChange {
     constructor(stateChange) {
         this.type = stateChange.type;
         this.from = stateChange.from;
+        this.opponentSide = stateChange.from === Constants.RED_SIDE ? Constants.BLUE_SIDE : Constants.RED_SIDE;
         this.data = stateChange.data;
         this.timestamp = stateChange.timestamp;
     }
@@ -39,9 +42,8 @@ StateChange.subClasses = {};
 
 /* Helper Functions */
 const { getBaseObject } = require('./data');
-const { getSurrounding } = require('./coordinates');
+const { Tuple, getSurrounding } = require('./coordinates');
 const { withinMap, map, Tiles } = require('./map');
-const Constants = require('./constants');
 const PathFinder = require('./path-finder');
 const Data = require('./data');
 
@@ -73,7 +75,7 @@ class BuildStructureStateChange extends StateChange {
                 return false;
             }
             else if (this.data.builtBy === undefined &&
-                state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
+                !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
@@ -248,15 +250,103 @@ class TurnPassoverStateChange extends StateChange {
             }
             /* Reset move range at the end of the turn */
             state.units[i].moveRange = Data.units[state.units[i].name].moverange;
+            /* Reset attack */
+            state.units[i].attacksThisTurn = 1;
         }
     }
 }
 StateChange.registerSubClass(TurnPassoverStateChange);
+
+class UnitAttackStateChange extends StateChange {
+    static create(from, posFrom, posTo) {
+        return new UnitAttackStateChange(
+            StateChange.create(
+                from, 'UnitAttackStateChange', {
+                    posFrom: posFrom,
+                    posTo: posTo
+                }
+            )
+        );
+    }
+
+    distance(a, b) {
+        return PathFinder.manhattanDistance(new Tuple(a.x, a.y).toCubeCoordinates(),
+            new Tuple(b.x, b.y).toCubeCoordinates());
+    }
+
+    findTargetPos(state, pos) {
+        let target = state.mapObjects[pos.y][pos.x];
+        if (target === undefined) {
+            /* No direct target, check for occupied mapping */
+            const occupiedPoint = state.occupied[pos.y][pos.x];
+            if (occupiedPoint && occupiedPoint !== true) {
+                return occupiedPoint;
+            }
+        }
+        return pos;
+    }
+
+    findTarget(state, pos) {
+        const targetPos = this.findTargetPos(state, pos);
+        let target = state.mapObjects[targetPos.y][targetPos.x];
+        return target;
+    }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+            return false;
+        }
+        /* Is there a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+
+        /* Does this unit have any attacks left? */
+        if (unit.attacksThisTurn === 0) {
+            return false;
+        }
+
+        /* Is the attack out of range? */
+        const distance = this.distance(this.data.posFrom, this.data.posTo);
+        if (distance > unit.attackRange) {
+            return false;
+        }
+
+        /* Is the attack destination a mapObject that belongs to the
+         * opponent? */
+        const target = this.findTarget(state, this.data.posTo);
+        if (target === undefined) {
+            return false;
+        }
+        if (target.side !== this.opponentSide) return false;
+
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        const target = this.findTarget(state, this.data.posTo);
+        unit.attacksThisTurn -= 1;
+
+        /* TODO: Shield Calculations */
+        target.currentHealth -= unit.attackDamage;
+        if (target.currentHealth <= 0) {
+            /* Kill Unit / Structure */
+            const targetPos = this.findTargetPos(state, this.data.posTo);
+            state.removeMapObject(targetPos);
+        }
+    }
+}
+StateChange.registerSubClass(UnitAttackStateChange);
 
 module.exports = {
     StateChange,
     BuildStructureStateChange,
     SpawnUnitStateChange,
     TurnPassoverStateChange,
-    MoveUnitStateChange
+    MoveUnitStateChange,
+    UnitAttackStateChange
 };
