@@ -73,7 +73,7 @@ class BuildStructureStateChange extends StateChange {
                 return false;
             }
             else if (this.data.builtBy === undefined &&
-                state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
+                !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
