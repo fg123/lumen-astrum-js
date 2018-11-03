@@ -1,5 +1,5 @@
 const Constants = require('../shared/constants');
-const { getReachable } = require('../shared/coordinates');
+const { getReachable, getSurrounding } = require('../shared/coordinates');
 const { getBaseObject } = require('../shared/data');
 const {
     withinMap,
@@ -12,6 +12,7 @@ const {
     SpawnUnitStateChange,
     MoveUnitStateChange,
     TurnPassoverStateChange,
+    UnitAttackStateChange
 } = require('../shared/state-change');
 const GameState = require('../shared/game-state');
 const Utils = require('./utils');
@@ -33,6 +34,7 @@ const KEY_D = 68;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const LEFT_MOUSE_BUTTON = 1;
+const RIGHT_MOUSE_BUTTON = 3;
 const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 
 const INTERNAL_TICK_INTERVAL = 16;
@@ -53,6 +55,8 @@ module.exports = class ClientState {
         this.smallAlert = { current: null, queue: [], lastShownTime: 0 };
         this.commandCenter = null;
         this.unitMoveRange = [];
+        this.unitAttackRange = [];
+        this.canCurrentUnitAttackPosition = false;
         this.canCurrentUnitMoveToPosition = false;
         this.buildingStructure = null;
         this.spawningUnit = null;
@@ -165,6 +169,7 @@ module.exports = class ClientState {
                         this.selectedObject.position.y === change.data.posFrom.y;
                     if (currentlySelected) {
                         this.unitMoveRange = [];
+                        this.unitAttackRange = [];
                     }
                     unit.animationManager.addAnimation(
                         new MoveUnitAnimation(path, 10, () => {
@@ -359,6 +364,7 @@ module.exports = class ClientState {
                         // It's blocked if it's not in the map, or occupied
                         return !withinMap(pos) || this.gameState.occupied[pos.y][pos.x];
                     });
+            this.unitAttackRange = getSurrounding(object.position, object.attackRange);
         }
     }
 
@@ -416,6 +422,19 @@ module.exports = class ClientState {
                     obj = this.gameState.mapObjects[occupiedPoint.y][occupiedPoint.x];
                 }
                 this.selectObject(obj);
+                return true;
+            }
+        }
+        if (button === RIGHT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
+            // Potential Attack
+            if (this.canCurrentUnitAttackPosition) {
+                this.sendStateChange(
+                    UnitAttackStateChange.create(
+                        this.side,
+                        this.selectedObject.position,
+                        this.inputManager.mouseState.tile
+                    )
+                );
                 return true;
             }
         }
