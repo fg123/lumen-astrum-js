@@ -197,8 +197,6 @@ class MoveUnitStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
-        /* Client Side will want to implement animations here, or we can store
-         * the path onto the map object for the client to interpolate */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         /* This can probably be cached between verify and simulate */
         const path = PathFinder.findPath(state, this.data.posFrom, this.data.posTo);
