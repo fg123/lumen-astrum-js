@@ -4,6 +4,7 @@ const { getBaseObject, structureList, unitList, units, structures } = require('.
 const { Structure } = require('../shared/map-objects');
 const { map, withinMap } = require('../shared/map');
 const { UnitAttackStateChange } = require('../shared/state-change');
+const AnimationManager = require('../shared/animation-manager');
 const PathFinder = require('../shared/path-finder');
 
 const Utils = require('./utils');
@@ -17,7 +18,7 @@ const SMALL_ALERT_SHOW_TIME = 2 * 1000;
 const LEFT_MOUSE_BUTTON = 1;
 
 module.exports = class GraphicsManager {
-    constructor(canvas, targetInterval, ui, camera, state, resourceManager, inputManager) {
+    constructor(canvas, targetInterval, ui, camera, state, animationManager, resourceManager, inputManager) {
         this.inputManager = inputManager;
         this.canvas = canvas;
         this.context = canvas.getContext('2d');
@@ -25,6 +26,7 @@ module.exports = class GraphicsManager {
         this.camera = camera;
         this.state = state;
         this.resourceManager = resourceManager;
+        this.animationManager = animationManager;
 
         /* Variables used during drawing */
         this.drawContext = {
@@ -331,6 +333,13 @@ module.exports = class GraphicsManager {
         this.context.globalCompositeOperation = 'source-over';
     }
 
+    drawGlobalAnimations() {
+        /* Global Animations don't have a default position, it is assumed they
+         * will handle their own positions */
+        this.animationManager.draw(this, Tuple.ZERO);
+        this.animationManager.tick();
+    }
+
     drawMap() {
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
             y < Math.min(map.length, this.drawContext.bottomRightVisible.y); y++) {
@@ -433,6 +442,8 @@ module.exports = class GraphicsManager {
                 }
             }
         }
+
+        this.drawGlobalAnimations();
 
         this.state.cursorMessage = '';
         if (this.state.buildingStructure) {

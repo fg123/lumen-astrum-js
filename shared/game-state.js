@@ -46,9 +46,6 @@ module.exports = class GameState {
         /* Pre-constructed buildings */
         this.insertMapObject(RED_SIDE_COMMAND_CENTER_LOC, 'Command Base', Constants.RED_SIDE);
         this.insertMapObject(BLUE_SIDE_COMMAND_CENTER_LOC, 'Command Base', Constants.BLUE_SIDE);
-        const { Tuple } = require('./coordinates');
-        this.insertMapObject(new Tuple(10, 10), 'Recon Team', Constants.RED_SIDE);
-        this.insertMapObject(new Tuple(10, 11), 'Recon Team', Constants.BLUE_SIDE);
     }
 
     isAllowedBuilding(x, y, side) {

@@ -105,7 +105,75 @@ class InPlaceSpriteAnimation extends MapObjectAnimation {
     }
 }
 
+/* This animation happens in two parts, first, the projectile flies
+ *   to the desired position, then it explodes.
+ * The animation is not attached to an actual unit, but instead is attached to
+ *   the graphics manager.
+ */
+const { Resource } = require('./resources');
+
+class AttackProjectileAnimation extends MapObjectAnimation {
+    constructor(resourceManager, from, to, onDone = () => {}) {
+        super(onDone);
+        this.resourceManager = resourceManager;
+
+        this.from = new Tuple(
+            from.x * 96,
+            (from.y * 111) + (from.x % 2) * 55
+        );
+        this.to = new Tuple(
+            to.x * 96,
+            (to.y * 111) + (to.x % 2) * 55
+        );
+
+        this.currentPos = this.from;
+
+        this.totalTicks = 0;
+        this.flyingTicks = 20;
+        this.hasFlown = false;
+
+        this.explodeAnimation = new InPlaceSpriteAnimation(
+            resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
+        );
+        this.attackProjectile = resourceManager.get(Resource.ATTACK_PROJECTILE);
+    }
+
+    _tick() {
+        if (!this.hasFlown) {
+            this.totalTicks += 1;
+            if (this.totalTicks >= this.flyingTicks) {
+                this.hasFlown = true;
+            }
+            const delta = this.totalTicks / this.flyingTicks;
+            const newX = this.from.x + delta * (this.to.x - this.from.x);
+            const newY = this.from.y + delta * (this.to.y - this.from.y);
+            this.currentPos = new Tuple(newX, newY);
+            return true;
+        }
+        return this.explodeAnimation.tick();
+    }
+
+    _draw(graphicsManager, position) {
+        if (this.hasFlown) {
+            this.explodeAnimation.draw(graphicsManager, this.getPosition());
+        }
+        else {
+            graphicsManager.drawImage(
+                this.attackProjectile,
+                position.x,
+                position.y
+            );
+        }
+        return true;
+    }
+
+    _getPosition() {
+        return this.currentPos;
+    }
+}
+
 module.exports = {
     InPlaceSpriteAnimation,
-    MoveUnitAnimation
+    MoveUnitAnimation,
+    AttackProjectileAnimation
 };

@@ -20,8 +20,11 @@ module.exports.Resource = {
     WIDTH_1_BUILD: 'resources/structures/width1Build.png',
     WIDTH_0_BUILD: 'resources/structures/width0Build.png',
     WIDTH_1_BUILD_ANIM: 'resources/structures/width1BuildAnimation.png',
-    WIDTH_0_BUILD_ANIM: 'resources/structures/width0BuildAnimation.png'
+    WIDTH_0_BUILD_ANIM: 'resources/structures/width0BuildAnimation.png',
+    ATTACK_PROJECTILE: 'resources/attack/attack.png',
+    ATTACK_EXPLODING: 'resources/attack/exploding.png'
 };
+
 module.exports.tiles = [
     module.exports.Resource.DEFAULT_TILE,
     module.exports.Resource.BRUSH_TILE,

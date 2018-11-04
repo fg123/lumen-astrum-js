@@ -5,6 +5,7 @@ const UI = require('./ui');
 const ResourceManager = require('./resource-manager');
 const GraphicsManager = require('./graphics-manager');
 const ClientState = require('./client-state');
+const AnimationManager = require('../shared/animation-manager');
 const InputManager = require('./input-manager');
 const Camera = require('./camera');
 
@@ -19,7 +20,8 @@ $(document).ready(() => {
         const camera = new Camera();
         const inputManager = new InputManager(canvas, ui, camera, TIME_BETWEEN_FRAMES);
 
-        const clientState = new ClientState(socket, camera, inputManager, ui, resourceManager);
+        const animationManager = new AnimationManager();
+        const clientState = new ClientState(socket, camera, inputManager, ui, resourceManager, animationManager);
 
         new GraphicsManager(
             canvas,
@@ -27,6 +29,7 @@ $(document).ready(() => {
             ui,
             camera,
             clientState,
+            animationManager,
             resourceManager,
             inputManager
         );

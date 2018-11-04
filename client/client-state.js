@@ -20,7 +20,8 @@ const { Tuple } = require('../shared/coordinates');
 const PathFinder = require('../shared/path-finder');
 const {
     InPlaceSpriteAnimation,
-    MoveUnitAnimation
+    MoveUnitAnimation,
+    AttackProjectileAnimation
 } = require('./animation');
 const { Resource } = require('./resources');
 
@@ -40,12 +41,13 @@ const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 const INTERNAL_TICK_INTERVAL = 16;
 
 module.exports = class ClientState {
-    constructor(socket, camera, inputManager, ui, resourceManager) {
+    constructor(socket, camera, inputManager, ui, resourceManager, animationManager) {
         this.ui = ui;
         this.socket = socket;
         this.camera = camera;
         this.inputManager = inputManager;
         this.resourceManager = resourceManager;
+        this.globalAnimationManager = animationManager;
 
         this.side = Constants.NONE_SIDE;
         this.gameState = undefined;
@@ -177,8 +179,15 @@ module.exports = class ClientState {
                         })
                     );
                 }
+            } else if (change instanceof UnitAttackStateChange) {
+                this.globalAnimationManager.addAnimation(
+                    new AttackProjectileAnimation(
+                        this.resourceManager,
+                        change.data.posFrom,
+                        change.data.posTo
+                    )
+                );
             }
-
             /* Trust Server */
             change.simulateStateChange(this.gameState);
         });
