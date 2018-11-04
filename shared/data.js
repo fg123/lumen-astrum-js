@@ -524,7 +524,7 @@ const units = {
         'turnsToBuild': 1,
         'unitclass': 'Biological',
         'options':
-            [
+        [
                 {
                     'title': 'Build Deployment Outpost',
                     'cost': 400,

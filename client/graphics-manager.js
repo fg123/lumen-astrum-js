@@ -3,6 +3,8 @@ const { Resource, tiles } = require('./resources');
 const { getBaseObject, structureList, unitList, units, structures } = require('../shared/data');
 const { Structure } = require('../shared/map-objects');
 const { map, withinMap } = require('../shared/map');
+const { UnitAttackStateChange } = require('../shared/state-change');
+const AnimationManager = require('../shared/animation-manager');
 const PathFinder = require('../shared/path-finder');
 
 const Utils = require('./utils');
@@ -16,7 +18,7 @@ const SMALL_ALERT_SHOW_TIME = 2 * 1000;
 const LEFT_MOUSE_BUTTON = 1;
 
 module.exports = class GraphicsManager {
-    constructor(canvas, targetInterval, ui, camera, state, resourceManager, inputManager) {
+    constructor(canvas, targetInterval, ui, camera, state, animationManager, resourceManager, inputManager) {
         this.inputManager = inputManager;
         this.canvas = canvas;
         this.context = canvas.getContext('2d');
@@ -24,6 +26,7 @@ module.exports = class GraphicsManager {
         this.camera = camera;
         this.state = state;
         this.resourceManager = resourceManager;
+        this.animationManager = animationManager;
 
         /* Variables used during drawing */
         this.drawContext = {
@@ -330,6 +333,13 @@ module.exports = class GraphicsManager {
         this.context.globalCompositeOperation = 'source-over';
     }
 
+    drawGlobalAnimations() {
+        /* Global Animations don't have a default position, it is assumed they
+         * will handle their own positions */
+        this.animationManager.draw(this, Tuple.ZERO);
+        this.animationManager.tick();
+    }
+
     drawMap() {
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
             y < Math.min(map.length, this.drawContext.bottomRightVisible.y); y++) {
@@ -433,6 +443,8 @@ module.exports = class GraphicsManager {
             }
         }
 
+        this.drawGlobalAnimations();
+
         this.state.cursorMessage = '';
         if (this.state.buildingStructure) {
             let baseObj = getBaseObject(this.state.buildingStructure);
@@ -483,42 +495,72 @@ module.exports = class GraphicsManager {
         }
 
         this.state.canCurrentUnitMoveToPosition = false;
+        this.state.canCurrentUnitAttackPosition = false;
         if (this.state.selectedObject && this.state.selectedObject.isUnit &&
             this.objectOnMySide(this.state.selectedObject) &&
             this.state.selectedObject.turnsUntilBuilt === 0) {
             /* This value is used in the calculation below, but we calculate it
              * here since we're already doing a traversal of the unitmoverange
              * array */
-            let isMouseOverOnUnitMoveRange = false;
-            for (let i = 0; i < this.state.unitMoveRange.length; i++) {
-                if (withinMap(this.state.unitMoveRange[i]) &&
-                !this.state.gameState.occupied[this.state.unitMoveRange[i].y][this.state.unitMoveRange[i].x]) {
-                    this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
-                        (this.state.unitMoveRange[i].x * 96),
-                        (this.state.unitMoveRange[i].y * 111) + (this.state.unitMoveRange[i].x % 2) * 55);
-                    if (this.inputManager.mouseState.tile.equals(this.state.unitMoveRange[i])) {
-                        isMouseOverOnUnitMoveRange = true;
+            if (this.state.isMyTurn()) {
+                if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
+                    let isMouseOverOnUnitMoveRange = false;
+                    for (let i = 0; i < this.state.unitMoveRange.length; i++) {
+                        if (withinMap(this.state.unitMoveRange[i]) &&
+                        !this.state.gameState.occupied[this.state.unitMoveRange[i].y][this.state.unitMoveRange[i].x]) {
+                            this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
+                                (this.state.unitMoveRange[i].x * 96),
+                                (this.state.unitMoveRange[i].y * 111) + (this.state.unitMoveRange[i].x % 2) * 55);
+                            if (this.inputManager.mouseState.tile.equals(this.state.unitMoveRange[i])) {
+                                isMouseOverOnUnitMoveRange = true;
+                            }
+                        }
+                    }
+                    /* Since most times this path is taken, it will be when the
+                    * player clicks a unit, we shortcircuit so we don't have to run
+                    * the expensive pathfinding algorithm */
+                    if (!this.inputManager.mouseState.tile.equals(
+                        this.state.selectedObject.position
+                    ) && isMouseOverOnUnitMoveRange) {
+                        const path = PathFinder.findPath(this.state.gameState,
+                            this.state.selectedObject.position, this.inputManager.mouseState.tile);
+                        path.forEach(node => {
+                            this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
+                                (node.x * 96),
+                                (node.y * 111) + (node.x % 2) * 55);
+                        });
+                        this.state.canCurrentUnitMoveToPosition = true;
+                        this.state.cursorMessage = 'Move Here';
+                    } else {
+                        this.state.cursorMessage = 'Can\'t move here!';
                     }
                 }
-            }
-            if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON] && this.state.isMyTurn()) {
-                /* Since most times this path is taken, it will be when the
-                 * player clicks a unit, we shortcircuit so we don't have to run
-                 * the expensive pathfinding algorithm */
-                if (!this.inputManager.mouseState.tile.equals(this.state.selectedObject.position) &&
-                isMouseOverOnUnitMoveRange) {
-
-                    const path = PathFinder.findPath(this.state.gameState,
-                        this.state.selectedObject.position, this.inputManager.mouseState.tile);
-                    path.forEach(node => {
-                        this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
-                            (node.x * 96),
-                            (node.y * 111) + (node.x % 2) * 55);
-                    });
-                    this.state.canCurrentUnitMoveToPosition = true;
-                    this.state.cursorMessage = 'Move Here';
-                } else {
-                    this.state.cursorMessage = 'Can\'t move here!';
+                else {
+                    let isMouseOverAttackRange = false;
+                    for (let i = 0; i < this.state.unitAttackRange.length; i++) {
+                        if (withinMap(this.state.unitAttackRange[i]) &&
+                        !this.state.gameState.occupied[this.state.unitAttackRange[i].y][this.state.unitAttackRange[i].x]) {
+                            this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
+                                (this.state.unitAttackRange[i].x * 96),
+                                (this.state.unitAttackRange[i].y * 111) + (this.state.unitAttackRange[i].x % 2) * 55);
+                        }
+                        if (this.inputManager.mouseState.tile.equals(this.state.unitAttackRange[i])) {
+                            isMouseOverAttackRange = true;
+                        }
+                    }
+                    if (isMouseOverAttackRange) {
+                        this.state.canCurrentUnitAttackPosition = UnitAttackStateChange.create(
+                            this.state.side,
+                            this.state.selectedObject.position,
+                            this.inputManager.mouseState.tile
+                        ).verifyStateChange(this.state.gameState);
+                        if (this.state.canCurrentUnitAttackPosition) {
+                            this.state.cursorMessage = `Attack for ${this.state.selectedObject.attackDamage} Damage`;
+                        }
+                        if (this.state.selectedObject.attacksThisTurn === 0) {
+                            this.state.cursorMessage = 'Already attacked!';
+                        }
+                    }
                 }
             }
         }
