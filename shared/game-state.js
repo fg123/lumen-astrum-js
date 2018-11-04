@@ -2,9 +2,7 @@ const Constants = require('./constants');
 const {
     map,
     withinMap,
-    Tiles,
-    RED_SIDE_COMMAND_CENTER_LOC,
-    BLUE_SIDE_COMMAND_CENTER_LOC
+    Tiles
 } = require('./map');
 const { Structure, Unit } = require('../shared/map-objects');
 const { getSurrounding  } = require('./coordinates');
@@ -28,24 +26,24 @@ module.exports = class GameState {
         this.currentTurn = Constants.NONE_SIDE;
 
         /* Setup two dimensional arrays */
-        for (let i = 0; i < map.length; i++) {
+        for (let i = 0; i < map.data.length; i++) {
             this.mapObjects.push([]);
             this.visibility.push([]);
             this.occupied.push([]);
             this.redAllowedBuilding.push([]);
             this.blueAllowedBuilding.push([]);
         }
-        for (let y = 0; y < map.length; y++) {
-            for (let x = 0; x < map[0].length; x++) {
-                if (map[y][x].displayType === 0 || map[y][x].displayType === 5) {
+        for (let y = 0; y < map.data.length; y++) {
+            for (let x = 0; x < map.data[0].length; x++) {
+                if (map.data[y][x].displayType === 0 || map.data[y][x].displayType === 5) {
                     this.occupied[y][x] = true;
                 }
             }
         }
 
         /* Pre-constructed buildings */
-        this.insertMapObject(RED_SIDE_COMMAND_CENTER_LOC, 'Command Base', Constants.RED_SIDE);
-        this.insertMapObject(BLUE_SIDE_COMMAND_CENTER_LOC, 'Command Base', Constants.BLUE_SIDE);
+        this.insertMapObject(map.redCommandCenterLocation, 'Command Base', Constants.RED_SIDE);
+        this.insertMapObject(map.blueCommandCenterLocation, 'Command Base', Constants.BLUE_SIDE);
     }
 
     isAllowedBuilding(x, y, side) {
@@ -86,8 +84,8 @@ module.exports = class GameState {
                 let surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
                 for (let i = 0; i < surrounding.length; i++) {
                     if (withinMap(surrounding[i]) &&
-                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
                         this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, side);
                     }
                 }
@@ -126,8 +124,8 @@ module.exports = class GameState {
                 let surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
                 for (let i = 0; i < surrounding.length; i++) {
                     if (withinMap(surrounding[i]) &&
-                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                        map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
                         this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.side);
                     }
                 }

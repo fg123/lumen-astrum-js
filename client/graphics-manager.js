@@ -4,7 +4,6 @@ const { getBaseObject, structureList, unitList, units, structures } = require('.
 const { Structure } = require('../shared/map-objects');
 const { map, withinMap } = require('../shared/map');
 const { UnitAttackStateChange } = require('../shared/state-change');
-const AnimationManager = require('../shared/animation-manager');
 const PathFinder = require('../shared/path-finder');
 
 const Utils = require('./utils');
@@ -342,10 +341,10 @@ module.exports = class GraphicsManager {
 
     drawMap() {
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
-            y < Math.min(map.length, this.drawContext.bottomRightVisible.y); y++) {
+            y < Math.min(map.data.length, this.drawContext.bottomRightVisible.y); y++) {
             for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
-                x < Math.min(map[0].length, this.drawContext.bottomRightVisible.x); x++) {
-                if (map[y][x].displayType != 0) {
+                x < Math.min(map.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
+                if (map.data[y][x].displayType != 0) {
                     let yOffset = 0;
                     if (x % 2 === 1) {
                         yOffset = 55;
@@ -360,7 +359,7 @@ module.exports = class GraphicsManager {
                     }
 
                     this.drawImage(this.resourceManager.get(
-                        tiles[map[y][x].displayType - 1]
+                        tiles[map.data[y][x].displayType - 1]
                     ), (x * 96), (y * 111) + yOffset);
 
                     this.context.globalCompositeOperation = 'source-over';
@@ -486,7 +485,7 @@ module.exports = class GraphicsManager {
             for (let i = 0; i < surrounding.length; i++) {
                 if (withinMap(surrounding[i]) &&
                     !this.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
-                    map[surrounding[i].y][surrounding[i].x].displayType != 2) {
+                    map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
                     this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
                         (surrounding[i].x * 96),
                         (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);

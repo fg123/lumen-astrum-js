@@ -1,5 +1,4 @@
 const { Tuple } = require('./coordinates');
-const fs = require('fs');
 
 class Tile {
     constructor(item) {
@@ -8,18 +7,11 @@ class Tile {
     }
 }
 
-const map = [];
-const contents = fs.readFileSync('server/maps/map.cfg', 'utf8').toString().split('\n');
+const map = require('./maps/big.js');
 
 console.log('Loading map...');
-for (let i = 0; i < contents.length; i++) {
-    const row = contents[i].split(' ');
-    const _row = [];
-    for (let j = 0; j < row.length; j++) {
-        _row.push(new Tile(row[j]));
-    }
-    map.push(_row);
-}
+map.data = map.data.map(row => row.split(' ').map(tile => new Tile(tile)));
+
 module.exports.map = map;
 module.exports.Tiles =  {
     DEFAULT: 1,
@@ -33,8 +25,5 @@ module.exports.Tiles =  {
 
 module.exports.withinMap = (tile) => {
     return !(tile.x < 0 || tile.y < 0 ||
-        tile.x >= map[0].length || tile.y >= map.length);
+        tile.x >= map.data[0].length || tile.y >= map.data.length);
 };
-
-module.exports.RED_SIDE_COMMAND_CENTER_LOC = new Tuple(6, 19);
-module.exports.BLUE_SIDE_COMMAND_CENTER_LOC = new Tuple(47, 6);

@@ -71,7 +71,7 @@ class BuildStructureStateChange extends StateChange {
         for (let i = 0; i < surrounding.length; i++) {
             if (!withinMap(surrounding[i]) ||
                 state.occupied[surrounding[i].y][surrounding[i].x] ||
-                map[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
+                map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
                 return false;
             }
             else if (this.data.builtBy === undefined &&
@@ -79,15 +79,15 @@ class BuildStructureStateChange extends StateChange {
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
-                if (map[surrounding[i].y][surrounding[i].x].displayType != Tiles.MINERAL &&
-                    map[surrounding[i].y][surrounding[i].x].displayType != Tiles.BIG_MINERAL) {
+                if (map.data[surrounding[i].y][surrounding[i].x].displayType != Tiles.MINERAL &&
+                    map.data[surrounding[i].y][surrounding[i].x].displayType != Tiles.BIG_MINERAL) {
                     // Harvester must be on mineral
                     return false;
                 }
             }
             else {
-                if (map[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
-                    map[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {
+                if (map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
+                    map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {
                     // Nothing else can be on mineral
                     return false;
                 }
@@ -147,7 +147,7 @@ class SpawnUnitStateChange extends StateChange {
         for (let i = 0; i < surrounding.length; i++) {
             if (withinMap(surrounding[i]) &&
                 !state.occupied[surrounding[i].y][surrounding[i].x] &&
-                map[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH) {
+                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH) {
                 if (this.data.position.x === surrounding[i].x &&
                     this.data.position.y === surrounding[i].y) {
                     return true;

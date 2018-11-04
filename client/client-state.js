@@ -3,8 +3,7 @@ const { getReachable, getSurrounding } = require('../shared/coordinates');
 const { getBaseObject } = require('../shared/data');
 const {
     withinMap,
-    RED_SIDE_COMMAND_CENTER_LOC,
-    BLUE_SIDE_COMMAND_CENTER_LOC
+    map
 } = require('../shared/map');
 const {
     StateChange,
@@ -204,22 +203,22 @@ module.exports = class ClientState {
             console.log(this.side);
             if (side === Constants.RED_SIDE) {
                 this.commandCenter = this.gameState.mapObjects[
-                    RED_SIDE_COMMAND_CENTER_LOC.y][
-                    RED_SIDE_COMMAND_CENTER_LOC.x];
+                    map.redCommandCenterLocation.y][
+                    map.redCommandCenterLocation.x];
                 this.camera.position = new Tuple(
-                    RED_SIDE_COMMAND_CENTER_LOC.x * 96,
-                    RED_SIDE_COMMAND_CENTER_LOC.y * 111 +
-                        (RED_SIDE_COMMAND_CENTER_LOC.x % 2) * 55
+                    map.redCommandCenterLocation.x * 96,
+                    map.redCommandCenterLocation.y * 111 +
+                        (map.redCommandCenterLocation.x % 2) * 55
                 );
             }
             else {
                 this.commandCenter = this.gameState.mapObjects[
-                    BLUE_SIDE_COMMAND_CENTER_LOC.y][
-                    BLUE_SIDE_COMMAND_CENTER_LOC.x];
+                    map.blueCommandCenterLocation.y][
+                    map.blueCommandCenterLocation.x];
                 this.camera.position = new Tuple(
-                    BLUE_SIDE_COMMAND_CENTER_LOC.x * 96,
-                    BLUE_SIDE_COMMAND_CENTER_LOC.y * 111 +
-                        (BLUE_SIDE_COMMAND_CENTER_LOC.x % 2) * 55
+                    map.blueCommandCenterLocation.x * 96,
+                    map.blueCommandCenterLocation.y * 111 +
+                        (map.blueCommandCenterLocation.x % 2) * 55
                 );
             }
             this.ui.loadScreen(this.ui.Screen.GAME_SCREEN);
