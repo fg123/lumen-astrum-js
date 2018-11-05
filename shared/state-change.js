@@ -268,6 +268,7 @@ class TurnPassoverStateChange extends StateChange {
             state.calculateNextTurnAvailableTime(state.currentTurn);
 
         // Handle Structure End-Turn Procedures
+        // This is calculated for the opponent since they gain the $
         let harvestorMoneyGained = 0;
         for (let i = 0; i < state.structures.length; i++) {
             const structure = state.structures[i];
@@ -275,7 +276,7 @@ class TurnPassoverStateChange extends StateChange {
 				structure.turnsUntilBuilt != 0) {
                 structure.turnsUntilBuilt -= 1;
             }
-            if (structure.side === this.from &&
+            if (structure.side === this.opponentSide &&
                 structure.name === 'Harvester') {
                 const tile = map.data[structure.position.y][
                     structure.position.x];
