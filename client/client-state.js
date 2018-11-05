@@ -174,7 +174,9 @@ module.exports = class ClientState {
                     }
                     unit.animationManager.addAnimation(
                         new MoveUnitAnimation(path, 10, () => {
-                            if (currentlySelected) this.selectObject(unit);
+                            if (currentlySelected && !this.selectedObject) {
+                                this.selectObject(unit);
+                            }
                         })
                     );
                 }
@@ -240,7 +242,7 @@ module.exports = class ClientState {
                     this.side,
                     this.buildingStructure,
                     this.inputManager.mouseState.tile,
-                    (this.selectedObject.isUnit ? this.selectedObject.position : undefined)
+                    this.selectedObject
                 ).verifyStateChange(this.gameState);
             }
             else if (this.spawningUnit) {
@@ -401,7 +403,7 @@ module.exports = class ClientState {
                                 this.side,
                                 this.buildingStructure,
                                 this.inputManager.mouseState.tile,
-                                (this.selectedObject.isUnit ? this.selectedObject.position : undefined)
+                                this.selectedObject
                             )
                         );
                     }

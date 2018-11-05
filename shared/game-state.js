@@ -162,4 +162,22 @@ module.exports = class GameState {
             return 1000 * ((30) + (this.blueTurnCount - 1) * 5);
         }
     }
+
+    getGold(side) {
+        if (side === Constants.RED_SIDE) {
+            return this.redGold;
+        }
+        else {
+            return this.blueGold;
+        }
+    }
+
+    changeGold(side, changeBy) {
+        if (side === Constants.RED_SIDE) {
+            this.redGold += changeBy;
+        }
+        else {
+            this.blueGold += changeBy;
+        }
+    }
 };

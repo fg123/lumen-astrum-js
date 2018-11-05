@@ -62,10 +62,31 @@ class BuildStructureStateChange extends StateChange {
         );
     }
 
+    getOptionToBuild() {
+        let builtBy = getBaseObject(this.data.builtBy.name);
+        console.log(builtBy);
+        if (!builtBy) {
+            return undefined;
+        }
+        return builtBy.options.find(option => {
+            return option.command === 'build-' + this.data.structureName;
+        });
+    }
+
     _verifyStateChange(state) {
         if (state.currentTurn !== this.from) {
             return false;
         }
+
+        const option = this.getOptionToBuild();
+        console.log(option);
+        if (!option) {
+            return false;
+        }
+        if (state.getGold(this.from) < option.cost) {
+            return false;
+        }
+
         let baseObj = getBaseObject(this.data.structureName);
         let surrounding = getSurrounding(this.data.position, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
@@ -74,7 +95,7 @@ class BuildStructureStateChange extends StateChange {
                 map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
                 return false;
             }
-            else if (this.data.builtBy === undefined &&
+            else if (!this.data.builtBy.isUnit &&
                 !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
                 return false;
             }
@@ -93,9 +114,10 @@ class BuildStructureStateChange extends StateChange {
                 }
             }
         }
-        if (this.data.builtBy) {
+        if (this.data.builtBy.isUnit) {
             // Check if building place is near a builder!
-            const builder = state.mapObjects[this.data.builtBy.y][this.data.builtBy.x];
+            const builder = state.mapObjects[this.data.builtBy.position.y][
+                this.data.builtBy.position.x];
             if (!builder) {
                 return false;
             }
@@ -120,6 +142,7 @@ class BuildStructureStateChange extends StateChange {
         state.insertMapObject(this.data.position,
             this.data.structureName,
             this.from);
+        state.changeGold(this.from, -(this.getOptionToBuild().cost));
     }
 }
 StateChange.registerSubClass(BuildStructureStateChange);
@@ -137,8 +160,25 @@ class SpawnUnitStateChange extends StateChange {
         );
     }
 
+    getOptionToBuild() {
+        let building = getBaseObject(this.data.fromBuilding.name);
+        if (!building) {
+            return undefined;
+        }
+        return building.options.find(option => {
+            return option.command === 'spawn-' + this.data.unitName;
+        });
+    }
+
     _verifyStateChange(state) {
         if (state.currentTurn !== this.from) {
+            return false;
+        }
+        const option = this.getOptionToBuild();
+        if (!option) {
+            return false;
+        }
+        if (state.getGold(this.from) < option.cost) {
             return false;
         }
         let surrounding = getSurrounding(
@@ -161,6 +201,7 @@ class SpawnUnitStateChange extends StateChange {
         state.insertMapObject(this.data.position,
             this.data.unitName,
             this.from);
+        state.changeGold(this.from, -(this.getOptionToBuild().cost));
     }
 }
 StateChange.registerSubClass(SpawnUnitStateChange);
