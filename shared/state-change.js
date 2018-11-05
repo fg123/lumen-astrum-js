@@ -79,8 +79,8 @@ class BuildStructureStateChange extends StateChange {
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
-                if (map.data[surrounding[i].y][surrounding[i].x].displayType != Tiles.MINERAL &&
-                    map.data[surrounding[i].y][surrounding[i].x].displayType != Tiles.BIG_MINERAL) {
+                if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.MINERAL &&
+                    map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BIG_MINERAL) {
                     // Harvester must be on mineral
                     return false;
                 }
@@ -223,24 +223,31 @@ class TurnPassoverStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
-        if (this.from === Constants.RED_SIDE) {
-            state.currentTurn = Constants.BLUE_SIDE;
-            state.blueTurnCount++;
-        }
-        else {
-            state.currentTurn = Constants.RED_SIDE;
-            state.redTurnCount++;
-        }
         state.turnEndTime = Date.now() +
             state.calculateNextTurnAvailableTime(state.currentTurn);
 
-        // Turn End Procedures
+        // Handle Structure End-Turn Procedures
+        let harvestorMoneyGained = 0;
         for (let i = 0; i < state.structures.length; i++) {
-            if (state.structures[i].side === this.from &&
-				state.structures[i].turnsUntilBuilt != 0) {
-                state.structures[i].turnsUntilBuilt -= 1;
+            const structure = state.structures[i];
+            if (structure.side === this.from &&
+				structure.turnsUntilBuilt != 0) {
+                structure.turnsUntilBuilt -= 1;
+            }
+            if (structure.side === this.from &&
+                structure.name === 'Harvester') {
+                const tile = map.data[structure.position.y][
+                    structure.position.x];
+                if (tile.displayType === Tiles.MINERAL) {
+                    harvestorMoneyGained += 100;
+                }
+                else if (tile.displayType === Tiles.BIG_MINERAL) {
+                    harvestorMoneyGained += 200;
+                }
             }
         }
+
+        // Handle Units End-Turn Procedures
         for (let i = 0; i < state.units.length; i++) {
             if (state.units[i].side === this.from &&
 				state.units[i].turnsUntilBuilt != 0) {
@@ -250,6 +257,24 @@ class TurnPassoverStateChange extends StateChange {
             state.units[i].moveRange = Data.units[state.units[i].name].moverange;
             /* Reset attack */
             state.units[i].attacksThisTurn = 1;
+        }
+
+        // Handle General Procedures
+        if (this.from === Constants.RED_SIDE) {
+            state.currentTurn = Constants.BLUE_SIDE;
+            if (state.blueTurnCount !== 0) {
+                state.blueGold += 200 + ((state.blueTurnCount - 1) * 50) +
+                    harvestorMoneyGained;
+            }
+            state.blueTurnCount++;
+        }
+        else {
+            state.currentTurn = Constants.RED_SIDE;
+            if (state.redTurnCount !== 0) {
+                state.redGold += 200 + ((state.redTurnCount - 1) * 50) +
+                    harvestorMoneyGained;
+            }
+            state.redTurnCount++;
         }
     }
 }
