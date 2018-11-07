@@ -191,6 +191,11 @@ module.exports = class ClientState {
             }
             /* Trust Server */
             change.simulateStateChange(this.gameState);
+            /* Currently Selected Unit might have died */
+            if (!this.gameState.mapObjects[this.selectedObject.position.y][
+                this.selectedObject.position.x]) {
+                this.selectObject(null);
+            }
         });
 
         socket.on('invalid-state-change', () => {
