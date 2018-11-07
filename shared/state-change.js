@@ -412,16 +412,18 @@ class UnitAttackStateChange extends StateChange {
         unit.attacksThisTurn -= 1;
 
         let damageToHealth = unit.attackDamage;
+        console.log('CurrentShield ' + target.currentShield);
         if (target.currentShield !== 0) {
-            target.currentShield -= unit.attackDamage;
+            target.currentShield -= damageToHealth;
+            damageToHealth = 0;
+            console.log('CurrentShield2 ' + target.currentShield);
             if (target.currentShield < 0) {
+                console.log('Shield blown through');
                 damageToHealth = -target.currentShield;
                 target.currentShield = 0;
             }
-            else {
-                damageToHealth = 0;
-            }
         }
+        console.log('DamageToHealth');
         target.currentHealth -= damageToHealth;
         if (target.currentHealth <= 0) {
             /* Kill Unit / Structure */

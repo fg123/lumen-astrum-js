@@ -69,6 +69,18 @@ module.exports = class GraphicsManager {
         }
     }
 
+    drawHealthAndShieldBar(x, y, mapObject) {
+        const totalWidth = 104;
+        const start = x - (totalWidth / 2);
+        /* Draw black background */
+        this.drawRectangle('black', start, y, totalWidth, 16);
+        /* Draw Health and Shield Bars (100px x 5px each) */
+        const healthPercent = mapObject.currentHealth / mapObject.maxHealth;
+        this.drawRectangle('green', start + 2, y + 2, healthPercent * 100, 5);
+        const shieldPercent = mapObject.currentShield / mapObject.maxShield;
+        this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
+    }
+
     drawText(text, color, fontSize, x, y,
         align = 'left', fontStyle = '', maxWidth = 0,
         fontFamily = 'Roboto Slab') {
@@ -441,6 +453,12 @@ module.exports = class GraphicsManager {
                             }
                             this.context.shadowBlur = 0;
                         }
+                        const mapObject = this.state.gameState.mapObjects[y][x];
+                        this.drawHealthAndShieldBar(
+                            (x * 96),
+                            (y * 111) + yOffset - 32 - ((mapObject.width + 0.5) * 111),
+                            mapObject
+                        );
                     }
                 }
             }
