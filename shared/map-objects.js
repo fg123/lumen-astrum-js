@@ -10,6 +10,8 @@ module.exports.Structure = class {
         this.width = Data.structures[name].width;
         this.currentHealth = Data.structures[name].health;
         this.currentShield = Data.structures[name].shield;
+        this.maxHealth = Data.structures[name].health;
+        this.maxShield = Data.structures[name].shield;
         this.isStructure = true;
         this.isUnit = false;
 
@@ -30,7 +32,11 @@ module.exports.Unit = class {
         this.width = 0;
         this.currentHealth = Data.units[name].health;
         this.currentShield = Data.units[name].shield;
+        this.maxHealth = Data.units[name].health;
+        this.maxShield = Data.units[name].shield;
         this.attackRange = Data.units[name].attackrange;
+        this.moveRange = Data.units[name].moverange;
+        this.sightRange = Data.units[name].sightrange;
         this.attackDamage = Data.units[name].damage;
         this.isStructure = false;
         this.isUnit = true;
@@ -39,6 +45,7 @@ module.exports.Unit = class {
 
         /* This is a local copy that changes based on state */
         this.moveRange = Data.units[name].moverange;
+        this.maxMoveRange = Data.units[name].moverange;
         this.attacksThisTurn = 0;
     }
 };

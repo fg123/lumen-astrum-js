@@ -209,11 +209,12 @@ module.exports = class GraphicsManager {
 
         // Bottom Left Selected Info
         if (this.state.selectedObject) {
+            const selectedObject = this.state.selectedObject;
             const bottomLeft = this.resourceManager.get(Resource.UI_BOTTOM_LEFT);
             this.drawImage(bottomLeft, bottomLeft.width / 2,
                 screenHeight - bottomLeft.height / 2);
-            const clip = this.getIconClipStart(this.state.selectedObject.name);
-            const baseObj = getBaseObject(this.state.selectedObject.name);
+            const clip = this.getIconClipStart(selectedObject.name);
+            const baseObj = getBaseObject(selectedObject.name);
 
             this.context.drawImage(this.resourceManager.get(Resource.UI_ICONS),
                 clip.x,
@@ -222,25 +223,28 @@ module.exports = class GraphicsManager {
                 48, 48);
 
             // Consider: unit vs structure, enemy vs mine, currently building vs not!
-            let name = this.state.selectedObject.name;
-            if (!this.objectOnMySide(this.state.selectedObject)) {
+            let name = selectedObject.name;
+            if (!this.objectOnMySide(selectedObject)) {
                 name = 'Enemy ' + name;
             }
             this.drawText(name, 'black', 16, 88,
                 screenHeight - bottomLeft.height + 43, 'center', 'bold');
 
-            if (this.state.selectedObject.turnsUntilBuilt === 0) {
+            if (selectedObject.turnsUntilBuilt === 0) {
                 const lineHeight = 16;
-                const rightSide = [this.state.selectedObject.currentHealth + '/' + baseObj.health,
-                    this.state.selectedObject.currentShield + '/' + baseObj.shield];
-                const leftSide = this.state.selectedObject.name in units ? UNITS_BOTTOM_RIGHT_STATS : STRUCTURS_BOTTOM_RIGHT_STATS;
+                const rightSide = [selectedObject.currentHealth + '/' + selectedObject.maxHealth,
+                    selectedObject.currentShield + '/' + selectedObject.maxShield];
+                const leftSide = selectedObject.isUnit ? UNITS_BOTTOM_RIGHT_STATS : STRUCTURS_BOTTOM_RIGHT_STATS;
                 leftSide.forEach((val, index) => {
                     this.drawText(val, 'black', 13, 10,
                         screenHeight - bottomLeft.height + 130 + index * lineHeight, 'left', 'bold');
                 });
-                if (this.state.selectedObject.name in units) {
+                if (selectedObject.isUnit) {
                     // Could also use concat here but will create more garbage but will be speedier
-                    Array.prototype.push.apply(rightSide, [baseObj.damage, this.state.selectedObject.moveRange + '/' + baseObj.moverange, baseObj.attackrange, baseObj.sightrange]);
+                    Array.prototype.push.apply(rightSide, [
+                        selectedObject.attackDamage,
+                        selectedObject.moveRange + '/' + selectedObject.maxMoveRange,
+                        selectedObject.attackRange, selectedObject.sightRange]);
                 }
                 rightSide.forEach((val, index) => {
                     this.drawText(val, 'black', 13, 176 - 10,
@@ -248,7 +252,7 @@ module.exports = class GraphicsManager {
                 });
             }
             else {
-                let t = this.state.selectedObject.turnsUntilBuilt;
+                let t = selectedObject.turnsUntilBuilt;
                 this.drawText('Constructing...(' + t + ' turn' + (t != 1 ? 's' : '') + ' left!)', 'black', 13, 88,
                     screenHeight - bottomLeft.height + 130, 'center', 'bold');
             }
