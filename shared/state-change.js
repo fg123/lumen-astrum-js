@@ -263,6 +263,14 @@ class TurnPassoverStateChange extends StateChange {
         return state.currentTurn === this.from;
     }
 
+    replenishShield(mapObject) {
+        const shieldToReplenish = Math.ceil(mapObject.maxShield / 10);
+        mapObject.shield += shieldToReplenish;
+        if (mapObject.shield > mapObject.maxShield) {
+            mapObject.shield = mapObject.maxShield;
+        }
+    }
+
     _simulateStateChange(state) {
         state.turnEndTime = Date.now() +
             state.calculateNextTurnAvailableTime(state.currentTurn);
@@ -287,6 +295,7 @@ class TurnPassoverStateChange extends StateChange {
                     harvestorMoneyGained += 200;
                 }
             }
+            this.replenishShield(structure);
         }
 
         // Handle Units End-Turn Procedures
@@ -299,6 +308,7 @@ class TurnPassoverStateChange extends StateChange {
             state.units[i].moveRange = Data.units[state.units[i].name].moverange;
             /* Reset attack */
             state.units[i].attacksThisTurn = 1;
+            this.replenishShield(state.units[i]);
         }
 
         // Handle General Procedures
