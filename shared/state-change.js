@@ -265,9 +265,9 @@ class TurnPassoverStateChange extends StateChange {
 
     replenishShield(mapObject) {
         const shieldToReplenish = Math.ceil(mapObject.maxShield / 10);
-        mapObject.shield += shieldToReplenish;
-        if (mapObject.shield > mapObject.maxShield) {
-            mapObject.shield = mapObject.maxShield;
+        mapObject.currentShield += shieldToReplenish;
+        if (mapObject.currentShield > mapObject.maxShield) {
+            mapObject.currentShield = mapObject.maxShield;
         }
     }
 
@@ -295,7 +295,10 @@ class TurnPassoverStateChange extends StateChange {
                     harvestorMoneyGained += 200;
                 }
             }
-            this.replenishShield(structure);
+            /* Shield replenished on the start of the turn */
+            if (structure.side === this.opponentSide) {
+                this.replenishShield(structure);
+            }
         }
 
         // Handle Units End-Turn Procedures
@@ -308,7 +311,9 @@ class TurnPassoverStateChange extends StateChange {
             state.units[i].moveRange = Data.units[state.units[i].name].moverange;
             /* Reset attack */
             state.units[i].attacksThisTurn = 1;
-            this.replenishShield(state.units[i]);
+            if (state.units[i].side === this.opponentSide) {
+                this.replenishShield(state.units[i]);
+            }
         }
 
         // Handle General Procedures
@@ -406,8 +411,18 @@ class UnitAttackStateChange extends StateChange {
         const target = this.findTarget(state, this.data.posTo);
         unit.attacksThisTurn -= 1;
 
-        /* TODO: Shield Calculations */
-        target.currentHealth -= unit.attackDamage;
+        let damageToHealth = unit.attackDamage;
+        if (target.currentShield !== 0) {
+            target.currentShield -= unit.attackDamage;
+            if (target.currentShield < 0) {
+                damageToHealth = -target.currentShield;
+                target.currentShield = 0;
+            }
+            else {
+                damageToHealth = 0;
+            }
+        }
+        target.currentHealth -= damageToHealth;
         if (target.currentHealth <= 0) {
             /* Kill Unit / Structure */
             const targetPos = this.findTargetPos(state, this.data.posTo);
