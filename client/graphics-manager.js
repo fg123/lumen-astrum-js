@@ -285,7 +285,7 @@ module.exports = class GraphicsManager {
                         this.inputManager.mouseState.position.y < pos.y + 48 &&
                         !this.state.hoveredOption) {
                         // Show Dialog
-                        const dialogPos = new Tuple(pos.x - 150 + 24, pos.y - 180);
+                        const dialogPos = new Tuple(pos.x - 150 + 24, pos.y - 120);
                         const dialogSize = new Tuple(300, 100);
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
                         this.drawText(baseObj.options[i].title, 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
@@ -456,7 +456,7 @@ module.exports = class GraphicsManager {
                         const mapObject = this.state.gameState.mapObjects[y][x];
                         this.drawHealthAndShieldBar(
                             (x * 96),
-                            (y * 111) + yOffset - 32 - ((mapObject.width + 0.5) * 111),
+                            (y * 111) + yOffset - 24 - ((mapObject.width + 0.5) * 111),
                             mapObject
                         );
                     }
