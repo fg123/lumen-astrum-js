@@ -1,5 +1,6 @@
 const { Tuple } = require('../shared/coordinates');
 
+/* The camera is realistically actually controlled by the minimap rectangle */
 module.exports = class Camera {
     constructor() {
         this.position = new Tuple(500, 500);

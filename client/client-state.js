@@ -14,7 +14,6 @@ const {
     UnitAttackStateChange
 } = require('../shared/state-change');
 const GameState = require('../shared/game-state');
-const Utils = require('./utils');
 const { Tuple } = require('../shared/coordinates');
 const PathFinder = require('../shared/path-finder');
 const {
@@ -23,9 +22,6 @@ const {
     AttackProjectileAnimation
 } = require('./animation');
 const { Resource } = require('./resources');
-
-const movement = [new Tuple(500, 500), new Tuple(2250, 1320), new Tuple(4092, 296), new Tuple(4733, 2323), new Tuple(2000, 2387)];
-let movementIndex = 0;
 
 const KEY_W = 87;
 const KEY_A = 65;
@@ -192,9 +188,11 @@ module.exports = class ClientState {
             /* Trust Server */
             change.simulateStateChange(this.gameState);
             /* Currently Selected Unit might have died */
-            if (!this.gameState.mapObjects[this.selectedObject.position.y][
-                this.selectedObject.position.x]) {
-                this.selectObject(null);
+            if (this.selectedObject) {
+                if (!this.gameState.mapObjects[this.selectedObject.position.y][
+                    this.selectedObject.position.x]) {
+                    this.selectObject(null);
+                }
             }
         });
 
@@ -268,40 +266,12 @@ module.exports = class ClientState {
             else {
                 this.turnTimer = '00:00';
             }
-
-            this.tickCamera(window.innerWidth, window.innerHeight);
         }, INTERNAL_TICK_INTERVAL);
     }
 
     isMyTurn() {
         return this.gameState.currentTurn !== Constants.NONE_SIDE &&
                 this.gameState.currentTurn === this.side;
-    }
-
-    tickCamera(screenWidth, screenHeight) {
-        const change = this.inputManager.mouseState.scrollDelta.y / 50;
-        const oldScale = this.camera.scale;
-        this.camera.scale += change;
-        this.camera.scale = Math.max(Math.min(1.0, this.camera.scale), 0.3);
-        const actualChange = Math.abs(oldScale - this.camera.scale);
-        this.camera.position.x += (this.inputManager.mouseState.position.x - (screenWidth / 2)) * 2 * actualChange + this.camera.delta.x;
-        this.camera.position.y += (this.inputManager.mouseState.position.y - (screenHeight / 2)) * 2 * actualChange + this.camera.delta.y;
-        this.inputManager.mouseState.scrollDelta.x *= 0.7;
-        this.inputManager.mouseState.scrollDelta.y *= 0.7;
-        this.camera.delta.x *= 0.7;
-        this.camera.delta.y *= 0.7;
-        if (this.ui.currentScreen !== this.ui.Screen.GAME_SCREEN) {
-            let d = Utils.distance(this.camera.position, movement[movementIndex]);
-            if (d < 1) {
-                movementIndex = (movementIndex + 1) % movement.length;
-                d = Utils.distance(this.camera.position, movement[movementIndex]);
-            }
-            const a = new Tuple(movement[movementIndex].x - this.camera.position.x,
-                movement[movementIndex].y - this.camera.position.y);
-
-            this.camera.position.x += a.x / d * 1;
-            this.camera.position.y += a.y / d * 1;
-        }
     }
 
     sendStateChange(stateChange) {

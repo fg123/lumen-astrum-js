@@ -1,5 +1,3 @@
-const { Tuple } = require('./coordinates');
-
 class Tile {
     constructor(item) {
         this.tileType = parseInt(item);

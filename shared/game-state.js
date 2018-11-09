@@ -44,9 +44,6 @@ module.exports = class GameState {
         /* Pre-constructed buildings */
         this.insertMapObject(map.redCommandCenterLocation, 'Command Base', Constants.RED_SIDE);
         this.insertMapObject(map.blueCommandCenterLocation, 'Command Base', Constants.BLUE_SIDE);
-
-        this.insertMapObject({x:10, y:11}, 'Pioneers', Constants.RED_SIDE);
-        this.insertMapObject({x:10, y:10}, 'Pioneers', Constants.BLUE_SIDE);
     }
 
     isAllowedBuilding(x, y, side) {
