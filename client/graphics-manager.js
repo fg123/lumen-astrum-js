@@ -429,6 +429,7 @@ module.exports = class GraphicsManager {
                 }
             }
         }
+
         /* Draw Rectangle */
         let centerPointX, centerPointY, rectWidth, rectHeight, left, top;
         const calculate = () => {
@@ -448,10 +449,18 @@ module.exports = class GraphicsManager {
             this.camera.scale = Math.max(xConstraint, yConstraint);
         };
         calculate();
+        if (this.inputManager.mouseState.position.x > screenWidth - MINIMAP_DISPLAY_SIZE.x - 10 &&
+            this.inputManager.mouseState.position.x < screenWidth - 10 &&
+            this.inputManager.mouseState.position.y > screenHeight - MINIMAP_DISPLAY_SIZE.y - 10 &&
+            this.inputManager.mouseState.position.y < screenHeight - 10 &&
+            this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
+            left = this.inputManager.mouseState.position.x - rectWidth / 2;
+            top = this.inputManager.mouseState.position.y - rectHeight / 2;
+        }
         left += this.minimapScaleFactor * this.camera.delta.x;
         top += this.minimapScaleFactor * this.camera.delta.y;
 
-        const change = this.inputManager.mouseState.scrollDelta.y * 2   ;
+        const change = this.inputManager.mouseState.scrollDelta.y * 6;
         if (change !== 0) {
             rectWidth += change;
             rectHeight += change;
@@ -467,6 +476,7 @@ module.exports = class GraphicsManager {
 
         if (rectWidth < screenWidth * this.minimapScaleFactor) {
             rectWidth = screenWidth * this.minimapScaleFactor;
+            left += change / 2;
         }
 
         if (rectHeight > MINIMAP_DISPLAY_SIZE.y) {
@@ -475,6 +485,7 @@ module.exports = class GraphicsManager {
 
         if (rectHeight < screenHeight * this.minimapScaleFactor) {
             rectHeight = screenHeight * this.minimapScaleFactor;
+            top += change / 2;
         }
 
         if (left < screenWidth - MINIMAP_DISPLAY_SIZE.x - 10) {

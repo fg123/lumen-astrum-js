@@ -34,6 +34,7 @@ const RIGHT_MOUSE_BUTTON = 3;
 const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 
 const INTERNAL_TICK_INTERVAL = 16;
+const CAMERA_SPEED = 50;
 
 module.exports = class ClientState {
     constructor(socket, camera, inputManager, ui, resourceManager, animationManager) {
@@ -64,16 +65,16 @@ module.exports = class ClientState {
 
         inputManager.attachInputPollingListener((keyState, prevKeyState) => {
             if (keyState[KEY_A]) {
-                this.camera.delta.x = -35;
+                this.camera.delta.x = -CAMERA_SPEED;
             }
             if (keyState[KEY_D]) {
-                this.camera.delta.x = 35;
+                this.camera.delta.x = CAMERA_SPEED;
             }
             if (keyState[KEY_W]) {
-                this.camera.delta.y = -35;
+                this.camera.delta.y = -CAMERA_SPEED;
             }
             if (keyState[KEY_S]) {
-                this.camera.delta.y = 35;
+                this.camera.delta.y = CAMERA_SPEED;
             }
             if (keyState[KEY_ESCAPE] && !prevKeyState[KEY_ESCAPE]) {
                 if (this.buildingStructure || this.spawningUnit) {
