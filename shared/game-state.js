@@ -11,7 +11,8 @@ const Data = require('./data');
 module.exports = class GameState {
     constructor(gameStartTime) {
         this.mapObjects = [];
-        this.visibility = [];
+        this.redVisibility = [];
+        this.blueVisibility = [];
         this.occupied = [];
         this.redAllowedBuilding = [];
         this.blueAllowedBuilding = [];
@@ -28,7 +29,8 @@ module.exports = class GameState {
         /* Setup two dimensional arrays */
         for (let i = 0; i < map.data.length; i++) {
             this.mapObjects.push([]);
-            this.visibility.push([]);
+            this.redVisibility.push([]);
+            this.blueVisibility.push([]);
             this.occupied.push([]);
             this.redAllowedBuilding.push([]);
             this.blueAllowedBuilding.push([]);
@@ -46,8 +48,12 @@ module.exports = class GameState {
         this.insertMapObject(map.blueCommandCenterLocation, 'Command Base', Constants.BLUE_SIDE);
     }
 
+    getAllowedBuildingMap(side) {
+        return (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+    }
+
     isAllowedBuilding(x, y, side) {
-        const arr = (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+        const arr = this.getAllowedBuildingMap(side);
         if (arr[y][x]) {
             return arr[y][x] !== 0;
         } else {
@@ -56,7 +62,7 @@ module.exports = class GameState {
     }
 
     setAllowedBuilding(x, y, side) {
-        const arr = (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+        const arr = this.getAllowedBuildingMap(side);
         if (arr[y][x]) {
             arr[y][x] += 1;
         } else {
@@ -65,7 +71,34 @@ module.exports = class GameState {
     }
 
     revokeAllowedBuilding(x, y, side) {
-        const arr = (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+        const arr = this.getAllowedBuildingMap(side);
+        arr[y][x] -= 1;
+    }
+
+    getVisibilityMap(side) {
+        return (side === Constants.RED_SIDE ? this.redVisibility : this.blueVisibility);
+    }
+
+    isVisible(x, y, side) {
+        const arr = this.getVisibilityMap(side);
+        if (arr[y][x]) {
+            return arr[y][x] !== 0;
+        } else {
+            return false;
+        }
+    }
+
+    addVisible(x, y, side) {
+        const arr = this.getVisibilityMap(side);
+        if (arr[y][x]) {
+            arr[y][x] += 1;
+        } else {
+            arr[y][x] = 1;
+        }
+    }
+
+    loseVisible(x, y, side) {
+        const arr = this.getVisibilityMap(side);
         arr[y][x] -= 1;
     }
 
