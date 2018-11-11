@@ -36,7 +36,11 @@ module.exports.Unit = class {
         this.maxShield = Data.units[name].shield;
         this.attackRange = Data.units[name].attackrange;
         this.moveRange = Data.units[name].moverange;
-        this.sightRange = Data.units[name].sightrange;
+
+        /* Sight range changing is complicated because it affects the cached
+         * maps in the game-state. We enforce this to be constant for now */
+        this.__sightRange__ = Data.units[name].sightrange;
+
         this.attackDamage = Data.units[name].damage;
         this.isStructure = false;
         this.isUnit = true;
@@ -48,4 +52,7 @@ module.exports.Unit = class {
         this.maxMoveRange = Data.units[name].moverange;
         this.attacksThisTurn = 0;
     }
+
+    get sightRange() { return this.__sightRange__; }
+    set sightRange(val) { throw new Error('Trying to set readonly property!'); }
 };

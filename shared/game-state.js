@@ -88,7 +88,7 @@ module.exports = class GameState {
         }
     }
 
-    addVisible(x, y, side) {
+    addVisibility(x, y, side) {
         const arr = this.getVisibilityMap(side);
         if (arr[y][x]) {
             arr[y][x] += 1;
@@ -97,7 +97,7 @@ module.exports = class GameState {
         }
     }
 
-    loseVisible(x, y, side) {
+    removeVisibility(x, y, side) {
         const arr = this.getVisibilityMap(side);
         arr[y][x] -= 1;
     }
@@ -113,14 +113,20 @@ module.exports = class GameState {
                     this.occupied[surrounding[i].y][surrounding[i].x] = location;
                 }
             }
-            if (Structure.isConstructionBuilding(name)) {
-                let surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
-                for (let i = 0; i < surrounding.length; i++) {
-                    if (withinMap(surrounding[i]) &&
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
-                        this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, side);
+
+            /* Visibility range of buildings is the same as the build range */
+            surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (withinMap(surrounding[i])) {
+                    if (Structure.isConstructionBuilding(name)) {
+                        if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                            map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                            this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, side);
+                        }
                     }
+
+                    /* TODO: Implement Bush Mechanics for Visibility Map */
+                    this.addVisibility(surrounding[i].x, surrounding[i].y, side);
                 }
             }
         }
@@ -129,6 +135,13 @@ module.exports = class GameState {
             this.mapObjects[location.y][location.x] = unit;
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
+
+            let surrounding = getSurrounding(location, unit.sightRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (withinMap(surrounding[i])) {
+                    this.addVisibility(surrounding[i].x, surrounding[i].y, side);
+                }
+            }
         }
     }
 
@@ -153,14 +166,17 @@ module.exports = class GameState {
                     break;
                 }
             }
-            if (Structure.isConstructionBuilding(mapObject.name)) {
-                let surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
-                for (let i = 0; i < surrounding.length; i++) {
-                    if (withinMap(surrounding[i]) &&
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
-                        this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.side);
+            surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (withinMap(surrounding[i])) {
+                    if (Structure.isConstructionBuilding(name)) {
+                        if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                            map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                            this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.side);
+                        }
                     }
+                    /* TODO: Implement Bush Mechanics for Visibility Map */
+                    this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side);
                 }
             }
         }
@@ -170,6 +186,12 @@ module.exports = class GameState {
                     this.units[i].position.y === location.y) {
                     this.units.splice(i, 1);
                     break;
+                }
+            }
+            let surrounding = getSurrounding(location, mapObject.sightRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (withinMap(surrounding[i])) {
+                    this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side);
                 }
             }
         }
@@ -185,6 +207,21 @@ module.exports = class GameState {
 
         this.occupied[from.y][from.x] = false;
         this.occupied[to.y][to.x] = to;
+
+        /* Change visibility from previous position to new position */
+        let surrounding = getSurrounding(from, unit.sightRange);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i])) {
+                this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.side);
+            }
+        }
+
+        surrounding = getSurrounding(to, unit.sightRange);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i])) {
+                this.addVisibility(surrounding[i].x, surrounding[i].y, unit.side);
+            }
+        }
     }
 
     calculateNextTurnAvailableTime(side) {
