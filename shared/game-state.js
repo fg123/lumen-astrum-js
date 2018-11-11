@@ -114,21 +114,23 @@ module.exports = class GameState {
                 }
             }
 
-            /* Visibility range of buildings is the same as the build range */
-            surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i])) {
-                    if (Structure.isConstructionBuilding(name)) {
+            if (Structure.isConstructionBuilding(name)) {
+                const surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
+                for (let i = 0; i < surrounding.length; i++) {
+                    if (withinMap(surrounding[i])) {
                         if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
                             map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
                             this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, side);
                         }
                     }
-
-                    /* TODO: Implement Bush Mechanics for Visibility Map */
-                    this.addVisibility(surrounding[i].x, surrounding[i].y, side);
                 }
             }
+
+            surrounding = getSurrounding(location, structure.width + Constants.BUILDING_VISION_RANGE);
+            surrounding.forEach(pos => {
+                /* TODO: Implement Bush Mechanics for Visibility Map */
+                this.addVisibility(pos.x, pos.y, side);
+            });
         }
         else if (name in Data.units) {
             const unit = new Unit(name, side, location);
@@ -166,19 +168,24 @@ module.exports = class GameState {
                     break;
                 }
             }
-            surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i])) {
-                    if (Structure.isConstructionBuilding(name)) {
+
+            if (Structure.isConstructionBuilding(name)) {
+                const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
+                for (let i = 0; i < surrounding.length; i++) {
+                    if (withinMap(surrounding[i])) {
                         if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
                             map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
                             this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.side);
                         }
                     }
-                    /* TODO: Implement Bush Mechanics for Visibility Map */
-                    this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side);
                 }
             }
+
+            surrounding = getSurrounding(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
+            surrounding.forEach(pos => {
+                /* TODO: Implement Bush Mechanics for Visibility Map */
+                this.removeVisibility(pos.x, pos.y, mapObject.side);
+            });
         }
         else if (mapObject.name in Data.units) {
             for (let i = 0; i < this.units.length; i++) {

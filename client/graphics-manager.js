@@ -543,6 +543,13 @@ module.exports = class GraphicsManager {
                     ), (x * 96), (y * 111) + yOffset);
 
                     this.context.globalCompositeOperation = 'source-over';
+                    if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN) {
+                        if (!this.state.gameState.isVisible(x, y, this.state.side)) {
+                            this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
+                                (x * 96),
+                                (y * 111) + yOffset);
+                        }
+                    }
                     if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN &&
                         this.state.gameState.mapObjects[y][x]) {
                         const animationManager =
