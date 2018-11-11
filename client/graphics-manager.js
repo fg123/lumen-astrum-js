@@ -67,16 +67,45 @@ module.exports = class GraphicsManager {
                 (MINIMAP_DISPLAY_SIZE.x - (
                     entireMapWidth * this.minimapScaleFactor)) / 2, 0);
         }
+        this.minimapCanvas = document.createElement('canvas');
+        this.minimapCanvas.width = MINIMAP_DISPLAY_SIZE.x;
+        this.minimapCanvas.height = MINIMAP_DISPLAY_SIZE.y;
+        const minimapContext = this.minimapCanvas.getContext('2d');
+        const img = this.resourceManager.get(tiles[0]);
+        const zeroPoint = new Tuple(
+            this.minimapOffsetToCenter.x +
+                (img.width * this.minimapScaleFactor),
+            this.minimapOffsetToCenter.y +
+                (img.height * this.minimapScaleFactor));
+        for (let y = 0; y < map.data.length; y++) {
+            for (let x = 0; x < map.data[0].length; x++) {
+                if (map.data[y][x].displayType !== 0) {
+                    const img = this.resourceManager.get(
+                        tiles[map.data[y][x].displayType - 1]
+                    );
+                    minimapContext.drawImage(
+                        img,
+                        (x * 96 * this.minimapScaleFactor) + zeroPoint.x,
+                        ((y * 111) + ((x % 2) * 55)) * this.minimapScaleFactor + zeroPoint.y,
+                        img.width * this.minimapScaleFactor,
+                        img.height * this.minimapScaleFactor
+                    );
+                }
+            }
+        }
+
         /* Start Graphics Loop */
-        this.graphicsLoop = setInterval(() => {
+        const tick = () => {
             this.drawContext.screenWidth = window.innerWidth;
             this.drawContext.screenHeight = window.innerHeight;
             this.tickCamera();
-            const thisFrameTime = (this.fps.thisLoop = new Date()) - this.fps.lastLoop;
+            const thisFrameTime = (this.fps.thisLoop = Date.now()) - this.fps.lastLoop;
             this.fps.frameTime += (thisFrameTime - this.fps.frameTime) / FPS_FILTER_STRENGTH;
             this.fps.lastLoop = this.fps.thisLoop;
             this.draw();
-        }, targetInterval);
+            window.requestAnimationFrame(tick);
+        };
+        window.requestAnimationFrame(tick);
     }
 
     draw() {
@@ -405,31 +434,10 @@ module.exports = class GraphicsManager {
 
     drawMinimap(screenWidth, screenHeight) {
         /* We grab a default tile to cache the calculation */
-        const img = this.resourceManager.get(tiles[0]);
         const zeroPoint = new Tuple(
-            screenWidth - 266 + this.minimapOffsetToCenter.x +
-                (img.width * this.minimapScaleFactor),
-            screenHeight - 154 + this.minimapOffsetToCenter.y +
-                (img.height * this.minimapScaleFactor));
-        for (let y = 0; y < map.data.length; y++) {
-            for (let x = 0; x < map.data[0].length; x++) {
-                if (map.data[y][x].displayType !== 0) {
-                    const img = this.resourceManager.get(
-                        tiles[map.data[y][x].displayType - 1]
-                    );
-                    this.context.drawImage(
-                        img,
-                        zeroPoint.x +
-                        (x * 96 * this.minimapScaleFactor),
-                        zeroPoint.y +
-                        ((y * 111) + ((x % 2) * 55)) * this.minimapScaleFactor,
-                        img.width * this.minimapScaleFactor,
-                        img.height * this.minimapScaleFactor
-                    );
-                }
-            }
-        }
-
+            screenWidth - 266,
+            screenHeight - 154);
+        this.context.drawImage(this.minimapCanvas, zeroPoint.x, zeroPoint.y);
         /* Draw Rectangle */
         let centerPointX, centerPointY, rectWidth, rectHeight, left, top;
         const calculate = () => {
@@ -460,7 +468,7 @@ module.exports = class GraphicsManager {
         left += this.minimapScaleFactor * this.camera.delta.x;
         top += this.minimapScaleFactor * this.camera.delta.y;
 
-        const change = this.inputManager.mouseState.scrollDelta.y * 6;
+        const change = this.inputManager.mouseState.scrollDelta.y * -6;
         if (change !== 0) {
             rectWidth += change;
             rectHeight += change;
@@ -571,19 +579,19 @@ module.exports = class GraphicsManager {
                                     mouseOver = (x === mouseOverCenter.x && y === mouseOverCenter.y);
                                 }
                             }
-                            this.context.shadowBlur = 0;
-                            if (selected && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
-                                this.context.shadowBlur = 10;
-                                this.context.shadowColor = 'black';
-                            }
-                            else if (mouseOver && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
-                                this.context.shadowBlur = 10;
-                                this.context.shadowColor = 'green';
-                            }
-                            else if (selected || mouseOver) {
-                                this.context.shadowBlur = 10;
-                                this.context.shadowColor = '#a40000';
-                            }
+                            // this.context.shadowBlur = 0;
+                            // if (selected && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
+                            //     this.context.shadowBlur = 10;
+                            //     this.context.shadowColor = 'black';
+                            // }
+                            // else if (mouseOver && this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
+                            //     this.context.shadowBlur = 10;
+                            //     this.context.shadowColor = 'green';
+                            // }
+                            // else if (selected || mouseOver) {
+                            //     this.context.shadowBlur = 10;
+                            //     this.context.shadowColor = '#a40000';
+                            // }
 
                             if (this.state.gameState.mapObjects[y][x].turnsUntilBuilt === 0) {
                                 if (name in structures) {
@@ -607,7 +615,7 @@ module.exports = class GraphicsManager {
                                     this.drawImage(this.resourceManager.get(Resource.WIDTH_1_BUILD), (x * 96), (y * 111) + yOffset);
                                 }
                             }
-                            this.context.shadowBlur = 0;
+                            // this.context.shadowBlur = 0;
                         }
                         const mapObject = this.state.gameState.mapObjects[y][x];
                         this.drawHealthAndShieldBar(
