@@ -128,8 +128,10 @@ module.exports = class GameState {
 
             surrounding = getSurrounding(location, structure.width + Constants.BUILDING_VISION_RANGE);
             surrounding.forEach(pos => {
-                /* TODO: Implement Bush Mechanics for Visibility Map */
-                this.addVisibility(pos.x, pos.y, side);
+                if (withinMap(pos)) {
+                    /* TODO: Implement Bush Mechanics for Visibility Map */
+                    this.addVisibility(pos.x, pos.y, side);
+                }
             });
         }
         else if (name in Data.units) {
@@ -183,8 +185,10 @@ module.exports = class GameState {
 
             surrounding = getSurrounding(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
             surrounding.forEach(pos => {
-                /* TODO: Implement Bush Mechanics for Visibility Map */
-                this.removeVisibility(pos.x, pos.y, mapObject.side);
+                if (withinMap(pos)) {
+                    /* TODO: Implement Bush Mechanics for Visibility Map */
+                    this.removeVisibility(pos.x, pos.y, mapObject.side);
+                }
             });
         }
         else if (mapObject.name in Data.units) {

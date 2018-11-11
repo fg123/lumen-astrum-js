@@ -630,6 +630,22 @@ module.exports = class GraphicsManager {
                             (y * 111) + yOffset - 24 - ((mapObject.width + 0.5) * 111),
                             mapObject
                         );
+
+                        /* Hide whatever portion should not be visible */
+                        const surrounding = getSurrounding(mapObject.position, mapObject.width);
+                        for (let i = 0; i < surrounding.length; i++) {
+                            /* Every node here must be withinMap for mapObject
+                             * to have been constructed */
+                            if (!this.state.gameState.isVisible(
+                                surrounding[i].x,
+                                surrounding[i].y,
+                                this.state.side
+                            )) {
+                                this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
+                                    (surrounding[i].x * 96),
+                                    (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));
+                            }
+                        }
                     }
                 }
             }
