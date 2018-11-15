@@ -86,6 +86,9 @@ class BuildStructureStateChange extends StateChange {
         if (state.getGold(this.from) < option.cost) {
             return false;
         }
+        if (!state.arePrereqsSatisfied(option, this.from)) {
+            return false;
+        }
 
         let baseObj = getBaseObject(this.data.structureName);
         let surrounding = getSurrounding(this.data.position, baseObj.width);
@@ -179,6 +182,12 @@ class SpawnUnitStateChange extends StateChange {
             return false;
         }
         if (state.getGold(this.from) < option.cost) {
+            return false;
+        }
+        if (!state.isTierSatisfied(this.data.unitName, this.from)) {
+            return false;
+        }
+        if (!state.arePrereqsSatisfied(option, this.from)) {
             return false;
         }
         let surrounding = getSurrounding(

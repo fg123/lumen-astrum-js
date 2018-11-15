@@ -284,20 +284,32 @@ module.exports = class ClientState {
     }
 
     handleOptionClicked(option) {
+        // Parse command
+        const parts = option.command.split('-');
         if (this.side !== this.gameState.currentTurn) {
             // Cannot Exercise Option If Not Your Turn
             this.pushAlertMessage('Wait for your turn!');
             return;
         }
         // Check for Gold Cost and Prereqs
-        // TODO: Prereqs
         if (option.cost > this.getGold()) {
             this.pushAlertMessage('Not enough gold!');
             return;
         }
-        // TODO: Use Constants
-        // Parse command
-        const parts = option.command.split('-');
+        if (!this.gameState.isTierSatisfied(parts[1], this.side)) {
+            this.pushAlertMessage('Requires tier support building!');
+            return;
+        }
+
+        if (!this.gameState.arePrereqsSatisfied(option, this.side)) {
+            let message = 'Missing some of: ' + option.prereq.join(', ') + '!';
+            if (option.prereq.length === 1) {
+                message = 'Missing a ' + option.prereq[0] + '!';
+            }
+            this.pushAlertMessage(message);
+            return;
+        }
+
         switch (parts[0]) {
         case 'spawn':
             this.spawningUnit = parts[1];

@@ -237,6 +237,16 @@ module.exports = class GameState {
         return true;
     }
 
+    arePrereqsSatisfied(option, side) {
+        return option.prereq.every(name =>
+            this.structures.some(structure =>
+                structure.side === side &&
+                structure.name === name &&
+                structure.turnsUntilBuilt === 0
+            )
+        );
+    }
+
     moveUnit(from, to) {
         /* Assumes the coordinates are verified. */
         const unit = this.mapObjects[from.y][from.x];
