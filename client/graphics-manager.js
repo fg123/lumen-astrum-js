@@ -348,7 +348,6 @@ module.exports = class GraphicsManager {
                             /* Clip x is based on the tier 1 - 4 */
                             (baseObj.tier - 1) * 38,
                             /* Clip y is 0 if satisfied, 18 if not */
-                            // 0
                             this.state.gameState.isTierSatisfied(optionIcon,
                                 this.state.side) ? 0 : 18
                         );
@@ -365,7 +364,7 @@ module.exports = class GraphicsManager {
                         this.inputManager.mouseState.position.y < pos.y + 48 &&
                         !this.state.hoveredOption) {
                         // Show Dialog
-                        const dialogPos = new Tuple(pos.x - 150 + 24, pos.y - 120);
+                        const dialogPos = new Tuple(pos.x - 150 + 24, pos.y - 125);
                         const dialogSize = new Tuple(300, 100);
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
                         this.drawText(baseObj.options[i].title, 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
