@@ -327,14 +327,37 @@ module.exports = class GraphicsManager {
             }
 
             this.state.hoveredOption = null;
-            if (this.objectOnMySide(this.state.selectedObject) && this.state.selectedObject.turnsUntilBuilt === 0) {
+            /* Draw Options */
+            if (this.objectOnMySide(this.state.selectedObject) &&
+                this.state.selectedObject.turnsUntilBuilt === 0) {
                 for (let i = 0; i < baseObj.options.length; i++) {
-                    const clipIcon = this.getIconClipStart(baseObj.options[i].icon.slice(1, -1));
+                    const optionIcon = baseObj.options[i].icon.slice(1, -1);
+                    const clipIcon = this.getIconClipStart(optionIcon);
                     const pos = new Tuple(176 + i * 48, screenHeight - 48);
-                    this.context.drawImage(this.resourceManager.get(Resource.UI_ICONS),
+                    this.context.drawImage(
+                        this.resourceManager.get(Resource.UI_ICONS),
                         clipIcon.x,
                         clipIcon.y, 48, 48, pos.x, pos.y,
                         48, 48);
+                    if (baseObj.options[i].type === 'Unit') {
+                        /* Check for Tier Requirement */
+                        /* For Units, the optionIcon is the name */
+                        const baseObj = getBaseObject(optionIcon);
+                        const pos = new Tuple(176 + i * 48 + 5, screenHeight - 48 - 18);
+                        const clip = new Tuple(
+                            /* Clip x is based on the tier 1 - 4 */
+                            (baseObj.tier - 1) * 38,
+                            /* Clip y is 0 if satisfied, 18 if not */
+                            // 0
+                            this.state.gameState.isTierSatisfied(optionIcon,
+                                this.state.side) ? 0 : 18
+                        );
+                        this.context.drawImage(
+                            this.resourceManager.get(Resource.TIER_ICONS),
+                            clip.x, clip.y, 38, 18,
+                            pos.x, pos.y, 38, 18
+                        );
+                    }
                     // Test Mouse Over
                     if (this.inputManager.mouseState.position.x > pos.x &&
                         this.inputManager.mouseState.position.x < pos.x + 48 &&

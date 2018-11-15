@@ -15,6 +15,7 @@ module.exports.Resource = {
     UI_BOTTOM_LEFT: 'resources/gui/bottomLeft.png',
     UI_BOTTOM_RIGHT: 'resources/gui/bottomRight.png',
     UI_ICONS: 'resources/gui/icons.png',
+    TIER_ICONS: 'resources/gui/tierIcons.png',
     CURSOR: 'resources/cursor.png',
     BACKGROUND: 'resources/background.png',
     WIDTH_1_BUILD: 'resources/structures/width1Build.png',

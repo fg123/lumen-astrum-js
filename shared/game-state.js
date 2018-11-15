@@ -208,6 +208,35 @@ module.exports = class GameState {
         }
     }
 
+    isTierSatisfied(name, side) {
+        /* Are tier requirements for *name* satisfied? */
+        const object = Data.getBaseObject(name);
+        const tier = object.tier || 0;
+        if (tier < 2) {
+            return true;
+        }
+        /*******************0, 1, 2, 3, 4*/
+        const hasSupport = [1, 1, 0, 0, 0];
+        this.structures.forEach(structure => {
+            if (structure.side === side && structure.turnsUntilBuilt === 0) {
+                if (structure.name === 'Armory') {
+                    hasSupport[2] = 1;
+                }
+                else if (structure.name === 'Tech Lab') {
+                    hasSupport[3] = 1;
+                }
+                else if (structure.name === 'Military Academy') {
+                    hasSupport[4] = 1;
+                }
+            }
+        });
+        /* Every index from 0->tier in hasSupport must be 1 */
+        for (let i = 0; i <= tier; i++) {
+            if (hasSupport[i] === 0) return false;
+        }
+        return true;
+    }
+
     moveUnit(from, to) {
         /* Assumes the coordinates are verified. */
         const unit = this.mapObjects[from.y][from.x];

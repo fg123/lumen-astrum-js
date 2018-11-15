@@ -525,34 +525,34 @@ const units = {
         'unitclass': 'Biological',
         'options':
         [
-                {
-                    'title': 'Build Deployment Outpost',
-                    'cost': 400,
-                    'prereq': [],
-                    'type': 'Structure',
-                    'description': '{Deployment Outpost}',
-                    'icon': '{Deployment Outpost}',
-                    'command': 'build-Deployment Outpost'
-                },
-                {
-                    'title': 'Build Turret',
-                    'cost': 250,
-                    'prereq': ['Automation Factory'],
-                    'type': 'Unit',
-                    'description': '{Turret}',
-                    'icon': '{Turret}',
-                    'command': 'spawn-Turret'
-                },
-                {
-                    'title': 'Build Harvester',
-                    'cost': 300,
-                    'prereq': [],
-                    'type': 'Structure',
-                    'description': '{Harvester}',
-                    'icon': '{Harvester}',
-                    'command': 'build-Harvester'
-                }
-            ]
+            {
+                'title': 'Build Deployment Outpost',
+                'cost': 400,
+                'prereq': [],
+                'type': 'Structure',
+                'description': '{Deployment Outpost}',
+                'icon': '{Deployment Outpost}',
+                'command': 'build-Deployment Outpost'
+            },
+            {
+                'title': 'Build Turret',
+                'cost': 250,
+                'prereq': ['Automation Factory'],
+                'type': 'Unit',
+                'description': '{Turret}',
+                'icon': '{Turret}',
+                'command': 'spawn-Turret'
+            },
+            {
+                'title': 'Build Harvester',
+                'cost': 300,
+                'prereq': [],
+                'type': 'Structure',
+                'description': '{Harvester}',
+                'icon': '{Harvester}',
+                'command': 'build-Harvester'
+            }
+        ]
     },
     'Guardian': {
         'advantagedamage': 0,
