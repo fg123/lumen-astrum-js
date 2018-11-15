@@ -72,7 +72,7 @@ module.exports = class GraphicsManager {
         this.minimapCanvas.height = MINIMAP_DISPLAY_SIZE.y;
         const minimapContext = this.minimapCanvas.getContext('2d');
         const img = this.resourceManager.get(tiles[0]);
-        const zeroPoint = new Tuple(
+        this.minimapZeroPoint = new Tuple(
             this.minimapOffsetToCenter.x +
                 (img.width * this.minimapScaleFactor),
             this.minimapOffsetToCenter.y +
@@ -85,8 +85,8 @@ module.exports = class GraphicsManager {
                     );
                     minimapContext.drawImage(
                         img,
-                        (x * 96 * this.minimapScaleFactor) + zeroPoint.x,
-                        ((y * 111) + ((x % 2) * 55)) * this.minimapScaleFactor + zeroPoint.y,
+                        (x * 96 * this.minimapScaleFactor) + this.minimapZeroPoint.x,
+                        ((y * 111) + ((x % 2) * 55)) * this.minimapScaleFactor + this.minimapZeroPoint.y,
                         img.width * this.minimapScaleFactor,
                         img.height * this.minimapScaleFactor
                     );
@@ -434,10 +434,10 @@ module.exports = class GraphicsManager {
 
     drawMinimap(screenWidth, screenHeight) {
         /* We grab a default tile to cache the calculation */
-        const zeroPoint = new Tuple(
-            screenWidth - 266,
-            screenHeight - 154);
-        this.context.drawImage(this.minimapCanvas, zeroPoint.x, zeroPoint.y);
+        this.context.drawImage(this.minimapCanvas, screenWidth - 266, screenHeight - 154);
+
+        const zeroPoint = new Tuple(screenWidth - 266 + this.minimapZeroPoint.x,
+            screenHeight - 154 + this.minimapZeroPoint.y);
         /* Draw Rectangle */
         let centerPointX, centerPointY, rectWidth, rectHeight, left, top;
         const calculate = () => {
@@ -552,10 +552,11 @@ module.exports = class GraphicsManager {
                     }
                     if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN &&
                         this.state.gameState.mapObjects[y][x]) {
+                        const mapObject = this.state.gameState.mapObjects[y][x];
                         const animationManager =
-                            this.state.gameState.mapObjects[y][x].animationManager;
+                            mapObject.animationManager;
 
-                        let name = this.state.gameState.mapObjects[y][x].name;
+                        let name = mapObject.name;
                         if (animationManager.hasAnimation()) {
                             const possiblePositionChange =
                                 animationManager.draw(this, new Tuple(
@@ -575,7 +576,7 @@ module.exports = class GraphicsManager {
                             animationManager.tick();
                         }
                         else {
-                            let selected = this.state.gameState.mapObjects[y][x] === this.state.selectedObject;
+                            let selected = mapObject === this.state.selectedObject;
                             let mouseOver = false;
                             if (withinMap(this.inputManager.mouseState.tile)) {
                                 let mouseOverCenter =
@@ -600,12 +601,12 @@ module.exports = class GraphicsManager {
                             //     this.context.shadowColor = '#a40000';
                             // }
 
-                            if (this.state.gameState.mapObjects[y][x].turnsUntilBuilt === 0) {
+                            if (mapObject.turnsUntilBuilt === 0) {
                                 if (name in structures) {
                                     this.drawImage(structures[name].image, (x * 96), (y * 111) + yOffset);
                                 }
                                 else if (name in units) {
-                                    if (this.objectOnMySide(this.state.gameState.mapObjects[y][x])) {
+                                    if (this.objectOnMySide(mapObject)) {
                                         this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), (x * 96), (y * 111) + yOffset);
                                     }
                                     else {
@@ -615,7 +616,7 @@ module.exports = class GraphicsManager {
                                 }
                             }
                             else {
-                                if (this.state.gameState.mapObjects[y][x].width === 0) {
+                                if (mapObject.width === 0) {
                                     this.drawImage(this.resourceManager.get(Resource.WIDTH_0_BUILD), (x * 96), (y * 111) + yOffset);
                                 }
                                 else {
@@ -624,14 +625,9 @@ module.exports = class GraphicsManager {
                             }
                             // this.context.shadowBlur = 0;
                         }
-                        const mapObject = this.state.gameState.mapObjects[y][x];
-                        this.drawHealthAndShieldBar(
-                            (x * 96),
-                            (y * 111) + yOffset - 24 - ((mapObject.width + 0.5) * 111),
-                            mapObject
-                        );
 
                         /* Hide whatever portion should not be visible */
+                        let allVisible = true;
                         const surrounding = getSurrounding(mapObject.position, mapObject.width);
                         for (let i = 0; i < surrounding.length; i++) {
                             /* Every node here must be withinMap for mapObject
@@ -644,7 +640,15 @@ module.exports = class GraphicsManager {
                                 this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                                     (surrounding[i].x * 96),
                                     (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));
+                                allVisible = false;
                             }
+                        }
+                        if (allVisible) {
+                            this.drawHealthAndShieldBar(
+                                (x * 96),
+                                (y * 111) + yOffset - 24 - ((mapObject.width + 0.5) * 111),
+                                mapObject
+                            );
                         }
                     }
                 }
