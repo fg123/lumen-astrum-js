@@ -557,11 +557,12 @@ module.exports = class GraphicsManager {
                             mapObject.animationManager;
 
                         let name = mapObject.name;
+                        let actualDrawnPosition = new Tuple(
+                            (x * 96), (y * 111) + yOffset
+                        );
                         if (animationManager.hasAnimation()) {
                             const possiblePositionChange =
-                                animationManager.draw(this, new Tuple(
-                                    (x * 96), (y * 111) + yOffset
-                                ));
+                                animationManager.draw(this, actualDrawnPosition);
                             if (possiblePositionChange) {
                                 /* No animation drew! */
                                 if (name in structures) {
@@ -572,6 +573,7 @@ module.exports = class GraphicsManager {
                                     this.drawImage(units[name].image,
                                         possiblePositionChange.x, possiblePositionChange.y);
                                 }
+                                actualDrawnPosition = possiblePositionChange;
                             }
                             animationManager.tick();
                         }
@@ -645,8 +647,8 @@ module.exports = class GraphicsManager {
                         }
                         if (allVisible) {
                             this.drawHealthAndShieldBar(
-                                (x * 96),
-                                (y * 111) + yOffset - 24 - ((mapObject.width + 0.5) * 111),
+                                actualDrawnPosition.x,
+                                actualDrawnPosition.y - 24 - ((mapObject.width + 0.5) * 111),
                                 mapObject
                             );
                         }
