@@ -4,6 +4,9 @@ const io = require('socket.io-client');
 const UI = require('./ui');
 const ResourceManager = require('./resource-manager');
 const GraphicsManager = require('./graphics-manager');
+
+const UiBackCanvas = require('./canvas/ui-back');
+
 const ClientState = require('./client-state');
 const AnimationManager = require('../shared/animation-manager');
 const InputManager = require('./input-manager');
@@ -12,19 +15,25 @@ const Camera = require('./camera');
 const TIME_BETWEEN_FRAMES = 16;
 
 $(document).ready(() => {
-    const canvas = $('canvas')[0];
+    const mapCanvas = $('canvas.map')[0];
+    const uiBackCanvas = $('canvas.ui-back')[0];
+    console.log(mapCanvas);
+    console.log(uiBackCanvas);
+
     const socket = io();
     const ui = new UI(socket);
 
     new ResourceManager((resourceManager) => {
-        const camera = new Camera();
-        const inputManager = new InputManager(canvas, ui, camera, TIME_BETWEEN_FRAMES);
+        const inputManager = new InputManager(mapCanvas, ui, TIME_BETWEEN_FRAMES);
+        const camera = new Camera(resourceManager, ui, inputManager);
+        inputManager.initialize(camera);
 
         const animationManager = new AnimationManager();
+
         const clientState = new ClientState(socket, camera, inputManager, ui, resourceManager, animationManager);
 
-        new GraphicsManager(
-            canvas,
+        ui.registerGameCanvas(new GraphicsManager(
+            mapCanvas,
             TIME_BETWEEN_FRAMES,
             ui,
             camera,
@@ -32,6 +41,13 @@ $(document).ready(() => {
             animationManager,
             resourceManager,
             inputManager
-        );
+        ));
+
+        ui.registerGameCanvas(new UiBackCanvas(
+            uiBackCanvas,
+            resourceManager,
+            clientState,
+            ui
+        ));
     });
 });

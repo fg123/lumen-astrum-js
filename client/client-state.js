@@ -227,7 +227,7 @@ module.exports = class ClientState {
                         (map.blueCommandCenterLocation.x % 2) * 55
                 );
             }
-            this.ui.loadScreen(this.ui.Screen.GAME_SCREEN);
+            this.ui.loadScreen(this.ui.Screen.GAME);
             const interval = setInterval(() => {
                 const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);
                 this.bigMessage = 'Game starting in ' + seconds + ' seconds';
@@ -367,7 +367,7 @@ module.exports = class ClientState {
     }
 
     gameUIClickEvent() {
-        if (this.ui.currentScreen !== this.ui.Screen.GAME_SCREEN) return false;
+        if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
         if (this.hoveredOption) {
             this.handleOptionClicked(this.hoveredOption);
             return true;
@@ -380,7 +380,7 @@ module.exports = class ClientState {
     }
 
     gameObjectClickEvent(button) {
-        if (this.ui.currentScreen !== this.ui.Screen.GAME_SCREEN) return false;
+        if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
         if (button === LEFT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
             // Could be a Placement
             if (this.buildingStructure || this.spawningUnit) {

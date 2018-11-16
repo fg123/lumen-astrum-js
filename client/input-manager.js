@@ -3,7 +3,8 @@ const { Tuple } = require('../shared/coordinates');
 require('jquery-mousewheel')($);
 
 module.exports = class InputManager {
-    constructor(canvas, ui, camera, inputPollingTime) {
+    constructor(canvas, ui, inputPollingTime) {
+        this.canvas = canvas;
         this.ui = ui;
         this.mouseState =  {
             position: new Tuple(0, 0),
@@ -19,6 +20,12 @@ module.exports = class InputManager {
         this.prevKeyState = [];
         this.inputPollingListeners = [];
 
+        this.inputPoller = setInterval(() => {
+            this.inputPoll();
+        }, inputPollingTime);
+    }
+
+    initialize(camera) {
         /* To capture into the closures */
         $(document).keydown((e) => {
             const code = e.keyCode || e.which;
@@ -35,7 +42,7 @@ module.exports = class InputManager {
             this.mouseState.mouseDown[e.which] = true;
         });
         $(document).mousemove((e) => {
-            const rect = canvas.getBoundingClientRect();
+            const rect = this.canvas.getBoundingClientRect();
             this.mouseState.position.x = e.clientX - rect.left;
             this.mouseState.position.y = e.clientY - rect.top;
             this.mouseState.mouseMoveListeners.some((fn) => {
@@ -54,10 +61,6 @@ module.exports = class InputManager {
             this.mouseState.scrollDelta.x = event.deltaX;
             this.mouseState.scrollDelta.y = event.deltaY;
         });
-
-        this.inputPoller = setInterval(() => {
-            this.inputPoll();
-        }, inputPollingTime);
     }
 
     attachMouseDownObserver(fn) {
@@ -77,7 +80,7 @@ module.exports = class InputManager {
     }
 
     inputPoll() {
-        if (this.ui.currentScreen != this.ui.Screen.GAME_SCREEN) return;
+        if (this.ui.currentScreen != this.ui.Screen.GAME) return;
         this.inputPollingListeners.some((fn) => {
             return fn(this.keyState, this.prevKeyState);
         });

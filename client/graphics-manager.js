@@ -44,61 +44,10 @@ module.exports = class GraphicsManager {
             thisLoop: 0
         };
 
-        /* Minimap Scaling is cached here */
-        /* Each hexagon adds 3/4 width due to overlapping, with 1/4 added at
-         * the end for the last hexagon */
-        /* We also add 2 for extra padding */
-        const entireMapWidth = 96 * (map.data[0].length + 2) + 32;
-        const entireMapHeight = 111 * (map.data.length + 2);
-        const widthScaleFactor = MINIMAP_DISPLAY_SIZE.x / entireMapWidth;
-        const heightScaleFactor = MINIMAP_DISPLAY_SIZE.y / entireMapHeight;
-
-        /* Constrained to the tighter one */
-        this.minimapScaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
-
-        /* We want to center minimap, either horizontally or vertically */
-        if (widthScaleFactor < heightScaleFactor) {
-            this.minimapOffsetToCenter = new Tuple(0,
-                (MINIMAP_DISPLAY_SIZE.y - (
-                    entireMapHeight * this.minimapScaleFactor)) / 2);
-        }
-        else {
-            this.minimapOffsetToCenter = new Tuple(
-                (MINIMAP_DISPLAY_SIZE.x - (
-                    entireMapWidth * this.minimapScaleFactor)) / 2, 0);
-        }
-        this.minimapCanvas = document.createElement('canvas');
-        this.minimapCanvas.width = MINIMAP_DISPLAY_SIZE.x;
-        this.minimapCanvas.height = MINIMAP_DISPLAY_SIZE.y;
-        const minimapContext = this.minimapCanvas.getContext('2d');
-        const img = this.resourceManager.get(tiles[0]);
-        this.minimapZeroPoint = new Tuple(
-            this.minimapOffsetToCenter.x +
-                (img.width * this.minimapScaleFactor),
-            this.minimapOffsetToCenter.y +
-                (img.height * this.minimapScaleFactor));
-        for (let y = 0; y < map.data.length; y++) {
-            for (let x = 0; x < map.data[0].length; x++) {
-                if (map.data[y][x].displayType !== 0) {
-                    const img = this.resourceManager.get(
-                        tiles[map.data[y][x].displayType - 1]
-                    );
-                    minimapContext.drawImage(
-                        img,
-                        (x * 96 * this.minimapScaleFactor) + this.minimapZeroPoint.x,
-                        ((y * 111) + ((x % 2) * 55)) * this.minimapScaleFactor + this.minimapZeroPoint.y,
-                        img.width * this.minimapScaleFactor,
-                        img.height * this.minimapScaleFactor
-                    );
-                }
-            }
-        }
-
         /* Start Graphics Loop */
         const tick = () => {
             this.drawContext.screenWidth = window.innerWidth;
             this.drawContext.screenHeight = window.innerHeight;
-            this.tickCamera();
             const thisFrameTime = (this.fps.thisLoop = Date.now()) - this.fps.lastLoop;
             this.fps.frameTime += (thisFrameTime - this.fps.frameTime) / FPS_FILTER_STRENGTH;
             this.fps.lastLoop = this.fps.thisLoop;
@@ -120,7 +69,7 @@ module.exports = class GraphicsManager {
         this.drawContext.bottomRightVisible.x += DRAW_PADDING;
         this.drawContext.bottomRightVisible.y += DRAW_PADDING;
         this.drawState(this.drawContext.screenWidth, this.drawContext.screenHeight);
-        if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN) {
+        if (this.ui.currentScreen === this.ui.Screen.GAME) {
             this.drawUI(this.drawContext.screenWidth, this.drawContext.screenHeight);
         }
     }
@@ -240,14 +189,6 @@ module.exports = class GraphicsManager {
             this.state.smallAlert.lastShownTime = Date.now();
         }
         // Four Part UI
-        const topRight = this.resourceManager.get(Resource.UI_TOP_RIGHT);
-        const bottomRight = this.resourceManager.get(Resource.UI_BOTTOM_RIGHT);
-        this.drawImage(topRight,
-            screenWidth - topRight.width / 2,
-            topRight.height / 2);
-        this.drawImage(bottomRight,
-            screenWidth - bottomRight.width / 2,
-            screenHeight - bottomRight.height / 2);
         this.drawMinimap(screenWidth, screenHeight);
 
         // Gold
@@ -405,6 +346,11 @@ module.exports = class GraphicsManager {
         this.drawText('Camera: (' + this.camera.position.x.toFixed(2) + ', ' +
             this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 15, 10,
         36, 'left', 'bold');
+        this.drawText('Minimap Rect: (' + this.camera.minimapRectPosition.x.toFixed(2) + ', ' +
+            this.camera.minimapRectPosition.y.toFixed(2) + ', ' +
+            this.camera.minimapRectSize.x.toFixed(2) + ', ' +
+            this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 15, 10,
+        54, 'left', 'bold');
     }
 
     hasSelectedConstructionBuildingAndIsAllowed(x, y) {
@@ -424,10 +370,6 @@ module.exports = class GraphicsManager {
             -(this.camera.position.y - offsetY));
         this.drawMap();
         this.context.restore();
-        this.context.globalCompositeOperation = 'destination-over';
-        this.drawImage(this.resourceManager.get(Resource.BACKGROUND),
-            screenWidth / 2, screenHeight / 2, screenWidth, screenHeight);
-        this.context.globalCompositeOperation = 'source-over';
     }
 
     drawGlobalAnimations() {
@@ -437,107 +379,15 @@ module.exports = class GraphicsManager {
         this.animationManager.tick();
     }
 
-    tickCamera() {
-        this.camera.delta.x *= 0.7;
-        this.camera.delta.y *= 0.7;
-        if (this.ui.currentScreen !== this.ui.Screen.GAME_SCREEN) {
-            let d = Utils.distance(this.camera.position, map.movement[map.movementIndex]);
-            if (d < 1) {
-                map.movementIndex = (map.movementIndex + 1) % map.movement.length;
-                d = Utils.distance(this.camera.position, map.movement[map.movementIndex]);
-            }
-            const a = new Tuple(map.movement[map.movementIndex].x - this.camera.position.x,
-                map.movement[map.movementIndex].y - this.camera.position.y);
-
-            this.camera.position.x += a.x / d * 1;
-            this.camera.position.y += a.y / d * 1;
-        }
-    }
-
     drawMinimap(screenWidth, screenHeight) {
         /* We grab a default tile to cache the calculation */
-        this.context.drawImage(this.minimapCanvas, screenWidth - 266, screenHeight - 154);
-
-        const zeroPoint = new Tuple(screenWidth - 266 + this.minimapZeroPoint.x,
-            screenHeight - 154 + this.minimapZeroPoint.y);
-        /* Draw Rectangle */
-        let centerPointX, centerPointY, rectWidth, rectHeight, left, top;
-        const calculate = () => {
-            centerPointX = this.camera.position.x * this.minimapScaleFactor;
-            centerPointY = this.camera.position.y * this.minimapScaleFactor;
-            rectWidth = screenWidth * this.minimapScaleFactor / this.camera.scale;
-            rectHeight = screenHeight * this.minimapScaleFactor / this.camera.scale;
-            left = zeroPoint.x + centerPointX - rectWidth / 2;
-            top = zeroPoint.y + centerPointY - rectHeight / 2;
-        };
-
-        const inverse = () => {
-            this.camera.position.x = (left - zeroPoint.x + (rectWidth / 2)) / this.minimapScaleFactor;
-            this.camera.position.y = (top - zeroPoint.y + (rectHeight / 2)) / this.minimapScaleFactor;
-            const xConstraint = screenWidth * this.minimapScaleFactor / rectWidth;
-            const yConstraint = screenHeight * this.minimapScaleFactor / rectHeight;
-            this.camera.scale = Math.max(xConstraint, yConstraint);
-        };
-        calculate();
-        if (this.inputManager.mouseState.position.x > screenWidth - MINIMAP_DISPLAY_SIZE.x - 10 &&
-            this.inputManager.mouseState.position.x < screenWidth - 10 &&
-            this.inputManager.mouseState.position.y > screenHeight - MINIMAP_DISPLAY_SIZE.y - 10 &&
-            this.inputManager.mouseState.position.y < screenHeight - 10 &&
-            this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
-            left = this.inputManager.mouseState.position.x - rectWidth / 2;
-            top = this.inputManager.mouseState.position.y - rectHeight / 2;
-        }
-        left += this.minimapScaleFactor * this.camera.delta.x;
-        top += this.minimapScaleFactor * this.camera.delta.y;
-
-        const change = this.inputManager.mouseState.scrollDelta.y * -6;
-        if (change !== 0) {
-            rectWidth += change;
-            rectHeight += change;
-            left -= change / 2;
-            top -= change / 2;
-        }
-        this.inputManager.mouseState.scrollDelta.x *= 0.7;
-        this.inputManager.mouseState.scrollDelta.y *= 0.7;
-
-        if (rectWidth > MINIMAP_DISPLAY_SIZE.x) {
-            rectWidth = MINIMAP_DISPLAY_SIZE.x;
-        }
-
-        if (rectWidth < screenWidth * this.minimapScaleFactor) {
-            rectWidth = screenWidth * this.minimapScaleFactor;
-            left += change / 2;
-        }
-
-        if (rectHeight > MINIMAP_DISPLAY_SIZE.y) {
-            rectHeight = MINIMAP_DISPLAY_SIZE.y;
-        }
-
-        if (rectHeight < screenHeight * this.minimapScaleFactor) {
-            rectHeight = screenHeight * this.minimapScaleFactor;
-            top += change / 2;
-        }
-
-        if (left < screenWidth - MINIMAP_DISPLAY_SIZE.x - 10) {
-            left = screenWidth - MINIMAP_DISPLAY_SIZE.x - 10;
-        }
-
-        if (top < screenHeight - MINIMAP_DISPLAY_SIZE.y - 10) {
-            top = screenHeight - MINIMAP_DISPLAY_SIZE.y - 10;
-        }
-
-        if (left + rectWidth > screenWidth - 10) {
-            left = screenWidth - 10 - rectWidth;
-        }
-
-        if (top + rectHeight > screenHeight - 10) {
-            top = screenHeight - 10 - rectHeight;
-        }
-        inverse();
-        calculate();
+        this.context.drawImage(this.camera.minimapCanvas, screenWidth - 266, screenHeight - 154);
         this.context.strokeStyle = 'white';
         this.context.lineWidth = '1.5';
-        this.context.rect(left, top, rectWidth, rectHeight);
+        const position = new Tuple(screenWidth - 266 + this.camera.minimapRectPosition.x,
+            screenHeight - 154 + this.camera.minimapRectPosition.y);
+        this.context.rect(position.x, position.y,
+            this.camera.minimapRectSize.x, this.camera.minimapRectSize.y);
         this.context.stroke();
     }
 
@@ -565,14 +415,14 @@ module.exports = class GraphicsManager {
                     ), (x * 96), (y * 111) + yOffset);
 
                     this.context.globalCompositeOperation = 'source-over';
-                    if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN) {
+                    if (this.ui.currentScreen === this.ui.Screen.GAME) {
                         if (!this.state.gameState.isVisible(x, y, this.state.side)) {
                             this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                                 (x * 96),
                                 (y * 111) + yOffset);
                         }
                     }
-                    if (this.ui.currentScreen === this.ui.Screen.GAME_SCREEN &&
+                    if (this.ui.currentScreen === this.ui.Screen.GAME &&
                         this.state.gameState.mapObjects[y][x]) {
                         const mapObject = this.state.gameState.mapObjects[y][x];
                         const animationManager =

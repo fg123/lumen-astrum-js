@@ -59,6 +59,12 @@ module.exports = class UI {
 
         this.queueTimerBegin = 0;
         this.queueTimer = undefined;
+
+        this.gameCanvases = [];
+    }
+
+    registerGameCanvas(canvas) {
+        this.gameCanvases.push(canvas);
     }
 
     hideScreen(screen) {
@@ -78,6 +84,14 @@ module.exports = class UI {
         this.hideScreen(Screen.GAME);
         this.hideScreen(Screen.MAIN);
         this.showScreen(screen);
+
+        if (screen === Screen.GAME) {
+            this.gameCanvases.forEach(canvas => {
+                if (canvas.onGameBegin) {
+                    canvas.onGameBegin();
+                }
+            });
+        }
     }
 
     startQueueTimer() {

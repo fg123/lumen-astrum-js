@@ -6,15 +6,18 @@ html, body {
     background: #000;
     font-family: "Roboto Slab", serif;
     font-size: 16px;
+    background: url("resources/background.png") no-repeat;
+    background-size: cover;
 }
 * {
     box-sizing: border-box;
 }
 canvas {
     position:absolute;
-    width:100%;
-    height:100%;
-    z-index: 0;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
     cursor: none;
 }
 div.overlay {
@@ -23,7 +26,7 @@ div.overlay {
     position: absolute;
     left: 0;
     top: 0;
-    z-index: 1;
+    z-index: 100;
     background-color: rgba(0, 0, 0, 0.8);
 }
 div.content, div.inQueue {
