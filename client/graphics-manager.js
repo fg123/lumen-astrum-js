@@ -319,29 +319,6 @@ module.exports = class GraphicsManager {
             }
         }
 
-        if (this.state.cursorMessage) {
-            this.setFontSize(14);
-
-            let measure = this.context.measureText(this.state.cursorMessage);
-            let width = measure.width + 10;
-            let height = 20;
-
-            this.drawRectangle('black',
-                this.inputManager.mouseState.position.x - (width / 2),
-                this.inputManager.mouseState.position.y - 30,
-                width, height);
-
-            this.context.textBaseline = 'middle';
-            this.drawText(this.state.cursorMessage, 'white', 14,
-                this.inputManager.mouseState.position.x,
-                this.inputManager.mouseState.position.y + height / 2 - 30, 'center');
-            this.context.textBaseline = 'alphabetic';
-        }
-
-        this.drawImage(this.resourceManager.get(Resource.CURSOR),
-            this.inputManager.mouseState.position.x,
-            this.inputManager.mouseState.position.y, -1, -1, Utils.toRadians(-30));
-
         this.drawText(parseInt(1000 / this.fps.frameTime) + ' fps', 'white', 16, 10, 20, 'left', 'bold');
         this.drawText('Camera: (' + this.camera.position.x.toFixed(2) + ', ' +
             this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 15, 10,

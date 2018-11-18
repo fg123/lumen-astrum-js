@@ -78,8 +78,7 @@ module.exports = class Camera {
         }
         this.tick = window.setInterval(() => {
             this.tickCamera(window.innerWidth, window.innerHeight);
-        }, 16);
-        // this.tickCamera(window.innerWidth, window.innerHeight);
+        }, 32);
         this.position = new Tuple(500, 500);
         this.tickCamera(window.innerWidth, window.innerHeight);
     }

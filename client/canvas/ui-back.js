@@ -24,9 +24,9 @@ module.exports = class UIBackCanvas {
             this.context.drawImage(topRight,
                 screenWidth - topRight.width,
                 0);
-            // this.context.drawImage(bottomRight,
-            //     screenWidth - bottomRight.width,
-            //     screenHeight - bottomRight.height);
+            this.context.drawImage(bottomRight,
+                screenWidth - bottomRight.width,
+                screenHeight - bottomRight.height);
         }
     }
 

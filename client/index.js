@@ -6,6 +6,7 @@ const ResourceManager = require('./resource-manager');
 const GraphicsManager = require('./graphics-manager');
 
 const UiBackCanvas = require('./canvas/ui-back');
+const UiCanvas = require('./canvas/ui');
 
 const ClientState = require('./client-state');
 const AnimationManager = require('../shared/animation-manager');
@@ -17,6 +18,8 @@ const TIME_BETWEEN_FRAMES = 16;
 $(document).ready(() => {
     const mapCanvas = $('canvas.map')[0];
     const uiBackCanvas = $('canvas.ui-back')[0];
+    const uiCanvas = $('canvas.ui')[0];
+
     console.log(mapCanvas);
     console.log(uiBackCanvas);
 
@@ -48,6 +51,14 @@ $(document).ready(() => {
             resourceManager,
             clientState,
             ui
+        ));
+
+        ui.registerGameCanvas(new UiCanvas(
+            uiCanvas,
+            clientState,
+            inputManager,
+            ui,
+            resourceManager
         ));
     });
 });
