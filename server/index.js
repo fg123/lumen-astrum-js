@@ -2,17 +2,31 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
-const pg = require('pg');
 const crypto = require('crypto');
 const Game = require('./game');
 const Constants = require('../shared/constants');
 const { StateChange } = require('../shared/state-change');
 
-const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/';
-const userRequestQueryString = 'SELECT * FROM users WHERE username=$1 AND password=$2';
-const dbClient = new pg.Client(connectionString);
 
-dbClient.connect();
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+const url = 'mongodb://localhost:27017';
+const dbName = 'lumen';
+const client = new MongoClient(url);
+let db;
+
+client.connect(function(err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
+    db = client.db(dbName);
+
+    const port = process.env.PORT || 5000;
+
+    http.listen(port, function() {
+        console.log('Listening on port ' + port);
+    });
+});
 
 const connectedUsers = [];
 const queue = [];
@@ -24,11 +38,6 @@ function generateHash(string) {
 
 app.use('/', express.static(__dirname + '/../client/dist'));
 app.use('/resources', express.static(__dirname + '/../client/resources'));
-
-const port = process.env.PORT || 5000;
-http.listen(port, function() {
-    console.log('Listening on port ' + port);
-});
 
 io.on('connection', function (socket) {
     console.log('User connected!');
@@ -45,23 +54,24 @@ io.on('connection', function (socket) {
         socket.emit('ping', Date.now());
     });
     socket.on('login', function (username, password) {
-        dbClient.query(userRequestQueryString, [username, generateHash(password)], function (err, res) {
+        db.collection('users').find({ username, password: generateHash(password) }).toArray(function(err, res) {
             if (err) {
                 console.log('DB Error: ' + err);
                 socket.emit('login-failed');
             }
             else {
-                if (res.rows.length === 0) {
+                if (res.length !== 1) {
                     console.log('Auth failed for: ' + username);
                     socket.emit('login-failed');
                 }
                 else {
                     console.log('Auth success for: ' + username);
+                    console.log(res[0]);
                     connectedUsers[socket.id].username = username;
-                    connectedUsers[socket.id].elo = res.rows[0].elo;
+                    connectedUsers[socket.id].elo = res[0].elo;
                     socket.emit('login-success', {
                         username: username,
-                        elo: res.rows[0].elo
+                        elo: res[0].elo
                     });
                 }
             }
