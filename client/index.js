@@ -17,6 +17,7 @@ const TIME_BETWEEN_FRAMES = 16;
 
 $(document).ready(() => {
     const mapCanvas = $('canvas.map')[0];
+    const mapOldCanvas = $('canvas.map-old')[0];
     const uiBackCanvas = $('canvas.ui-back')[0];
     const uiCanvas = $('canvas.ui')[0];
 
@@ -36,7 +37,7 @@ $(document).ready(() => {
         const clientState = new ClientState(socket, camera, inputManager, ui, resourceManager, animationManager);
 
         ui.registerGameCanvas(new GraphicsManager(
-            mapCanvas,
+            mapOldCanvas,
             TIME_BETWEEN_FRAMES,
             ui,
             camera,
@@ -58,7 +59,8 @@ $(document).ready(() => {
             clientState,
             inputManager,
             ui,
-            resourceManager
+            resourceManager,
+            camera
         ));
     });
 });

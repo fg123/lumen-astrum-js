@@ -34,7 +34,7 @@ const RIGHT_MOUSE_BUTTON = 3;
 const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 
 const INTERNAL_TICK_INTERVAL = 16;
-const CAMERA_SPEED = 50;
+const CAMERA_SPEED = 60;
 
 module.exports = class ClientState {
     constructor(socket, camera, inputManager, ui, resourceManager, animationManager) {

@@ -64,7 +64,6 @@ class BuildStructureStateChange extends StateChange {
 
     getOptionToBuild() {
         let builtBy = getBaseObject(this.data.builtBy.name);
-        console.log(builtBy);
         if (!builtBy) {
             return undefined;
         }
@@ -79,7 +78,6 @@ class BuildStructureStateChange extends StateChange {
         }
 
         const option = this.getOptionToBuild();
-        console.log(option);
         if (!option) {
             return false;
         }

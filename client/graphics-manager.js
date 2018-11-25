@@ -54,12 +54,12 @@ module.exports = class GraphicsManager {
             this.draw();
             window.requestAnimationFrame(tick);
         };
-        window.requestAnimationFrame(tick);
+        tick();
     }
 
     draw() {
-        this.context.canvas.width = this.drawContext.screenWidth;
-        this.context.canvas.height = this.drawContext.screenHeight;
+        this.canvas.width = this.drawContext.screenWidth;
+        this.canvas.height = this.drawContext.screenHeight;
         this.drawContext.topLeftVisible = this.camera.toWorldCoord(Tuple.ZERO).toTileCoord();
         this.drawContext.bottomRightVisible = this.camera.toWorldCoord(new Tuple(this.drawContext.screenWidth,
             this.drawContext.screenHeight)).toTileCoord();
@@ -187,34 +187,6 @@ module.exports = class GraphicsManager {
         if (this.state.smallAlert.queue.length !== 0 && this.state.smallAlert.current === null) {
             this.state.smallAlert.current = this.state.smallAlert.queue.shift();
             this.state.smallAlert.lastShownTime = Date.now();
-        }
-        // Four Part UI
-        this.drawMinimap(screenWidth, screenHeight);
-
-        // Gold
-        this.context.textBaseline = 'middle';
-        this.drawText(this.state.getGold(),
-            'white', 32, screenWidth - 185, screenHeight - 184, 'left', 'bold');
-        this.context.textBaseline = 'alphabetic';
-
-        // Turn Controls
-        this.state.hoveringEndTurn = false;
-        if (this.state.gameState.currentTurn === this.state.side) {
-            // Show Timer
-            this.drawText(this.state.turnTimer, 'black', 60, screenWidth - 180, 75, 'left', 'bold');
-            // Show End Turn Button
-            if (this.inputManager.mouseState.position.x > screenWidth - 365 &&
-                this.inputManager.mouseState.position.x < screenWidth - 365 + 120 &&
-                this.inputManager.mouseState.position.y > 0 && this.inputManager.mouseState.position.y < 48) {
-                this.state.hoveringEndTurn = true;
-                this.drawRectangle('rgba(164, 0, 0, 0.8)', screenWidth - 365, 0, 120, 48);
-            }
-            else {
-                this.drawRectangle('rgba(164, 0, 0, 0.6)', screenWidth - 365, 0, 120, 48);
-            }
-            this.context.textBaseline = 'middle';
-            this.drawText('End Turn', 'white', 20,  screenWidth - 365 + 60, 24, 'center', 'bold');
-            this.context.textBaseline = 'alphabetic';
         }
 
         // Bottom Left Selected Info
@@ -354,18 +326,6 @@ module.exports = class GraphicsManager {
          * will handle their own positions */
         this.animationManager.draw(this, Tuple.ZERO);
         this.animationManager.tick();
-    }
-
-    drawMinimap(screenWidth, screenHeight) {
-        /* We grab a default tile to cache the calculation */
-        this.context.drawImage(this.camera.minimapCanvas, screenWidth - 266, screenHeight - 154);
-        this.context.strokeStyle = 'white';
-        this.context.lineWidth = '1.5';
-        const position = new Tuple(screenWidth - 266 + this.camera.minimapRectPosition.x,
-            screenHeight - 154 + this.camera.minimapRectPosition.y);
-        this.context.rect(position.x, position.y,
-            this.camera.minimapRectSize.x, this.camera.minimapRectSize.y);
-        this.context.stroke();
     }
 
     drawMap() {

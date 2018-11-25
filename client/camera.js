@@ -140,7 +140,7 @@ module.exports = class Camera {
         this.minimapRectPosition.x += this.minimapScaleFactor * this.delta.x;
         this.minimapRectPosition.y += this.minimapScaleFactor * this.delta.y;
 
-        const change = this.inputManager.mouseState.scrollDelta.y * -6;
+        const change = this.inputManager.mouseState.scrollDelta.y * -10;
         if (change !== 0) {
             let changeX = change;
             let changeY = change / (screenWidth / screenHeight);
