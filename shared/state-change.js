@@ -410,6 +410,10 @@ class UnitAttackStateChange extends StateChange {
         }
         if (target.side !== this.opponentSide) return false;
 
+        /* Is the target visible to the attacker? */
+        if (!state.isVisible(this.data.posTo.x, this.data.posTo.y, this.from)) {
+            return false;
+        }
         return true;
     }
 

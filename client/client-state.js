@@ -362,7 +362,8 @@ module.exports = class ClientState {
                         // It's blocked if it's not in the map, or occupied
                         return !withinMap(pos) || this.gameState.occupied[pos.y][pos.x];
                     });
-            this.unitAttackRange = getSurrounding(object.position, object.attackRange);
+            this.unitAttackRange = getSurrounding(object.position, object.attackRange).filter(
+                pos => this.gameState.isVisible(pos.x, pos.y, this.side));
         }
     }
 
