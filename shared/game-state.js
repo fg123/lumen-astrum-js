@@ -2,7 +2,8 @@ const Constants = require('./constants');
 const {
     map,
     withinMap,
-    Tiles
+    Tiles,
+    getVisible
 } = require('./map');
 const { Structure, Unit } = require('../shared/map-objects');
 const { getSurrounding  } = require('./coordinates');
@@ -126,12 +127,9 @@ module.exports = class GameState {
                 }
             }
 
-            surrounding = getSurrounding(location, structure.width + Constants.BUILDING_VISION_RANGE);
+            surrounding = getVisible(location, structure.width + Constants.BUILDING_VISION_RANGE);
             surrounding.forEach(pos => {
-                if (withinMap(pos)) {
-                    /* TODO: Implement Bush Mechanics for Visibility Map */
-                    this.addVisibility(pos.x, pos.y, side);
-                }
+                this.addVisibility(pos.x, pos.y, side);
             });
         }
         else if (name in Data.units) {
@@ -140,7 +138,7 @@ module.exports = class GameState {
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
 
-            let surrounding = getSurrounding(location, unit.sightRange);
+            let surrounding = getVisible(location, unit.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
                 if (withinMap(surrounding[i])) {
                     this.addVisibility(surrounding[i].x, surrounding[i].y, side);
@@ -183,12 +181,9 @@ module.exports = class GameState {
                 }
             }
 
-            surrounding = getSurrounding(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
+            surrounding = getVisible(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
             surrounding.forEach(pos => {
-                if (withinMap(pos)) {
-                    /* TODO: Implement Bush Mechanics for Visibility Map */
-                    this.removeVisibility(pos.x, pos.y, mapObject.side);
-                }
+                this.removeVisibility(pos.x, pos.y, mapObject.side);
             });
         }
         else if (mapObject.name in Data.units) {
@@ -199,11 +194,9 @@ module.exports = class GameState {
                     break;
                 }
             }
-            let surrounding = getSurrounding(location, mapObject.sightRange);
+            let surrounding = getVisible(location, mapObject.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i])) {
-                    this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side);
-                }
+                this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side);
             }
         }
     }
@@ -259,18 +252,14 @@ module.exports = class GameState {
         this.occupied[to.y][to.x] = to;
 
         /* Change visibility from previous position to new position */
-        let surrounding = getSurrounding(from, unit.sightRange);
+        let surrounding = getVisible(from, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i])) {
-                this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.side);
-            }
+            this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.side);
         }
 
-        surrounding = getSurrounding(to, unit.sightRange);
+        surrounding = getVisible(to, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i])) {
-                this.addVisibility(surrounding[i].x, surrounding[i].y, unit.side);
-            }
+            this.addVisibility(surrounding[i].x, surrounding[i].y, unit.side);
         }
     }
 

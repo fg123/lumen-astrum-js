@@ -289,13 +289,22 @@ module.exports = class MapCanvas {
 
         this.drawText(parseInt(1000 / this.fps.frameTime) + ' fps', 'white', 16, 10, 20, 'left', 'bold');
         this.drawText('Camera: (' + this.camera.position.x.toFixed(2) + ', ' +
-            this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 15, 10,
-        36, 'left', 'bold');
+            this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 16, 10,
+        40, 'left', 'bold');
         this.drawText('Minimap Rect: (' + this.camera.minimapRectPosition.x.toFixed(2) + ', ' +
             this.camera.minimapRectPosition.y.toFixed(2) + ', ' +
             this.camera.minimapRectSize.x.toFixed(2) + ', ' +
-            this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 15, 10,
-        54, 'left', 'bold');
+            this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 16, 10,
+        60, 'left', 'bold');
+        const hover = this.inputManager.mouseState.tile;
+        if (withinMap(hover)) {
+            const tile = map.data[hover.y][hover.x];
+            this.drawText(
+                'Hover: { displayType: ' + tile.displayType + ', isHighGround: ' + tile.isHighGround +
+                ', highGroundGroup:' + tile.highGroundGroup + '}',
+                'white', 16, 10, 80, 'left', 'bold'
+            );
+        }
     }
 
     hasSelectedConstructionBuildingAndIsAllowed(x, y) {
