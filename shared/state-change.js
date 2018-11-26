@@ -236,9 +236,10 @@ class MoveUnitStateChange extends StateChange {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
         if (unit.side !== this.from) return false;
-        /* Find a path from A to B */
-        const path = PathFinder.findPath(state, this.data.posFrom, this.data.posTo);
-        if (path.length > unit.moveRange) {
+
+        /* Is the place to move to in the movement range? */
+        const range = state.getUnitMovementTiles(this.data.posFrom);
+        if (range.find(pos => pos.equals(this.data.posTo)) === undefined) {
             return false;
         }
         return true;
@@ -396,12 +397,6 @@ class UnitAttackStateChange extends StateChange {
             return false;
         }
 
-        /* Is the attack out of range? */
-        const distance = this.distance(this.data.posFrom, this.data.posTo);
-        if (distance > unit.attackRange) {
-            return false;
-        }
-
         /* Is the attack destination a mapObject that belongs to the
          * opponent? */
         const target = this.findTarget(state, this.data.posTo);
@@ -410,8 +405,9 @@ class UnitAttackStateChange extends StateChange {
         }
         if (target.side !== this.opponentSide) return false;
 
-        /* Is the target visible to the attacker? */
-        if (!state.isVisible(this.data.posTo.x, this.data.posTo.y, this.from)) {
+        /* Is the target in the range (including visibility) */
+        const range = state.getUnitAttackTiles(this.data.posFrom);
+        if (range.find(pos => pos.equals(this.data.posTo)) === undefined) {
             return false;
         }
         return true;

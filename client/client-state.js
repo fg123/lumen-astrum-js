@@ -355,15 +355,8 @@ module.exports = class ClientState {
         this.spawningUnit = null;
         this.selectedObject = object;
         if (object && object.isUnit) {
-            this.unitMoveRange =
-                getReachable(object.position,
-                    object.moveRange,
-                    (pos) => {
-                        // It's blocked if it's not in the map, or occupied
-                        return !withinMap(pos) || this.gameState.occupied[pos.y][pos.x];
-                    });
-            this.unitAttackRange = getSurrounding(object.position, object.attackRange).filter(
-                pos => this.gameState.isVisible(pos.x, pos.y, this.side));
+            this.unitMoveRange = this.gameState.getUnitMovementTiles(object.position);
+            this.unitAttackRange = this.gameState.getUnitAttackTiles(object.position);
         }
     }
 

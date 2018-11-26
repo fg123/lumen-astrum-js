@@ -6,7 +6,7 @@ const {
     getVisible
 } = require('./map');
 const { Structure, Unit } = require('../shared/map-objects');
-const { getSurrounding  } = require('./coordinates');
+const { getSurrounding, getReachable  } = require('./coordinates');
 const Data = require('./data');
 
 module.exports = class GameState {
@@ -288,5 +288,40 @@ module.exports = class GameState {
         else {
             this.blueGold += changeBy;
         }
+    }
+
+    getUnitMovementTiles(unitPos) {
+        if (!withinMap(unitPos)) {
+            return [];
+        }
+        const object = this.mapObjects[unitPos.y][unitPos.x];
+        if (!object) {
+            return [];
+        }
+        if (!object.isUnit) {
+            return [];
+        }
+        return getReachable(object.position,
+            object.moveRange,
+            (pos) => {
+                // It's blocked if it's not in the map, occupied, or out of vision range
+                return !withinMap(pos) || this.occupied[pos.y][pos.x] ||
+                    !this.isVisible(pos.x, pos.y, object.side);
+            });
+    }
+
+    getUnitAttackTiles(unitPos) {
+        if (!withinMap(unitPos)) {
+            return [];
+        }
+        const object = this.mapObjects[unitPos.y][unitPos.x];
+        if (!object) {
+            return [];
+        }
+        if (!object.isUnit) {
+            return [];
+        }
+        return getSurrounding(object.position, object.attackRange).filter(
+            pos => withinMap(pos) && this.isVisible(pos.x, pos.y, object.side));
     }
 };
