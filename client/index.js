@@ -3,8 +3,8 @@ const $ = require('jquery-browserify');
 const io = require('socket.io-client');
 const UI = require('./ui');
 const ResourceManager = require('./resource-manager');
-const GraphicsManager = require('./graphics-manager');
 
+const MapCanvas = require('./canvas/map');
 const UiBackCanvas = require('./canvas/ui-back');
 const UiCanvas = require('./canvas/ui');
 
@@ -17,7 +17,6 @@ const TIME_BETWEEN_FRAMES = 16;
 
 $(document).ready(() => {
     const mapCanvas = $('canvas.map')[0];
-    const mapOldCanvas = $('canvas.map-old')[0];
     const uiBackCanvas = $('canvas.ui-back')[0];
     const uiCanvas = $('canvas.ui')[0];
 
@@ -36,8 +35,8 @@ $(document).ready(() => {
 
         const clientState = new ClientState(socket, camera, inputManager, ui, resourceManager, animationManager);
 
-        ui.registerGameCanvas(new GraphicsManager(
-            mapOldCanvas,
+        ui.registerGameCanvas(new MapCanvas(
+            mapCanvas,
             TIME_BETWEEN_FRAMES,
             ui,
             camera,
