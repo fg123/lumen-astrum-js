@@ -120,7 +120,14 @@ io.on('connection', function (socket) {
         let game = connectedUsers[socket.id].game;
         if (game.verifyStateChange(change)) {
             // Process will call simulate and foward as necessary
-            game.processStateChange(change);
+            const winner = game.processStateChange(change);
+            if (winner !== Constants.NONE_SIDE) {
+                const gameOver = {
+                    winner: winner
+                };
+                socket.emit(game.redSocket, 'game-over', gameOver);
+                socket.emit(game.blueSocket, 'game-over', gameOver);
+            }
         }
         else {
             socket.emit('invalid-state-change');
@@ -139,4 +146,3 @@ io.on('connection', function (socket) {
         delete connectedUsers[socket.id];
     });
 });
-

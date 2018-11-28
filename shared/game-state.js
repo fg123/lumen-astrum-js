@@ -324,4 +324,18 @@ module.exports = class GameState {
         return getSurrounding(object.position, object.attackRange).filter(
             pos => withinMap(pos) && this.isVisible(pos.x, pos.y, object.side));
     }
+
+    getWinner() {
+        const redCommandBase = this.mapObjects[map.redCommandCenterLocation.y][
+            map.redCommandCenterLocation.x];
+        const blueCommandBase = this.mapObjects[map.blueCommandCenterLocation.y][
+            map.blueCommandCenterLocation.x];
+        if (!redCommandBase) {
+            return Constants.BLUE_SIDE;
+        }
+        if (!blueCommandBase) {
+            return Constants.RED_SIDE;
+        }
+        return Constants.NONE_SIDE;
+    }
 };

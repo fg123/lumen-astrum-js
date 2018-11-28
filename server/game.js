@@ -47,5 +47,6 @@ module.exports = class Game {
         // TODO: Advanced processing here.
         this.redSocket.emit('state-change', stateChange);
         this.blueSocket.emit('state-change', stateChange);
+        return this.state.getWinner();
     }
 };

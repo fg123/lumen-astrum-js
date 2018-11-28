@@ -202,6 +202,16 @@ module.exports = class ClientState {
             this.pushAlertMessage('Invalid action!');
         });
 
+        socket.on('game-over', (gameOver) => {
+            const winner = gameOver.winner;
+            if (winner === this.side) {
+                alert('You won!');
+            }
+            else {
+                alert('You lost!');
+            }
+        });
+
         socket.on('game-start', (side, gameStartTime) => {
             console.log('Game Start!');
             this.side = side;
