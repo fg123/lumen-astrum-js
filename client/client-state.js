@@ -213,7 +213,9 @@ module.exports = class ClientState {
                 alert('You lost!');
             }
         });
-
+        socket.on('game-over', (gameOver) => {
+            this.ui.goToGameOver(gameOver);
+        });
         socket.on('game-start', (side, gameStartTime) => {
             console.log('Game Start!');
             this.ui.goToGame();

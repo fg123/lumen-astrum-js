@@ -1,8 +1,5 @@
 <template>
-    <div class="wrapper">
-        <div class="topLeft">
-            <logo style="width: 400px" />
-        </div>
+    <dashboard-wrapper v-bind:user="user">
         <div class="joinGameDialog">
             <div class="notInQueue" v-if="!inQueue">
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('ranked')">Join Ranked Queue</gradient-button>
@@ -14,10 +11,7 @@
             <div style="margin-bottom: 25px;"><b>Looking for a match... ({{ queueTimerText }})</b></div>
             <div class="button leaveQueue medium" @click="leaveQueue">Leave Queue</div>
         </div>
-        <div class="topRight" style="top: 10px">
-            <div class="usernameDisplay">{{ this.user.username }} ({{ this.user.elo }})</div>
-        </div>
-    </div>
+    </dashboard-wrapper>
 </template>
 
 <script>
@@ -37,7 +31,7 @@ module.exports = {
     },
     components: {
         gradientButton: require('./gradient-button.vue'),
-        logo: require('./logo.vue')
+        dashboardWrapper: require('./dashboard-wrapper.vue')
     },
     mounted() {
         if (!this.user) {
@@ -72,31 +66,23 @@ module.exports = {
 </script>
 
 <style>
-div.wrapper {
-    padding: 100px;
-    width: 100%;
-    height: 100%;
-}
-
-div.wrapper > * {
-    padding: inherit;
-}
-
-div.topLeft {
+div.inQueue {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
 
-div.topRight {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
-div.usernameDisplay {
-    font-size: 20px;
-    font-weight: bold;
+div.inQueue {
     color: #FFF;
+}
+
+div.joinGameDialog {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(0, -50%);
+    text-align: right;
 }
 </style>

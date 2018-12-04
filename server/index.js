@@ -123,7 +123,7 @@ io.on('connection', function (socket) {
             const winner = game.processStateChange(change);
             if (winner !== Constants.NONE_SIDE) {
                 const gameOver = {
-                    winner: winner
+                    winner: winner === Constants.RED_SIDE ? game.redPlayer : game.bluePlayer
                 };
                 socket.emit(game.redSocket, 'game-over', gameOver);
                 socket.emit(game.blueSocket, 'game-over', gameOver);

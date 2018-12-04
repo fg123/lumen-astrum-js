@@ -15,7 +15,8 @@ const Screen = {
     WELCOME: 'welcome',
     LOGIN: 'login',
     GAME: 'game',
-    CLIENT_MAIN: 'clientMain'
+    CLIENT_MAIN: 'clientMain',
+    POST_GAME: 'postGame'
 };
 
 module.exports = {
@@ -24,7 +25,8 @@ module.exports = {
             Screen,
             currentScreen: Screen.WELCOME,
             socket: io(),
-            user: undefined
+            user: undefined,
+            lastGameOver: undefined
         };
     },
     mounted() {
@@ -34,15 +36,22 @@ module.exports = {
         goToLogin() {
             this.currentScreen = Screen.LOGIN;
         },
+        goToGameOver(gameOver) {
+            this.currentScreen = Screen.POST_GAME;
+            this.lastGameOver = gameOver;
+        },
         goToGame() {
             this.currentScreen = Screen.GAME;
+        },
+        goToClientMain() {
+            this.currentScreen = Screen.CLIENT_MAIN;
         },
         login(username, password, callback) {
             this.socket.emit('login', username, password, callback);
         },
         loginSuccess(data) {
-            this.currentScreen = Screen.CLIENT_MAIN;
             this.user = data;
+            this.goToClientMain();
         },
         leaveQueue(callback) {
             this.socket.emit('leave-queue', callback);
@@ -55,7 +64,8 @@ module.exports = {
         game: game,
         welcome: require('./welcome.vue'),
         login: require('./login.vue'),
-        clientMain: require('./client-main.vue')
+        clientMain: require('./client-main.vue'),
+        postGame: require('./post-game.vue')
     }
 };
 </script>
