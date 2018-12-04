@@ -169,7 +169,7 @@ module.exports = class GameState {
                 }
             }
 
-            if (Structure.isConstructionBuilding(name)) {
+            if (Structure.isConstructionBuilding(mapObject.name)) {
                 const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
                 for (let i = 0; i < surrounding.length; i++) {
                     if (withinMap(surrounding[i])) {

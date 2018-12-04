@@ -122,11 +122,12 @@ io.on('connection', function (socket) {
             // Process will call simulate and foward as necessary
             const winner = game.processStateChange(change);
             if (winner !== Constants.NONE_SIDE) {
+                console.log('Game Over!');
                 const gameOver = {
                     winner: winner === Constants.RED_SIDE ? game.redPlayer : game.bluePlayer
                 };
-                socket.emit(game.redSocket, 'game-over', gameOver);
-                socket.emit(game.blueSocket, 'game-over', gameOver);
+                game.redSocket.emit('game-over', gameOver);
+                game.blueSocket.emit('game-over', gameOver);
             }
         }
         else {

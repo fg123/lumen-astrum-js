@@ -1,7 +1,7 @@
 const structures = {
     'Command Base': {
         'description': 'Main Base. Defend yours while destroying opponent\'s.',
-        'health': 250,
+        'health': 1,
         'shield': 0,
         'width': 2,
         'turnsToBuild': 0,
@@ -422,7 +422,7 @@ const units = {
         'damage': 3,
         'description': 'Weak recon unit. Good for scouting out enemy units and providing basic harrasment.',
         'health': 15,
-        'moverange': 5,
+        'moverange': 15,
         'shield': 0,
         'sightrange': 5,
         'squadsize': 2,

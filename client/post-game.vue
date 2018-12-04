@@ -1,7 +1,9 @@
 <template>
    <dashboard-wrapper v-bind:user="user">
-       <div class="bigTitle">
-            {{ gameOver.winner === user.username ? "VICTORY" : "DEFEAT" }}
+       <div class="centered">
+            <div class="bigText">
+                {{ gameOver.winner === user.username ? "VICTORY" : "DEFEAT" }}
+            </div>
             <gradient-button medium @click="backToLobby">Back to Menu</gradient-button>
        </div>
    </dashboard-wrapper>
@@ -33,15 +35,17 @@ module.exports = {
 </script>
 
 <style>
-div.bigTitle {
-    color: #FFF;
-    font-size: 100px;
-    font-family: "Montserrat";
-    font-weight: bold;
+div.centered {
     text-align: center;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+div.bigText {
+    color: #FFF;
+    font-size: 100px;
+    font-family: "Patua One";
 }
 </style>

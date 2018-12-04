@@ -203,16 +203,6 @@ module.exports = class ClientState {
             // Should never happen since UI should prevent it, but if so...
             this.pushAlertMessage('Invalid action!');
         });
-
-        socket.on('game-over', (gameOver) => {
-            const winner = gameOver.winner;
-            if (winner === this.side) {
-                alert('You won!');
-            }
-            else {
-                alert('You lost!');
-            }
-        });
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
         });

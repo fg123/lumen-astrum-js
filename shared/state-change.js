@@ -74,17 +74,21 @@ class BuildStructureStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.currentTurn !== this.from) {
+            console.log(0);
             return false;
         }
 
         const option = this.getOptionToBuild();
         if (!option) {
+            console.log(1);
             return false;
         }
         if (state.getGold(this.from) < option.cost) {
+            console.log(2);
             return false;
         }
         if (!state.arePrereqsSatisfied(option, this.from)) {
+            console.log(3);
             return false;
         }
 
@@ -94,16 +98,19 @@ class BuildStructureStateChange extends StateChange {
             if (!withinMap(surrounding[i]) ||
                 state.occupied[surrounding[i].y][surrounding[i].x] ||
                 map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
+                console.log(5);
                 return false;
             }
             else if (!this.data.builtBy.isUnit &&
                 !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
+                console.log(6);
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
                 if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.MINERAL &&
                     map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BIG_MINERAL) {
                     // Harvester must be on mineral
+                    console.log(7);
                     return false;
                 }
             }
@@ -111,6 +118,7 @@ class BuildStructureStateChange extends StateChange {
                 if (map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
                     map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {
                     // Nothing else can be on mineral
+                    console.log(8);
                     return false;
                 }
             }

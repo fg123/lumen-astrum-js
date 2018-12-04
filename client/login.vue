@@ -32,7 +32,7 @@ module.exports = {
         checkEnter(e) {
             const key = e.keyCode || e.which;
             if (key === 13) {
-                this.$refs.button.click();
+                this.$refs.button.$el.click();
             }
         },
         submit() {

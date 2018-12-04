@@ -1,7 +1,7 @@
 l<template>
     <div>
-        <canvas ref="ui" style="z-index: 3;"></canvas>
-        <canvas ref="ui-back" style="z-index: 2;"></canvas>
+        <canvas ref="ui" style="z-index: 3;" v-show="isInGame"></canvas>
+        <canvas ref="ui-back" style="z-index: 2;" v-show="isInGame"></canvas>
         <canvas ref="map" style="z-index: 1;"></canvas>
     </div>
 </template>
@@ -10,6 +10,11 @@ l<template>
 module.exports = {
     props: {
         root: Object
+    },
+    computed: {
+        isInGame() {
+            return this.root.currentScreen === this.root.Screen.GAME;
+        }
     },
     mounted() {
         const ResourceManager = require('./resource-manager');
