@@ -4,7 +4,10 @@ module.exports = {
         browser: true,
         node: true
     },
-    extends: 'eslint:recommended',
+    extends: [
+        'eslint:recommended',
+        'plugin:vue/essential'
+    ],
     parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module'

@@ -54,12 +54,7 @@ div.button.medium {
 div.button.large {
     padding: 1.2em 3em;
 }
-div.loginForm {
-    text-align:right;
-    width: 40%;
-    margin-left: auto;
-    margin-right: auto;
-}
+
 
 .hide {
     display: none;
@@ -120,11 +115,6 @@ input {
     font-weight: bold;
 }
 
-div.errorMessage {
-    color: #ff4a4a;
-    padding: 5px;
-    display: none;
-}
 div.clientMain div.content {
     padding: 50px 200px;
     width: 100%;
@@ -132,24 +122,6 @@ div.clientMain div.content {
     background: linear-gradient(0, rgba(0, 140, 255, 0.041),
         rgba(43, 128, 255, 0.171)); /* Standard syntax (must be last) */
     position: relative;
-}
-
-div.topLeft {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-div.topRight {
-    position: absolute;
-    top: 0;
-    right: 0;
-}
-
-div.usernameDisplay {
-    font-size: 20px;
-    font-weight: bold;
-    color: #FFF;
 }
 
 .loader,

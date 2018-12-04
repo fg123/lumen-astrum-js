@@ -45,6 +45,8 @@ module.exports = class ClientState {
         this.resourceManager = resourceManager;
         this.globalAnimationManager = animationManager;
 
+        this.gameStartListeners = [];
+
         this.side = Constants.NONE_SIDE;
         this.gameState = undefined;
         this.selectedObject = null;
@@ -214,6 +216,7 @@ module.exports = class ClientState {
 
         socket.on('game-start', (side, gameStartTime) => {
             console.log('Game Start!');
+            this.ui.goToGame();
             this.side = side;
             this.gameState = new GameState(gameStartTime);
             console.log(this.side);
@@ -237,7 +240,6 @@ module.exports = class ClientState {
                         (map.blueCommandCenterLocation.x % 2) * 55
                 );
             }
-            this.ui.loadScreen(this.ui.Screen.GAME);
             const interval = setInterval(() => {
                 const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);
                 this.bigMessage = 'Game starting in ' + seconds + ' seconds';
@@ -246,6 +248,7 @@ module.exports = class ClientState {
                     this.bigMessage = '';
                 }
             }, 1000);
+            this.gameStartListeners.forEach(x => x());
         });
 
         this.internalTick = setInterval(() => {
@@ -283,6 +286,10 @@ module.exports = class ClientState {
     isMyTurn() {
         return this.gameState.currentTurn !== Constants.NONE_SIDE &&
                 this.gameState.currentTurn === this.side;
+    }
+
+    addGameStartListener(fn) {
+        this.gameStartListeners.push(fn);
     }
 
     sendStateChange(stateChange) {

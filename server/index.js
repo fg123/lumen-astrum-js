@@ -53,7 +53,7 @@ io.on('connection', function (socket) {
         connectedUsers[socket.id].ping = (Date.now() - date) * 2;
         socket.emit('ping', Date.now());
     });
-    socket.on('login', function (username, password) {
+    socket.on('login', function (username, password, callback) {
         db.collection('users').find({ username, password: generateHash(password) }).toArray(function(err, res) {
             if (err) {
                 console.log('DB Error: ' + err);
@@ -62,14 +62,14 @@ io.on('connection', function (socket) {
             else {
                 if (res.length !== 1) {
                     console.log('Auth failed for: ' + username);
-                    socket.emit('login-failed');
+                    callback('failed', undefined);
                 }
                 else {
                     console.log('Auth success for: ' + username);
                     console.log(res[0]);
                     connectedUsers[socket.id].username = username;
                     connectedUsers[socket.id].elo = res[0].elo;
-                    socket.emit('login-success', {
+                    callback(undefined, {
                         username: username,
                         elo: res[0].elo
                     });
@@ -77,7 +77,7 @@ io.on('connection', function (socket) {
             }
         });
     });
-    socket.on('join-queue', function (type) {
+    socket.on('join-queue', function (type, callback) {
         if (connectedUsers[socket.id].username != null &&
 			connectedUsers[socket.id].queueID === -1) {
             let gameFound = false;
@@ -111,7 +111,7 @@ io.on('connection', function (socket) {
                     socket: socket,
                     elo: connectedUsers[socket.id].elo
                 });
-                socket.emit('joined-queue');
+                callback();
             }
         }
     });
@@ -133,10 +133,10 @@ io.on('connection', function (socket) {
             socket.emit('invalid-state-change');
         }
     });
-    socket.on('leave-queue', function () {
+    socket.on('leave-queue', function (callback) {
         queue.splice(connectedUsers[socket.id].queueID, 1);
         connectedUsers[socket.id].queueID = -1;
-        socket.emit('left-queue');
+        callback();
     });
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
