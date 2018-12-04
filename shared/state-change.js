@@ -288,9 +288,6 @@ class TurnPassoverStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
-        state.turnEndTime = Date.now() +
-            state.calculateNextTurnAvailableTime(state.currentTurn);
-
         // Handle Structure End-Turn Procedures
         // This is calculated for the opponent since they gain the $
         let harvestorMoneyGained = 0;
@@ -349,6 +346,11 @@ class TurnPassoverStateChange extends StateChange {
             }
             state.redTurnCount++;
         }
+
+        console.log('Seconds for turn: ' + state.calculateNextTurnAvailableTime(state.currentTurn));
+        state.turnEndTime = Date.now() +
+            state.calculateNextTurnAvailableTime(state.currentTurn);
+
     }
 }
 StateChange.registerSubClass(TurnPassoverStateChange);
