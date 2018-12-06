@@ -1,5 +1,4 @@
 const Constants = require('../shared/constants');
-const { getReachable, getSurrounding } = require('../shared/coordinates');
 const { getBaseObject } = require('../shared/data');
 const {
     withinMap,
@@ -11,6 +10,7 @@ const {
     SpawnUnitStateChange,
     MoveUnitStateChange,
     TurnPassoverStateChange,
+    ChatMessageStateChange,
     UnitAttackStateChange
 } = require('../shared/state-change');
 const GameState = require('../shared/game-state');
@@ -37,9 +37,10 @@ const INTERNAL_TICK_INTERVAL = 16;
 const CAMERA_SPEED = 60;
 
 module.exports = class ClientState {
-    constructor(socket, camera, inputManager, ui, resourceManager, animationManager) {
+    constructor(socket, chatbox, camera, inputManager, ui, resourceManager, animationManager) {
         this.ui = ui;
         this.socket = socket;
+        this.chatbox = chatbox;
         this.camera = camera;
         this.inputManager = inputManager;
         this.resourceManager = resourceManager;
@@ -188,6 +189,19 @@ module.exports = class ClientState {
                     )
                 );
             }
+            else if (change instanceof ChatMessageStateChange) {
+                /* For some reason, the vue component can't watch a nested property
+                 * that's not properly defined as a prop, so we have to manually
+                 * push changes over. */
+                const fakeState = {
+                    chatMessages: [],
+                    /* These are needed by simulateStateChange */
+                    redPlayer: this.gameState.redPlayer,
+                    bluePlayer: this.gameState.bluePlayer
+                };
+                change._simulateStateChange(fakeState);
+                chatbox.addMessage(fakeState.chatMessages[0]);
+            }
             /* Trust Server */
             change.simulateStateChange(this.gameState);
             /* Currently Selected Unit might have died */
@@ -207,7 +221,8 @@ module.exports = class ClientState {
             this.ui.goToGameOver(gameOver);
         });
         socket.on('game-start', (side, gameStartTime, redPlayer, bluePlayer) => {
-            console.log('Game Start!');
+            this.addNeutralChat(`${redPlayer} vs ${bluePlayer}`);
+            this.addNeutralChat(`${redPlayer} goes first!`);
             this.ui.goToGame();
             this.side = side;
             this.gameState = new GameState(gameStartTime, redPlayer, bluePlayer);
@@ -273,6 +288,14 @@ module.exports = class ClientState {
                 this.turnTimer = '00:00';
             }
         }, INTERNAL_TICK_INTERVAL);
+    }
+
+    addNeutralChat(message) {
+        this.chatbox.addMessage({
+            author: undefined,
+            content: message,
+            color: 'yellow'
+        });
     }
 
     isMyTurn() {

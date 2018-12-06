@@ -1,6 +1,6 @@
 l<template>
     <div>
-        <chat-box style="z-index: 4;" v-show="isInGame" v-bind:game="this"/>
+        <chat-box style="z-index: 4;" v-show="isInGame" v-bind:game="this" ref="chatbox"/>
         <canvas ref="ui" style="z-index: 3;" v-show="isInGame"></canvas>
         <canvas ref="ui-back" style="z-index: 2;" v-show="isInGame"></canvas>
         <canvas ref="map" style="z-index: 1;"></canvas>
@@ -51,15 +51,19 @@ module.exports = {
         const uiBackCanvas = this.$refs['ui-back'];
         const uiCanvas = this.$refs.ui;
 
+        const chatbox = this.$refs.chatbox;
+
         const ui = this.root;
         new ResourceManager((resourceManager) => {
-            const inputManager = new InputManager(mapCanvas, ui, TIME_BETWEEN_FRAMES);
+            const inputManager = new InputManager(uiCanvas, ui, TIME_BETWEEN_FRAMES,
+                () => chatbox.isFocused(),
+                () => chatbox.isMouseOverChatBox());
             const camera = new Camera(resourceManager, ui, inputManager);
             inputManager.initialize(camera);
 
             const animationManager = new AnimationManager();
 
-            const clientState = new ClientState(this.root.socket, camera, inputManager, ui, resourceManager, animationManager);
+            const clientState = new ClientState(this.root.socket, chatbox, camera, inputManager, ui, resourceManager, animationManager);
             this.clientState = clientState;
             new MapCanvas(
                 mapCanvas,

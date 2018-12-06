@@ -3,7 +3,7 @@ const { Tuple } = require('../shared/coordinates');
 require('jquery-mousewheel')($);
 
 module.exports = class InputManager {
-    constructor(canvas, ui, inputPollingTime) {
+    constructor(canvas, ui, inputPollingTime, isChatBoxFocused, isMouseOverChatBox) {
         this.canvas = canvas;
         this.ui = ui;
         this.mouseState =  {
@@ -16,6 +16,8 @@ module.exports = class InputManager {
 
             mouseDown: []
         };
+        this.isChatBoxFocused = isChatBoxFocused;
+        this.isMouseOverChatBox = isMouseOverChatBox;
         this.keyState = [];
         this.prevKeyState = [];
         this.inputPollingListeners = [];
@@ -28,10 +30,16 @@ module.exports = class InputManager {
     initialize(camera) {
         /* To capture into the closures */
         $(document).keydown((e) => {
+            if (this.isChatBoxFocused()) {
+                return;
+            }
             const code = e.keyCode || e.which;
             this.keyState[code] = true;
         });
         $(document).keyup((e) => {
+            if (this.isChatBoxFocused()) {
+                return;
+            }
             const code = e.keyCode || e.which;
             this.keyState[code] = false;
         });
@@ -58,6 +66,9 @@ module.exports = class InputManager {
             this.mouseState.mouseDown[e.which] = false;
         });
         $(document).mousewheel((event) => {
+            if (this.isMouseOverChatBox() || this.isChatBoxFocused()) {
+                return;
+            }
             this.mouseState.scrollDelta.x = event.deltaX;
             this.mouseState.scrollDelta.y = event.deltaY;
         });

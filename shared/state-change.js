@@ -464,9 +464,9 @@ class ChatMessageStateChange extends StateChange {
 
     _simulateStateChange(state) {
         state.chatMessages.push({
-            id: state.chatMessages.length,
             author: this.from === Constants.RED_SIDE ? state.redPlayer : state.bluePlayer,
             content: this.data.message,
+            color: this.from === Constants.RED_SIDE ? Constants.RED_CHAT_COLOR : Constants.BLUE_CHAT_COLOR
         });
     }
 }

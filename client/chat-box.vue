@@ -1,9 +1,14 @@
 <template>
-    <div class="chatBox">
-        <div class="messages">
-            <span v-for="message in messages" v-bind:key="message.id">
-                <b>{{ message.author }}</b>: {{ message.content }}
-            </span>
+    <div class="chatBox" ref="chatBox">
+        <div class="messages" ref="scrollBox">
+            <div v-for="(message, index) in messages"
+                v-bind:key="index"
+                v-bind:style="{ 'color': !message.author ? message.color: '#fff' }">
+                <template v-if="message.author">
+                    <b v-bind:style="{ 'color': message.color }">{{ message.author }}</b>:&nbsp;
+                </template>
+                {{ message.content }}
+            </div>
         </div>
         <input type="text" class="chatInput" @keydown="onKey" ref="chatInput">
     </div>
@@ -17,16 +22,47 @@ module.exports = {
     props: {
         game: Game
     },
-    data: {
-        messages: []
+    data() {
+        return {
+            messages: [],
+            mouseOverChatBox: false
+        };
+    },
+    updated() {
+        /* Scroll to Bottom */
+        const div = this.$refs.scrollBox;
+        div.scrollTop = div.scrollHeight;
+    },
+    mounted() {
+        this.$refs.chatBox.addEventListener('mouseenter', () => {
+            console.log('enter');
+            this.mouseOverChatBox = true;
+        });
+        this.$refs.chatBox.addEventListener('mouseleave', () => {
+            console.log('exit');
+            this.mouseOverChatBox = false;
+        });
     },
     methods: {
+        addMessage(message) {
+            console.log(message);
+            this.messages.push(message);
+        },
         onKey(e) {
             const code = e.keyCode || e.which;
             if (code === 13) {
                 this.game.sendChat(this.$refs.chatInput.value);
                 this.$refs.chatInput.value = "";
             }
+            else if (code === 27) {
+                this.$refs.chatInput.blur();
+            }
+        },
+        isFocused() {
+            return this.$refs.chatInput === document.activeElement;
+        },
+        isMouseOverChatBox() {
+            return this.mouseOverChatBox;
         }
     }
 };
@@ -58,7 +94,12 @@ div.messages {
     width: 400px;
     height: 150px;
     overflow-y: scroll;
+    font-weight: bold;
+    font-size: 14px;
+    word-wrap:break-word;
     background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 2px 6px;
 }
 input.chatInput {
     border: 0px;

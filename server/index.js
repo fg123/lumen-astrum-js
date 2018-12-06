@@ -18,7 +18,7 @@ let db;
 
 client.connect(function(err) {
     assert.equal(null, err);
-    console.log("Connected successfully to server");
+    console.log('Connected successfully to server');
     db = client.db(dbName);
 
     const port = process.env.PORT || 5000;
