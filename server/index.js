@@ -96,8 +96,16 @@ io.on('connection', function (socket) {
                     connectedUsers[socket.id].game = game;
                     connectedUsers[otherSocket.id].game = game;
                     games.push(game);
-                    socket.emit('game-start', Constants.RED_SIDE, gameStartTime);
-                    otherSocket.emit('game-start', Constants.BLUE_SIDE, gameStartTime);
+                    socket.emit('game-start',
+                        Constants.RED_SIDE,
+                        gameStartTime,
+                        connectedUsers[socket.id].username,
+                        connectedUsers[otherSocket.id].username);
+                    otherSocket.emit('game-start',
+                        Constants.BLUE_SIDE,
+                        gameStartTime,
+                        connectedUsers[socket.id].username,
+                        connectedUsers[otherSocket.id].username);
                     queue.splice(i, 1);
                     break;
                 }

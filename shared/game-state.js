@@ -10,7 +10,9 @@ const { getSurrounding, getReachable  } = require('./coordinates');
 const Data = require('./data');
 
 module.exports = class GameState {
-    constructor(gameStartTime) {
+    constructor(gameStartTime, redPlayer, bluePlayer) {
+        this.redPlayer = redPlayer;
+        this.bluePlayer = bluePlayer;
         this.mapObjects = [];
         this.redVisibility = [];
         this.blueVisibility = [];
@@ -26,6 +28,7 @@ module.exports = class GameState {
         this.redGold = Constants.STARTING_GOLD;
         this.blueGold = Constants.STARTING_GOLD;
         this.currentTurn = Constants.NONE_SIDE;
+        this.chatMessages = [];
 
         /* Setup two dimensional arrays */
         for (let i = 0; i < map.data.length; i++) {

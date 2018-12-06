@@ -8,7 +8,7 @@ module.exports = class Game {
         this.bluePlayer = bluePlayer;
         this.redSocket = redSocket;
         this.blueSocket = blueSocket;
-        this.state = new GameState(gameStartTime);
+        this.state = new GameState(gameStartTime, this.redPlayer, this.bluePlayer);
         this.stateChanges = [];
 
         this.nextTurnTimer = undefined;

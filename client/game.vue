@@ -1,5 +1,6 @@
 l<template>
     <div>
+        <chat-box style="z-index: 4;" v-show="isInGame" v-bind:game="this"/>
         <canvas ref="ui" style="z-index: 3;" v-show="isInGame"></canvas>
         <canvas ref="ui-back" style="z-index: 2;" v-show="isInGame"></canvas>
         <canvas ref="map" style="z-index: 1;"></canvas>
@@ -7,6 +8,8 @@ l<template>
 </template>
 
 <script>
+const { ChatMessageStateChange } = require('../shared/state-change.js');
+
 module.exports = {
     props: {
         root: Object
@@ -14,6 +17,19 @@ module.exports = {
     computed: {
         isInGame() {
             return this.root.currentScreen === this.root.Screen.GAME;
+        }
+    },
+    components: {
+        chatBox: require('./chat-box.vue')
+    },
+    methods: {
+        sendChat(message) {
+            this.clientState.sendStateChange(
+                ChatMessageStateChange.create(
+                    this.clientState.side,
+                    message
+                )
+            );
         }
     },
     mounted() {
@@ -44,6 +60,7 @@ module.exports = {
             const animationManager = new AnimationManager();
 
             const clientState = new ClientState(this.root.socket, camera, inputManager, ui, resourceManager, animationManager);
+            this.clientState = clientState;
             new MapCanvas(
                 mapCanvas,
                 TIME_BETWEEN_FRAMES,

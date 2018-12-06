@@ -447,11 +447,37 @@ class UnitAttackStateChange extends StateChange {
 }
 StateChange.registerSubClass(UnitAttackStateChange);
 
+class ChatMessageStateChange extends StateChange {
+    static create(from, message) {
+        return new ChatMessageStateChange(
+            StateChange.create(
+                from, 'ChatMessageStateChange', {
+                    message: message
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(/* state */) {
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        state.chatMessages.push({
+            id: state.chatMessages.length,
+            author: this.from === Constants.RED_SIDE ? state.redPlayer : state.bluePlayer,
+            content: this.data.message,
+        });
+    }
+}
+StateChange.registerSubClass(ChatMessageStateChange);
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
     SpawnUnitStateChange,
     TurnPassoverStateChange,
     MoveUnitStateChange,
-    UnitAttackStateChange
+    UnitAttackStateChange,
+    ChatMessageStateChange
 };

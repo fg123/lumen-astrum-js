@@ -206,11 +206,11 @@ module.exports = class ClientState {
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
         });
-        socket.on('game-start', (side, gameStartTime) => {
+        socket.on('game-start', (side, gameStartTime, redPlayer, bluePlayer) => {
             console.log('Game Start!');
             this.ui.goToGame();
             this.side = side;
-            this.gameState = new GameState(gameStartTime);
+            this.gameState = new GameState(gameStartTime, redPlayer, bluePlayer);
             console.log(this.side);
             if (side === Constants.RED_SIDE) {
                 this.commandCenter = this.gameState.mapObjects[
