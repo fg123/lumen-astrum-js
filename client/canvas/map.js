@@ -334,6 +334,7 @@ module.exports = class MapCanvas {
     }
 
     drawMap() {
+        const healthbarsToDraw = [];
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
             y < Math.min(map.data.length, this.drawContext.bottomRightVisible.y); y++) {
             for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
@@ -435,11 +436,11 @@ module.exports = class MapCanvas {
                             }
                         }
                         if (allVisible) {
-                            this.drawHealthAndShieldBar(
-                                actualDrawnPosition.x,
-                                actualDrawnPosition.y - 24 - ((mapObject.width + 0.5) * 111),
+                            healthbarsToDraw.push({
+                                x: actualDrawnPosition.x,
+                                y: actualDrawnPosition.y - 24 - ((mapObject.width + 0.5) * 111),
                                 mapObject
-                            );
+                            });
                         }
                     }
                 }
@@ -567,5 +568,13 @@ module.exports = class MapCanvas {
                 }
             }
         }
+
+        healthbarsToDraw.forEach(healthbar => {
+            this.drawHealthAndShieldBar(
+                healthbar.x,
+                healthbar.y,
+                healthbar.mapObject
+            );
+        });
     }
 };
