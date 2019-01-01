@@ -344,26 +344,27 @@ module.exports = class MapCanvas {
                     if (x % 2 === 1) {
                         yOffset = 55;
                     }
-                    this.context.globalCompositeOperation = 'destination-over';
-                    // Overlays
-                    // Drawn first because of Destination Over
-                    if (this.hasSelectedConstructionBuildingAndIsAllowed(x, y)) {
-                        this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
-                            (x * 96),
-                            (y * 111) + yOffset);
-                    }
-
-                    this.drawImage(this.resourceManager.get(
-                        tiles[map.data[y][x].displayType - 1]
-                    ), (x * 96), (y * 111) + yOffset);
-
-                    this.context.globalCompositeOperation = 'source-over';
-                    if (this.ui.currentScreen === this.ui.Screen.GAME) {
-                        if (!this.state.gameState.isVisible(x, y, this.state.side)) {
-                            this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
+                    if (this.ui.currentScreen !== this.ui.Screen.GAME ||
+                        this.state.gameState.isVisible(x, y, this.state.side)) {
+                        this.context.globalCompositeOperation = 'destination-over';
+                        // Overlays
+                        // Drawn first because of Destination Over
+                        if (this.hasSelectedConstructionBuildingAndIsAllowed(x, y)) {
+                            this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
                                 (x * 96),
                                 (y * 111) + yOffset);
                         }
+
+                        this.drawImage(this.resourceManager.get(
+                            tiles[map.data[y][x].displayType - 1]
+                        ), (x * 96), (y * 111) + yOffset);
+
+                        this.context.globalCompositeOperation = 'source-over';
+                    }
+                    else {
+                        this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
+                            (x * 96),
+                            (y * 111) + yOffset);
                     }
                     if (this.ui.currentScreen === this.ui.Screen.GAME &&
                         this.state.gameState.mapObjects[y][x]) {
