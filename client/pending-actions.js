@@ -12,8 +12,8 @@ class PendingAction {
 const { Resource } = require('./resources');
 const { withinMap, map } = require('../shared/map');
 const { getBaseObject } = require('../shared/data');
-const { getSurrounding } = require('../shared/coordinates');
-const { BuildStructureStateChange, SpawnUnitStateChange } = require('../shared/state-change');
+const { getSurrounding, tupleDistance } = require('../shared/coordinates');
+const { BuildStructureStateChange, SpawnUnitStateChange, HealUnitStateChange } = require('../shared/state-change');
 
 class PlaceUnitPendingAction extends PendingAction {
     constructor(unitName) {
@@ -87,6 +87,7 @@ class PlaceStructurePendingAction extends PendingAction {
             mapCanvas.state.selectedObject
         ).verifyStateChange(mapCanvas.state.gameState);
 
+        // Draw Object to be Placed
         let baseObj = getBaseObject(this.structureName);
         let surrounding = getSurrounding(mapCanvas.inputManager.mouseState.tile, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
@@ -101,6 +102,20 @@ class PlaceStructurePendingAction extends PendingAction {
                     this.isValid ? Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
                 (surrounding[i].x * 96),
                 (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+            }
+        }
+
+        // Draw Building Range
+        if (mapCanvas.state.selectedObject.isUnit) {
+            surrounding = getSurrounding(mapCanvas.state.selectedObject.position, 1);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (withinMap(surrounding[i]) &&
+                    !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
+                    map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
+                    mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
+                        (surrounding[i].x * 96),
+                        (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+                }
             }
         }
     }
@@ -120,7 +135,54 @@ class PlaceStructurePendingAction extends PendingAction {
     }
 }
 
+const ChooseUnitType = { FRIENDY: 'Friendly', ENEMY: 'Enemy', BOTH: 'Any' };
+
+class HealUnitPendingAction extends PendingAction {
+    constructor() {
+        super(1, ChooseUnitType.FRIENDY, false, 'Heal Unit');
+    }
+
+    _onTick(mapCanvas) {
+        mapCanvas.state.cursorMessage = 'Choose Friendly Unit to Heal';
+
+        this.isValid = HealUnitStateChange.create(
+            mapCanvas.state.side,
+            mapCanvas.state.selectedObject.position,
+            mapCanvas.state.inputManager.mouseState.tile
+        ).verifyStateChange(mapCanvas.state.gameState);
+
+        if (this.isValid) {
+            mapCanvas.state.cursorMessage = 'Heal Unit';
+        }
+
+        let surrounding = getSurrounding(mapCanvas.state.selectedObject.position, this.range);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i]) &&
+                !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
+                map.data[surrounding[i].y][surrounding[i].x].displayType !== 2) {
+                mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
+                    (surrounding[i].x * 96),
+                    (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+            }
+        }
+    }
+
+    _onClick(state) {
+        if (this.isValid) {
+            state.sendStateChange(
+                HealUnitStateChange.create(
+                    state.side,
+                    state.selectedObject.position,
+                    state.inputManager.mouseState.tile
+                )
+            );
+        }
+        return this.isValid;
+    }
+}
+
 module.exports = {
     PlaceUnitPendingAction,
-    PlaceStructurePendingAction
+    PlaceStructurePendingAction,
+    HealUnitPendingAction
 };

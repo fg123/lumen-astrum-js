@@ -14,7 +14,8 @@ const {
 
 const {
     PlaceUnitPendingAction,
-    PlaceStructurePendingAction
+    PlaceStructurePendingAction,
+    HealUnitPendingAction
 } = require('./pending-actions');
 
 const GameState = require('../shared/game-state');
@@ -333,6 +334,24 @@ module.exports = class ClientState {
         case 'build':
             this.pendingAction = new PlaceStructurePendingAction(parts[1]);
             break;
+        case 'custom':
+            // Dispatch Custom Function Call
+            this.customActionDispatch(parts[1]);
+            break;
+        }
+        return;
+    }
+
+    customActionDispatch(name) {
+        switch (name) {
+        case 'healUnit': {
+            if (this.selectedObject.attacksThisTurn === 0) {
+                this.pushAlertMessage('Already healed this turn!');
+                break;
+            }
+            this.pendingAction = new HealUnitPendingAction();
+            break;
+        }
         }
         return;
     }
@@ -386,25 +405,34 @@ module.exports = class ClientState {
         return false;
     }
 
+    getHoveredObjectOrNull() {
+        if (withinMap(this.inputManager.mouseState.tile)) {
+            let obj = null;
+            let occupiedPoint = this.gameState.occupied[
+                this.inputManager.mouseState.tile.y][this.inputManager.mouseState.tile.x];
+            // Check that it's actually occupied by an object
+            if (occupiedPoint && occupiedPoint !== true) {
+                obj = this.gameState.mapObjects[occupiedPoint.y][occupiedPoint.x];
+            }
+            return obj;
+        }
+        return null;
+    }
+
     gameObjectClickEvent(button) {
         if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
         if (button === LEFT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
             if (this.pendingAction) {
                 const result = this.pendingAction.onClick(this);
                 this.pendingAction = null;
-                return result;
-            }
-            else {
-                let obj = null;
-                let occupiedPoint = this.gameState.occupied[
-                    this.inputManager.mouseState.tile.y][this.inputManager.mouseState.tile.x];
-                // Check that it's actually occupied by an object
-                if (occupiedPoint && occupiedPoint !== true) {
-                    obj = this.gameState.mapObjects[occupiedPoint.y][occupiedPoint.x];
+                if (result) {
+                    return true;
                 }
-                this.selectObject(obj);
-                return true;
             }
+
+            let obj = this.getHoveredObjectOrNull();
+            this.selectObject(obj);
+            return true;
         }
         if (button === RIGHT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
             // Potential Attack

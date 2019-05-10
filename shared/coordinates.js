@@ -19,6 +19,10 @@ class Tuple {
         return JSON.stringify(this);
     }
 
+    distance(other) {
+        return this.toCubeCoordinates().distance(new Tuple(other.x, other.y).toCubeCoordinates());
+    }
+
     toTileCoord() {
         const XYVertex = false;
         const s = 64;
@@ -101,6 +105,10 @@ class Triple {
     hash() {
         return JSON.stringify(this);
     }
+
+    distance(other) {
+        return (Math.abs(this.x - other.x) + Math.abs(this.y - other.y) + Math.abs(this.z - other.z)) / 2;
+    }
 }
 
 module.exports.Triple = Triple;
@@ -146,4 +154,8 @@ module.exports.getReachable = (start, max, isBlock) => {
         });
     }
     return result;
+};
+
+module.exports.tupleDistance = (a, b) => {
+    return new Tuple(a.x, a.y).distance(b);
 };

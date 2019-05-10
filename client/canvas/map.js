@@ -387,24 +387,45 @@ module.exports = class MapCanvas {
                         let actualDrawnPosition = new Tuple(
                             (x * 96), (y * 111) + yOffset
                         );
+
+                        /* Hide whatever portion should not be visible */
+                        let allVisible = true;
+                        let anyVisible = false;
+                        const surrounding = getSurrounding(mapObject.position, mapObject.width);
+                        for (let i = 0; i < surrounding.length; i++) {
+                            /* Every node here must be withinMap for mapObject
+                             * to have been constructed */
+                            if (!this.state.gameState.isVisible(
+                                surrounding[i].x,
+                                surrounding[i].y,
+                                this.state.side
+                            )) {
+                                allVisible = false;
+                            } else {
+                                anyVisible = true;
+                            }
+                        }
+
                         if (animationManager.hasAnimation()) {
                             const possiblePositionChange =
                                 animationManager.draw(this, actualDrawnPosition);
                             if (possiblePositionChange) {
                                 /* No animation drew! */
-                                if (name in structures) {
-                                    this.drawImage(structures[name].image,
-                                        possiblePositionChange.x, possiblePositionChange.y);
-                                }
-                                else if (name in units) {
-                                    this.drawImage(units[name].image,
-                                        possiblePositionChange.x, possiblePositionChange.y);
+                                if (anyVisible) {
+                                    if (name in structures) {
+                                        this.drawImage(structures[name].image,
+                                            possiblePositionChange.x, possiblePositionChange.y);
+                                    }
+                                    else if (name in units) {
+                                        this.drawImage(units[name].image,
+                                            possiblePositionChange.x, possiblePositionChange.y);
+                                    }
                                 }
                                 actualDrawnPosition = possiblePositionChange;
                             }
                             animationManager.tick();
                         }
-                        else {
+                        else if (anyVisible) {
                             if (mapObject.turnsUntilBuilt === 0) {
                                 if (name in structures) {
                                     this.drawImage(structures[name].image, (x * 96), (y * 111) + yOffset);
@@ -430,12 +451,9 @@ module.exports = class MapCanvas {
                             // this.context.shadowBlur = 0;
                         }
 
-                        /* Hide whatever portion should not be visible */
-                        let allVisible = true;
-                        const surrounding = getSurrounding(mapObject.position, mapObject.width);
+                        // Now we hide any bits of a building that isn't supposed to be
+                        // showing
                         for (let i = 0; i < surrounding.length; i++) {
-                            /* Every node here must be withinMap for mapObject
-                             * to have been constructed */
                             if (!this.state.gameState.isVisible(
                                 surrounding[i].x,
                                 surrounding[i].y,
@@ -444,9 +462,9 @@ module.exports = class MapCanvas {
                                 this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                                     (surrounding[i].x * 96),
                                     (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));
-                                allVisible = false;
                             }
                         }
+
                         if (allVisible) {
                             healthbarsToDraw.push({
                                 x: actualDrawnPosition.x,
@@ -511,7 +529,8 @@ module.exports = class MapCanvas {
                     let isMouseOverAttackRange = false;
                     for (let i = 0; i < this.state.unitAttackRange.length; i++) {
                         if (withinMap(this.state.unitAttackRange[i]) &&
-                        !this.state.gameState.occupied[this.state.unitAttackRange[i].y][this.state.unitAttackRange[i].x]) {
+                        !this.state.gameState.occupied[this.state.unitAttackRange[i].y][this.state.unitAttackRange[i].x] &&
+                        !this.state.pendingAction) {
                             this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
                                 (this.state.unitAttackRange[i].x * 96),
                                 (this.state.unitAttackRange[i].y * 111) + (this.state.unitAttackRange[i].x % 2) * 55);

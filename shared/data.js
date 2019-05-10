@@ -448,8 +448,8 @@ const units = {
     },
     'Medic': {
         'advantagedamage': 0,
-        'attackrange': 1,
-        'damage': 15,
+        'attackrange': 0,
+        'damage': 0,
         'description': 'Support unit. Heals friendly units.',
         'health': 18,
         'moverange': 3,
@@ -466,11 +466,12 @@ const units = {
             'type': 'Action',
             'description': 'Heal a Friendly Unit',
             'icon': '{Medic}',
-            'command': function() {
-
-            }
+            'command': 'custom-healUnit'
         }],
-        'unitclass': 'Medical, Biological'
+        'unitclass': 'Medical, Biological',
+        'custom': {
+            'healFor': 15
+        }
     },
     'Pioneers': {
         'advantage': 'Biological',

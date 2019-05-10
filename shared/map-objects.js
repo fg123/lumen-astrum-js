@@ -30,7 +30,7 @@ module.exports.Unit = class {
         this.position = position;
         this.turnsUntilBuilt = Data.units[name].turnsToBuild;
         this.width = 0;
-        this.currentHealth = Data.units[name].health;
+        this.currentHealth = Data.units[name].health - 10;
         this.currentShield = Data.units[name].shield;
         this.maxHealth = Data.units[name].health;
         this.maxShield = Data.units[name].shield;
@@ -51,6 +51,9 @@ module.exports.Unit = class {
         this.moveRange = Data.units[name].moverange;
         this.maxMoveRange = Data.units[name].moverange;
         this.attacksThisTurn = 0;
+
+        /* This stores any unit specific custom data */
+        this.custom = Data.units[name].custom;
     }
 
     get sightRange() { return this.__sightRange__; }

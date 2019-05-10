@@ -42,7 +42,7 @@ StateChange.subClasses = {};
 
 /* Helper Functions */
 const { getBaseObject } = require('./data');
-const { Tuple, getSurrounding } = require('./coordinates');
+const { Tuple, getSurrounding, tupleDistance } = require('./coordinates');
 const { withinMap, map, Tiles } = require('./map');
 const PathFinder = require('./path-finder');
 const Data = require('./data');
@@ -133,14 +133,7 @@ class BuildStructureStateChange extends StateChange {
             if (builder.name !== 'Combat Engineer') {
                 return false;
             }
-            let surrounding = getSurrounding(builder.position, 1);
-            let found = false;
-            for (let i = 0; i < surrounding.length; i++) {
-                if (surrounding[i].equals(this.data.position)) {
-                    found = true;
-                }
-            }
-            if (!found) {
+            if (tupleDistance(builder.position, this.data.position) !== 1) {
                 return false;
             }
         }
@@ -347,7 +340,7 @@ class TurnPassoverStateChange extends StateChange {
             state.redTurnCount++;
         }
 
-        console.log('Seconds for turn: ' + state.calculateNextTurnAvailableTime(state.currentTurn));
+        console.log('Seconds for turn: ' + state.calculateNextTurnAvailableTime(state.currentTurn) / 1000);
         state.turnEndTime = Date.now() +
             state.calculateNextTurnAvailableTime(state.currentTurn);
 
@@ -472,6 +465,70 @@ class ChatMessageStateChange extends StateChange {
 }
 StateChange.registerSubClass(ChatMessageStateChange);
 
+class HealUnitStateChange extends StateChange {
+    static create(from, posFrom, posTo) {
+        return new HealUnitStateChange(
+            StateChange.create(
+                from, 'HealUnitStateChange', {
+                    posFrom,
+                    posTo
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+            return false;
+        }
+        /* Is there a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+
+        /* Is that a medic? */
+        if (unit.name !== 'Medic') return false;
+
+        /* Does this unit have any attacks left?
+            (We use attack here to track once a turn activity.) */
+        if (unit.attacksThisTurn === 0) {
+            return false;
+        }
+
+        /* Is the attack destination a mapObject that belongs to me? */
+        const target = state.mapObjects[this.data.posTo.y][this.data.posTo.x];
+        if (target === undefined) {
+            return false;
+        }
+        if (!target.isUnit) return false;
+        if (target.side === this.opponentSide) return false;
+
+        /* No point healing someone with full health! */
+        if (target.currentHealth === target.maxHealth) return false;
+
+        /* Is the target in the range? */
+        if (tupleDistance(this.data.posFrom, this.data.posTo) !== 1) {
+            return false;
+        }
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        const target = state.mapObjects[this.data.posTo.y][this.data.posTo.x];
+
+        unit.attacksThisTurn -= 1;
+        target.currentHealth += unit.custom.healFor;
+        if (target.currentHealth > target.maxHealth) {
+            target.currentHealth = target.maxHealth;
+        }
+    }
+}
+StateChange.registerSubClass(HealUnitStateChange);
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
@@ -479,5 +536,6 @@ module.exports = {
     TurnPassoverStateChange,
     MoveUnitStateChange,
     UnitAttackStateChange,
-    ChatMessageStateChange
+    ChatMessageStateChange,
+    HealUnitStateChange
 };

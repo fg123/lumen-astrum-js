@@ -7,7 +7,7 @@ class Tile {
     }
 }
 
-const map = require('./maps/big.js');
+const map = require('./maps/small.js');
 const { Tuple, getSurrounding } = require('./coordinates');
 
 console.log('Loading map...');

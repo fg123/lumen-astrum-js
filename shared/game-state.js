@@ -206,7 +206,14 @@ module.exports = class GameState {
 
     isTierSatisfied(name, side) {
         /* Are tier requirements for *name* satisfied? */
-        const object = Data.getBaseObject(name);
+        let object = null;
+        try {
+            object = Data.getBaseObject(name);
+        }
+        catch (e) {
+            // name passed isn't even a actual unit / structure
+            return true;
+        }
         const tier = object.tier || 0;
         if (tier < 2) {
             return true;
@@ -325,7 +332,8 @@ module.exports = class GameState {
             return [];
         }
         return getSurrounding(object.position, object.attackRange).filter(
-            pos => withinMap(pos) && this.isVisible(pos.x, pos.y, object.side));
+            pos => withinMap(pos) && this.isVisible(pos.x, pos.y, object.side)
+            && !pos.equals(unitPos));
     }
 
     getWinner() {
