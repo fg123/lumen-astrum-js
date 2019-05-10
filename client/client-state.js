@@ -6,8 +6,6 @@ const {
 } = require('../shared/map');
 const {
     StateChange,
-    BuildStructureStateChange,
-    SpawnUnitStateChange,
     MoveUnitStateChange,
     TurnPassoverStateChange,
     ChatMessageStateChange,

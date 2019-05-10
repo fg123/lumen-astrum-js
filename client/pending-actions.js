@@ -50,7 +50,7 @@ class PlaceUnitPendingAction extends PendingAction {
             if (withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
-                    mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.YELLOW_OVERLAY),
+                mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.YELLOW_OVERLAY),
                     (surrounding[i].x * 96),
                     (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
             }
