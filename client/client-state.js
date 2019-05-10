@@ -13,6 +13,12 @@ const {
     ChatMessageStateChange,
     UnitAttackStateChange
 } = require('../shared/state-change');
+
+const {
+    PlaceUnitPendingAction,
+    PlaceStructurePendingAction
+} = require('./pending-actions');
+
 const GameState = require('../shared/game-state');
 const { Tuple } = require('../shared/coordinates');
 const PathFinder = require('../shared/path-finder');
@@ -59,9 +65,7 @@ module.exports = class ClientState {
         this.unitAttackRange = [];
         this.canCurrentUnitAttackPosition = false;
         this.canCurrentUnitMoveToPosition = false;
-        this.buildingStructure = null;
-        this.spawningUnit = null;
-        this.allowedToBuildOrSpawn = false;
+        this.pendingAction = null;
         this.hoveringEndTurn = false;
         this.turnTimer = '';
         this.cursorMessage = '';
@@ -80,9 +84,8 @@ module.exports = class ClientState {
                 this.camera.delta.y = CAMERA_SPEED;
             }
             if (keyState[KEY_ESCAPE] && !prevKeyState[KEY_ESCAPE]) {
-                if (this.buildingStructure || this.spawningUnit) {
-                    this.buildingStructure = null;
-                    this.spawningUnit = null;
+                if (this.pendingAction) {
+                    this.pendingAction = null;
                 }
                 else if (this.selectedObject) {
                     this.selectedObject = null;
@@ -124,8 +127,7 @@ module.exports = class ClientState {
                 .deserialize(stateChange);
 
             if (change instanceof TurnPassoverStateChange) {
-                this.buildingStructure = null;
-                this.spawningUnit = null;
+                this.pendingAction = null;
                 /* Spawn Animations for buildings being constructed */
                 const animationSpawner = mapObject => {
                     if (mapObject.side === change.from) {
@@ -261,22 +263,6 @@ module.exports = class ClientState {
         this.internalTick = setInterval(() => {
             /* This just sets up some internal checks as the game goes on for
              * UI purposes */
-            if (this.buildingStructure) {
-                this.allowedToBuildOrSpawn = BuildStructureStateChange.create(
-                    this.side,
-                    this.buildingStructure,
-                    this.inputManager.mouseState.tile,
-                    this.selectedObject
-                ).verifyStateChange(this.gameState);
-            }
-            else if (this.spawningUnit) {
-                this.allowedToBuildOrSpawn = SpawnUnitStateChange.create(
-                    this.side,
-                    this.spawningUnit,
-                    this.inputManager.mouseState.tile,
-                    this.selectedObject
-                ).verifyStateChange(this.gameState);
-            }
             if (this.gameState && this.gameState.currentTurn === this.side) {
                 let diff = this.gameState.turnEndTime - Date.now();
                 // Diff in Millis
@@ -344,12 +330,10 @@ module.exports = class ClientState {
 
         switch (parts[0]) {
         case 'spawn':
-            this.spawningUnit = parts[1];
-            this.buildingStructure = null;
+            this.pendingAction = new PlaceUnitPendingAction(parts[1]);
             break;
         case 'build':
-            this.buildingStructure = parts[1];
-            this.spawningUnit = null;
+            this.pendingAction = new PlaceStructurePendingAction(parts[1]);
             break;
         }
         return;
@@ -383,8 +367,7 @@ module.exports = class ClientState {
     }
 
     selectObject(object) {
-        this.buildingStructure = null;
-        this.spawningUnit = null;
+        this.pendingAction = null;
         this.selectedObject = object;
         if (object && object.isUnit) {
             this.unitMoveRange = this.gameState.getUnitMovementTiles(object.position);
@@ -408,34 +391,10 @@ module.exports = class ClientState {
     gameObjectClickEvent(button) {
         if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
         if (button === LEFT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
-            // Could be a Placement
-            if (this.buildingStructure || this.spawningUnit) {
-                if (this.allowedToBuildOrSpawn) {
-                    if (this.buildingStructure) {
-                        this.sendStateChange(
-                            BuildStructureStateChange.create(
-                                this.side,
-                                this.buildingStructure,
-                                this.inputManager.mouseState.tile,
-                                this.selectedObject
-                            )
-                        );
-                    }
-                    else {
-                        this.sendStateChange(
-                            SpawnUnitStateChange.create(
-                                this.side,
-                                this.spawningUnit,
-                                this.inputManager.mouseState.tile,
-                                this.selectedObject
-                            )
-                        );
-                    }
-                    this.buildingStructure = null;
-                    this.spawningUnit = null;
-                    return true;
-                }
-                return false;
+            if (this.pendingAction) {
+                const result = this.pendingAction.onClick(this);
+                this.pendingAction = null;
+                return result;
             }
             else {
                 let obj = null;

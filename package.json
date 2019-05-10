@@ -45,6 +45,6 @@
     "jshint": "^2.9.6",
     "prettier-eslint": "^8.8.2",
     "vueify": "^9.4.1",
-    "watchify": "^3.11.0"
+    "watchify": "^3.11.1"
   }
 }

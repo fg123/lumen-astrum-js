@@ -39,7 +39,7 @@ module.exports = class Game {
                 clearTimeout(this.nextTurnTimer);
             }
 
-            console.log('Seconds for turn: ' + this.state.calculateNextTurnAvailableTime(nextSide));
+            console.log('Seconds for turn: ' + this.state.calculateNextTurnAvailableTime(nextSide) / 1000);
             this.nextTurnTimer = setTimeout(() => {
                 this.processStateChange(
                     TurnPassoverStateChange.create(nextSide, false));

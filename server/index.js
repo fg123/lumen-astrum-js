@@ -36,6 +36,8 @@ function generateHash(string) {
     return crypto.createHash('sha512').update(string).digest('hex');
 }
 
+console.log(generateHash('test'));
+
 app.use('/', express.static(__dirname + '/../client/dist'));
 app.use('/resources', express.static(__dirname + '/../client/resources'));
 

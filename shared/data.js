@@ -459,7 +459,17 @@ const units = {
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,
-        'options': [],
+        'options': [{
+            'title': 'Heal Unit',
+            'cost': 0,
+            'prereq': [],
+            'type': 'Action',
+            'description': 'Heal a Friendly Unit',
+            'icon': '{Medic}',
+            'command': function() {
+
+            }
+        }],
         'unitclass': 'Medical, Biological'
     },
     'Pioneers': {

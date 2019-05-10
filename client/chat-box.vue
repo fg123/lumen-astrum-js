@@ -35,11 +35,9 @@ module.exports = {
     },
     mounted() {
         this.$refs.chatBox.addEventListener('mouseenter', () => {
-            console.log('enter');
             this.mouseOverChatBox = true;
         });
         this.$refs.chatBox.addEventListener('mouseleave', () => {
-            console.log('exit');
             this.mouseOverChatBox = false;
         });
     },

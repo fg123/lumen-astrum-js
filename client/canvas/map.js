@@ -240,8 +240,13 @@ module.exports = class MapCanvas {
             if (this.objectOnMySide(this.state.selectedObject) &&
                 this.state.selectedObject.turnsUntilBuilt === 0) {
                 for (let i = 0; i < baseObj.options.length; i++) {
+                    // Set Icon: icon can be {UnitName/StructureName} or {x,y}
                     const optionIcon = baseObj.options[i].icon.slice(1, -1);
-                    const clipIcon = this.getIconClipStart(optionIcon);
+                    const clipIcon = isNaN(optionIcon[0]) ?
+                        this.getIconClipStart(optionIcon) : (() => {
+                            const split = optionIcon.split(',');
+                            return new Tuple(48 * Number(split[0]), 48 * Number(split[1]));
+                        })();
                     const pos = new Tuple(176 + i * 48, screenHeight - 48);
                     this.context.drawImage(
                         this.resourceManager.get(Resource.UI_ICONS),
@@ -278,8 +283,14 @@ module.exports = class MapCanvas {
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
                         this.drawText(baseObj.options[i].title, 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
                         this.drawText('Ø' + baseObj.options[i].cost, 'white', 16, dialogPos.x + dialogSize.x - 5, dialogPos.y + 20, 'right', 'bold');
-                        const descSrc = baseObj.options[i].description.slice(1, -1);
-                        const desc = descSrc in structures ? structures[descSrc].description : units[descSrc].description;
+
+                        // Set Description
+                        let desc = baseObj.options[i].description;
+                        if (desc[0] === '{') {
+                            // Pull from Unit / Structure source
+                            const descSrc = desc.slice(1, -1);
+                            desc = descSrc in structures ? structures[descSrc].description : units[descSrc].description;
+                        }
                         this.drawText(desc, 'white', 16, dialogPos.x + 5, dialogPos.y + 40, 'left', '', dialogSize.x - 10);
                         this.state.hoveredOption = baseObj.options[i];
                     }
@@ -451,52 +462,8 @@ module.exports = class MapCanvas {
         this.drawGlobalAnimations();
 
         this.state.cursorMessage = '';
-        if (this.state.buildingStructure) {
-            let baseObj = getBaseObject(this.state.buildingStructure);
-            let surrounding = getSurrounding(this.inputManager.mouseState.tile, baseObj.width);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i])) {
-                    if (this.state.allowedToBuildOrSpawn) {
-                        this.state.cursorMessage = 'Build ' + this.state.buildingStructure;
-                    }
-                    else {
-                        this.state.cursorMessage = 'Cannot build there!';
-                    }
-                    this.drawImage(this.resourceManager.get(
-                        this.state.allowedToBuildOrSpawn ?
-                            Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
-                    (surrounding[i].x * 96),
-                    (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
-                }
-            }
-        }
-        else if (this.state.spawningUnit) {
-            if (withinMap(this.inputManager.mouseState.tile)) {
-                if (this.state.allowedToBuildOrSpawn) {
-                    this.state.cursorMessage = 'Spawn ' + this.state.spawningUnit;
-                }
-                else {
-                    this.state.cursorMessage = 'Cannot spawn there!';
-                }
-                this.drawImage(this.resourceManager.get(
-                    this.state.allowedToBuildOrSpawn ?
-                        Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
-                (this.inputManager.mouseState.tile.x * 96),
-                (this.inputManager.mouseState.tile.y * 111) + (this.inputManager.mouseState.tile.x % 2) * 55);
-            }
-
-            let baseObj = getBaseObject(this.state.selectedObject.name);
-            let surrounding = getSurrounding(this.state.selectedObject.position,
-                baseObj.width + 1);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i]) &&
-                    !this.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
-                    map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
-                    this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
-                        (surrounding[i].x * 96),
-                        (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
-                }
-            }
+        if (this.state.pendingAction) {
+            this.state.pendingAction.onTick(this);
         }
 
         this.state.canCurrentUnitMoveToPosition = false;
