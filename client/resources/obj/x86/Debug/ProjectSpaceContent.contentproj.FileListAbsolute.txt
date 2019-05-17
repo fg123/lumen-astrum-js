@@ -1,3 +1,0 @@
-D:\Documents\Visual Studio 2012\ProjectSpace\trunk\ProjectSpace\ProjectSpaceContent\obj\x86\Debug\ProjectSpaceContent.contentprojResolveAssemblyReference.cache
-C:\Users\felix\Desktop\Lumen\trunk\ProjectSpace\ProjectSpaceContent\obj\x86\Debug\ProjectSpaceContent.contentprojResolveAssemblyReference.cache
-D:\Documents\Visual Studio\ProjectSpace\trunk\ProjectSpace\ProjectSpaceContent\obj\x86\Debug\ProjectSpaceContent.contentprojResolveAssemblyReference.cache
