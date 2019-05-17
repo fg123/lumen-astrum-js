@@ -9,6 +9,8 @@ const MINIMAP_DISPLAY_SIZE = new Tuple(256, 144);
 
 const LEFT_MOUSE_BUTTON = 1;
 
+const INTERNAL_TICK_INTERVAL = 16;
+
 module.exports = class Camera {
     constructor(resourceManager, ui, inputManager) {
         this.resourceManager = resourceManager;
@@ -78,7 +80,7 @@ module.exports = class Camera {
         }
         this.tick = window.setInterval(() => {
             this.tickCamera(window.innerWidth, window.innerHeight);
-        }, 32);
+        }, INTERNAL_TICK_INTERVAL);
         this.position = new Tuple(500, 500);
         this.tickCamera(window.innerWidth, window.innerHeight);
     }

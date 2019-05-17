@@ -14,6 +14,7 @@ console.log('Loading map...');
 map.data = map.data.map(row => row.split(' ').map(tile => new Tile(tile)));
 
 const Tiles =  {
+    NONE: 0,
     DEFAULT: 1,
     BRUSH: 2,
     MINERAL: 3,
@@ -35,7 +36,8 @@ const applyHighGroundGroup = (start, group) => {
         const current = nodes[0];
         nodes.splice(0, 1);
         const tile = map.data[current.y][current.x];
-        if (tile.displayType === Tiles.ROCK || tile.displayType === Tiles.LOW || tile.highGroundGroup >= 0) {
+        if (tile.displayType === Tiles.NONE || tile.displayType === Tiles.ROCK ||
+            tile.displayType === Tiles.LOW || tile.highGroundGroup >= 0) {
             continue;
         }
         Array.prototype.push.apply(nodes, getSurrounding(current, 1).filter(withinMap));

@@ -8,7 +8,9 @@ module.exports = class ResourceManager {
         this.resources = {};
         this.deferArr = [];
         this.loadResources(this.deferArr);
-        $.when(...this.deferArr).then(() => { onDone(this); });
+        $.when(...this.deferArr).then(() => {
+            onDone(this);
+        });
     }
 
     get(key) {

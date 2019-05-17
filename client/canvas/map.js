@@ -147,11 +147,16 @@ module.exports = class MapCanvas {
     drawImage(img, x, y, width = -1, height = -1, angle = 0) {
         if (width === -1) width = img.width;
         if (height === -1) height = img.height;
-        this.context.translate(x, y);
-        this.context.rotate(angle);
-        this.context.drawImage(img, -width / 2, -height / 2, width, height);
-        this.context.rotate(-angle);
-        this.context.translate(-x, -y);
+        if (angle === 0) {
+            this.context.drawImage(img, x - width / 2, y - height / 2);
+        }
+        else {
+            this.context.translate(x, y);
+            this.context.rotate(angle);
+            this.context.drawImage(img, -width / 2, -height / 2, width, height);
+            this.context.rotate(-angle);
+            this.context.translate(-x, -y);
+        }
     }
 
     drawRectangle(color, x, y, width, height) {
@@ -350,7 +355,7 @@ module.exports = class MapCanvas {
             y < Math.min(map.data.length, this.drawContext.bottomRightVisible.y); y++) {
             for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
                 x < Math.min(map.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
-                if (map.data[y][x].displayType != 0) {
+                if (map.data[y][x].displayType !== 0) {
                     let yOffset = 0;
                     if (x % 2 === 1) {
                         yOffset = 55;
