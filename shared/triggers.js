@@ -1,6 +1,7 @@
-const { map, Tiles } = require('./map');
+const { map, Tiles, findTarget, replenishShield } = require('./map');
 const Constants = require('./constants');
 const { units, structures } = require('./data');
+const { getSurrounding } = require('./coordinates');
 
 const triggers = {
     'Harvester': {
@@ -21,6 +22,18 @@ const triggers = {
             }
             else {
                 state.blueGold += gain;
+            }
+        }
+    },
+    'Maintenance Drone': {
+        onTurnStart(state) {
+            // Range 3, double shield regeneration
+            const range = getSurrounding(this.position, 3);
+            for (let i = 0; i < range.length; i++) {
+                const target = findTarget(state, range[i]);
+                if (target && target.side === this.side) {
+                    replenishShield(target);
+                }
             }
         }
     },

@@ -80,9 +80,38 @@ const getVisible = (point, sightRange) => {
     return surrounding;
 };
 
+const findTargetPos = (state, pos) => {
+    let target = state.mapObjects[pos.y][pos.x];
+    if (target === undefined) {
+        /* No direct target, check for occupied mapping */
+        const occupiedPoint = state.occupied[pos.y][pos.x];
+        if (occupiedPoint && occupiedPoint !== true) {
+            return occupiedPoint;
+        }
+    }
+    return pos;
+};
+
+const findTarget = (state, pos) => {
+    const targetPos = findTargetPos(state, pos);
+    let target = state.mapObjects[targetPos.y][targetPos.x];
+    return target;
+};
+
+const replenishShield = (mapObject) => {
+    const shieldToReplenish = Math.ceil(mapObject.maxShield / 10);
+    mapObject.currentShield += shieldToReplenish;
+    if (mapObject.currentShield > mapObject.maxShield) {
+        mapObject.currentShield = mapObject.maxShield;
+    }
+};
+
 module.exports = {
     map,
     Tiles,
     withinMap,
-    getVisible
+    getVisible,
+    findTargetPos,
+    findTarget,
+    replenishShield
 };

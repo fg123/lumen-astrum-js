@@ -1,4 +1,5 @@
 const Constants = require('./constants');
+const { findTarget, findTargetPos, replenishShield } = require('./map');
 
 class StateChange {
     constructor(stateChange) {
@@ -264,14 +265,6 @@ class TurnPassoverStateChange extends StateChange {
         return state.currentTurn === this.from;
     }
 
-    replenishShield(mapObject) {
-        const shieldToReplenish = Math.ceil(mapObject.maxShield / 10);
-        mapObject.currentShield += shieldToReplenish;
-        if (mapObject.currentShield > mapObject.maxShield) {
-            mapObject.currentShield = mapObject.maxShield;
-        }
-    }
-
     isBuilt(mapObject) {
         return mapObject.turnsUntilBuilt === 0;
     }
@@ -282,7 +275,7 @@ class TurnPassoverStateChange extends StateChange {
             const structure = state.structures[i];
             /* Shield replenished on the start of the turn */
             if (structure.side === this.opponentSide) {
-                this.replenishShield(structure);
+                replenishShield(structure);
                 if (this.isBuilt(structure) && structure.onTurnStart) {
                     structure.onTurnStart(state);
                 }
@@ -309,7 +302,7 @@ class TurnPassoverStateChange extends StateChange {
             /* Reset attack */
             unit.attacksThisTurn = 1;
             if (unit.side === this.opponentSide) {
-                this.replenishShield(unit);
+                replenishShield(unit);
                 if (this.isBuilt(unit) && unit.onTurnStart) {
                     unit.onTurnStart(state);
                 }
@@ -361,24 +354,6 @@ class UnitAttackStateChange extends StateChange {
             new Tuple(b.x, b.y).toCubeCoordinates());
     }
 
-    findTargetPos(state, pos) {
-        let target = state.mapObjects[pos.y][pos.x];
-        if (target === undefined) {
-            /* No direct target, check for occupied mapping */
-            const occupiedPoint = state.occupied[pos.y][pos.x];
-            if (occupiedPoint && occupiedPoint !== true) {
-                return occupiedPoint;
-            }
-        }
-        return pos;
-    }
-
-    findTarget(state, pos) {
-        const targetPos = this.findTargetPos(state, pos);
-        let target = state.mapObjects[targetPos.y][targetPos.x];
-        return target;
-    }
-
     _verifyStateChange(state) {
         if (state.currentTurn !== this.from) {
             return false;
@@ -398,7 +373,7 @@ class UnitAttackStateChange extends StateChange {
 
         /* Is the attack destination a mapObject that belongs to the
          * opponent? */
-        const target = this.findTarget(state, this.data.posTo);
+        const target = findTarget(state, this.data.posTo);
         if (target === undefined) {
             return false;
         }
@@ -414,7 +389,7 @@ class UnitAttackStateChange extends StateChange {
 
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        const target = this.findTarget(state, this.data.posTo);
+        const target = findTarget(state, this.data.posTo);
         unit.attacksThisTurn -= 1;
 
         let damageToHealth = unit.attackDamage;
@@ -429,7 +404,7 @@ class UnitAttackStateChange extends StateChange {
         target.currentHealth -= damageToHealth;
         if (target.currentHealth <= 0) {
             /* Kill Unit / Structure */
-            const targetPos = this.findTargetPos(state, this.data.posTo);
+            const targetPos = findTargetPos(state, this.data.posTo);
             state.removeMapObject(targetPos);
         }
     }
