@@ -464,7 +464,7 @@ const units = {
             'cost': 0,
             'prereq': [],
             'type': 'Action',
-            'description': 'Heal a Friendly Unit',
+            'description': 'Heal a Friendly Unit for 15 Health',
             'icon': '{Medic}',
             'command': 'custom-healUnit'
         }],
@@ -522,8 +522,8 @@ const units = {
     },
     'Combat Engineer': {
         'advantagedamage': 0,
-        'attackrange': 1,
-        'damage': 20,
+        'attackrange': 0,
+        'damage': 0,
         'description': 'Construction unit. Can build turrets, harvesters, deployment outposts and repair structures.',
         'health': 12,
         'moverange': 3,
@@ -534,36 +534,45 @@ const units = {
         'tier': 1,
         'turnsToBuild': 1,
         'unitclass': 'Biological',
-        'options':
-        [
-            {
-                'title': 'Build Deployment Outpost',
-                'cost': 400,
-                'prereq': [],
-                'type': 'Structure',
-                'description': '{Deployment Outpost}',
-                'icon': '{Deployment Outpost}',
-                'command': 'build-Deployment Outpost'
-            },
-            {
-                'title': 'Build Turret',
-                'cost': 250,
-                'prereq': ['Automation Factory'],
-                'type': 'Unit',
-                'description': '{Turret}',
-                'icon': '{Turret}',
-                'command': 'spawn-Turret'
-            },
-            {
-                'title': 'Build Harvester',
-                'cost': 300,
-                'prereq': [],
-                'type': 'Structure',
-                'description': '{Harvester}',
-                'icon': '{Harvester}',
-                'command': 'build-Harvester'
-            }
-        ]
+        'options': [{
+            'title': 'Repair Structure',
+            'cost': 0,
+            'prereq': [],
+            'type': 'Action',
+            'description': 'Repair a Friendly Structure for 20 Health',
+            'icon': '{Combat Engineer}',
+            'command': 'custom-repairStructure'
+        },
+        {
+            'title': 'Build Deployment Outpost',
+            'cost': 400,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Deployment Outpost}',
+            'icon': '{Deployment Outpost}',
+            'command': 'build-Deployment Outpost'
+        },
+        {
+            'title': 'Build Turret',
+            'cost': 250,
+            'prereq': ['Automation Factory'],
+            'type': 'Unit',
+            'description': '{Turret}',
+            'icon': '{Turret}',
+            'command': 'spawn-Turret'
+        },
+        {
+            'title': 'Build Harvester',
+            'cost': 300,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Harvester}',
+            'icon': '{Harvester}',
+            'command': 'build-Harvester'
+        }],
+        'custom': {
+            'repairFor': 20
+        }
     },
     'Guardian': {
         'advantagedamage': 0,

@@ -15,7 +15,8 @@ const {
 const {
     PlaceUnitPendingAction,
     PlaceStructurePendingAction,
-    HealUnitPendingAction
+    HealUnitPendingAction,
+    RepairStructurePendingAction
 } = require('./pending-actions');
 
 const GameState = require('../shared/game-state');
@@ -351,6 +352,13 @@ module.exports = class ClientState {
             }
             this.pendingAction = new HealUnitPendingAction();
             break;
+        }
+        case 'repairStructure': {
+            if (this.selectedObject.attacksThisTurn === 0) {
+                this.pushAlertMessage('Already repaired this turn!');
+                break;
+            }
+            this.pendingAction = new RepairStructurePendingAction();
         }
         }
         return;

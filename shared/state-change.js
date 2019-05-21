@@ -500,6 +500,71 @@ class HealUnitStateChange extends StateChange {
 }
 StateChange.registerSubClass(HealUnitStateChange);
 
+
+class RepairStructureStateChange extends StateChange {
+    static create(from, posFrom, posTo) {
+        return new RepairStructureStateChange(
+            StateChange.create(
+                from, 'RepairStructureStateChange', {
+                    posFrom,
+                    posTo
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+            return false;
+        }
+        /* Is this from a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+
+        /* Is that a combat engineer? */
+        if (unit.name !== 'Combat Engineer') return false;
+
+        /* Does this unit have any attacks left?
+            (We use attack here to track once a turn activity.) */
+        if (unit.attacksThisTurn === 0) {
+            return false;
+        }
+
+        /* Is the attack destination a structure that belongs to me? */
+        const target = findTarget(state, this.data.posTo);
+        if (target === undefined) {
+            return false;
+        }
+        if (target.isUnit) return false;
+        if (target.side === this.opponentSide) return false;
+
+        /* No point repairing structure with full health */
+        if (target.currentHealth === target.maxHealth) return false;
+
+        /* Is the target in the range? */
+        if (tupleDistance(this.data.posFrom, this.data.posTo) !== 1) {
+            return false;
+        }
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        const target = findTarget(state, this.data.posTo);
+
+        unit.attacksThisTurn -= 1;
+        target.currentHealth += unit.custom.repairFor;
+        if (target.currentHealth > target.maxHealth) {
+            target.currentHealth = target.maxHealth;
+        }
+    }
+}
+StateChange.registerSubClass(RepairStructureStateChange);
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
@@ -508,5 +573,6 @@ module.exports = {
     MoveUnitStateChange,
     UnitAttackStateChange,
     ChatMessageStateChange,
-    HealUnitStateChange
+    HealUnitStateChange,
+    RepairStructureStateChange
 };

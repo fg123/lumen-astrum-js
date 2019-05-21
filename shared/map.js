@@ -7,7 +7,8 @@ class Tile {
     }
 }
 
-const map = require('./maps/big.js');
+const Constants = require('./constants');
+const map = Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small');
 const { Tuple, getSurrounding } = require('./coordinates');
 
 console.log('Loading map...');
