@@ -74,21 +74,17 @@ class BuildStructureStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.currentTurn !== this.from) {
-            console.log(0);
             return false;
         }
 
         const option = this.getOptionToBuild();
         if (!option) {
-            console.log(1);
             return false;
         }
         if (state.getGold(this.from) < option.cost) {
-            console.log(2);
             return false;
         }
         if (!state.arePrereqsSatisfied(option, this.from)) {
-            console.log(3);
             return false;
         }
 
@@ -98,19 +94,16 @@ class BuildStructureStateChange extends StateChange {
             if (!withinMap(surrounding[i]) ||
                 state.occupied[surrounding[i].y][surrounding[i].x] ||
                 map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
-                console.log(5);
                 return false;
             }
             else if (!this.data.builtBy.isUnit &&
                 !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
-                console.log(6);
                 return false;
             }
             else if (this.data.structureName === 'Harvester') {
                 if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.MINERAL &&
                     map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BIG_MINERAL) {
                     // Harvester must be on mineral
-                    console.log(7);
                     return false;
                 }
             }
@@ -118,7 +111,6 @@ class BuildStructureStateChange extends StateChange {
                 if (map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
                     map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {
                     // Nothing else can be on mineral
-                    console.log(8);
                     return false;
                 }
             }
@@ -280,45 +272,51 @@ class TurnPassoverStateChange extends StateChange {
         }
     }
 
+    isBuilt(mapObject) {
+        return mapObject.turnsUntilBuilt === 0;
+    }
+
     _simulateStateChange(state) {
         // Handle Structure End-Turn Procedures
-        // This is calculated for the opponent since they gain the $
-        let harvestorMoneyGained = 0;
         for (let i = 0; i < state.structures.length; i++) {
             const structure = state.structures[i];
-            if (structure.side === this.from &&
-				structure.turnsUntilBuilt != 0) {
-                structure.turnsUntilBuilt -= 1;
-            }
-            if (structure.side === this.opponentSide &&
-                structure.name === 'Harvester') {
-                const tile = map.data[structure.position.y][
-                    structure.position.x];
-                if (tile.displayType === Tiles.MINERAL) {
-                    harvestorMoneyGained += 100;
-                }
-                else if (tile.displayType === Tiles.BIG_MINERAL) {
-                    harvestorMoneyGained += 200;
-                }
-            }
             /* Shield replenished on the start of the turn */
             if (structure.side === this.opponentSide) {
                 this.replenishShield(structure);
+                if (this.isBuilt(structure) && structure.onTurnStart) {
+                    structure.onTurnStart(state);
+                }
+            } else {
+                if (this.isBuilt(structure) && structure.onTurnEnd) {
+                    structure.onTurnEnd(state);
+                }
+            }
+            if (structure.side === this.from &&
+				!this.isBuilt(structure)) {
+                structure.turnsUntilBuilt -= 1;
             }
         }
 
         // Handle Units End-Turn Procedures
         for (let i = 0; i < state.units.length; i++) {
-            if (state.units[i].side === this.from &&
-				state.units[i].turnsUntilBuilt != 0) {
-                state.units[i].turnsUntilBuilt -= 1;
+            const unit = state.units[i];
+            if (unit.side === this.from &&
+				unit.turnsUntilBuilt !== 0) {
+                unit.turnsUntilBuilt -= 1;
             }
             /* Reset move range at the end of the turn */
-            state.units[i].moveRange = Data.units[state.units[i].name].moverange;
+            unit.moveRange = Data.units[unit.name].moverange;
             /* Reset attack */
-            state.units[i].attacksThisTurn = 1;
-            if (state.units[i].side === this.opponentSide) {
-                this.replenishShield(state.units[i]);
+            unit.attacksThisTurn = 1;
+            if (unit.side === this.opponentSide) {
+                this.replenishShield(unit);
+                if (this.isBuilt(unit) && unit.onTurnStart) {
+                    unit.onTurnStart(state);
+                }
+            } else {
+                if (this.isBuilt(unit) && unit.onTurnEnd) {
+                    unit.onTurnEnd(state);
+                }
             }
         }
 
@@ -326,16 +324,14 @@ class TurnPassoverStateChange extends StateChange {
         if (this.from === Constants.RED_SIDE) {
             state.currentTurn = Constants.BLUE_SIDE;
             if (state.blueTurnCount !== 0) {
-                state.blueGold += 200 + ((state.blueTurnCount - 1) * 50) +
-                    harvestorMoneyGained;
+                state.blueGold += 200 + ((state.blueTurnCount - 1) * 50);
             }
             state.blueTurnCount++;
         }
         else {
             state.currentTurn = Constants.RED_SIDE;
             if (state.redTurnCount !== 0) {
-                state.redGold += 200 + ((state.redTurnCount - 1) * 50) +
-                    harvestorMoneyGained;
+                state.redGold += 200 + ((state.redTurnCount - 1) * 50);
             }
             state.redTurnCount++;
         }

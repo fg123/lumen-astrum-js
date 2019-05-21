@@ -1,5 +1,6 @@
 const Data = require('./data');
 const AnimationManager = require('./animation-manager');
+const triggers = require('./triggers');
 
 module.exports.Structure = class {
     constructor(name, side, position) {
@@ -16,6 +17,8 @@ module.exports.Structure = class {
         this.isUnit = false;
 
         this.animationManager = new AnimationManager();
+
+        Object.assign(this, triggers[name]);
     }
 
     static isConstructionBuilding(name) {
@@ -54,6 +57,8 @@ module.exports.Unit = class {
 
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;
+
+        Object.assign(this, triggers[name]);
     }
 
     get sightRange() { return this.__sightRange__; }
