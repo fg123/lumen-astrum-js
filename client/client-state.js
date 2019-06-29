@@ -9,7 +9,9 @@ const {
     MoveUnitStateChange,
     TurnPassoverStateChange,
     ChatMessageStateChange,
-    UnitAttackStateChange
+    UnitAttackStateChange,
+    ReaverDetonateStateChange,
+    GuardianLockdownStateChange
 } = require('../shared/state-change');
 
 const {
@@ -20,7 +22,7 @@ const {
 } = require('./pending-actions');
 
 const GameState = require('../shared/game-state');
-const { Tuple } = require('../shared/coordinates');
+const { Tuple, getSurrounding } = require('../shared/coordinates');
 const PathFinder = require('../shared/path-finder');
 const {
     InPlaceSpriteAnimation,
@@ -182,7 +184,8 @@ module.exports = class ClientState {
                         })
                     );
                 }
-            } else if (change instanceof UnitAttackStateChange) {
+            }
+            else if (change instanceof UnitAttackStateChange) {
                 this.globalAnimationManager.addAnimation(
                     new AttackProjectileAnimation(
                         this.resourceManager,
@@ -190,6 +193,20 @@ module.exports = class ClientState {
                         change.data.posTo
                     )
                 );
+            }
+            else if (change instanceof ReaverDetonateStateChange) {
+                const surrounding = getSurrounding(change.data.posFrom, 1);
+                for (let i = 0; i < surrounding.length; i++) {
+                    if (!surrounding[i].equals(change.data.posFrom)) {
+                        this.globalAnimationManager.addAnimation(
+                            new AttackProjectileAnimation(
+                                this.resourceManager,
+                                change.data.posFrom,
+                                surrounding[i]
+                            )
+                        );
+                    }
+                }
             }
             else if (change instanceof ChatMessageStateChange) {
                 /* For some reason, the vue component can't watch a nested property
@@ -359,6 +376,21 @@ module.exports = class ClientState {
                 break;
             }
             this.pendingAction = new RepairStructurePendingAction();
+            break;
+        }
+        case 'detonateReaver': {
+            const change = ReaverDetonateStateChange.create(this.side, this.selectedObject.position);
+            if (change.verifyStateChange(this.gameState)) {
+                this.sendStateChange(change);
+            }
+            break;
+        }
+        case 'guardianLockdown': {
+            const change = GuardianLockdownStateChange.create(this.side, this.selectedObject.position);
+            if (change.verifyStateChange(this.gameState)) {
+                this.sendStateChange(change);
+            }
+            break;
         }
         }
         return;

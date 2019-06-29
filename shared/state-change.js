@@ -1,5 +1,21 @@
 const Constants = require('./constants');
-const { findTarget, findTargetPos, replenishShield } = require('./map');
+const { findTarget, replenishShield } = require('./map');
+
+function dealDamageToUnit(state, target, damage) {
+    if (target.currentShield !== 0) {
+        target.currentShield -= damage;
+        damage = 0;
+        if (target.currentShield < 0) {
+            damage = -target.currentShield;
+            target.currentShield = 0;
+        }
+    }
+    target.currentHealth -= damage;
+    if (target.currentHealth <= 0) {
+        /* Kill Unit / Structure */
+        state.removeMapObject(target.position);
+    }
+}
 
 class StateChange {
     constructor(stateChange) {
@@ -391,22 +407,7 @@ class UnitAttackStateChange extends StateChange {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         const target = findTarget(state, this.data.posTo);
         unit.attacksThisTurn -= 1;
-
-        let damageToHealth = unit.attackDamage;
-        if (target.currentShield !== 0) {
-            target.currentShield -= damageToHealth;
-            damageToHealth = 0;
-            if (target.currentShield < 0) {
-                damageToHealth = -target.currentShield;
-                target.currentShield = 0;
-            }
-        }
-        target.currentHealth -= damageToHealth;
-        if (target.currentHealth <= 0) {
-            /* Kill Unit / Structure */
-            const targetPos = findTargetPos(state, this.data.posTo);
-            state.removeMapObject(targetPos);
-        }
+        dealDamageToUnit(state, target, unit.attackDamage);
     }
 }
 StateChange.registerSubClass(UnitAttackStateChange);
@@ -565,6 +566,103 @@ class RepairStructureStateChange extends StateChange {
 }
 StateChange.registerSubClass(RepairStructureStateChange);
 
+
+class ReaverDetonateStateChange extends StateChange {
+    static create(from, posFrom) {
+        return new ReaverDetonateStateChange(
+            StateChange.create(
+                from, 'ReaverDetonateStateChange', {
+                    posFrom
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom)) {
+            return false;
+        }
+        /* Is this from a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+
+        /* Is that a reaver? */
+        if (unit.name !== 'Reaver') return false;
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+
+        // Apply damage to surrounding units
+        const surrounding = getSurrounding(this.data.posFrom, 1);
+        for (let i = 0; i < surrounding.length; i++) {
+            const target = findTarget(state, surrounding[i]);
+            if (target !== undefined && target.isUnit && target.side === this.opponentSide) {
+                dealDamageToUnit(state, target, unit.custom.explodeDamage);
+            }
+        }
+
+        // Kill the reaver
+        state.removeMapObject(this.data.posFrom);
+    }
+}
+StateChange.registerSubClass(ReaverDetonateStateChange);
+
+
+class GuardianLockdownStateChange extends StateChange {
+    static create(from, posFrom) {
+        return new GuardianLockdownStateChange(
+            StateChange.create(
+                from, 'GuardianLockdownStateChange', {
+                    posFrom
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom)) {
+            return false;
+        }
+        /* Is this from a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+
+        /* Is that a guardian? */
+        if (unit.name !== 'Guardian') return false;
+
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+
+        if (unit.lockedDown) {
+            unit.lockedDown = false;
+            unit.maxMoveRange = Data.units[unit.name].moverange;
+            unit.attackRange = Data.units[unit.name].attackrange;
+        }
+        else {
+            unit.lockedDown = true;
+            unit.maxMoveRange = unit.custom.lockedDownMoveRange;
+            unit.attackRange = unit.custom.lockedDownAttackRange;
+        }
+
+        // No more attacking if we lock or unlock.
+        unit.attacksThisTurn = 0;
+    }
+}
+StateChange.registerSubClass(GuardianLockdownStateChange);
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
@@ -574,5 +672,6 @@ module.exports = {
     UnitAttackStateChange,
     ChatMessageStateChange,
     HealUnitStateChange,
-    RepairStructureStateChange
+    RepairStructureStateChange,
+    ReaverDetonateStateChange
 };

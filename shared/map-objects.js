@@ -38,7 +38,6 @@ module.exports.Unit = class {
         this.maxHealth = Data.units[name].health;
         this.maxShield = Data.units[name].shield;
         this.attackRange = Data.units[name].attackrange;
-        this.moveRange = Data.units[name].moverange;
 
         /* Sight range changing is complicated because it affects the cached
          * maps in the game-state. We enforce this to be constant for now */

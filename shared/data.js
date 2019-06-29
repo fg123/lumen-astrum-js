@@ -591,20 +591,26 @@ const units = {
         'options':
             [
                 {
-                    'title': 'Toggle Lockdown',
+                    'title': 'Lockdown',
                     'cost': 0,
                     'prereq': [],
-                    'type': 'UnitAction',
-                    'description': '{Lockdown}',
-                    'icon': '{Lockdown}',
-                    'command': 'BoolToggle'
+                    'type': 'Action',
+                    'description': 'Locks down the Guardian, increasing attack range to ' +
+                                   '4 but reducing movement range to 0. Cannot lockdown and ' +
+                                   'attack in the same turn.',
+                    'icon': '{0,2}',
+                    'command': 'custom-guardianLockdown'
                 }
-            ]
+            ],
+        'custom': {
+            'lockedDownMoveRange': 0,
+            'lockedDownAttackRange': 4
+        }
     },
     'Reaver': {
         'advantagedamage': 0,
-        'attackrange': 1,
-        'damage': 50,
+        'attackrange': 0,
+        'damage': 0,
         'description': 'Kamakazi unit. One time use, high damage.',
         'health': 5,
         'moverange': 4,
@@ -621,12 +627,15 @@ const units = {
                     'title': 'Detonate',
                     'cost': 0,
                     'prereq': [],
-                    'type': 'UnitAction',
-                    'description': '{Detonate}',
-                    'icon': '{Detonate}',
-                    'command': 'ReaverDetonate'
+                    'type': 'Action',
+                    'description': 'Explodes in a circle, dealing damage and killing itself.',
+                    'icon': '{2,2}',
+                    'command': 'custom-detonateReaver'
                 }
-            ]
+            ],
+        'custom': {
+            'explodeDamage': 50
+        }
     },
     'Turret': {
         'advantagedamage': 0,
