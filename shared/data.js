@@ -596,8 +596,7 @@ const units = {
                     'prereq': [],
                     'type': 'Action',
                     'description': 'Locks down the Guardian, increasing attack range to ' +
-                                   '4 but reducing movement range to 0. Cannot lockdown and ' +
-                                   'attack in the same turn.',
+                                   '4 but reducing movement range to 0.',
                     'icon': '{0,2}',
                     'command': 'custom-guardianLockdown'
                 }

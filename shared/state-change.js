@@ -657,11 +657,13 @@ class GuardianLockdownStateChange extends StateChange {
         if (unit.lockedDown) {
             unit.lockedDown = false;
             unit.maxMoveRange = Data.units[unit.name].moverange;
+            unit.moveRange = Math.min(unit.maxMoveRange, unit.moveRange);
             unit.attackRange = Data.units[unit.name].attackrange;
         }
         else {
             unit.lockedDown = true;
             unit.maxMoveRange = unit.custom.lockedDownMoveRange;
+            unit.moveRange = Math.min(unit.maxMoveRange, unit.moveRange);
             unit.attackRange = unit.custom.lockedDownAttackRange;
         }
 

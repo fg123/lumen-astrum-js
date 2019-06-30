@@ -230,6 +230,10 @@ module.exports = class ClientState {
             }
             /* Trust Server */
             change.simulateStateChange(this.gameState);
+            if (change instanceof GuardianLockdownStateChange) {
+                /* Reselect to show updated range */
+                this.selectObject(this.selectedObject);
+            }
             /* Currently Selected Unit might have died */
             if (this.selectedObject) {
                 if (!this.gameState.mapObjects[this.selectedObject.position.y][

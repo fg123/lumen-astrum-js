@@ -1,6 +1,6 @@
 const GameState = require('../shared/game-state');
 const Constants = require('../shared/constants');
-const { TurnPassoverStateChange } = require('../shared/state-change');
+const { TurnPassoverStateChange, GuardianLockdownStateChange } = require('../shared/state-change');
 
 module.exports = class Game {
     constructor(redPlayer, bluePlayer, redSocket, blueSocket, gameStartTime) {
@@ -45,7 +45,21 @@ module.exports = class Game {
                     TurnPassoverStateChange.create(nextSide, false));
             }, this.state.calculateNextTurnAvailableTime(nextSide));
         }
-        this.stateChanges.push(stateChange);
+        let shouldPush = true;
+        if (stateChange instanceof GuardianLockdownStateChange) {
+            let lastStateChange = this.stateChanges[this.stateChanges.length - 1];
+            if (lastStateChange instanceof GuardianLockdownStateChange) {
+                if (stateChange.data.posFrom.x === lastStateChange.data.posFrom.x &&
+                    stateChange.data.posFrom.y === lastStateChange.data.posFrom.y) {
+                    // Remove Last One
+                    this.stateChanges.pop();
+                    shouldPush = false;
+                }
+            }
+        }
+        if (shouldPush) {
+            this.stateChanges.push(stateChange);
+        }
         // TODO: Advanced processing here.
         if (this.redSocket) {
             this.redSocket.emit('state-change', stateChange);
