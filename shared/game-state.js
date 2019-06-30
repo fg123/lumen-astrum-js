@@ -92,18 +92,18 @@ module.exports = class GameState {
         }
     }
 
-    addVisibility(x, y, side) {
+    addVisibility(x, y, side, value = 1) {
         const arr = this.getVisibilityMap(side);
         if (arr[y][x]) {
-            arr[y][x] += 1;
+            arr[y][x] += value;
         } else {
-            arr[y][x] = 1;
+            arr[y][x] = value;
         }
     }
 
-    removeVisibility(x, y, side) {
+    removeVisibility(x, y, side, value = 1) {
         const arr = this.getVisibilityMap(side);
-        arr[y][x] -= 1;
+        arr[y][x] -= value;
     }
 
     insertMapObject(location, name, side) {
@@ -144,7 +144,9 @@ module.exports = class GameState {
             let surrounding = getVisible(location, unit.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
                 if (withinMap(surrounding[i])) {
-                    this.addVisibility(surrounding[i].x, surrounding[i].y, side);
+                    this.addVisibility(
+                        surrounding[i].x, surrounding[i].y, side,
+                        unit.getVisionValue());
                 }
             }
         }
@@ -199,7 +201,7 @@ module.exports = class GameState {
             }
             let surrounding = getVisible(location, mapObject.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
-                this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side);
+                this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side, mapObject.getVisionValue());
             }
         }
     }
@@ -264,12 +266,12 @@ module.exports = class GameState {
         /* Change visibility from previous position to new position */
         let surrounding = getVisible(from, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
-            this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.side);
+            this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.side, unit.getVisionValue());
         }
 
         surrounding = getVisible(to, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
-            this.addVisibility(surrounding[i].x, surrounding[i].y, unit.side);
+            this.addVisibility(surrounding[i].x, surrounding[i].y, unit.side, unit.getVisionValue());
         }
     }
 

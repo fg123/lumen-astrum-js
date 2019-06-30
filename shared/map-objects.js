@@ -62,6 +62,10 @@ module.exports.Unit = class {
         Object.assign(this, triggers[name]);
     }
 
+    getVisionValue() {
+        return name === 'Observer' ? Constants.SUPER_VISION_VALUE : 1;
+    }
+
     get sightRange() { return this.__sightRange__; }
     set sightRange(val) { throw new Error('Trying to set readonly property!'); }
 };
