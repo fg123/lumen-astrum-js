@@ -255,7 +255,9 @@ module.exports = class ClientState {
                 }
             }
         });
-
+        socket.on('update-turn-end-time', (turnEndTime) => {
+            this.gameState.turnEndTime = turnEndTime;
+        });
         socket.on('invalid-state-change', () => {
             // Should never happen since UI should prevent it, but if so...
             this.pushAlertMessage('Invalid action!');

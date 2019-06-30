@@ -94,6 +94,7 @@ io.on('connection', function (socket) {
                         for (let i = 0; i < potentialGame.stateChanges.length; i++) {
                             socket.emit('state-change', potentialGame.stateChanges[i]);
                         }
+                        socket.emit('update-turn-end-time', potentialGame.state.turnEndTime);
                     }
                 }
             }
