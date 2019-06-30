@@ -315,12 +315,15 @@ class TurnPassoverStateChange extends StateChange {
             }
             /* Reset move range at the end of the turn */
             unit.moveRange = Data.units[unit.name].moverange;
-            /* Reset attack */
-            unit.attacksThisTurn = 1;
+
             if (unit.side === this.opponentSide) {
                 replenishShield(unit);
                 if (this.isBuilt(unit) && unit.onTurnStart) {
                     unit.onTurnStart(state);
+                }
+                /* Reset attack on turn start */
+                if (unit.attacksThisTurn < 1) {
+                    unit.attacksThisTurn += 1;
                 }
             } else {
                 if (this.isBuilt(unit) && unit.onTurnEnd) {
@@ -383,7 +386,7 @@ class UnitAttackStateChange extends StateChange {
         if (unit.side !== this.from) return false;
 
         /* Does this unit have any attacks left? */
-        if (unit.attacksThisTurn === 0 || unit.attackDamage === 0) {
+        if (unit.attacksThisTurn <= 0 || unit.attackDamage === 0) {
             return false;
         }
 
@@ -406,7 +409,12 @@ class UnitAttackStateChange extends StateChange {
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         const target = findTarget(state, this.data.posTo);
-        unit.attacksThisTurn -= 1;
+        if (unit.custom && unit.custom.attackCooldown) {
+            unit.attacksThisTurn -= unit.custom.attackCooldown;
+        }
+        else {
+            unit.attacksThisTurn -= 1;
+        }
         dealDamageToUnit(state, target, unit.attackDamage);
     }
 }

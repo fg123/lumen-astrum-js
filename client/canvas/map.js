@@ -553,7 +553,7 @@ module.exports = class MapCanvas {
                         if (this.state.canCurrentUnitAttackPosition) {
                             this.state.cursorMessage = `Attack for ${this.state.selectedObject.attackDamage} Damage`;
                         }
-                        if (this.state.selectedObject.attacksThisTurn === 0) {
+                        if (this.state.selectedObject.attacksThisTurn <= 0) {
                             this.state.cursorMessage = 'Already attacked!';
                         }
                     }

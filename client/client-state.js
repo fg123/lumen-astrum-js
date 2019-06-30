@@ -37,6 +37,7 @@ const KEY_S = 83;
 const KEY_D = 68;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
+const KEY_G = 71;
 const LEFT_MOUSE_BUTTON = 1;
 const RIGHT_MOUSE_BUTTON = 3;
 const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
@@ -84,6 +85,12 @@ module.exports = class ClientState {
             }
             if (keyState[KEY_S]) {
                 this.camera.delta.y = CAMERA_SPEED;
+            }
+            if (!keyState[KEY_G] && prevKeyState[KEY_G]) {
+                const stateChange = TurnPassoverStateChange.create(this.side, true);
+                if (stateChange.verifyStateChange(this.gameState)) {
+                    this.sendStateChange(stateChange);
+                }
             }
             if (keyState[KEY_ESCAPE] && !prevKeyState[KEY_ESCAPE]) {
                 if (this.pendingAction) {

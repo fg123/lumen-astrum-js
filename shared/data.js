@@ -702,7 +702,7 @@ const units = {
         'advantagedamage': 0,
         'attackrange': 4,
         'damage': 25,
-        'description': 'Slow-moving medium artillery unit. Bombards with long-ranage attacks',
+        'description': 'Slow-moving medium artillery unit. Bombards with long-range attacks',
         'health': 5,
         'moverange': 2,
         'shield': 25,
@@ -711,7 +711,10 @@ const units = {
         'tier': 3,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Mechanical'
+        'unitclass': 'Mechanical',
+        'custom': {
+            'attackCooldown': 2
+        }
     },
     'RDS Trooper': {
         'advantagedamage': 0,
@@ -816,7 +819,10 @@ const units = {
         'tier': 4,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Heavy, Mechanical'
+        'unitclass': 'Heavy, Mechanical',
+        'custom': {
+            'attackCooldown': 2
+        }
     },
     'Harbinger': {
         'advantagedamage': 0,
