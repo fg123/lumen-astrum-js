@@ -416,6 +416,25 @@ class UnitAttackStateChange extends StateChange {
             unit.attacksThisTurn -= 1;
         }
         dealDamageToUnit(state, target, unit.attackDamage);
+
+        if (unit.custom && unit.custom.splashDamage) {
+            // Apply damage to surrounding units
+            const surrounding = getSurrounding(this.data.posTo, unit.custom.splashRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                const target = findTarget(state, surrounding[i]);
+                if (target !== undefined && target.isUnit && target.side === this.opponentSide) {
+                    dealDamageToUnit(state, target, unit.custom.splashDamage);
+                }
+            }
+        }
+    }
+
+    getSplashRange(state) {
+        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (unit.custom && unit.custom.splashRange) {
+            return unit.custom.splashRange;
+        }
+        return 0;
     }
 }
 StateChange.registerSubClass(UnitAttackStateChange);

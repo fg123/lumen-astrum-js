@@ -200,6 +200,19 @@ module.exports = class ClientState {
                         change.data.posTo
                     )
                 );
+                const splashRange = change.getSplashRange(this.gameState);
+                const surrounding = getSurrounding(change.data.posTo, splashRange);
+                for (let i = 0; i < surrounding.length; i++) {
+                    if (!surrounding[i].equals(change.data.posTo)) {
+                        this.globalAnimationManager.addAnimation(
+                            new AttackProjectileAnimation(
+                                this.resourceManager,
+                                change.data.posTo,
+                                surrounding[i]
+                            )
+                        );
+                    }
+                }
             }
             else if (change instanceof ReaverDetonateStateChange) {
                 const surrounding = getSurrounding(change.data.posFrom, 1);

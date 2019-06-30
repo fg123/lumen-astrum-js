@@ -318,9 +318,9 @@ const structures = {
                     'cost': 1200,
                     'prereq': [],
                     'type': 'Unit',
-                    'description': '{MZ-103 Annihilator}',
-                    'icon': '{MZ-103 Annihilator}',
-                    'command': 'spawn-MZ-103 Annihilator'
+                    'description': '{Annihilator}',
+                    'icon': '{Annihilator}',
+                    'command': 'spawn-Annihilator'
                 },
                 {
                     'title': 'Spawn Dragons',
@@ -342,7 +342,7 @@ const structures = {
         'options': [],
     },
     'Spec Ops Facility': {
-        'description': 'Unit production building, trains Shadow Huntresses.',
+        'description': 'Unit production building, trains Shadow Huntresses and Harbingers.',
         'health': 75,
         'shield': 0,
         'width': 1,
@@ -837,7 +837,11 @@ const units = {
         'tier': 4,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Heavy, Biological'
+        'unitclass': 'Heavy, Biological',
+        'custom': {
+            'splashDamage': 16,
+            'splashRange': 1
+        }
     },
     'Probe': {
         'advantagedamage': 0,
