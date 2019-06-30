@@ -2,7 +2,8 @@
  * this, we keep it in the shared folder. It does not have any other
  * strict dependencies */
 module.exports = class AnimationManager {
-    constructor() {
+    constructor(isBlockingPipeline = false) {
+        this.isBlockingPipeline = isBlockingPipeline;
         this.animations = [];
     }
 
@@ -26,21 +27,28 @@ module.exports = class AnimationManager {
     }
 
     draw(graphicsManager, defaultPosition) {
-        /* If any animation returns, it blocks the rest of the animating
-         * pipeline */
-        let actualPosition = defaultPosition;
-        for (let i = 0; i < this.animations.length; i++) {
-            const position = this.animations[i].getPosition();
-            if (position) {
-                actualPosition = position;
-                break;
+
+        if (this.isBlockingPipeline) {
+            /* If any animation returns, it blocks the rest of the animating
+            * pipeline */
+            let actualPosition = defaultPosition;
+            for (let i = 0; i < this.animations.length; i++) {
+                const position = this.animations[i].getPosition();
+                if (position) {
+                    actualPosition = position;
+                    break;
+                }
+            }
+            if (!this.animations.some(animation =>
+                animation.draw(graphicsManager, actualPosition))) {
+                return actualPosition;
             }
         }
-        if (!this.animations.some(animation =>
-            animation.draw(graphicsManager, actualPosition))) {
-            return actualPosition;
-        } else {
-            return undefined;
+        else {
+            /* No blocking pipeline */
+            this.animations.forEach(animation => animation.draw(graphicsManager,
+                animation.getPosition()));
         }
+        return undefined;
     }
 };

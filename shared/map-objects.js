@@ -16,7 +16,8 @@ module.exports.Structure = class {
         this.isStructure = true;
         this.isUnit = false;
 
-        this.animationManager = new AnimationManager();
+        /* true indicates a blocking pipeline, only one animation can play */
+        this.animationManager = new AnimationManager(true);
 
         Object.assign(this, triggers[name]);
     }
@@ -47,7 +48,8 @@ module.exports.Unit = class {
         this.isStructure = false;
         this.isUnit = true;
 
-        this.animationManager = new AnimationManager();
+        /* true indicates a blocking pipeline, only one animation can play */
+        this.animationManager = new AnimationManager(true);
 
         /* This is a local copy that changes based on state */
         this.moveRange = Data.units[name].moverange;

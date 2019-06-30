@@ -61,7 +61,8 @@ module.exports = {
             const camera = new Camera(resourceManager, ui, inputManager);
             inputManager.initialize(camera);
 
-            const animationManager = new AnimationManager();
+            /* The global animation manager should not block pipeline */
+            const animationManager = new AnimationManager(false);
 
             const clientState = new ClientState(this.root.socket, chatbox, camera, inputManager, ui, resourceManager, animationManager);
             this.clientState = clientState;

@@ -268,11 +268,12 @@ module.exports = class ClientState {
             }
             const interval = setInterval(() => {
                 const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);
-                this.bigMessage = 'Game starting in ' + seconds + ' seconds';
-                if (seconds === 0) {
+                if (seconds <= 0) {
                     clearInterval(interval);
                     this.bigMessage = '';
+                    return;
                 }
+                this.bigMessage = 'Game starting in ' + seconds + ' seconds';
             }, 1000);
             this.gameStartListeners.forEach(x => x());
         });
@@ -424,6 +425,7 @@ module.exports = class ClientState {
     }
 
     selectObject(object) {
+        this.hoveredOption = null;
         this.pendingAction = null;
         this.selectedObject = object;
         if (object && object.isUnit) {

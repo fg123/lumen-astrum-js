@@ -28,7 +28,8 @@ client.connect(function(err) {
     });
 });
 
-const connectedUsers = [];
+const connectedUsers = {};
+const disconnectedMidGame = {};
 const queue = [];
 const games = [];
 
@@ -71,10 +72,29 @@ io.on('connection', function (socket) {
                     console.log(res[0]);
                     connectedUsers[socket.id].username = username;
                     connectedUsers[socket.id].elo = res[0].elo;
+
+                    let potentialGame = disconnectedMidGame[username];
+                    if (potentialGame) {
+                        console.log('Previously disconnected from a game!');
+                        delete disconnectedMidGame[username];
+                        connectedUsers[socket.id].game = potentialGame;
+                        potentialGame.updateSocket(username, socket);
+                    }
                     callback(undefined, {
                         username: username,
                         elo: res[0].elo
                     });
+
+                    if (potentialGame) {
+                        socket.emit('game-start',
+                            potentialGame.getSide(username),
+                            potentialGame.state.gameStartTime,
+                            potentialGame.redPlayer,
+                            potentialGame.bluePlayer);
+                        for (let i = 0; i < potentialGame.stateChanges.length; i++) {
+                            socket.emit('state-change', potentialGame.stateChanges[i]);
+                        }
+                    }
                 }
             }
         });
@@ -153,6 +173,12 @@ io.on('connection', function (socket) {
         console.log('Got disconnect!');
         if (connectedUsers[socket.id].queueID != -1) {
             queue.splice(connectedUsers[socket.id].queueID, 1);
+        }
+        let potentialGame = connectedUsers[socket.id].game;
+        if (potentialGame) {
+            console.log('Disconnected mid game! Storing in list!');
+            potentialGame.removeSocket(socket);
+            disconnectedMidGame[connectedUsers[socket.id].username] = potentialGame;
         }
         delete connectedUsers[socket.id];
     });

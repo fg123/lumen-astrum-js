@@ -383,7 +383,7 @@ class UnitAttackStateChange extends StateChange {
         if (unit.side !== this.from) return false;
 
         /* Does this unit have any attacks left? */
-        if (unit.attacksThisTurn === 0) {
+        if (unit.attacksThisTurn === 0 || unit.attackDamage === 0) {
             return false;
         }
 
@@ -673,5 +673,6 @@ module.exports = {
     ChatMessageStateChange,
     HealUnitStateChange,
     RepairStructureStateChange,
-    ReaverDetonateStateChange
+    ReaverDetonateStateChange,
+    GuardianLockdownStateChange
 };

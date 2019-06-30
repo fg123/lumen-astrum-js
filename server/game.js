@@ -47,8 +47,37 @@ module.exports = class Game {
         }
         this.stateChanges.push(stateChange);
         // TODO: Advanced processing here.
-        this.redSocket.emit('state-change', stateChange);
-        this.blueSocket.emit('state-change', stateChange);
+        if (this.redSocket) {
+            this.redSocket.emit('state-change', stateChange);
+        }
+        if (this.blueSocket) {
+            this.blueSocket.emit('state-change', stateChange);
+        }
         return this.state.getWinner();
+    }
+
+    updateSocket(username, socket) {
+        if (username === this.redPlayer) {
+            this.redSocket = socket;
+            return;
+        }
+        if (username === this.bluePlayer) {
+            this.blueSocket = socket;
+            return;
+        }
+    }
+
+    removeSocket(socket) {
+        if (this.redSocket === socket) {
+            this.redSocket = undefined;
+        }
+        if (this.blueSocket === socket) {
+            this.blueSocket = undefined;
+        }
+    }
+
+    getSide(username) {
+        if (this.redPlayer === username) return Constants.RED_SIDE;
+        return Constants.BLUE_SIDE;
     }
 };
