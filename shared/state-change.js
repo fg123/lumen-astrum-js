@@ -403,6 +403,11 @@ class UnitAttackStateChange extends StateChange {
         if (range.find(pos => pos.equals(this.data.posTo)) === undefined) {
             return false;
         }
+
+        /* Is the target stealthed? */
+        if (target.isStealthed(this.from, state)) {
+            return false;
+        }
         return true;
     }
 

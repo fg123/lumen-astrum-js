@@ -772,7 +772,10 @@ const units = {
                     'icon': '{Stealth}',
                     'command': 'BoolToggle'
                 }
-            ]
+            ],
+        'custom': {
+            'stealth': 10000
+        }
     },
     'Raider': {
         'advantagedamage': 0,
@@ -871,7 +874,10 @@ const units = {
         'tier': 3,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Biological'
+        'unitclass': 'Biological',
+        'custom': {
+            'superVision': 10000
+        }
     }
 };
 

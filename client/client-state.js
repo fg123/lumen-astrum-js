@@ -482,6 +482,9 @@ module.exports = class ClientState {
             if (occupiedPoint && occupiedPoint !== true) {
                 obj = this.gameState.mapObjects[occupiedPoint.y][occupiedPoint.x];
             }
+            if (obj && obj.isUnit && obj.isStealthed(this.side, this.gameState)) {
+                return null;
+            }
             return obj;
         }
         return null;

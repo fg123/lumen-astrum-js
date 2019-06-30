@@ -1,6 +1,7 @@
 const Data = require('./data');
 const AnimationManager = require('./animation-manager');
 const triggers = require('./triggers');
+const Constants = require('./constants');
 
 module.exports.Structure = class {
     constructor(name, side, position) {
@@ -63,7 +64,25 @@ module.exports.Unit = class {
     }
 
     getVisionValue() {
-        return name === 'Observer' ? Constants.SUPER_VISION_VALUE : 1;
+        if (this.custom && this.custom.superVision)
+            return this.custom.superVision;
+        else return 1;
+    }
+
+    isStealthed(side, state) {
+        if (this.side === side) {
+            // My own unit!
+            return false;
+        }
+
+        if (this.custom && this.custom.stealth) {
+            const visionMap = state.getVisibilityMap(side);
+            const visionValue = visionMap[this.position.y][this.position.x];
+
+            /* If not enough vision value, it's stealthed */
+            return visionValue < this.custom.stealth;
+        }
+        return false;
     }
 
     get sightRange() { return this.__sightRange__; }

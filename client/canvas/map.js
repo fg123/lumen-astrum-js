@@ -355,6 +355,7 @@ module.exports = class MapCanvas {
             y < Math.min(map.data.length, this.drawContext.bottomRightVisible.y); y++) {
             for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
                 x < Math.min(map.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
+                this.context.globalAlpha = 1;
                 if (map.data[y][x].displayType !== 0) {
                     let yOffset = 0;
                     if (x % 2 === 1) {
@@ -409,6 +410,13 @@ module.exports = class MapCanvas {
                             } else {
                                 anyVisible = true;
                             }
+                        }
+
+                        const unitStealthed = mapObject.isUnit && mapObject.isStealthed(this.state.side,
+                            this.state.gameState);
+                        if (unitStealthed) {
+                            allVisible = false;
+                            this.context.globalAlpha = 0.5;
                         }
 
                         if (animationManager.hasAnimation()) {
