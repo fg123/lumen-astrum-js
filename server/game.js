@@ -1,8 +1,17 @@
 const GameState = require('../shared/game-state');
 const Constants = require('../shared/constants');
-const { TurnPassoverStateChange, GuardianLockdownStateChange } = require('../shared/state-change');
+const { StateChange, TurnPassoverStateChange, GuardianLockdownStateChange } = require('../shared/state-change');
 
 module.exports = class Game {
+    static fromJson(json) {
+        const game = new Game(json.redPlayer, json.bluePlayer, undefined,
+            undefined, json.gameStartTime);
+        clearTimeout(game.initialTurnPassover);
+        for (let i = 0; i < json.stateChanges.length; i++) {
+            game.processStateChange(StateChange.deserialize(json.stateChanges[i]));
+        }
+        return game;
+    }
     constructor(redPlayer, bluePlayer, redSocket, blueSocket, gameStartTime) {
         this.redPlayer = redPlayer;
         this.bluePlayer = bluePlayer;
@@ -14,7 +23,7 @@ module.exports = class Game {
         this.nextTurnTimer = undefined;
 
         // Initial Turn Passover
-        setTimeout(() => {
+        this.initialTurnPassover = setTimeout(() => {
             // Pretend Blue Side to Trigger Red to be the First
             this.processStateChange(
                 TurnPassoverStateChange.create(

@@ -5,4 +5,4 @@ package-lock.json
 .env
 
 client/dist/main.js
-
+dump.json

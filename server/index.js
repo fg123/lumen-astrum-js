@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
@@ -38,6 +39,36 @@ function generateHash(string) {
 }
 
 console.log(generateHash('test'));
+
+const safeStringify = require('json-stringify-safe');
+
+process.on('uncaughtException', (err, origin) => {
+    fs.writeSync(
+        process.stderr.fd,
+        `Caught exception: ${err}\n` +
+        `Exception origin: ${origin}\n` +
+        'Creating dump file of games!'
+    );
+    for (let i = 0; i < games.length; i++) {
+        delete games[i].redSocket;
+        delete games[i].blueSocket;
+    }
+    fs.writeFileSync('dump.json', safeStringify(games));
+    process.exit(1);
+});
+
+// Restore from Dump
+if (fs.existsSync('dump.json')) {
+    console.log('Restoring from dump!');
+    const dumpedGames = JSON.parse(fs.readFileSync('dump.json'));
+    for (let i = 0; i < dumpedGames.length; i++) {
+        const game = Game.fromJson(dumpedGames[i]);
+        disconnectedMidGame[game.redPlayer] = game;
+        disconnectedMidGame[game.bluePlayer] = game;
+        games.push(game);
+    }
+}
+
 
 app.use('/', express.static(__dirname + '/../client/dist'));
 app.use('/resources', express.static(__dirname + '/../client/resources'));

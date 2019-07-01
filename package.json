@@ -30,13 +30,14 @@
     "express": "^4.15.4",
     "jquery-browserify": "^1.8.1",
     "jquery-mousewheel": "^3.1.13",
+    "json-stringify-safe": "^5.0.1",
     "mongodb": "^3.1.10",
     "nodemon": "^1.18.6",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "tinyqueue": "^2.0.0",
-    "vueify": "^9.4.1",
-    "vue": "^2.5.17"
+    "vue": "^2.5.17",
+    "vueify": "^9.4.1"
   },
   "homepage": "https://github.com/fg123/lumen-astrum#readme",
   "devDependencies": {
