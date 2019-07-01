@@ -494,6 +494,9 @@ module.exports = class ClientState {
             if (obj && obj.isUnit && obj.isStealthed(this.side, this.gameState)) {
                 return null;
             }
+            if (obj && !this.gameState.isVisible(obj.position.x, obj.position.y, this.side)) {
+                return null;
+            }
             return obj;
         }
         return null;

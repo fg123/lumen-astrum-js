@@ -409,8 +409,10 @@ class UnitAttackStateChange extends StateChange {
         }
 
         /* Is the target stealthed? */
-        if (target.isStealthed(this.from, state)) {
-            return false;
+        if (target.isUnit) {
+            if (target.isStealthed(this.from, state)) {
+                return false;
+            }
         }
         return true;
     }

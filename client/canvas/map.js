@@ -77,7 +77,8 @@ module.exports = class MapCanvas {
         this.drawRectangle('black', start, y, totalWidth, 16);
         /* Draw Health and Shield Bars (100px x 5px each) */
         const healthPercent = mapObject.currentHealth / mapObject.maxHealth;
-        this.drawRectangle('green', start + 2, y + 2, healthPercent * 100, 5);
+        const healthColor = this.objectOnMySide(mapObject) ? 'green' : 'red';
+        this.drawRectangle(healthColor, start + 2, y + 2, healthPercent * 100, 5);
         const shieldPercent = mapObject.currentShield / mapObject.maxShield;
         this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
     }
