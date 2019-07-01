@@ -6,7 +6,7 @@ const {
     getVisible
 } = require('./map');
 const { Structure, Unit } = require('../shared/map-objects');
-const { getSurrounding, getReachable  } = require('./coordinates');
+const { getSurrounding, getReachable, Tuple  } = require('./coordinates');
 const Data = require('./data');
 
 module.exports = class GameState {
@@ -16,6 +16,10 @@ module.exports = class GameState {
         this.mapObjects = [];
         this.redVisibility = [];
         this.blueVisibility = [];
+
+        this.redProbeLocations = [];
+        this.blueProbeLocations = [];
+
         this.occupied = [];
         this.redAllowedBuilding = [];
         this.blueAllowedBuilding = [];
@@ -104,6 +108,23 @@ module.exports = class GameState {
     removeVisibility(x, y, side, value = 1) {
         const arr = this.getVisibilityMap(side);
         arr[y][x] -= value;
+    }
+
+    getProbeLocationArr(side) {
+        return (side === Constants.RED_SIDE ? this.redProbeLocations : this.blueProbeLocations);
+    }
+
+    addProbeLocation(x, y, side) {
+        this.getProbeLocationArr(side).push(new Tuple(x, y));
+        this.addVisibility(x, y, side);
+    }
+
+    removeAllProbeLocations(side) {
+        const arr = this.getProbeLocationArr(side);
+        for (let i = 0; i < arr.length; i++) {
+            this.removeVisibility(arr[i].x, arr[i].y, side);
+        }
+        arr.length = 0;
     }
 
     insertMapObject(location, name, side) {

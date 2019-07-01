@@ -18,7 +18,8 @@ const {
     PlaceUnitPendingAction,
     PlaceStructurePendingAction,
     HealUnitPendingAction,
-    RepairStructurePendingAction
+    RepairStructurePendingAction,
+    LaunchProbePendingAction
 } = require('./pending-actions');
 
 const GameState = require('../shared/game-state');
@@ -381,13 +382,13 @@ module.exports = class ClientState {
             break;
         case 'custom':
             // Dispatch Custom Function Call
-            this.customActionDispatch(parts[1]);
+            this.customActionDispatch(parts[1], option);
             break;
         }
         return;
     }
 
-    customActionDispatch(name) {
+    customActionDispatch(name, option) {
         switch (name) {
         case 'healUnit': {
             if (this.selectedObject.attacksThisTurn === 0) {
@@ -403,6 +404,14 @@ module.exports = class ClientState {
                 break;
             }
             this.pendingAction = new RepairStructurePendingAction();
+            break;
+        }
+        case 'launchProbe': {
+            if (option.cost > this.getGold()) {
+                this.pushAlertMessage('Not enough gold!');
+                return;
+            }
+            this.pendingAction = new LaunchProbePendingAction();
             break;
         }
         case 'detonateReaver': {

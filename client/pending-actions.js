@@ -17,7 +17,8 @@ const {
     BuildStructureStateChange,
     SpawnUnitStateChange,
     HealUnitStateChange,
-    RepairStructureStateChange } = require('../shared/state-change');
+    RepairStructureStateChange,
+    LaunchProbeStateChange } = require('../shared/state-change');
 
 class PlaceUnitPendingAction extends PendingAction {
     constructor(unitName) {
@@ -227,9 +228,43 @@ class RepairStructurePendingAction extends PendingAction {
     }
 }
 
+class LaunchProbePendingAction extends PendingAction {
+    constructor() {
+        super();
+    }
+
+    _onTick(mapCanvas) {
+        mapCanvas.state.cursorMessage = 'Choose Area to Probe';
+
+        this.isValid = LaunchProbeStateChange.create(
+            mapCanvas.state.side,
+            mapCanvas.state.selectedObject.position,
+            mapCanvas.state.inputManager.mouseState.tile
+        ).verifyStateChange(mapCanvas.state.gameState);
+
+        if (this.isValid) {
+            mapCanvas.state.cursorMessage = 'Probe Here';
+        }
+    }
+
+    _onClick(state) {
+        if (this.isValid) {
+            state.sendStateChange(
+                LaunchProbeStateChange.create(
+                    state.side,
+                    state.selectedObject.position,
+                    state.inputManager.mouseState.tile
+                )
+            );
+        }
+        return this.isValid;
+    }
+}
+
 module.exports = {
     PlaceUnitPendingAction,
     PlaceStructurePendingAction,
     HealUnitPendingAction,
-    RepairStructurePendingAction
+    RepairStructurePendingAction,
+    LaunchProbePendingAction
 };

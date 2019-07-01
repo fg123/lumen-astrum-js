@@ -386,13 +386,13 @@ const structures = {
         'options':
             [
                 {
-                    'title': 'Launch Probe',
+                    'title': 'Launch a Probe',
                     'cost': 50,
                     'prereq': [],
-                    'type': 'Unit',
-                    'description': '{Probe}',
-                    'icon': '{Probe}',
-                    'command': 'spawn-Probe'
+                    'type': 'Action',
+                    'description': 'Gains vision of a small area until the end of the turn.',
+                    'icon': '{1,2}',
+                    'command': 'custom-launchProbe'
                 },
                 {
                     'title': 'Spawn Observer',
@@ -760,19 +760,8 @@ const units = {
         'squadsize': 1,
         'tier': 4,
         'turnsToBuild': 1,
+        'options': [],
         'unitclass': 'Light, Biological, Cloaked',
-        'options':
-            [
-                {
-                    'title': 'Toggle Stealth',
-                    'cost': 0,
-                    'prereq': [],
-                    'type': 'UnitAction',
-                    'description': '{Stealth}',
-                    'icon': '{Stealth}',
-                    'command': 'BoolToggle'
-                }
-            ],
         'custom': {
             'stealth': 10000
         }
@@ -846,30 +835,15 @@ const units = {
             'splashRange': 1
         }
     },
-    'Probe': {
+    'Observer': {
         'advantagedamage': 0,
         'attackrange': 0,
         'damage': 0,
-        'description': 'A weak unit that grants vision until destroyed.',
-        'health': 1,
-        'moverange': 0,
-        'shield': 0,
-        'sightrange': 2,
-        'squadsize': 1,
-        'tier': 1,
-        'turnsToBuild': 1,
-        'options': [],
-        'unitclass': 'Biological'
-    },
-    'Observer': {
-        'advantagedamage': 0,
-        'attackrange': 3,
-        'damage': 0,
-        'description': 'Far-sight recon unit capable of seeing into tall grass.',
+        'description': 'Far-sight recon unit capable of seeing stealthed units.',
         'health': 50,
         'moverange': 5,
         'shield': 0,
-        'sightrange': 6,
+        'sightrange': 5,
         'squadsize': 1,
         'tier': 3,
         'turnsToBuild': 1,

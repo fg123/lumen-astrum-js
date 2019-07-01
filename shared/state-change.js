@@ -286,6 +286,10 @@ class TurnPassoverStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
+        // Remove all probe locations
+        state.removeAllProbeLocations(Constants.RED_SIDE);
+        state.removeAllProbeLocations(Constants.BLUE_SIDE);
+
         // Handle Structure End-Turn Procedures
         for (let i = 0; i < state.structures.length; i++) {
             const structure = state.structures[i];
@@ -697,6 +701,63 @@ class GuardianLockdownStateChange extends StateChange {
 }
 StateChange.registerSubClass(GuardianLockdownStateChange);
 
+class LaunchProbeStateChange extends StateChange {
+    static create(from, posFrom, posTo) {
+        return new LaunchProbeStateChange(
+            StateChange.create(
+                from, 'LaunchProbeStateChange', {
+                    posFrom,
+                    posTo
+                }
+            )
+        );
+    }
+
+    getOptionToLaunch() {
+        let builtBy = getBaseObject('Scouting Tower');
+        if (!builtBy) {
+            return undefined;
+        }
+        return builtBy.options.find(option => {
+            return option.command === 'custom-launchProbe';
+        });
+    }
+
+    _verifyStateChange(state) {
+        if (state.currentTurn !== this.from) {
+            return false;
+        }
+        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+            return false;
+        }
+        /* Is this from a structure that belongs to the player? */
+        const structure = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (structure === undefined || !structure.isStructure) return false;
+        if (structure.side !== this.from) return false;
+
+        /* Is that a scouting tower? */
+        if (structure.name !== 'Scouting Tower') return false;
+
+        /* Do you have enough gold? */
+        if (state.getGold(this.from) < this.getOptionToLaunch().cost) {
+            return false;
+        }
+
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const surrounding = getSurrounding(this.data.posTo, Constants.PROBE_RANGE);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (withinMap(surrounding[i])) {
+                state.addProbeLocation(surrounding[i].x, surrounding[i].y, this.from);
+            }
+        }
+        state.changeGold(this.from, -(this.getOptionToLaunch().cost));
+    }
+}
+StateChange.registerSubClass(LaunchProbeStateChange);
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
@@ -708,5 +769,6 @@ module.exports = {
     HealUnitStateChange,
     RepairStructureStateChange,
     ReaverDetonateStateChange,
-    GuardianLockdownStateChange
+    GuardianLockdownStateChange,
+    LaunchProbeStateChange
 };
