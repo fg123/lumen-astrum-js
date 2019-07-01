@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Top down turn based RTS game",
   "scripts": {
-    "build-client": "browserify client/index.js -t vueify  -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
+    "build-client": "browserify client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ] -t [ envify --NODE_ENV production ]",
     "watch-client": "watchify --debug client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
     "start-server": "node -r dotenv/config server/index.js",
     "watch-server": "nodemon -r dotenv/config --watch server --watch shared server/index.js",
     "dev": "concurrently --kill-others 'npm:watch-client' 'npm:watch-server'",
-    "prod": "npm run build-client && NODE_ENV=production npm run start-server"
+    "prod": "NODE_ENV=production npm run build-client && NODE_ENV=production npm run start-server"
   },
   "repository": {
     "type": "git",
@@ -20,31 +20,32 @@
     "url": "https://github.com/fg123/lumen-astrum/issues"
   },
   "dependencies": {
-    "@babel/cli": "^7.1.2",
-    "@babel/core": "^7.1.2",
-    "@babel/preset-env": "^7.1.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
     "babelify": "^10.0.0",
-    "brfs": "^2.0.1",
+    "brfs": "^2.0.2",
     "browserify": "^16.2.3",
     "dotenv": "^4.0.0",
-    "express": "^4.15.4",
+    "envify": "^4.1.0",
+    "express": "^4.17.1",
     "jquery-browserify": "^1.8.1",
     "jquery-mousewheel": "^3.1.13",
     "json-stringify-safe": "^5.0.1",
-    "mongodb": "^3.1.10",
-    "nodemon": "^1.18.6",
-    "socket.io": "^2.1.1",
-    "socket.io-client": "^2.1.1",
-    "tinyqueue": "^2.0.0",
-    "vue": "^2.5.17",
+    "mongodb": "^3.2.7",
+    "nodemon": "^1.19.1",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
+    "tinyqueue": "^2.0.3",
+    "vue": "^2.6.10",
     "vueify": "^9.4.1"
   },
   "homepage": "https://github.com/fg123/lumen-astrum#readme",
   "devDependencies": {
-    "concurrently": "^4.0.1",
-    "eslint": "^5.7.0",
-    "eslint-plugin-vue": "^5.0.0-beta.5",
-    "jshint": "^2.9.6",
+    "concurrently": "^4.1.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-vue": "^5.2.3",
+    "jshint": "^2.10.2",
     "prettier-eslint": "^8.8.2",
     "watchify": "^3.11.1"
   }
