@@ -316,8 +316,8 @@ module.exports = class MapCanvas {
         const hover = this.inputManager.mouseState.tile;
         if (withinMap(hover)) {
             const tile = map.data[hover.y][hover.x];
-            this.drawText(`Hover: (${hover.x}, ${hover.y}) { displayType: ${tile.displayType}, isHighGround: ${tile.isHighGround}
-                , highGroundGroup: ${tile.highGroundGroup}, jungleDist: ${tile.jungleDist} }`,
+            this.drawText(`Hover: (${hover.x}, ${hover.y}) { displayType: ${tile.displayType},
+isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, jungleDist: ${tile.jungleDist} }`,
             'white', 16, 10, 80, 'left', 'bold'
             );
         }
@@ -379,6 +379,9 @@ module.exports = class MapCanvas {
                         this.context.globalCompositeOperation = 'source-over';
                     }
                     else {
+                        this.drawImage(this.resourceManager.get(
+                            tiles[map.data[y][x].displayType - 1]
+                        ), (x * 96), (y * 111) + yOffset);
                         this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                             (x * 96),
                             (y * 111) + yOffset);
@@ -472,6 +475,9 @@ module.exports = class MapCanvas {
                                 surrounding[i].y,
                                 this.state.side
                             )) {
+                                this.drawImage(this.resourceManager.get(
+                                    tiles[map.data[surrounding[i].y][surrounding[i].x].displayType - 1]
+                                ), (surrounding[i].x * 96), (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));
                                 this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                                     (surrounding[i].x * 96),
                                     (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));

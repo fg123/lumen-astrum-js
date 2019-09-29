@@ -3,7 +3,7 @@ module.exports.Resource = {
     RED_OVERLAY: 'resources/groundTexture/redOverlay.png',
     GREEN_OVERLAY: 'resources/groundTexture/greenOverlay.png',
     YELLOW_OVERLAY: 'resources/groundTexture/yellowOverlay.png',
-    FOG_OF_WAR: 'resources/groundTexture/fogOfWar.png',
+    FOG_OF_WAR: 'resources/groundTexture/fogOfWarTranslucent.png',
     DEFAULT_TILE: 'resources/groundTexture/defaultTile.png',
     BRUSH_TILE: 'resources/groundTexture/brushTile.png',
     MINERAL_TILE: 'resources/groundTexture/mineralTile.png',
