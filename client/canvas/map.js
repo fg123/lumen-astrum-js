@@ -316,10 +316,9 @@ module.exports = class MapCanvas {
         const hover = this.inputManager.mouseState.tile;
         if (withinMap(hover)) {
             const tile = map.data[hover.y][hover.x];
-            this.drawText(
-                'Hover: { displayType: ' + tile.displayType + ', isHighGround: ' + tile.isHighGround +
-                ', highGroundGroup:' + tile.highGroundGroup + '}',
-                'white', 16, 10, 80, 'left', 'bold'
+            this.drawText(`Hover: (${hover.x}, ${hover.y}) { displayType: ${tile.displayType}, isHighGround: ${tile.isHighGround}
+                , highGroundGroup: ${tile.highGroundGroup}, jungleDist: ${tile.jungleDist} }`,
+            'white', 16, 10, 80, 'left', 'bold'
             );
         }
     }

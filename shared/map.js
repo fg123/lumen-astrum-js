@@ -4,6 +4,7 @@ class Tile {
         this.displayType = this.tileType;
         this.isHighGround = false;
         this.highGroundGroup = -1;
+        this.jungleDist = -1;
     }
 }
 
@@ -60,25 +61,63 @@ for (let y = 0; y < map.data.length; y++) {
         }
     }
 }
+
 const getVisible = (point, sightRange) => {
     /* Returns visibility map of a given point */
-    // TODO: Implement Brush Mechanics
-    let surrounding = getSurrounding(point, sightRange).filter(
-        point => withinMap(point)
-    );
-    /* A unit or structure can only be on high, default, or low */
-    if (map.data[point.y][point.x].displayType === Tiles.LOW) {
-        surrounding = surrounding.filter(pt => !map.data[pt.y][pt.x].isHighGround);
+    /* Checks for Brush, High Ground and High Ground Groups */
+    if (map.data[point.y][point.x].displayType === Tiles.BRUSH) {
+        sightRange = Constants.BRUSH_VISION;
     }
-    else {
-        const group = map.data[point.y][point.x].highGroundGroup;
-        /* We only keep non-high grounds or high grounds in the same group */
-        surrounding = surrounding.filter(pt => {
-            const tile = map.data[pt.y][pt.x];
-            return !tile.isHighGround || tile.highGroundGroup === group;
+    const start = new Tuple(point.x, point.y).toCubeCoordinates();
+    const visited = new Set();
+    let result = [];
+    const jungDist = {};
+    visited.add(JSON.stringify(start));
+    result.push(start.toOffsetCoordinates());
+    const fringes = [];
+    fringes.push([start]);
+
+    for (let i = 0; i < sightRange; i++) {
+        fringes.push([]);
+        fringes[i].forEach((hex) => {
+            const curString = JSON.stringify(hex);
+            hex.getNeighbours().forEach((neighbour) => {
+                const n_coord = neighbour.toOffsetCoordinates();
+                if (!withinMap(n_coord) ||
+                    map.data[n_coord.y][n_coord.x].displayType === Tiles.NONE) {
+                    // Don't explore
+                    return;
+                }
+                const neighbourString = JSON.stringify(neighbour);
+                if (!visited.has(neighbourString)) {
+                    let keepExplore = true;
+                    if (map.data[n_coord.y][n_coord.x].displayType === Tiles.BRUSH) {
+                        jungDist[neighbourString] = curString in jungDist ? jungDist[curString] + 1 : 0;
+                        if (jungDist[neighbourString] >= Constants.BRUSH_VISION) {
+                            keepExplore = false;
+                        }
+                    }
+                    if (map.data[point.y][point.x].displayType === Tiles.LOW &&
+                        map.data[n_coord.y][n_coord.x].isHighGround) {
+                        // Trying to see high ground from low ground
+                        keepExplore = false;
+                    }
+                    else if (map.data[n_coord.y][n_coord.x].isHighGround &&
+                             map.data[n_coord.y][n_coord.x].highGroundGroup !==
+                                map.data[point.y][point.x].highGroundGroup) {
+                        // Trying to see high ground from different high ground group
+                        keepExplore = false;
+                    }
+                    visited.add(neighbourString);
+                    if (keepExplore) {
+                        result.push(n_coord);
+                        fringes[i + 1].push(neighbour);
+                    }
+                }
+            });
         });
     }
-    return surrounding;
+    return result;
 };
 
 const findTargetPos = (state, pos) => {

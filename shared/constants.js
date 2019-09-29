@@ -10,5 +10,6 @@ module.exports = {
     BUILDING_VISION_RANGE: 5,
     TIME_IN_SECONDS_BEFORE_GAME_START: 3,
     IS_PRODUCTION: is_production,
-    PROBE_RANGE: 2
+    PROBE_RANGE: 2,
+    BRUSH_VISION: 2
 };

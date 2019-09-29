@@ -326,6 +326,17 @@ module.exports = class GameState {
         }
     }
 
+    getObjectVisibileTiles(objectPos) {
+        if (!withinMap(objectPos)) {
+            return [];
+        }
+        const object = this.mapObjects[objectPos.y][objectPos.x];
+        if (!object) {
+            return [];
+        }
+
+    }
+
     getUnitMovementTiles(unitPos) {
         if (!withinMap(unitPos)) {
             return [];
