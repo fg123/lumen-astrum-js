@@ -428,6 +428,10 @@ class UnitAttackStateChange extends StateChange {
         }
         dealDamageToUnit(state, target, unit.attackDamage);
 
+        if (!(unit.custom && unit.custom.canMoveAfterAttack)) {
+            unit.moveRange = 0;
+        }
+
         if (unit.custom && unit.custom.splashDamage) {
             // Apply damage to surrounding units
             const surrounding = getSurrounding(this.data.posTo, unit.custom.splashRange);
