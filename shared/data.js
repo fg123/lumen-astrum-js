@@ -840,7 +840,7 @@ const units = {
         'attackrange': 0,
         'damage': 0,
         'description': 'Far-sight recon unit capable of seeing stealthed units.',
-        'health': 50,
+        'health': 20,
         'moverange': 5,
         'shield': 0,
         'sightrange': 5,
