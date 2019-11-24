@@ -13,6 +13,7 @@ const { Resource } = require('./resources');
 const { withinMap, map } = require('../shared/map');
 const { getBaseObject } = require('../shared/data');
 const { getSurrounding } = require('../shared/coordinates');
+const { toDrawCoord } = require('./utils');
 const {
     BuildStructureStateChange,
     SpawnUnitStateChange,
@@ -42,10 +43,10 @@ class PlaceUnitPendingAction extends PendingAction {
             else {
                 mapCanvas.state.cursorMessage = 'Cannot spawn there!';
             }
+            const drawn = toDrawCoord(mapCanvas.inputManager.mouseState.tile);
             mapCanvas.drawImage(mapCanvas.resourceManager.get(
                 this.isValid ? Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
-            (mapCanvas.inputManager.mouseState.tile.x * 96),
-            (mapCanvas.inputManager.mouseState.tile.y * 111) + (mapCanvas.inputManager.mouseState.tile.x % 2) * 55);
+                drawn.x, drawn.y);
         }
 
         let baseObj = getBaseObject(mapCanvas.state.selectedObject.name);
@@ -55,9 +56,9 @@ class PlaceUnitPendingAction extends PendingAction {
             if (withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
+                const drawn = toDrawCoord(surrounding[i]);
                 mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.YELLOW_OVERLAY),
-                    (surrounding[i].x * 96),
-                    (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+                    drawn.x, drawn.y);
             }
         }
     }
@@ -103,10 +104,10 @@ class PlaceStructurePendingAction extends PendingAction {
                 else {
                     mapCanvas.state.cursorMessage = 'Cannot build there!';
                 }
+                const drawn = toDrawCoord(surrounding[i]);
                 mapCanvas.drawImage(mapCanvas.resourceManager.get(
                     this.isValid ? Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
-                (surrounding[i].x * 96),
-                (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+                    drawn.x, drawn.y);
             }
         }
 
@@ -117,9 +118,9 @@ class PlaceStructurePendingAction extends PendingAction {
                 if (withinMap(surrounding[i]) &&
                     !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                     map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
+                    const drawn = toDrawCoord(surrounding[i]);
                     mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
-                        (surrounding[i].x * 96),
-                        (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+                        drawn.x, drawn.y);
                 }
             }
         }
@@ -163,9 +164,9 @@ class HealUnitPendingAction extends PendingAction {
             if (withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType !== 2) {
+                const drawn = toDrawCoord(surrounding[i]);
                 mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
-                    (surrounding[i].x * 96),
-                    (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+                    drawn.x, drawn.y);
             }
         }
     }
@@ -207,9 +208,9 @@ class RepairStructurePendingAction extends PendingAction {
             if (withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType !== 2) {
+                const drawn = toDrawCoord(surrounding[i]);
                 mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
-                    (surrounding[i].x * 96),
-                    (surrounding[i].y * 111) + (surrounding[i].x % 2) * 55);
+                    drawn.x, drawn.y);
             }
         }
     }

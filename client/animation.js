@@ -1,4 +1,5 @@
 const { Tuple } = require('../shared/coordinates');
+const { toDrawCoord } = require('./utils');
 
 class BaseAnimator {
     constructor(onDone) {
@@ -31,10 +32,7 @@ class MoveUnitAnimation extends MapObjectAnimation {
      * in terms of ticks */
     constructor(points, speed, onDone = () => {}) {
         super(onDone);
-        this.points = points.map(point => new Tuple(
-            point.x * 96,
-            (point.y * 111) + (point.x % 2) * 55
-        ));
+        this.points = points.map(toDrawCoord);
         this.speed = speed;
         this.totalTicks = 0;
         this.maxTicks = speed * (points.length - 1);
@@ -117,14 +115,8 @@ class AttackProjectileAnimation extends MapObjectAnimation {
         super(onDone);
         this.resourceManager = resourceManager;
 
-        this.from = new Tuple(
-            from.x * 96,
-            (from.y * 111) + (from.x % 2) * 55
-        );
-        this.to = new Tuple(
-            to.x * 96,
-            (to.y * 111) + (to.x % 2) * 55
-        );
+        this.from = toDrawCoord(from);
+        this.to = toDrawCoord(to);
 
         this.currentPos = this.from;
 

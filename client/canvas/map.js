@@ -4,7 +4,9 @@ const { getBaseObject, structureList, unitList, units, structures } = require('.
 const { Structure } = require('../../shared/map-objects');
 const { map, withinMap } = require('../../shared/map');
 const { UnitAttackStateChange } = require('../../shared/state-change');
+const { toDrawCoord } = require('../utils');
 const PathFinder = require('../../shared/path-finder');
+const Constants = require('../../shared/constants');
 
 const DRAW_PADDING = 3;
 const FPS_FILTER_STRENGTH = 20;
@@ -349,6 +351,11 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
         this.animationManager.tick();
     }
 
+    calculateRotation(position) {
+        const input = this.camera.toWorldCoord(this.inputManager.mouseState.position);
+        return Math.atan2(input.y - position.y, input.x - position.x) + (Math.PI / 2);
+    }
+
     drawMap() {
         const healthbarsToDraw = [];
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
@@ -357,10 +364,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                 x < Math.min(map.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
                 this.context.globalAlpha = 1;
                 if (map.data[y][x].displayType !== 0) {
-                    let yOffset = 0;
-                    if (x % 2 === 1) {
-                        yOffset = 55;
-                    }
+                    const drawCoord = toDrawCoord(x, y);
                     if (this.ui.currentScreen !== this.ui.Screen.GAME ||
                         this.state.gameState.isVisible(x, y, this.state.side)) {
                         this.context.globalCompositeOperation = 'destination-over';
@@ -368,23 +372,21 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         // Drawn first because of Destination Over
                         if (this.hasSelectedConstructionBuildingAndIsAllowed(x, y)) {
                             this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
-                                (x * 96),
-                                (y * 111) + yOffset);
+                                drawCoord.x, drawCoord.y);
                         }
 
                         this.drawImage(this.resourceManager.get(
                             tiles[map.data[y][x].displayType - 1]
-                        ), (x * 96), (y * 111) + yOffset);
+                        ), drawCoord.x, drawCoord.y);
 
                         this.context.globalCompositeOperation = 'source-over';
                     }
                     else {
                         this.drawImage(this.resourceManager.get(
                             tiles[map.data[y][x].displayType - 1]
-                        ), (x * 96), (y * 111) + yOffset);
+                        ), drawCoord.x, drawCoord.y);
                         this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
-                            (x * 96),
-                            (y * 111) + yOffset);
+                            drawCoord.x, drawCoord.y);
                     }
                     if (this.ui.currentScreen === this.ui.Screen.GAME &&
                         this.state.gameState.mapObjects[y][x]) {
@@ -393,9 +395,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             mapObject.animationManager;
 
                         let name = mapObject.name;
-                        let actualDrawnPosition = new Tuple(
-                            (x * 96), (y * 111) + yOffset
-                        );
+                        let actualDrawnPosition = drawCoord.copy();
 
                         /* Hide whatever portion should not be visible */
                         let allVisible = true;
@@ -434,7 +434,13 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                                     }
                                     else if (name in units) {
                                         this.drawImage(units[name].image,
-                                            possiblePositionChange.x, possiblePositionChange.y);
+                                            possiblePositionChange.x, possiblePositionChange.y,
+                                            units[name].image.width,
+                                            units[name].image.height,
+                                            mapObject.rotation);
+                                        if (this.state.selectedObject === mapObject) {
+                                            mapObject.rotation = this.calculateRotation(possiblePositionChange);
+                                        }
                                     }
                                 }
                                 actualDrawnPosition = possiblePositionChange;
@@ -444,24 +450,30 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         else if (anyVisible) {
                             if (mapObject.turnsUntilBuilt === 0) {
                                 if (name in structures) {
-                                    this.drawImage(structures[name].image, (x * 96), (y * 111) + yOffset);
+                                    this.drawImage(structures[name].image, drawCoord.x, drawCoord.y);
                                 }
                                 else if (name in units) {
                                     if (this.objectOnMySide(mapObject)) {
-                                        this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), (x * 96), (y * 111) + yOffset);
+                                        this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), drawCoord.x, drawCoord.y);
                                     }
                                     else {
-                                        this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY), (x * 96), (y * 111) + yOffset);
+                                        this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY), drawCoord.x, drawCoord.y);
                                     }
-                                    this.drawImage(units[name].image, (x * 96), (y * 111) + yOffset);
+                                    this.drawImage(units[name].image, drawCoord.x, drawCoord.y,
+                                        units[name].image.width,
+                                        units[name].image.height,
+                                        mapObject.rotation);
+                                    if (this.state.selectedObject === mapObject) {
+                                        mapObject.rotation = this.calculateRotation(drawCoord);
+                                    }
                                 }
                             }
                             else {
                                 if (mapObject.width === 0) {
-                                    this.drawImage(this.resourceManager.get(Resource.WIDTH_0_BUILD), (x * 96), (y * 111) + yOffset);
+                                    this.drawImage(this.resourceManager.get(Resource.WIDTH_0_BUILD), drawCoord.x, drawCoord.y);
                                 }
                                 else {
-                                    this.drawImage(this.resourceManager.get(Resource.WIDTH_1_BUILD), (x * 96), (y * 111) + yOffset);
+                                    this.drawImage(this.resourceManager.get(Resource.WIDTH_1_BUILD), drawCoord.x, drawCoord.y);
                                 }
                             }
                             // this.context.shadowBlur = 0;
@@ -475,19 +487,20 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                                 surrounding[i].y,
                                 this.state.side
                             )) {
+                                const drawnCoord = toDrawCoord(surrounding[i]);
                                 this.drawImage(this.resourceManager.get(
                                     tiles[map.data[surrounding[i].y][surrounding[i].x].displayType - 1]
-                                ), (surrounding[i].x * 96), (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));
+                                ), drawnCoord.x, drawnCoord.y);
                                 this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
-                                    (surrounding[i].x * 96),
-                                    (surrounding[i].y * 111) + ((surrounding[i].x % 2) * 55));
+                                    drawnCoord.x, drawnCoord.y);
                             }
                         }
 
                         if (allVisible) {
                             healthbarsToDraw.push({
                                 x: actualDrawnPosition.x,
-                                y: actualDrawnPosition.y - 24 - ((mapObject.width + 0.5) * 111),
+                                y: actualDrawnPosition.y - 24 -
+                                    ((mapObject.width + 0.5) * Constants.MAP_TILE_DRAW_Y_MULTIPLIER),
                                 mapObject
                             });
                         }
@@ -517,9 +530,9 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                     for (let i = 0; i < this.state.unitMoveRange.length; i++) {
                         if (withinMap(this.state.unitMoveRange[i]) &&
                         !this.state.gameState.occupied[this.state.unitMoveRange[i].y][this.state.unitMoveRange[i].x]) {
+                            const drawnCoord = toDrawCoord(this.state.unitMoveRange[i]);
                             this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
-                                (this.state.unitMoveRange[i].x * 96),
-                                (this.state.unitMoveRange[i].y * 111) + (this.state.unitMoveRange[i].x % 2) * 55);
+                                drawnCoord.x, drawnCoord.y);
                             if (this.inputManager.mouseState.tile.equals(this.state.unitMoveRange[i])) {
                                 isMouseOverOnUnitMoveRange = true;
                             }
@@ -534,9 +547,9 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         const path = PathFinder.findPath(this.state.gameState,
                             this.state.selectedObject.position, this.inputManager.mouseState.tile);
                         path.forEach(node => {
+                            const drawn = toDrawCoord(node);
                             this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
-                                (node.x * 96),
-                                (node.y * 111) + (node.x % 2) * 55);
+                                drawn.x, drawn.y);
                         });
                         this.state.canCurrentUnitMoveToPosition = true;
                         this.state.cursorMessage = 'Move Here';
@@ -550,9 +563,9 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         if (withinMap(this.state.unitAttackRange[i]) &&
                         !this.state.gameState.occupied[this.state.unitAttackRange[i].y][this.state.unitAttackRange[i].x] &&
                         !this.state.pendingAction) {
+                            const drawnCoord = toDrawCoord(this.state.unitAttackRange[i]);
                             this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
-                                (this.state.unitAttackRange[i].x * 96),
-                                (this.state.unitAttackRange[i].y * 111) + (this.state.unitAttackRange[i].x % 2) * 55);
+                                drawnCoord.x, drawnCoord.y);
                         }
                         if (this.inputManager.mouseState.tile.equals(this.state.unitAttackRange[i])) {
                             isMouseOverAttackRange = true;

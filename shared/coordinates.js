@@ -1,3 +1,5 @@
+const Constants = require('./constants');
+
 class Tuple {
     constructor (x, y) {
         this.x = x;
@@ -18,6 +20,10 @@ class Tuple {
     hash() {
         return JSON.stringify(this);
     }
+    
+    copy() {
+        return new Tuple(this.x, this.y);
+    }
 
     distance(other) {
         return this.toCubeCoordinates().distance(new Tuple(other.x, other.y).toCubeCoordinates());
@@ -25,10 +31,10 @@ class Tuple {
 
     toTileCoord() {
         const XYVertex = false;
-        const s = 64;
-        const t = 32;
-        const r = 55;
-        const h = 111;
+        const s = Constants.MAP_TILE_DRAW_X_MULTIPLIER * (2 / 3);
+        const t = Constants.MAP_TILE_DRAW_X_MULTIPLIER / 3;
+        const r = Constants.MAP_TILE_DRAW_Y_MULTIPLIER / 2;
+        const h = Constants.MAP_TILE_DRAW_Y_MULTIPLIER;
         let mx = parseInt(this.x) + 64;
         const my = parseInt(this.y) + 55;
 

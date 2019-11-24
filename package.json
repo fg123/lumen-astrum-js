@@ -29,6 +29,7 @@
     "dotenv": "^4.0.0",
     "envify": "^4.1.0",
     "express": "^4.17.1",
+    "howler": "^2.1.2",
     "jquery-browserify": "^1.8.1",
     "jquery-mousewheel": "^3.1.13",
     "json-stringify-safe": "^5.0.1",
@@ -38,6 +39,7 @@
     "socket.io-client": "^2.2.0",
     "tinyqueue": "^2.0.3",
     "vue": "^2.6.10",
+    "vue-template-compiler": "^2.6.10",
     "vueify": "^9.4.1"
   },
   "homepage": "https://github.com/fg123/lumen-astrum#readme",

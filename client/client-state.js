@@ -31,6 +31,7 @@ const {
     AttackProjectileAnimation
 } = require('./animation');
 const { Resource } = require('./resources');
+const { toDrawCoord } = require('./utils');
 
 const KEY_W = 87;
 const KEY_A = 65;
@@ -277,21 +278,13 @@ module.exports = class ClientState {
                 this.commandCenter = this.gameState.mapObjects[
                     map.redCommandCenterLocation.y][
                     map.redCommandCenterLocation.x];
-                this.camera.position = new Tuple(
-                    map.redCommandCenterLocation.x * 96,
-                    map.redCommandCenterLocation.y * 111 +
-                        (map.redCommandCenterLocation.x % 2) * 55
-                );
+                this.camera.position = toDrawCoord(map.redCommandCenterLocation);
             }
             else {
                 this.commandCenter = this.gameState.mapObjects[
                     map.blueCommandCenterLocation.y][
                     map.blueCommandCenterLocation.x];
-                this.camera.position = new Tuple(
-                    map.blueCommandCenterLocation.x * 96,
-                    map.blueCommandCenterLocation.y * 111 +
-                        (map.blueCommandCenterLocation.x % 2) * 55
-                );
+                this.camera.position = toDrawCoord(map.blueCommandCenterLocation)
             }
             const interval = setInterval(() => {
                 const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);

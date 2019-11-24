@@ -2,6 +2,7 @@ const { Tuple } = require('../shared/coordinates');
 const { map } = require('../shared/map');
 const Utils = require('./utils');
 const { tiles } = require('./resources');
+const Constants = require('../shared/constants');
 
 /* The camera manages the minimap rectangle as well as itself. */
 
@@ -33,8 +34,8 @@ module.exports = class Camera {
         /* Each hexagon adds 3/4 width due to overlapping, with 1/4 added at
          * the end for the last hexagon */
         /* We also add 2 for extra padding */
-        const entireMapWidth = 96 * (map.data[0].length + 2) + 32;
-        const entireMapHeight = 111 * (map.data.length + 2);
+        const entireMapWidth = Constants.MAP_TILE_DRAW_X_MULTIPLIER * (map.data[0].length + 2) + (Constants.MAP_TILE_DRAW_X_MULTIPLIER / 3);
+        const entireMapHeight = Constants.MAP_TILE_DRAW_Y_MULTIPLIER * (map.data.length + 2);
         const widthScaleFactor = MINIMAP_DISPLAY_SIZE.x / entireMapWidth;
         const heightScaleFactor = MINIMAP_DISPLAY_SIZE.y / entireMapHeight;
 
@@ -68,10 +69,11 @@ module.exports = class Camera {
                     const img = this.resourceManager.get(
                         tiles[map.data[y][x].displayType - 1]
                     );
+                    const coord = Utils.toDrawCoord(x, y);
                     minimapContext.drawImage(
                         img,
-                        (x * 96 * this.minimapScaleFactor) + this.minimapZeroPoint.x,
-                        ((y * 111) + ((x % 2) * 55)) * this.minimapScaleFactor + this.minimapZeroPoint.y,
+                        (coord.x * this.minimapScaleFactor) + this.minimapZeroPoint.x,
+                        coord.y * this.minimapScaleFactor + this.minimapZeroPoint.y,
                         img.width * this.minimapScaleFactor,
                         img.height * this.minimapScaleFactor
                     );
