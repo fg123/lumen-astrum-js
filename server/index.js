@@ -200,6 +200,12 @@ io.on('connection', function (socket) {
                         break;
                     }
                 }
+
+                // const eloChange = parseInt(16 +
+                //     (connectedUsers[game.redSocket.id].elo - connectedUsers[game.blueSocket.id]) * 0.04);
+                // if (eloChange > 31) eloChange = 31;
+                // if (eloChange < 1) eloChange = 1;
+                // db.collection('users').find({ username, password: generateHash(password) })
             }
         }
         else {

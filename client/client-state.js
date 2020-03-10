@@ -11,7 +11,8 @@ const {
     ChatMessageStateChange,
     UnitAttackStateChange,
     ReaverDetonateStateChange,
-    GuardianLockdownStateChange
+    GuardianLockdownStateChange,
+    LaunchProbeStateChange
 } = require('../shared/state-change');
 
 const {
@@ -27,6 +28,7 @@ const { Tuple, getSurrounding } = require('../shared/coordinates');
 const PathFinder = require('../shared/path-finder');
 const {
     InPlaceSpriteAnimation,
+    GenericInPlaceSpriteAnimation,
     MoveUnitAnimation,
     AttackProjectileAnimation,
     MuzzleFlashAnimation
@@ -150,7 +152,7 @@ module.exports = class ClientState {
                                     new InPlaceSpriteAnimation(
                                         this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
                                         10,
-                                        1
+                                        2
                                     )
                                 );
                             }
@@ -159,7 +161,7 @@ module.exports = class ClientState {
                                     new InPlaceSpriteAnimation(
                                         this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
                                         6,
-                                        1
+                                        2
                                     )
                                 );
                             }
@@ -168,7 +170,18 @@ module.exports = class ClientState {
                 };
                 this.gameState.structures.forEach(animationSpawner);
                 this.gameState.units.forEach(animationSpawner);
-            } else if (change instanceof MoveUnitStateChange) {
+            }
+            else if (change instanceof LaunchProbeStateChange) {
+                this.globalAnimationManager.addAnimation(
+                    new GenericInPlaceSpriteAnimation(
+                        toDrawCoord(change.data.posTo),
+                        this.resourceManager.get(Resource.PROBE_ANIM),
+                        5,
+                        20
+                    )
+                );
+            }
+            else if (change instanceof MoveUnitStateChange) {
                 const unit = this.gameState.mapObjects[
                     change.data.posFrom.y][change.data.posFrom.x];
                 if (unit) {

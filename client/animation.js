@@ -105,6 +105,17 @@ class InPlaceSpriteAnimation extends MapObjectAnimation {
     }
 }
 
+class GenericInPlaceSpriteAnimation extends InPlaceSpriteAnimation {
+    constructor(position, spriteSheet, frameCount, timeOnEachFrame, onDone = ()=>{}) {
+        super(spriteSheet, frameCount, timeOnEachFrame, onDone);
+        this.position = position;
+    }
+
+    _getPosition() {
+        return this.position;
+    }
+};
+
 /* This animation happens in two parts, first, the projectile flies
  *   to the desired position, then it explodes.
  * The animation is not attached to an actual unit, but instead is attached to
@@ -219,6 +230,7 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
 
 module.exports = {
     InPlaceSpriteAnimation,
+    GenericInPlaceSpriteAnimation,
     MoveUnitAnimation,
     AttackProjectileAnimation,
     MuzzleFlashAnimation
