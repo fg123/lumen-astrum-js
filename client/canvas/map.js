@@ -4,7 +4,7 @@ const { getBaseObject, structureList, unitList, units, structures } = require('.
 const { Structure } = require('../../shared/map-objects');
 const { map, withinMap } = require('../../shared/map');
 const { UnitAttackStateChange } = require('../../shared/state-change');
-const { toDrawCoord } = require('../utils');
+const { toDrawCoord, roundToNearest } = require('../utils');
 const PathFinder = require('../../shared/path-finder');
 const Constants = require('../../shared/constants');
 
@@ -353,7 +353,8 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
 
     calculateRotation(position) {
         const input = this.camera.toWorldCoord(this.inputManager.mouseState.position);
-        return Math.atan2(input.y - position.y, input.x - position.x) + (Math.PI / 2);
+        const result = Math.atan2(input.y - position.y, input.x - position.x) + (Math.PI / 2);
+        return result; // roundToNearest(result, Math.PI / 3);
     }
 
     drawMap() {
@@ -395,7 +396,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             mapObject.animationManager;
 
                         let name = mapObject.name;
-                        let actualDrawnPosition = drawCoord.copy();
+                        let actualDrawnPosition = drawCoord;
 
                         /* Hide whatever portion should not be visible */
                         let allVisible = true;

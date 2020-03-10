@@ -22,7 +22,12 @@ module.exports.Resource = {
     WIDTH_1_BUILD_ANIM: 'resources/structures/width1BuildAnimation.png',
     WIDTH_0_BUILD_ANIM: 'resources/structures/width0BuildAnimation.png',
     ATTACK_PROJECTILE: 'resources/attack/attack.png',
-    ATTACK_EXPLODING: 'resources/attack/exploding.png'
+    ATTACK_EXPLODING: 'resources/attack/exploding.png',
+    MUZZLE_1: 'resources/muzzle/muzzle1.png',
+    MUZZLE_2: 'resources/muzzle/muzzle2.png',
+    MUZZLE_3: 'resources/muzzle/muzzle3.png',
+    MUZZLE_4: 'resources/muzzle/muzzle4.png',
+    MUZZLE_5: 'resources/muzzle/muzzle5.png',
 };
 
 module.exports.tiles = [

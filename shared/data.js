@@ -135,13 +135,13 @@ const structures = {
                     'command': 'spawn-Combat Engineer'
                 },
                 {
-                    'title': 'Spawn Marine Squad',
+                    'title': 'Spawn Marine',
                     'cost': 250,
                     'prereq': [],
                     'type': 'Unit',
-                    'description': '{Marine Squad}',
-                    'icon': '{Marine Squad}',
-                    'command': 'spawn-Marine Squad'
+                    'description': '{Marine}',
+                    'icon': '{Marine}',
+                    'command': 'spawn-Marine'
                 },
                 {
                     'title': 'Spawn Medic',
@@ -431,7 +431,7 @@ const units = {
         'options': [],
         'unitclass': 'Light, Biological'
     },
-    'Marine Squad': {
+    'Marine': {
         'advantagedamage': 0,
         'attackrange': 2,
         'damage': 10,
@@ -444,7 +444,13 @@ const units = {
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Light, Biological'
+        'unitclass': 'Light, Biological',
+        'custom': {
+            'muzzle': {
+                'x': 0,
+                'y': -65
+            }
+        }
     },
     'Medic': {
         'advantagedamage': 0,

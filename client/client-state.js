@@ -28,7 +28,8 @@ const PathFinder = require('../shared/path-finder');
 const {
     InPlaceSpriteAnimation,
     MoveUnitAnimation,
-    AttackProjectileAnimation
+    AttackProjectileAnimation,
+    MuzzleFlashAnimation
 } = require('./animation');
 const { Resource } = require('./resources');
 const { toDrawCoord } = require('./utils');
@@ -214,6 +215,16 @@ module.exports = class ClientState {
                             )
                         );
                     }
+                }
+
+                const attacker = this.gameState.mapObjects[change.data.posFrom.y][change.data.posFrom.x];
+                if (attacker && attacker.isUnit && attacker.custom && attacker.custom.muzzle) {
+                    this.globalAnimationManager.addAnimation(
+                        new MuzzleFlashAnimation(
+                            this.resourceManager,
+                            attacker
+                        )
+                    );
                 }
             }
             else if (change instanceof ReaverDetonateStateChange) {

@@ -32,7 +32,9 @@ class MoveUnitAnimation extends MapObjectAnimation {
      * in terms of ticks */
     constructor(points, speed, onDone = () => {}) {
         super(onDone);
-        this.points = points.map(toDrawCoord);
+        console.log(points);
+        this.points = points.map((x) => toDrawCoord(x));
+        console.log(this.points);
         this.speed = speed;
         this.totalTicks = 0;
         this.maxTicks = speed * (points.length - 1);
@@ -164,8 +166,60 @@ class AttackProjectileAnimation extends MapObjectAnimation {
     }
 }
 
+const Muzzles = [Resource.MUZZLE_1, Resource.MUZZLE_2, Resource.MUZZLE_3, Resource.MUZZLE_4, Resource.MUZZLE_5];
+class MuzzleFlashAnimation extends MapObjectAnimation {
+
+    constructor(resourceManager, attacker, onDone = () => {}) {
+        super(onDone);
+        this.resourceManager = resourceManager;
+        this.location = toDrawCoord(attacker.position);
+        this.muzzleOffset = attacker.custom.muzzle;
+        this.totalTicks = 0;
+        this.rotation = attacker.rotation;
+        this.framesOn = 4;
+
+        this.shots = Math.floor(attacker.attackDamage / 10);
+        // i.e. shots = 4
+        this.maxTicks = this.shots * this.framesOn * 2;
+    }
+
+    _tick() {
+        this.totalTicks += 1;
+        if (this.totalTicks >= this.maxTicks) {
+            return false;
+        }
+        return true;
+    }
+
+    _draw(graphicsManager, position) {
+        // console.log(position);
+        if (this.totalTicks % (this.framesOn * 2) >= this.framesOn) {
+            return false;
+        }
+        if (this.totalTicks % (this.framesOn * 2) === 0) {
+            this.flash = this.resourceManager.get(Muzzles[Math.floor(Math.random() * Muzzles.length)]);
+        }
+        console.log(this.muzzleOffset);
+        const transformedMuzzle = new Tuple(
+            Math.cos(this.rotation) * this.muzzleOffset.x - Math.sin(this.rotation) * this.muzzleOffset.y,
+            Math.sin(this.rotation) * this.muzzleOffset.x + Math.cos(this.rotation) * this.muzzleOffset.y
+        );
+        graphicsManager.context.translate(position.x + transformedMuzzle.x, position.y + transformedMuzzle.y);
+        graphicsManager.context.rotate(this.rotation);
+        graphicsManager.context.drawImage(this.flash, -this.flash.width / 2, -this.flash.height / 2, this.flash.width, this.flash.height);
+        graphicsManager.context.rotate(-this.rotation);
+        graphicsManager.context.translate(-position.x - transformedMuzzle.x, -position.y - transformedMuzzle.y);
+        return true;
+    }
+
+    _getPosition() {
+        return this.location;
+    }
+}
+
 module.exports = {
     InPlaceSpriteAnimation,
     MoveUnitAnimation,
-    AttackProjectileAnimation
+    AttackProjectileAnimation,
+    MuzzleFlashAnimation
 };
