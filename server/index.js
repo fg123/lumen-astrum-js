@@ -190,6 +190,16 @@ io.on('connection', function (socket) {
                 };
                 game.redSocket.emit('game-over', gameOver);
                 game.blueSocket.emit('game-over', gameOver);
+                connectedUsers[game.redSocket.id].game = null;
+                connectedUsers[game.blueSocket.id].game = null;
+
+                for (let i = 0; i < games.length; i++) {
+                    if (games[i].redPlayer === game.redPlayer &&
+                        games[i].bluePlayer == game.bluePlayer) {
+                        games.splice(i, 1);
+                        break;
+                    }
+                }
             }
         }
         else {
