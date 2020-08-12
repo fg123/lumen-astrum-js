@@ -385,7 +385,7 @@ module.exports = class GameState {
         for (let i = 0; i < tiles.length; i++) {
             const tile = tiles[i];
             const occupied = this.occupied[tile.y][tile.x];
-            if (occupied) {
+            if (occupied && occupied.x && occupied.y) {
                 const obj = this.mapObjects[occupied.y][occupied.x];
                 if (obj.side !== object.side) {
                     result.push(obj);
