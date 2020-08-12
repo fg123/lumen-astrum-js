@@ -7,12 +7,12 @@ const {
 const {
     StateChange,
     MoveUnitStateChange,
-    TurnPassoverStateChange,
     ChatMessageStateChange,
     UnitAttackStateChange,
     ReaverDetonateStateChange,
     GuardianLockdownStateChange,
-    LaunchProbeStateChange
+    LaunchProbeStateChange,
+    PhaseChangeStateChange
 } = require('../shared/state-change');
 
 const {
@@ -74,8 +74,8 @@ module.exports = class ClientState {
         this.canCurrentUnitAttackPosition = false;
         this.canCurrentUnitMoveToPosition = false;
         this.pendingAction = null;
-        this.hoveringEndTurn = false;
-        this.turnTimer = '';
+        this.gameTimer = '';
+        this.phaseText = '';
         this.cursorMessage = '';
 
         inputManager.attachInputPollingListener((keyState, prevKeyState) => {
@@ -90,12 +90,6 @@ module.exports = class ClientState {
             }
             if (keyState[KEY_S]) {
                 this.camera.delta.y = CAMERA_SPEED;
-            }
-            if (!keyState[KEY_G] && prevKeyState[KEY_G]) {
-                const stateChange = TurnPassoverStateChange.create(this.side, true);
-                if (stateChange.verifyStateChange(this.gameState)) {
-                    this.sendStateChange(stateChange);
-                }
             }
             if (keyState[KEY_ESCAPE] && !prevKeyState[KEY_ESCAPE]) {
                 if (this.pendingAction) {
@@ -134,13 +128,18 @@ module.exports = class ClientState {
             }
         });
 
+        socket.on('disconnect', () => {
+	        alert('Server disconnected.');
+            window.location.reload(); 
+        });
+
         socket.on('state-change', (stateChange) => {
             console.log('State Change!');
             console.log(stateChange);
             const change = StateChange
                 .deserialize(stateChange);
 
-            if (change instanceof TurnPassoverStateChange) {
+            if (change instanceof PhaseChangeStateChange) {
                 this.pendingAction = null;
                 /* Spawn Animations for buildings being constructed */
                 const animationSpawner = mapObject => {
@@ -281,9 +280,6 @@ module.exports = class ClientState {
                 }
             }
         });
-        socket.on('update-turn-end-time', (turnEndTime) => {
-            this.gameState.turnEndTime = turnEndTime;
-        });
         socket.on('invalid-state-change', () => {
             // Should never happen since UI should prevent it, but if so...
             this.pushAlertMessage('Invalid action!');
@@ -325,15 +321,27 @@ module.exports = class ClientState {
         this.internalTick = setInterval(() => {
             /* This just sets up some internal checks as the game goes on for
              * UI purposes */
-            if (this.gameState && this.gameState.currentTurn === this.side) {
-                let diff = this.gameState.turnEndTime - Date.now();
-                // Diff in Millis
-                diff = Math.ceil(diff / 1000);
-                // Diff in Seconds
-                this.turnTimer = ('0' + Math.floor(diff / 60)).slice(-2) + ':' + ('0' + (diff % 60)).slice(-2);
+            if (this.gameState) {
+                if (this.gameState.phase === Constants.PHASE_ACTION) {
+                    this.phaseText = 'ACTION';
+                    this.gameTimer = '00:00';
+                }
+                else if (this.gameState.phase === Constants.PHASE_PLANNING) {
+                    this.phaseText = 'PLANNING';
+                    let diff = (Constants.PLANNING_TIME * 1000) - (Date.now() - this.gameState.phaseStartTime);
+                    // Diff in Millis
+                    diff = Math.ceil(diff / 1000);
+                    // Diff in Seconds
+                    this.gameTimer = ('0' + Math.floor(diff / 60)).slice(-2) + ':' + ('0' + (diff % 60)).slice(-2);
+                }
+                else {
+                    this.phaseText = '...';
+                    this.gameTimer = '00:00';
+                }
             }
             else {
-                this.turnTimer = '00:00';
+                this.phaseText = '...';
+                this.gameTimer = '00:00';
             }
         }, INTERNAL_TICK_INTERVAL);
     }
@@ -344,11 +352,6 @@ module.exports = class ClientState {
             content: message,
             color: 'yellow'
         });
-    }
-
-    isMyTurn() {
-        return this.gameState.currentTurn !== Constants.NONE_SIDE &&
-                this.gameState.currentTurn === this.side;
     }
 
     addGameStartListener(fn) {
@@ -366,11 +369,7 @@ module.exports = class ClientState {
     handleOptionClicked(option) {
         // Parse command
         const parts = option.command.split('-');
-        if (this.side !== this.gameState.currentTurn) {
-            // Cannot Exercise Option If Not Your Turn
-            this.pushAlertMessage('Wait for your turn!');
-            return;
-        }
+
         // Check for Gold Cost and Prereqs
         if (option.cost > this.getGold()) {
             this.pushAlertMessage('Not enough gold!');
@@ -460,6 +459,10 @@ module.exports = class ClientState {
                         this.side,
                         this.selectedObject.position,
                         this.inputManager.mouseState.tile));
+                this.selectedObject.desiredPath = 
+                    PathFinder.findPath(this.gameState, this.selectedObject.position,
+                        this.inputManager.mouseState.tile);
+                // TODO: add pathfinding here
             }
         }
     }
@@ -490,10 +493,6 @@ module.exports = class ClientState {
         if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
         if (this.hoveredOption) {
             this.handleOptionClicked(this.hoveredOption);
-            return true;
-        }
-        if (this.hoveringEndTurn) {
-            this.sendStateChange(TurnPassoverStateChange.create(this.side, true));
             return true;
         }
         return false;

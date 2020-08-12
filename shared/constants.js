@@ -13,5 +13,9 @@ module.exports = {
     PROBE_RANGE: 1,
     BRUSH_VISION: 2,
     MAP_TILE_DRAW_X_MULTIPLIER: 96,
-    MAP_TILE_DRAW_Y_MULTIPLIER: 111
+    MAP_TILE_DRAW_Y_MULTIPLIER: 111,
+    PHASE_ACTION: 'phase_action',
+    PHASE_PLANNING: 'phase_planning',
+    PLANNING_TIME: is_production ? 12 : 3,
+    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 1 : 0
 };

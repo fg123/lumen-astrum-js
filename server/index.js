@@ -49,6 +49,10 @@ process.on('uncaughtException', (err, origin) => {
         `Exception origin: ${origin}\n` +
         'Creating dump file of games!'
     );
+    fs.writeSync(
+        process.stderr.fd,
+        err.stack
+    );
     for (let i = 0; i < games.length; i++) {
         delete games[i].redSocket;
         delete games[i].blueSocket;
@@ -125,7 +129,6 @@ io.on('connection', function (socket) {
                         for (let i = 0; i < potentialGame.stateChanges.length; i++) {
                             socket.emit('state-change', potentialGame.stateChanges[i]);
                         }
-                        socket.emit('update-turn-end-time', potentialGame.state.turnEndTime);
                     }
                 }
             }

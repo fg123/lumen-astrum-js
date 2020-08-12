@@ -23,9 +23,6 @@ module.exports = class UICanvas {
 
         this.lastGold = 0;
         this.lastGoldCanvas = undefined;
-
-        this.endTurnCanvas = document.createElement('canvas');
-        this.cacheTextToCanvas('End Turn', 'white', 'bold 20px Roboto Slab', this.endTurnCanvas);
     }
 
     cacheTextToCanvas(text, color, font, canvas) {
@@ -33,7 +30,7 @@ module.exports = class UICanvas {
         context.font = font;
         const measure = context.measureText(text);
         canvas.width = measure.width;
-        canvas.height = parseInt(font.replace(/\D/g,''));
+        canvas.height = parseInt(font.replace(/\D/g, ''));
         context.font = font;
         context.fillStyle = 'white';
         context.textAlign = 'center';
@@ -94,30 +91,18 @@ module.exports = class UICanvas {
         this.context.textBaseline = 'middle';
         this.context.fillStyle = 'white';
         this.context.font = 'bold 32px Roboto Slab';
-        this.context.fillText(this.state.getGold(), screenWidth - 185, screenHeight - 184);
+        this.context.fillText(this.state.getGold(), screenWidth - 185, screenHeight - 182);
         this.context.textBaseline = 'alphabetic';
+        
+        // Show Timer
+        this.context.fillStyle = 'black';
+        this.context.font = 'bold 60px Roboto Slab';
+        this.context.fillText(this.state.gameTimer, screenWidth - 180, 75);
 
-        // Turn Controls
-        this.state.hoveringEndTurn = false;
-        if (this.state.gameState.currentTurn === this.state.side) {
-            // Show Timer
-            this.context.fillStyle = 'black';
-            this.context.font = 'bold 60px Roboto Slab';
-            this.context.fillText(this.state.turnTimer, screenWidth - 180, 75);
-            // Show End Turn Button
-            if (this.inputManager.mouseState.position.x > screenWidth - 365 &&
-                this.inputManager.mouseState.position.x < screenWidth - 365 + 120 &&
-                this.inputManager.mouseState.position.y > 0 && this.inputManager.mouseState.position.y < 48) {
-                this.state.hoveringEndTurn = true;
-                this.context.fillStyle = 'rgba(164, 0, 0, 0.8)';
-            }
-            else {
-                this.context.fillStyle = 'rgba(164, 0, 0, 0.6)';
-            }
-            this.context.fillRect(screenWidth - 365, 0, 120, 48);
-            this.context.drawImage(this.endTurnCanvas, screenWidth - 305 - (this.endTurnCanvas.width / 2),
-                24 - (this.endTurnCanvas.height / 2));
-        }
+        // Show Phase Text
+        this.context.fillStyle = 'black';
+        this.context.font = 'bold 16px Roboto Slab';
+        this.context.fillText(this.state.phaseText, screenWidth - 140, 100);
     }
 
     drawMinimap(screenWidth, screenHeight) {

@@ -5,7 +5,7 @@ const { getSurrounding } = require('./coordinates');
 
 const triggers = {
     'Harvester': {
-        onTurnStart(state) {
+        onPlanningStart(state) {
             // Gain Extra Gold
             const tile = map.data[this.position.y][
                 this.position.x];
@@ -26,7 +26,7 @@ const triggers = {
         }
     },
     'Maintenance Drone': {
-        onTurnStart(state) {
+        onPlanningStart(state) {
             // Range 3, double shield regeneration
             const range = getSurrounding(this.position, 3);
             for (let i = 0; i < range.length; i++) {
@@ -35,22 +35,6 @@ const triggers = {
                     replenishShield(target);
                 }
             }
-        }
-    },
-    'Barracks': {
-        onTurnStart(state) {
-            console.log('Barracks Turn Start');
-        },
-        onTurnEnd(state) {
-            console.log('Barracks Turn End');
-        }
-    },
-    'Recon Team': {
-        onTurnStart(state) {
-            console.log('Recon Team Turn Start');
-        },
-        onTurnEnd(state) {
-            console.log('Recon Team Turn End');
         }
     }
 };

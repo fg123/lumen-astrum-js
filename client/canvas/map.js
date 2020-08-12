@@ -424,6 +424,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         }
 
                         if (animationManager.hasAnimation()) {
+                            // Draw any animations in the animation stack
                             const possiblePositionChange =
                                 animationManager.draw(this, actualDrawnPosition);
                             if (possiblePositionChange) {
@@ -451,9 +452,11 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         else if (anyVisible) {
                             if (mapObject.turnsUntilBuilt === 0) {
                                 if (name in structures) {
+                                    // Draw Structure
                                     this.drawImage(structures[name].image, drawCoord.x, drawCoord.y);
                                 }
                                 else if (name in units) {
+                                    // Draw Unit
                                     if (this.objectOnMySide(mapObject)) {
                                         this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), drawCoord.x, drawCoord.y);
                                     }
@@ -466,6 +469,19 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                                         mapObject.rotation);
                                     if (this.state.selectedObject === mapObject) {
                                         mapObject.rotation = this.calculateRotation(drawCoord);
+                                    }
+                                    // Draw Unit desired path
+                                    if (mapObject.desiredPath !== undefined) {
+                                        this.context.strokeStyle = '#FF0000';
+                                        this.context.lineWidth = 2;
+                                        this.context.beginPath();
+                                        this.context.moveTo(drawCoord.x, drawCoord.y);
+                                        for (let i = 0; i < mapObject.desiredPath.length; i++) {
+                                            const destination = toDrawCoord(mapObject.desiredPath[i].x,
+                                                mapObject.desiredPath[i].y);
+                                            this.context.lineTo(destination.x, destination.y);
+                                        }
+                                        this.context.stroke();
                                     }
                                 }
                             }
@@ -525,7 +541,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
             /* This value is used in the calculation below, but we calculate it
              * here since we're already doing a traversal of the unitmoverange
              * array */
-            if (this.state.isMyTurn()) {
+            if (this.state.gameState.phase === Constants.PHASE_PLANNING) {
                 if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
                     let isMouseOverOnUnitMoveRange = false;
                     for (let i = 0; i < this.state.unitMoveRange.length; i++) {

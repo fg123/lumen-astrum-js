@@ -59,6 +59,9 @@ module.exports.Unit = class {
         this.maxMoveRange = Data.units[name].moverange;
         this.attacksThisTurn = 0;
 
+        /* These are client specific usage */
+        this.desiredPath = [];
+
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;
 

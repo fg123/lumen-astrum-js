@@ -8,6 +8,7 @@ const {
 const { Structure, Unit } = require('../shared/map-objects');
 const { getSurrounding, getReachable, Tuple  } = require('./coordinates');
 const Data = require('./data');
+const { distance } = require('../client/utils');
 
 module.exports = class GameState {
     constructor(gameStartTime, redPlayer, bluePlayer) {
@@ -26,13 +27,16 @@ module.exports = class GameState {
         this.structures = [];
         this.units = [];
         this.gameStartTime = gameStartTime;
-        this.turnEndTime = 0;
-        this.redTurnCount = 0;
-        this.blueTurnCount = 0;
+
+        // Action so we can phase change it to planning at start of game
+        this.phase = Constants.PHASE_ACTION;
+        this.phaseStartTime = 0;
+
         this.redGold = Constants.STARTING_GOLD;
         this.blueGold = Constants.STARTING_GOLD;
-        this.currentTurn = Constants.NONE_SIDE;
         this.chatMessages = [];
+
+        this.deadObjects = [];
 
         /* Setup two dimensional arrays */
         for (let i = 0; i < map.data.length; i++) {
@@ -299,15 +303,6 @@ module.exports = class GameState {
         }
     }
 
-    calculateNextTurnAvailableTime(side) {
-        if (side === Constants.RED_SIDE) {
-            return 1000 * ((30) + (this.redTurnCount - 1) * 5);
-        }
-        else {
-            return 1000 * ((30) + (this.blueTurnCount - 1) * 5);
-        }
-    }
-
     getGold(side) {
         if (side === Constants.RED_SIDE) {
             return this.redGold;
@@ -371,6 +366,37 @@ module.exports = class GameState {
         return getSurrounding(object.position, object.attackRange).filter(
             pos => withinMap(pos) && this.isVisible(pos.x, pos.y, object.side)
             && !pos.equals(unitPos));
+    }
+
+    // TODO: pass in priority / sorting function
+    getEnemiesInAttackRange(unitPos) {
+        if (!withinMap(unitPos)) {
+            return [];
+        }
+        const object = this.mapObjects[unitPos.y][unitPos.x];
+        if (!object) {
+            return [];
+        }
+        if (!object.isUnit) {
+            return [];
+        }
+        const tiles = this.getUnitAttackTiles(unitPos);
+        const result = [];
+        for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i];
+            const occupied = this.occupied[tile.y][tile.x];
+            if (occupied) {
+                const obj = this.mapObjects[occupied.y][occupied.x];
+                if (obj.side !== object.side) {
+                    result.push(obj);
+                }
+            }
+        }
+        result.sort((a, b) => {
+            return distance(unitPos, a.position) -
+                distance(unitPos, b.position);
+        });
+        return result;
     }
 
     getWinner() {

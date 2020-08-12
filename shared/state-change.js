@@ -13,7 +13,7 @@ function dealDamageToUnit(state, target, damage) {
     target.currentHealth -= damage;
     if (target.currentHealth <= 0) {
         /* Kill Unit / Structure */
-        state.removeMapObject(target.position);
+        state.deadObjects.push(target.position);
     }
 }
 
@@ -63,6 +63,7 @@ const { Tuple, getSurrounding, tupleDistance } = require('./coordinates');
 const { withinMap, map, Tiles } = require('./map');
 const PathFinder = require('./path-finder');
 const Data = require('./data');
+const { default: GameState } = require('./game-state');
 
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the
@@ -90,10 +91,6 @@ class BuildStructureStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
-
         const option = this.getOptionToBuild();
         if (!option) {
             return false;
@@ -182,9 +179,6 @@ class SpawnUnitStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
         const option = this.getOptionToBuild();
         if (!option) {
             return false;
@@ -236,9 +230,6 @@ class MoveUnitStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
         if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
             return false;
         }
@@ -266,99 +257,107 @@ class MoveUnitStateChange extends StateChange {
 }
 StateChange.registerSubClass(MoveUnitStateChange);
 
-class TurnPassoverStateChange extends StateChange {
-    static create(from, isUserInitiated) {
-        return new TurnPassoverStateChange(
+class PhaseChangeStateChange extends StateChange {
+    static create(from) {
+        return new PhaseChangeStateChange(
             StateChange.create(
-                from, 'TurnPassoverStateChange', {
-                    isUserInitiated: isUserInitiated
-                }
+                from, 'PhaseChangeStateChange'
             )
         );
-    }
-
-    _verifyStateChange(state) {
-        return state.currentTurn === this.from;
     }
 
     isBuilt(mapObject) {
         return mapObject.turnsUntilBuilt === 0;
     }
 
-    _simulateStateChange(state) {
-        // Remove all probe locations
-        state.removeAllProbeLocations(Constants.RED_SIDE);
-        state.removeAllProbeLocations(Constants.BLUE_SIDE);
+    _verifyStateChange(state) {
+        return true;
+    }
 
-        // Handle Structure End-Turn Procedures
-        for (let i = 0; i < state.structures.length; i++) {
-            const structure = state.structures[i];
-            /* Shield replenished on the start of the turn */
-            if (structure.side === this.opponentSide) {
-                replenishShield(structure);
-                if (this.isBuilt(structure) && structure.onTurnStart) {
-                    structure.onTurnStart(state);
-                }
-            } else {
-                if (this.isBuilt(structure) && structure.onTurnEnd) {
-                    structure.onTurnEnd(state);
+    _simulateStateChange(state) {
+        if (state.phase == Constants.PHASE_PLANNING) {
+            state.phase = Constants.PHASE_ACTION;
+            for (let i = 0; i < state.units.length; i++) {
+                const unit = state.units[i];
+                unit.desiredPath = [];
+                if (this.isBuilt(unit) && unit.onActionStart) {
+                    unit.onActionStart(state);
                 }
             }
-            if (structure.side === this.from &&
-				!this.isBuilt(structure)) {
-                structure.turnsUntilBuilt -= 1;
+            for (let i = 0; i < state.structures.length; i++) {
+                const structure = state.structures[i];
+                if (this.isBuilt(structure) && structure.onActionStart) {
+                    structure.onActionStart(state);
+                }
             }
         }
+        else {
+            state.phase = Constants.PHASE_PLANNING;
 
-        // Handle Units End-Turn Procedures
-        for (let i = 0; i < state.units.length; i++) {
-            const unit = state.units[i];
-            if (unit.side === this.from &&
-				unit.turnsUntilBuilt !== 0) {
-                unit.turnsUntilBuilt -= 1;
+            // Delete dead objects from trade in action
+            for (let i = 0; i < state.deadObjects.length; i++) {
+                state.removeMapObject(state.deadObjects[i]);
             }
-            /* Reset move range at the end of the turn */
-            unit.moveRange = Data.units[unit.name].moverange;
+            state.deadObjects = [];
 
-            if (unit.side === this.opponentSide) {
-                replenishShield(unit);
-                if (this.isBuilt(unit) && unit.onTurnStart) {
-                    unit.onTurnStart(state);
+            // Process Structures
+            for (let i = 0; i < state.structures.length; i++) {
+                const structure = state.structures[i];
+                replenishShield(structure);
+                if (!this.isBuilt(structure)) {
+                    structure.turnsUntilBuilt -= 1;
+                } 
+                if (this.isBuilt(structure) && structure.onPlanningStart) {
+                    structure.onPlanningStart(state);
                 }
+            }
+    
+            // Process Units
+            for (let i = 0; i < state.units.length; i++) {
+                const unit = state.units[i];
+                replenishShield(unit);
+                if (unit.turnsUntilBuilt !== 0) {
+                    unit.turnsUntilBuilt -= 1;
+                }
+                /* Reset move range at the end of the turn */
+                unit.moveRange = Data.units[unit.name].moverange;
                 /* Reset attack on turn start */
                 if (unit.attacksThisTurn < 1) {
                     unit.attacksThisTurn += 1;
                 }
-            } else {
-                if (this.isBuilt(unit) && unit.onTurnEnd) {
-                    unit.onTurnEnd(state);
+                if (this.isBuilt(unit) && unit.onPlanningStart) {
+                    unit.onPlanningStart(state);
                 }
             }
         }
 
+        state.phaseStartTime = this.timestamp;
+
+        // Remove all probe locations
+        // state.removeAllProbeLocations(Constants.RED_SIDE);
+        // state.removeAllProbeLocations(Constants.BLUE_SIDE);
+
+        // // Handle Structure End-Turn Procedures
+        
+
         // Handle General Procedures
-        if (this.from === Constants.RED_SIDE) {
-            state.currentTurn = Constants.BLUE_SIDE;
-            if (state.blueTurnCount !== 0) {
-                state.blueGold += 200 + ((state.blueTurnCount - 1) * 50);
-            }
-            state.blueTurnCount++;
-        }
-        else {
-            state.currentTurn = Constants.RED_SIDE;
-            if (state.redTurnCount !== 0) {
-                state.redGold += 200 + ((state.redTurnCount - 1) * 50);
-            }
-            state.redTurnCount++;
-        }
-
-        console.log('Seconds for turn: ' + state.calculateNextTurnAvailableTime(state.currentTurn) / 1000);
-        state.turnEndTime = Date.now() +
-            state.calculateNextTurnAvailableTime(state.currentTurn);
-
+        // if (this.from === Constants.RED_SIDE) {
+        //     state.currentTurn = Constants.BLUE_SIDE;
+        //     if (state.blueTurnCount !== 0) {
+        //         state.blueGold += 200 + ((state.blueTurnCount - 1) * 50);
+        //     }
+        //     state.blueTurnCount++;
+        // }
+        // else {
+        //     state.currentTurn = Constants.RED_SIDE;
+        //     if (state.redTurnCount !== 0) {
+        //         state.redGold += 200 + ((state.redTurnCount - 1) * 50);
+        //     }
+        //     state.redTurnCount++;
+        // }
     }
 }
-StateChange.registerSubClass(TurnPassoverStateChange);
+StateChange.registerSubClass(PhaseChangeStateChange);
 
 class UnitAttackStateChange extends StateChange {
     static create(from, posFrom, posTo) {
@@ -378,9 +377,6 @@ class UnitAttackStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
         if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
             return false;
         }
@@ -764,11 +760,12 @@ class LaunchProbeStateChange extends StateChange {
 }
 StateChange.registerSubClass(LaunchProbeStateChange);
 
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
     SpawnUnitStateChange,
-    TurnPassoverStateChange,
+    PhaseChangeStateChange,
     MoveUnitStateChange,
     UnitAttackStateChange,
     ChatMessageStateChange,
