@@ -187,6 +187,9 @@ io.on('connection', function (socket) {
             // Process will call simulate and foward as necessary
             const winner = game.processStateChange(change);
             if (winner !== Constants.NONE_SIDE) {
+                if (game.state.nextPhaseTimer) {
+                    clearInterval(game.state.nextPhaseTimer);
+                }
                 console.log('Game Over!');
                 const gameOver = {
                     winner: winner === Constants.RED_SIDE ? game.redPlayer : game.bluePlayer

@@ -12,6 +12,7 @@ function dealDamageToUnit(state, target, damage) {
     }
     target.currentHealth -= damage;
     if (target.currentHealth <= 0) {
+        target.currentHealth = 0;
         /* Kill Unit / Structure */
         state.deadObjects.push(target.position);
     }
@@ -217,6 +218,40 @@ class SpawnUnitStateChange extends StateChange {
 }
 StateChange.registerSubClass(SpawnUnitStateChange);
 
+class SetUnitTargetStateChange extends StateChange {
+    static create(from, unitPos, posTarget) {
+        return new SetUnitTargetStateChange(
+            StateChange.create(
+                from, 'SetUnitTargetStateChange', {
+                    unitPos: unitPos,
+                    posTarget: posTarget
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (!withinMap(this.data.unitPos) || !withinMap(this.data.posTarget)) {
+            return false;
+        }
+        /* Is there a unit that belongs to the player? */
+        const unit = state.mapObjects[this.data.unitPos.y][this.data.unitPos.x];
+        if (unit === undefined || !unit.isUnit) return false;
+        if (unit.side !== this.from) return false;
+
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const unit = state.mapObjects[this.data.unitPos.y][this.data.unitPos.x];
+        unit.targetPoint = this.data.posTarget;
+        unit.desiredPath = PathFinder.findPath(state,
+            unit.position, unit.targetPoint);
+    }
+};
+
+StateChange.registerSubClass(SetUnitTargetStateChange);
+
 class MoveUnitStateChange extends StateChange {
     static create(from, posFrom, posTo) {
         return new MoveUnitStateChange(
@@ -253,6 +288,19 @@ class MoveUnitStateChange extends StateChange {
         unit.moveRange -= path.length;
 
         state.moveUnit(this.data.posFrom, this.data.posTo);
+
+        if (unit.targetPoint) {
+            if (unit.desiredPath.length > 0) {
+                if (unit.desiredPath[0].y === this.data.posTo.y &&
+                    unit.desiredPath[0].x === this.data.posTo.x) {
+                    unit.desiredPath.shift();
+                    if (unit.desiredPath.length === 0) {
+                        unit.targetPoint = undefined;
+                    }
+                }
+            }
+            // TODO: figure out when to recalculate a path
+        }
     }
 }
 StateChange.registerSubClass(MoveUnitStateChange);
@@ -279,7 +327,6 @@ class PhaseChangeStateChange extends StateChange {
             state.phase = Constants.PHASE_ACTION;
             for (let i = 0; i < state.units.length; i++) {
                 const unit = state.units[i];
-                unit.desiredPath = [];
                 if (this.isBuilt(unit) && unit.onActionStart) {
                     unit.onActionStart(state);
                 }
@@ -329,6 +376,9 @@ class PhaseChangeStateChange extends StateChange {
                     unit.onPlanningStart(state);
                 }
             }
+
+            state.blueGold += 200;
+            state.redGold += 200;
         }
 
         state.phaseStartTime = this.timestamp;
@@ -345,6 +395,8 @@ class PhaseChangeStateChange extends StateChange {
         //     state.currentTurn = Constants.BLUE_SIDE;
         //     if (state.blueTurnCount !== 0) {
         //         state.blueGold += 200 + ((state.blueTurnCount - 1) * 50);
+        //     }if (state.redTurnCount !== 0) {
+        //         state.redGold += 200 + ((state.redTurnCount - 1) * 50);
         //     }
         //     state.blueTurnCount++;
         // }
@@ -766,6 +818,7 @@ module.exports = {
     BuildStructureStateChange,
     SpawnUnitStateChange,
     PhaseChangeStateChange,
+    SetUnitTargetStateChange,
     MoveUnitStateChange,
     UnitAttackStateChange,
     ChatMessageStateChange,

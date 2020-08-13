@@ -22,7 +22,6 @@ module.exports = class Game {
         this.stateChanges = [];
 
         this.queuedActions = {
-            movement: [],
             builds: []
         };
 
@@ -47,20 +46,6 @@ module.exports = class Game {
     processStateChange(stateChange) {
         console.log('Processing State Change');
         if (this.state.phase === Constants.PHASE_PLANNING) {
-            // Block movement and buildings commands during planning
-            if (stateChange instanceof MoveUnitStateChange) {
-                const unitPos = stateChange.data.posFrom;
-                for (let i = 0; i < this.queuedActions.movement.length; i++) {
-                    // Only one queued movement per unit
-                    const curr = this.queuedActions.movement[i].data.posFrom;
-                    if (curr.x === unitPos.x && curr.y === unitPos.y) {
-                        this.queuedActions.movement.splice(i, 1);
-                        break;
-                    }
-                }
-                this.queuedActions.movement.push(stateChange);
-                return this.state.getWinner();
-            }
         }
 
         stateChange.simulateStateChange(this.state);
@@ -133,31 +118,31 @@ module.exports = class Game {
     }
 
     runActionPhase() {
-        // Create pathfinding cache
-        let nextKey = 0;
-        const unitMovementCache = {};
-        let longestPath = 0;
-        for (let i = 0; i < this.queuedActions.movement.length; i++) {
-            const movement = this.queuedActions.movement[i];
-            // Quick verification pass
-            if (this.verifyStateChange(movement)) {
-                const path = PathFinder.findPath(this.state, movement.data.posFrom, movement.data.posTo);
-                longestPath = Math.max(longestPath, path.length);
-                unitMovementCache[nextKey++] = {
-                    from: movement.from,
-                    currentPos: movement.data.posFrom,
-                    path: path
-                };
-            }
-        }
-        
-        this.queuedActions.movement = [];
-        
         // Perform movement ticks
-        console.log('Action phase, perform ' + longestPath + ' ticks.');
-        let i = 0;
         const movementTick = setInterval(() => {
-            if (i >= longestPath) {
+            // EACH TICK
+            let someoneMoved = false;
+            for (let j = 0; j < this.state.units.length; j++) {
+                const unit = this.state.units[j];
+                if (unit.targetPoint && unit.desiredPath && unit.desiredPath.length !== 0) {
+                    // We have a target point that we trynna get to you feel
+
+                    // Try moving it one tile this tick
+                    const pendingMove = MoveUnitStateChange.create(
+                        unit.side, unit.position,
+                        unit.desiredPath[0]);
+                    console.log('MOVE ', unit.position, unit.desiredPath[0]);
+                    if (this.verifyStateChange(pendingMove)) {
+                        this.processStateChange(pendingMove);
+                        someoneMoved = true;
+                    }
+                }
+            }
+            
+            this.checkForAttacks();
+
+            // No one did a move, we can proceed with ending this action phase.
+            if (!someoneMoved) {
                 clearInterval(movementTick);
                 // Process Buildings
                 //   TODO: what to do if u can't done it
@@ -166,57 +151,11 @@ module.exports = class Game {
                         this.processStateChange(this.queuedActions.builds[i]);
                     }
                 }
-                this.queuedActions.movement.builds = [];
-                if (longestPath === 0) {
-                    this.checkForAttacks();
-                }
+                this.queuedActions.builds = [];
                 setTimeout(() => {
                     this.processStateChange(PhaseChangeStateChange.create(Constants.BLUE_SIDE));
                 }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
-                return;
             }
-            // EACH TICK
-            const cacheKeys = Object.keys(unitMovementCache);
-            const cancelQueue = new Set();
-            for (let j = 0; j < cacheKeys.length; j++) {
-                const key = cacheKeys[j];
-                if (cancelQueue.has(key)) continue;
-
-                const currentPendingMovement = {
-                    from: unitMovementCache[key].currentPos,
-                    to: unitMovementCache[key].path[0]
-                };
-                // Check that no one else is moving into this tile
-                // TODO: advanced resolution mechanic here later
-                let isBlock = false;
-                for (let k = 0; k < cacheKeys.length; k++) {
-                    if (k === j) continue;
-                    if (unitMovementCache[cacheKeys[k]].path[0] === currentPendingMovement.to) {
-                        // I am move blocked by this dude who wants to go where
-                        //   I wanna go, now we both don't get to go (for now)
-                        cancelQueue.push(cacheKeys[k]);
-                        isBlock = true;
-                    }
-                }
-                if (isBlock) {
-                    // Someone is moveblocking me
-                    cancelQueue.add(key);
-                    continue;
-                }
-                this.processStateChange(MoveUnitStateChange.create(
-                    unitMovementCache[key].from, unitMovementCache[key].currentPos,
-                    unitMovementCache[key].path[0]));
-                unitMovementCache[key].currentPos = unitMovementCache[key].path.shift();
-                if (unitMovementCache[key].path.length === 0) {
-                    cancelQueue.add(key);
-                }
-            }
-            cancelQueue.forEach((k) => {
-                delete unitMovementCache[k];
-            });
-            
-            this.checkForAttacks();
-            i++;
         }, 400);
     }
     

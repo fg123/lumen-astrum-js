@@ -11,6 +11,7 @@ const {
     UnitAttackStateChange,
     ReaverDetonateStateChange,
     GuardianLockdownStateChange,
+    SetUnitTargetStateChange,
     LaunchProbeStateChange,
     PhaseChangeStateChange
 } = require('../shared/state-change');
@@ -43,6 +44,7 @@ const KEY_D = 68;
 const KEY_ESCAPE = 27;
 const KEY_SPACE = 32;
 const KEY_G = 71;
+const KEY_CTRL = 17;
 const LEFT_MOUSE_BUTTON = 1;
 const RIGHT_MOUSE_BUTTON = 3;
 const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
@@ -77,6 +79,7 @@ module.exports = class ClientState {
         this.gameTimer = '';
         this.phaseText = '';
         this.cursorMessage = '';
+        this.movementMode = false;
 
         inputManager.attachInputPollingListener((keyState, prevKeyState) => {
             if (keyState[KEY_A]) {
@@ -109,9 +112,8 @@ module.exports = class ClientState {
                     }
                 }
             }
-            if (keyState[KEY_SPACE]) {
-                this.selectObject(this.commandCenter);
-            }
+            this.movementMode = keyState[KEY_G] && this.selectedObject && 
+                this.objectOnMySide(this.selectedObject);
         });
 
         inputManager.attachMouseDownObserver((button) => {
@@ -119,13 +121,20 @@ module.exports = class ClientState {
         });
 
         inputManager.attachMouseDownObserver((button) => {
-            return this.gameObjectClickEvent(button);
+            if (this.movementMode) {
+                console.log('Desired Move Event');
+                this.potentialDesiredMoveEvent();
+            }
+            else {
+                console.log('Click event');
+                return this.gameObjectClickEvent(button);
+            }
         });
 
         inputManager.attachMouseUpObserver((button) => {
-            if (button === LEFT_MOUSE_BUTTON) {
-                this.potentialMoveUnitEvent();
-            }
+            // if (button === LEFT_MOUSE_BUTTON) {
+            //     this.potentialMoveUnitEvent();
+            // }
         });
 
         socket.on('disconnect', () => {
@@ -136,8 +145,7 @@ module.exports = class ClientState {
         socket.on('state-change', (stateChange) => {
             console.log('State Change!');
             console.log(stateChange);
-            const change = StateChange
-                .deserialize(stateChange);
+            const change = StateChange.deserialize(stateChange);
 
             if (change instanceof PhaseChangeStateChange) {
                 this.pendingAction = null;
@@ -467,6 +475,22 @@ module.exports = class ClientState {
         }
     }
 
+    potentialDesiredMoveEvent() {
+        if (this.selectedObject && this.selectedObject.isUnit &&
+            this.objectOnMySide(this.selectedObject) &&
+            this.selectedObject.turnsUntilBuilt === 0) {
+            
+            if (this.inputManager.mouseState.tile &&
+                withinMap(this.inputManager.mouseState.tile)) {
+                this.sendStateChange(SetUnitTargetStateChange.create(
+                    this.side,
+                    this.selectedObject.position,
+                    this.inputManager.mouseState.tile
+                ));
+            }
+        }
+    }
+
     getGold() {
         // GameState gold will not be guaranteed to reflect the correct amount
         //   of the opposite side.
@@ -532,19 +556,6 @@ module.exports = class ClientState {
             let obj = this.getHoveredObjectOrNull();
             this.selectObject(obj);
             return true;
-        }
-        if (button === RIGHT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
-            // Potential Attack
-            if (this.canCurrentUnitAttackPosition) {
-                this.sendStateChange(
-                    UnitAttackStateChange.create(
-                        this.side,
-                        this.selectedObject.position,
-                        this.inputManager.mouseState.tile
-                    )
-                );
-                return true;
-            }
         }
         return false;
     }

@@ -38,7 +38,7 @@ class MoveUnitAnimation extends MapObjectAnimation {
         this.speed = speed;
         this.totalTicks = 0;
         this.maxTicks = speed * (points.length - 1);
-        this.position = points[0] || Tuple.ZERO;
+        this.position = this.points[0] || Tuple.ZERO;
     }
 
     _tick() {

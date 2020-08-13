@@ -359,6 +359,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
 
     drawMap() {
         const healthbarsToDraw = [];
+        const desiredPathsToDraw = [];
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
             y < Math.min(map.data.length, this.drawContext.bottomRightVisible.y); y++) {
             for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
@@ -470,19 +471,6 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                                     if (this.state.selectedObject === mapObject) {
                                         mapObject.rotation = this.calculateRotation(drawCoord);
                                     }
-                                    // Draw Unit desired path
-                                    if (mapObject.desiredPath !== undefined) {
-                                        this.context.strokeStyle = '#FF0000';
-                                        this.context.lineWidth = 2;
-                                        this.context.beginPath();
-                                        this.context.moveTo(drawCoord.x, drawCoord.y);
-                                        for (let i = 0; i < mapObject.desiredPath.length; i++) {
-                                            const destination = toDrawCoord(mapObject.desiredPath[i].x,
-                                                mapObject.desiredPath[i].y);
-                                            this.context.lineTo(destination.x, destination.y);
-                                        }
-                                        this.context.stroke();
-                                    }
                                 }
                             }
                             else {
@@ -495,7 +483,19 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             }
                             // this.context.shadowBlur = 0;
                         }
-
+                        
+                        if (name in units && mapObject.turnsUntilBuilt === 0) {
+                            // Draw Unit desired path
+                            if (mapObject.desiredPath.length > 0) {
+                                desiredPathsToDraw.push({
+                                    side: mapObject.side,
+                                    drawnPos: actualDrawnPosition,
+                                    position: toDrawCoord(mapObject.position),
+                                    path: mapObject.desiredPath,
+                                    range: mapObject.moveRange
+                                });
+                            }
+                        }
                         // Now we hide any bits of a building that isn't supposed to be
                         // showing
                         for (let i = 0; i < surrounding.length; i++) {
@@ -525,6 +525,42 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                 }
             }
         }
+            
+        // Draw full desired path
+        for (let j = 0; j < desiredPathsToDraw.length; j++) {
+            const obj = desiredPathsToDraw[j];
+
+            this.context.strokeStyle = obj.side === this.state.side ? 'green' : 'red';
+            this.context.lineWidth = 3;
+            this.context.setLineDash([]);
+            this.context.beginPath();
+            this.context.moveTo(obj.drawnPos.x, obj.drawnPos.y);
+            this.context.lineTo(obj.position.x, obj.position.y);
+            for (let i = 0; i < obj.path.length; i++) {
+                const destination = toDrawCoord(obj.path[i].x,
+                    obj.path[i].y);
+                this.context.lineTo(destination.x, destination.y);
+            }
+            this.context.stroke();
+        }
+        // Draw path up to move range
+        for (let j = 0; j < desiredPathsToDraw.length; j++) {
+            const obj = desiredPathsToDraw[j];
+
+            this.context.strokeStyle =  'white';
+            this.context.lineWidth = 3;
+            
+            this.context.setLineDash([10, 10]);
+            this.context.beginPath();
+            this.context.moveTo(obj.drawnPos.x, obj.drawnPos.y);
+            this.context.lineTo(obj.position.x, obj.position.y);
+            for (let i = 0; i < Math.min(obj.path.length, obj.range); i++) {
+                const destination = toDrawCoord(obj.path[i].x,
+                    obj.path[i].y);
+                this.context.lineTo(destination.x, destination.y);
+            }
+            this.context.stroke();
+        }
 
         this.drawGlobalAnimations();
 
@@ -542,7 +578,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
              * here since we're already doing a traversal of the unitmoverange
              * array */
             if (this.state.gameState.phase === Constants.PHASE_PLANNING) {
-                if (this.inputManager.mouseState.mouseDown[LEFT_MOUSE_BUTTON]) {
+                if (this.state.movementMode) {
                     let isMouseOverOnUnitMoveRange = false;
                     for (let i = 0; i < this.state.unitMoveRange.length; i++) {
                         if (withinMap(this.state.unitMoveRange[i]) &&
@@ -571,35 +607,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                         this.state.canCurrentUnitMoveToPosition = true;
                         this.state.cursorMessage = 'Move Here';
                     } else {
-                        this.state.cursorMessage = 'Can\'t move here!';
-                    }
-                }
-                else {
-                    let isMouseOverAttackRange = false;
-                    for (let i = 0; i < this.state.unitAttackRange.length; i++) {
-                        if (withinMap(this.state.unitAttackRange[i]) &&
-                        !this.state.gameState.occupied[this.state.unitAttackRange[i].y][this.state.unitAttackRange[i].x] &&
-                        !this.state.pendingAction) {
-                            const drawnCoord = toDrawCoord(this.state.unitAttackRange[i]);
-                            this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
-                                drawnCoord.x, drawnCoord.y);
-                        }
-                        if (this.inputManager.mouseState.tile.equals(this.state.unitAttackRange[i])) {
-                            isMouseOverAttackRange = true;
-                        }
-                    }
-                    if (isMouseOverAttackRange) {
-                        this.state.canCurrentUnitAttackPosition = UnitAttackStateChange.create(
-                            this.state.side,
-                            this.state.selectedObject.position,
-                            this.inputManager.mouseState.tile
-                        ).verifyStateChange(this.state.gameState);
-                        if (this.state.canCurrentUnitAttackPosition) {
-                            this.state.cursorMessage = `Attack for ${this.state.selectedObject.attackDamage} Damage`;
-                        }
-                        if (this.state.selectedObject.attacksThisTurn <= 0) {
-                            this.state.cursorMessage = 'Already attacked!';
-                        }
+                        this.state.cursorMessage = 'Set Target Here';
                     }
                 }
             }

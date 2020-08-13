@@ -133,6 +133,9 @@ const findTargetPos = (state, pos) => {
 };
 
 const findTarget = (state, pos) => {
+    if (!withinMap(pos)) {
+        return undefined;
+    }
     const targetPos = findTargetPos(state, pos);
     let target = state.mapObjects[targetPos.y][targetPos.x];
     return target;
