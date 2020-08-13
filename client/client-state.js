@@ -111,6 +111,9 @@ module.exports = class ClientState {
                         }
                     }
                 }
+            } 
+            if (keyState[KEY_SPACE]) {	           
+                this.selectObject(this.commandCenter);
             }
             this.movementMode = keyState[KEY_G] && this.selectedObject && 
                 this.objectOnMySide(this.selectedObject);

@@ -231,6 +231,7 @@ class SetUnitTargetStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
+        if (state.phase !== Constants.PHASE_PLANNING) return false;
         if (!withinMap(this.data.unitPos) || !withinMap(this.data.posTarget)) {
             return false;
         }
@@ -265,6 +266,7 @@ class MoveUnitStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
+        if (state.phase !== Constants.PHASE_ACTION) return false;
         if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
             return false;
         }

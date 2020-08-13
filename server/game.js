@@ -1,6 +1,6 @@
 const GameState = require('../shared/game-state');
 const Constants = require('../shared/constants');
-const { StateChange, TurnPassoverStateChange, GuardianLockdownStateChange, PhaseChangeStateChange, MoveUnitStateChange, UnitAttackStateChange } = require('../shared/state-change');
+const { StateChange, TurnPassoverStateChange, GuardianLockdownStateChange, PhaseChangeStateChange, MoveUnitStateChange, UnitAttackStateChange, SetUnitTargetStateChange } = require('../shared/state-change');
 const PathFinder = require('../shared/path-finder');
 
 module.exports = class Game {
@@ -45,8 +45,6 @@ module.exports = class Game {
 
     processStateChange(stateChange) {
         console.log('Processing State Change');
-        if (this.state.phase === Constants.PHASE_PLANNING) {
-        }
 
         stateChange.simulateStateChange(this.state);
         if (stateChange instanceof PhaseChangeStateChange) {
