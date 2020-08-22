@@ -46,7 +46,11 @@ module.exports = class Game {
     processStateChange(stateChange) {
         console.log('Processing State Change');
 
+        let shouldBroadcastRed = true;
+        let shouldBroadcastBlue = true;
+
         stateChange.simulateStateChange(this.state);
+
         if (stateChange instanceof PhaseChangeStateChange) {
             if (this.state.phase === Constants.PHASE_PLANNING) {
                 // Starting planning phase now
@@ -65,6 +69,14 @@ module.exports = class Game {
                 this.runActionPhase();
             }
         }
+        if (stateChange instanceof SetUnitTargetStateChange) {
+            if (stateChange.from === Constants.RED_SIDE) {
+                shouldBroadcastBlue = false;
+            }
+            else {
+                shouldBroadcastRed = false;
+            }
+        }
         let shouldPush = true;
         if (stateChange instanceof GuardianLockdownStateChange) {
             let lastStateChange = this.stateChanges[this.stateChanges.length - 1];
@@ -81,10 +93,10 @@ module.exports = class Game {
             this.stateChanges.push(stateChange);
         }
         // TODO: Advanced processing here.
-        if (this.redSocket) {
+        if (this.redSocket && shouldBroadcastRed) {
             this.redSocket.emit('state-change', stateChange);
         }
-        if (this.blueSocket) {
+        if (this.blueSocket && shouldBroadcastBlue) {
             this.blueSocket.emit('state-change', stateChange);
         }
         return this.state.getWinner();
