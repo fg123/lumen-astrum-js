@@ -38,20 +38,20 @@ module.exports = class ResourceManager {
     loadResources(deferArr) {
         const resourcesToLoad = Object.values(Resource);
         for (let i = 0; i < resourcesToLoad.length; i++) {
-            this.loadResource(this.resources, resourcesToLoad[i], resourcesToLoad[i], deferArr);
+            this.loadResource(this.resources, resourcesToLoad[i], '/' + resourcesToLoad[i], deferArr);
         }
 
         const structureNames = Object.keys(Data.structures);
         for (let i = 0; i < structureNames.length; i++) {
             const name = structureNames[i];
-            const url = 'resources/structures/' + name.toLowerCase().replace(/ /g, '') + '.png';
+            const url = '/resources/structures/' + name.toLowerCase().replace(/ /g, '') + '.png';
             this.loadResource(Data.structures[name], 'image', url, deferArr);
         }
 
         const unitNames = Object.keys(Data.units);
         for (let i = 0; i < unitNames.length; i++) {
             const name = unitNames[i];
-            const url = 'resources/units/' + name.toLowerCase().replace(/ /g, '') + '.png';
+            const url = '/resources/units/' + name.toLowerCase().replace(/ /g, '') + '.png';
             this.loadResource(Data.units[name], 'image', url, deferArr);
         }
     }

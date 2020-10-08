@@ -77,6 +77,18 @@ if (fs.existsSync('dump.json')) {
 app.use('/', express.static(__dirname + '/../client/dist'));
 app.use('/resources', express.static(__dirname + '/../client/resources'));
 
+if (!Constants.IS_PRODUCTION) {
+    app.use('/tools', express.static(__dirname + '/../devtools/dist'));
+    app.get('/tools/list-maps', function (_, res) {
+        fs.readdir('shared/maps/', (err, files) => {
+            res.send(files);
+        });
+    });
+    app.get('/tools/get-map/:mapFile', function (req, res) {
+        res.send(require('../shared/maps/' + req.params.mapFile));
+    });
+}
+
 io.on('connection', function (socket) {
     console.log('User connected!');
     connectedUsers[socket.id] = {

@@ -5,9 +5,11 @@
   "scripts": {
     "build-client": "browserify client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ] -t [ envify --NODE_ENV production ]",
     "watch-client": "watchify --debug client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
+    "watch-devtools-map-editor": "watchify --debug devtools/map-editor/index.js -o devtools/dist/map-editor/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
+    "watch-devtools-data-editor": "watchify --debug devtools/data-editor/index.js -o devtools/dist/data-editor/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
     "start-server": "node -r dotenv/config server/index.js",
     "watch-server": "nodemon -r dotenv/config --watch server --watch shared server/index.js",
-    "dev": "concurrently --kill-others 'npm:watch-client' 'npm:watch-server'",
+    "dev": "concurrently --kill-others 'npm:watch-client' 'npm:watch-server' 'npm:watch-devtools-map-editor' 'npm:watch-devtools-data-editor'",
     "prod": "NODE_ENV=production npm run build-client && NODE_ENV=production npm run start-server"
   },
   "repository": {
@@ -20,26 +22,27 @@
     "url": "https://github.com/fg123/lumen-astrum/issues"
   },
   "dependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/preset-env": "^7.4.5",
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.4",
+    "@babel/preset-env": "^7.11.0",
+    "axios": "^0.20.0",
     "babelify": "^10.0.0",
     "brfs": "^2.0.2",
-    "browserify": "^16.2.3",
+    "browserify": "^16.5.2",
     "dotenv": "^4.0.0",
     "envify": "^4.1.0",
     "express": "^4.17.1",
-    "howler": "^2.1.2",
+    "howler": "^2.2.0",
     "jquery-browserify": "^1.8.1",
     "jquery-mousewheel": "^3.1.13",
     "json-stringify-safe": "^5.0.1",
-    "mongodb": "^3.2.7",
+    "mongodb": "^3.6.0",
     "nodemon": "^1.19.1",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
     "tinyqueue": "^2.0.3",
-    "vue": "^2.6.10",
-    "vue-template-compiler": "^2.6.10",
+    "vue": "^2.6.12",
+    "vue-template-compiler": "^2.6.12",
     "vueify": "^9.4.1"
   },
   "homepage": "https://github.com/fg123/lumen-astrum#readme",
@@ -47,7 +50,7 @@
     "concurrently": "^4.1.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.3",
-    "jshint": "^2.10.2",
+    "jshint": "^2.12.0",
     "prettier-eslint": "^8.8.2",
     "watchify": "^3.11.1"
   }

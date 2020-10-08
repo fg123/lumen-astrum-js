@@ -1,7 +1,4 @@
 const Constants = require('./constants');
-const {
-    withinMap,
-} = require('./map');
 
 class Tuple {
     constructor (x, y) {

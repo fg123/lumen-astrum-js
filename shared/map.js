@@ -9,13 +9,9 @@ class Tile {
 }
 
 const Constants = require('./constants');
-const map = Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small');
 const { Tuple, getSurrounding } = require('./coordinates');
 
-console.log('Loading map...');
-map.data = map.data.map(row => row.split(' ').map(tile => new Tile(tile)));
-
-const Tiles =  {
+const Tiles = {
     NONE: 0,
     DEFAULT: 1,
     BRUSH: 2,
@@ -26,13 +22,34 @@ const Tiles =  {
     LOW: 7
 };
 
+const setupMap = (map) => {
+    console.log('Loading map...');
+    if (typeof map.data[0] === 'string') {
+        map.data = map.data.map(row => row.split(' ').map(tile => new Tile(tile)));
+        /* Initial Setup for Map Data */
+        let nextGroup = 0;
+        for (let y = 0; y < map.data.length; y++) {
+            for (let x = 0; x < map.data[0].length; x++) {
+                const type = map.data[y][x].displayType;
+                if (type === Tiles.HIGH && map.data[y][x].highGroundGroup <= 0) {
+                    applyHighGroundGroup(map, new Tuple(x, y), nextGroup);
+                    nextGroup += 1;
+                }
+            }
+        }
+    }
+    return map;
+}
+
+let map = setupMap(Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small'));
+
 const withinMap = (tile) => {
     return !(tile.x < 0 || tile.y < 0 ||
         tile.x >= map.data[0].length || tile.y >= map.data.length);
 };
 
 /* Recursively applies the group to any high ground surrounding */
-const applyHighGroundGroup = (start, group) => {
+const applyHighGroundGroup = (map, start, group) => {
     const nodes = [start];
     while (nodes.length !== 0) {
         const current = nodes[0];
@@ -50,17 +67,6 @@ const applyHighGroundGroup = (start, group) => {
     }
 };
 
-/* Initial Setup for Map Data */
-let nextGroup = 0;
-for (let y = 0; y < map.data.length; y++) {
-    for (let x = 0; x < map.data[0].length; x++) {
-        const type = map.data[y][x].displayType;
-        if (type === Tiles.HIGH && map.data[y][x].highGroundGroup <= 0) {
-            applyHighGroundGroup(new Tuple(x, y), nextGroup);
-            nextGroup += 1;
-        }
-    }
-}
 
 const getVisible = (point, sightRange) => {
     /* Returns visibility map of a given point */
@@ -156,5 +162,7 @@ module.exports = {
     getVisible,
     findTargetPos,
     findTarget,
-    replenishShield
+    replenishShield,
+    setupMap,
+    Tile
 };
