@@ -10,7 +10,7 @@ class PendingAction {
 
 // Helpers
 const { Resource } = require('./resources');
-const { withinMap, map } = require('../shared/map');
+const { map } = require('../shared/map');
 const { getBaseObject } = require('../shared/data');
 const { getSurrounding } = require('../shared/coordinates');
 const { toDrawCoord } = require('./utils');
@@ -30,13 +30,13 @@ class PlaceUnitPendingAction extends PendingAction {
 
     _onTick(mapCanvas) {
         this.isValid = SpawnUnitStateChange.create(
-            mapCanvas.state.side,
+            mapCanvas.state.player,
             this.unitName,
             mapCanvas.state.inputManager.mouseState.tile,
             mapCanvas.state.selectedObject
         ).verifyStateChange(mapCanvas.state.gameState);
 
-        if (withinMap(mapCanvas.inputManager.mouseState.tile)) {
+        if (map.withinMap(mapCanvas.inputManager.mouseState.tile)) {
             if (this.isValid) {
                 mapCanvas.state.cursorMessage = 'Spawn ' + this.unitName;
             }
@@ -53,7 +53,7 @@ class PlaceUnitPendingAction extends PendingAction {
         let surrounding = getSurrounding(mapCanvas.state.selectedObject.position,
             baseObj.width + 1);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i]) &&
+            if (map.withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
                 const drawn = toDrawCoord(surrounding[i]);
@@ -67,7 +67,7 @@ class PlaceUnitPendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 SpawnUnitStateChange.create(
-                    state.side,
+                    state.player,
                     this.unitName,
                     state.inputManager.mouseState.tile,
                     state.selectedObject
@@ -87,7 +87,7 @@ class PlaceStructurePendingAction extends PendingAction {
 
     _onTick(mapCanvas) {
         this.isValid = BuildStructureStateChange.create(
-            mapCanvas.state.side,
+            mapCanvas.state.player,
             this.structureName,
             mapCanvas.state.inputManager.mouseState.tile,
             mapCanvas.state.selectedObject
@@ -97,7 +97,7 @@ class PlaceStructurePendingAction extends PendingAction {
         let baseObj = getBaseObject(this.structureName);
         let surrounding = getSurrounding(mapCanvas.inputManager.mouseState.tile, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i])) {
+            if (map.withinMap(surrounding[i])) {
                 if (this.isValid) {
                     mapCanvas.state.cursorMessage = 'Build ' + this.structureName;
                 }
@@ -115,7 +115,7 @@ class PlaceStructurePendingAction extends PendingAction {
         if (mapCanvas.state.selectedObject.isUnit) {
             surrounding = getSurrounding(mapCanvas.state.selectedObject.position, 1);
             for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i]) &&
+                if (map.withinMap(surrounding[i]) &&
                     !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                     map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
                     const drawn = toDrawCoord(surrounding[i]);
@@ -130,7 +130,7 @@ class PlaceStructurePendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 BuildStructureStateChange.create(
-                    state.side,
+                    state.player,
                     this.structureName,
                     state.inputManager.mouseState.tile,
                     state.selectedObject
@@ -150,7 +150,7 @@ class HealUnitPendingAction extends PendingAction {
         mapCanvas.state.cursorMessage = 'Choose Friendly Unit to Heal';
 
         this.isValid = HealUnitStateChange.create(
-            mapCanvas.state.side,
+            mapCanvas.state.player,
             mapCanvas.state.selectedObject.position,
             mapCanvas.state.inputManager.mouseState.tile
         ).verifyStateChange(mapCanvas.state.gameState);
@@ -161,7 +161,7 @@ class HealUnitPendingAction extends PendingAction {
 
         let surrounding = getSurrounding(mapCanvas.state.selectedObject.position, 1);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i]) &&
+            if (map.withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType !== 2) {
                 const drawn = toDrawCoord(surrounding[i]);
@@ -175,7 +175,7 @@ class HealUnitPendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 HealUnitStateChange.create(
-                    state.side,
+                    state.player,
                     state.selectedObject.position,
                     state.inputManager.mouseState.tile
                 )
@@ -194,7 +194,7 @@ class RepairStructurePendingAction extends PendingAction {
         mapCanvas.state.cursorMessage = 'Choose Friendly Structure to Repair';
 
         this.isValid = RepairStructureStateChange.create(
-            mapCanvas.state.side,
+            mapCanvas.state.player,
             mapCanvas.state.selectedObject.position,
             mapCanvas.state.inputManager.mouseState.tile
         ).verifyStateChange(mapCanvas.state.gameState);
@@ -205,7 +205,7 @@ class RepairStructurePendingAction extends PendingAction {
 
         let surrounding = getSurrounding(mapCanvas.state.selectedObject.position, 1);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i]) &&
+            if (map.withinMap(surrounding[i]) &&
                 !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType !== 2) {
                 const drawn = toDrawCoord(surrounding[i]);
@@ -219,7 +219,7 @@ class RepairStructurePendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 RepairStructureStateChange.create(
-                    state.side,
+                    state.player,
                     state.selectedObject.position,
                     state.inputManager.mouseState.tile
                 )
@@ -238,7 +238,7 @@ class LaunchProbePendingAction extends PendingAction {
         mapCanvas.state.cursorMessage = 'Choose Area to Probe';
 
         this.isValid = LaunchProbeStateChange.create(
-            mapCanvas.state.side,
+            mapCanvas.state.player,
             mapCanvas.state.selectedObject.position,
             mapCanvas.state.inputManager.mouseState.tile
         ).verifyStateChange(mapCanvas.state.gameState);
@@ -252,7 +252,7 @@ class LaunchProbePendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 LaunchProbeStateChange.create(
-                    state.side,
+                    state.player,
                     state.selectedObject.position,
                     state.inputManager.mouseState.tile
                 )

@@ -1,7 +1,6 @@
 const Constants = require('./constants');
 const {
     map,
-    withinMap,
     Tiles,
     getVisible
 } = require('./map');
@@ -10,20 +9,43 @@ const { getSurrounding, getReachable, Tuple  } = require('./coordinates');
 const Data = require('./data');
 const { distance } = require('../client/utils');
 
+class PlayerState {
+    constructor(playerName) {
+        this.playerName = playerName;
+        
+        // Caches what tiles we have visibility of
+        this.visibilityCache = [];
+
+        // Caches what tiles we are allowed to build on
+        this.allowedBuildingCache = [];
+
+        // Caches what locations we've put a probe on
+        this.probeLocationCache = [];
+
+        this.gold = Constants.STARTING_GOLD;
+
+        // Setup 2D Maps
+        for (let i = 0; i < map.data.length; i++) {
+            this.visibilityCache.push([]);
+            this.allowedBuildingCache.push([]);
+        }
+    }
+};
+
 module.exports = class GameState {
-    constructor(gameStartTime, redPlayer, bluePlayer) {
-        this.redPlayer = redPlayer;
-        this.bluePlayer = bluePlayer;
+    // All functions that take "player" is the designated player identifier,
+    //   right now it is the username of the player, it's whatever keys into
+    //   this.players.
+    constructor(gameStartTime, playerUsernameList) {
+        this.players = {};
+        for (let i = 0; i < playerUsernameList.length; i++) {
+            const username = playerUsernameList[i];
+            this.players[username] = new PlayerState(username);
+        }
+        
         this.mapObjects = [];
-        this.redVisibility = [];
-        this.blueVisibility = [];
-
-        this.redProbeLocations = [];
-        this.blueProbeLocations = [];
-
         this.occupied = [];
-        this.redAllowedBuilding = [];
-        this.blueAllowedBuilding = [];
+
         this.structures = [];
         this.units = [];
         this.gameStartTime = gameStartTime;
@@ -32,8 +54,6 @@ module.exports = class GameState {
         this.phase = Constants.PHASE_ACTION;
         this.phaseStartTime = 0;
 
-        this.redGold = Constants.STARTING_GOLD;
-        this.blueGold = Constants.STARTING_GOLD;
         this.chatMessages = [];
 
         this.deadObjects = [];
@@ -41,11 +61,7 @@ module.exports = class GameState {
         /* Setup two dimensional arrays */
         for (let i = 0; i < map.data.length; i++) {
             this.mapObjects.push([]);
-            this.redVisibility.push([]);
-            this.blueVisibility.push([]);
             this.occupied.push([]);
-            this.redAllowedBuilding.push([]);
-            this.blueAllowedBuilding.push([]);
         }
         for (let y = 0; y < map.data.length; y++) {
             for (let x = 0; x < map.data[0].length; x++) {
@@ -56,16 +72,19 @@ module.exports = class GameState {
         }
 
         /* Pre-constructed buildings */
-        this.insertMapObject(map.redCommandCenterLocation, 'Command Base', Constants.RED_SIDE);
-        this.insertMapObject(map.blueCommandCenterLocation, 'Command Base', Constants.BLUE_SIDE);
+        console.log(playerUsernameList);
+        for (let i = 0; i < playerUsernameList.length; i++) {
+            console.log(playerUsernameList[i], map.commandCenterLocations[i]);
+            this.insertMapObject(map.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
+        }
     }
 
-    getAllowedBuildingMap(side) {
-        return (side === Constants.RED_SIDE ? this.redAllowedBuilding : this.blueAllowedBuilding);
+    getAllowedBuildingMap(player) {
+        return this.players[player].allowedBuildingCache;
     }
 
-    isAllowedBuilding(x, y, side) {
-        const arr = this.getAllowedBuildingMap(side);
+    isAllowedBuilding(x, y, player) {
+        const arr = this.getAllowedBuildingMap(player);
         if (arr[y][x]) {
             return arr[y][x] !== 0;
         } else {
@@ -73,8 +92,8 @@ module.exports = class GameState {
         }
     }
 
-    setAllowedBuilding(x, y, side) {
-        const arr = this.getAllowedBuildingMap(side);
+    setAllowedBuilding(x, y, player) {
+        const arr = this.getAllowedBuildingMap(player);
         if (arr[y][x]) {
             arr[y][x] += 1;
         } else {
@@ -82,17 +101,17 @@ module.exports = class GameState {
         }
     }
 
-    revokeAllowedBuilding(x, y, side) {
-        const arr = this.getAllowedBuildingMap(side);
+    revokeAllowedBuilding(x, y, player) {
+        const arr = this.getAllowedBuildingMap(player);
         arr[y][x] -= 1;
     }
 
-    getVisibilityMap(side) {
-        return (side === Constants.RED_SIDE ? this.redVisibility : this.blueVisibility);
+    getVisibilityMap(player) {
+        return this.players[player].visibilityCache;
     }
 
-    isVisible(x, y, side) {
-        const arr = this.getVisibilityMap(side);
+    isVisible(x, y, player) {
+        const arr = this.getVisibilityMap(player);
         if (arr[y][x]) {
             return arr[y][x] !== 0;
         } else {
@@ -100,8 +119,8 @@ module.exports = class GameState {
         }
     }
 
-    addVisibility(x, y, side, value = 1) {
-        const arr = this.getVisibilityMap(side);
+    addVisibility(x, y, player, value = 1) {
+        const arr = this.getVisibilityMap(player);
         if (arr[y][x]) {
             arr[y][x] += value;
         } else {
@@ -109,36 +128,36 @@ module.exports = class GameState {
         }
     }
 
-    removeVisibility(x, y, side, value = 1) {
-        const arr = this.getVisibilityMap(side);
+    removeVisibility(x, y, player, value = 1) {
+        const arr = this.getVisibilityMap(player);
         arr[y][x] -= value;
     }
 
-    getProbeLocationArr(side) {
-        return (side === Constants.RED_SIDE ? this.redProbeLocations : this.blueProbeLocations);
+    getProbeLocationArr(player) {
+        return this.players[player].probeLocationCache;
     }
 
-    addProbeLocation(x, y, side) {
-        this.getProbeLocationArr(side).push(new Tuple(x, y));
-        this.addVisibility(x, y, side);
+    addProbeLocation(x, y, player) {
+        this.getProbeLocationArr(player).push(new Tuple(x, y));
+        this.addVisibility(x, y, player);
     }
 
-    removeAllProbeLocations(side) {
-        const arr = this.getProbeLocationArr(side);
+    removeAllProbeLocations(player) {
+        const arr = this.getProbeLocationArr(player);
         for (let i = 0; i < arr.length; i++) {
-            this.removeVisibility(arr[i].x, arr[i].y, side);
+            this.removeVisibility(arr[i].x, arr[i].y, player);
         }
         arr.length = 0;
     }
 
-    insertMapObject(location, name, side) {
+    insertMapObject(location, name, player) {
         if (name in Data.structures) {
-            const structure = new Structure(name, side, location);
+            const structure = new Structure(name, player, location);
             this.mapObjects[location.y][location.x] = structure;
             this.structures.push(structure);
             let surrounding = getSurrounding(location, structure.width);
             for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i])) {
+                if (map.withinMap(surrounding[i])) {
                     this.occupied[surrounding[i].y][surrounding[i].x] = location;
                 }
             }
@@ -146,10 +165,10 @@ module.exports = class GameState {
             if (Structure.isConstructionBuilding(name)) {
                 const surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
                 for (let i = 0; i < surrounding.length; i++) {
-                    if (withinMap(surrounding[i])) {
+                    if (map.withinMap(surrounding[i])) {
                         if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
                             map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
-                            this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, side);
+                            this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, player);
                         }
                     }
                 }
@@ -157,20 +176,20 @@ module.exports = class GameState {
 
             surrounding = getVisible(location, structure.width + Constants.BUILDING_VISION_RANGE);
             surrounding.forEach(pos => {
-                this.addVisibility(pos.x, pos.y, side);
+                this.addVisibility(pos.x, pos.y, player);
             });
         }
         else if (name in Data.units) {
-            const unit = new Unit(name, side, location);
+            const unit = new Unit(name, player, location);
             this.mapObjects[location.y][location.x] = unit;
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
 
             let surrounding = getVisible(location, unit.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
-                if (withinMap(surrounding[i])) {
+                if (map.withinMap(surrounding[i])) {
                     this.addVisibility(
-                        surrounding[i].x, surrounding[i].y, side,
+                        surrounding[i].x, surrounding[i].y, player,
                         unit.getVisionValue());
                 }
             }
@@ -186,7 +205,7 @@ module.exports = class GameState {
         this.mapObjects[location.y][location.x] = undefined;
         let surrounding = getSurrounding(location, mapObject.width);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i])) {
+            if (map.withinMap(surrounding[i])) {
                 this.occupied[surrounding[i].y][surrounding[i].x] = false;
             }
         }
@@ -202,10 +221,10 @@ module.exports = class GameState {
             if (Structure.isConstructionBuilding(mapObject.name)) {
                 const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
                 for (let i = 0; i < surrounding.length; i++) {
-                    if (withinMap(surrounding[i])) {
+                    if (map.withinMap(surrounding[i])) {
                         if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
                             map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
-                            this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.side);
+                            this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.owner);
                         }
                     }
                 }
@@ -213,7 +232,7 @@ module.exports = class GameState {
 
             surrounding = getVisible(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
             surrounding.forEach(pos => {
-                this.removeVisibility(pos.x, pos.y, mapObject.side);
+                this.removeVisibility(pos.x, pos.y, mapObject.owner);
             });
         }
         else if (mapObject.name in Data.units) {
@@ -226,12 +245,12 @@ module.exports = class GameState {
             }
             let surrounding = getVisible(location, mapObject.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
-                this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.side, mapObject.getVisionValue());
+                this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.owner, mapObject.getVisionValue());
             }
         }
     }
 
-    isTierSatisfied(name, side) {
+    isTierSatisfied(name, player) {
         /* Are tier requirements for *name* satisfied? */
         let object = null;
         try {
@@ -248,7 +267,7 @@ module.exports = class GameState {
         /*******************0, 1, 2, 3, 4*/
         const hasSupport = [1, 1, 0, 0, 0];
         this.structures.forEach(structure => {
-            if (structure.side === side && structure.turnsUntilBuilt === 0) {
+            if (structure.owner === player && structure.turnsUntilBuilt === 0) {
                 if (structure.name === 'Armory') {
                     hasSupport[2] = 1;
                 }
@@ -267,13 +286,13 @@ module.exports = class GameState {
         return true;
     }
 
-    arePrereqsSatisfied(option, side) {
+    arePrereqsSatisfied(option, player) {
         if (!Constants.IS_PRODUCTION) {
             return true;
         }
         return option.prereq.every(name =>
             this.structures.some(structure =>
-                structure.side === side &&
+                structure.owner === player &&
                 structure.name === name &&
                 structure.turnsUntilBuilt === 0
             )
@@ -294,35 +313,25 @@ module.exports = class GameState {
         /* Change visibility from previous position to new position */
         let surrounding = getVisible(from, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
-            this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.side, unit.getVisionValue());
+            this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
         }
 
         surrounding = getVisible(to, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
-            this.addVisibility(surrounding[i].x, surrounding[i].y, unit.side, unit.getVisionValue());
+            this.addVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
         }
     }
 
-    getGold(side) {
-        if (side === Constants.RED_SIDE) {
-            return this.redGold;
-        }
-        else {
-            return this.blueGold;
-        }
+    getGold(player) {
+        return this.players[player].gold;
     }
 
-    changeGold(side, changeBy) {
-        if (side === Constants.RED_SIDE) {
-            this.redGold += changeBy;
-        }
-        else {
-            this.blueGold += changeBy;
-        }
+    changeGold(player, changeBy) {
+        this.players[player].gold += changeBy;
     }
 
     getObjectVisibileTiles(objectPos) {
-        if (!withinMap(objectPos)) {
+        if (!map.withinMap(objectPos)) {
             return [];
         }
         const object = this.mapObjects[objectPos.y][objectPos.x];
@@ -333,7 +342,7 @@ module.exports = class GameState {
     }
 
     getUnitMovementTiles(unitPos) {
-        if (!withinMap(unitPos)) {
+        if (!map.withinMap(unitPos)) {
             return [];
         }
         const object = this.mapObjects[unitPos.y][unitPos.x];
@@ -347,13 +356,13 @@ module.exports = class GameState {
             object.moveRange,
             (pos) => {
                 // It's blocked if it's not in the map, occupied, or out of vision range
-                return !withinMap(pos) || this.occupied[pos.y][pos.x] ||
-                    !this.isVisible(pos.x, pos.y, object.side);
+                return !map.withinMap(pos) || this.occupied[pos.y][pos.x] ||
+                    !this.isVisible(pos.x, pos.y, object.owner);
             });
     }
 
     getUnitAttackTiles(unitPos) {
-        if (!withinMap(unitPos)) {
+        if (!map.withinMap(unitPos)) {
             return [];
         }
         const object = this.mapObjects[unitPos.y][unitPos.x];
@@ -364,13 +373,13 @@ module.exports = class GameState {
             return [];
         }
         return getSurrounding(object.position, object.attackRange).filter(
-            pos => withinMap(pos) && this.isVisible(pos.x, pos.y, object.side)
+            pos => map.withinMap(pos) && this.isVisible(pos.x, pos.y, object.owner)
             && !pos.equals(unitPos));
     }
 
     // TODO: pass in priority / sorting function
     getEnemiesInAttackRange(unitPos) {
-        if (!withinMap(unitPos)) {
+        if (!map.withinMap(unitPos)) {
             return [];
         }
         const object = this.mapObjects[unitPos.y][unitPos.x];
@@ -387,7 +396,7 @@ module.exports = class GameState {
             const occupied = this.occupied[tile.y][tile.x];
             if (occupied && occupied.x && occupied.y) {
                 const obj = this.mapObjects[occupied.y][occupied.x];
-                if (obj.side !== object.side) {
+                if (obj.owner !== object.owner) {
                     result.push(obj);
                 }
             }
@@ -400,16 +409,7 @@ module.exports = class GameState {
     }
 
     getWinner() {
-        const redCommandBase = this.mapObjects[map.redCommandCenterLocation.y][
-            map.redCommandCenterLocation.x];
-        const blueCommandBase = this.mapObjects[map.blueCommandCenterLocation.y][
-            map.blueCommandCenterLocation.x];
-        if (!redCommandBase) {
-            return Constants.BLUE_SIDE;
-        }
-        if (!blueCommandBase) {
-            return Constants.RED_SIDE;
-        }
-        return Constants.NONE_SIDE;
+        // TODO: Check for territory
+        return undefined;
     }
 };

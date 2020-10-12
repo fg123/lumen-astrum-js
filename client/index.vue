@@ -49,7 +49,7 @@ module.exports = {
         login(username, password, callback) {
             this.socket.emit('login', username, password, callback);
         },
-        loginSuccess(data) {
+        loginSuccess(data, username) {
             this.user = data;
             this.goToClientMain();
         },

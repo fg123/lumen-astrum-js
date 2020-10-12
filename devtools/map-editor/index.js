@@ -17,6 +17,7 @@ let map = undefined;
 
 $('#map-option').change(function (data) {
     changeMap($('#map-option').val());
+    $('#map-option').blur();
 });
 
 const inputState = {
@@ -200,6 +201,8 @@ function mapTick() {
                     drawImage(resourceManager.get(Resource.DEBUG_RING),
                         drawCoord.x, drawCoord.y);
                 }
+                context.font = "16px Consolas";
+                context.fillText(`${x}, ${y}`, drawCoord.x - 30, drawCoord.y);
             }
         }
     }

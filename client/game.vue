@@ -26,7 +26,7 @@ module.exports = {
         sendChat(message) {
             this.clientState.sendStateChange(
                 ChatMessageStateChange.create(
-                    this.clientState.side,
+                    this.clientState.player,
                     message
                 )
             );

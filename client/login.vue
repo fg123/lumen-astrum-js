@@ -43,7 +43,7 @@ module.exports = {
                     this.hasError = true;
                     return;
                 }
-                this.root.loginSuccess(data);
+                this.root.loginSuccess(data, username);
             });
         }
     },

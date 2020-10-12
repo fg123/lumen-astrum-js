@@ -4,39 +4,7 @@ const { units, structures } = require('./data');
 const { getSurrounding } = require('./coordinates');
 
 const triggers = {
-    'Harvester': {
-        onPlanningStart(state) {
-            // Gain Extra Gold
-            const tile = map.data[this.position.y][
-                this.position.x];
-            let gain = 0;
-            if (tile.displayType === Tiles.MINERAL) {
-                gain += 100;
-            }
-            else if (tile.displayType === Tiles.BIG_MINERAL) {
-                gain += 200;
-            }
 
-            if (this.side === Constants.RED_SIDE) {
-                state.redGold += gain;
-            }
-            else {
-                state.blueGold += gain;
-            }
-        }
-    },
-    'Maintenance Drone': {
-        onPlanningStart(state) {
-            // Range 3, double shield regeneration
-            const range = getSurrounding(this.position, 3);
-            for (let i = 0; i < range.length; i++) {
-                const target = findTarget(state, range[i]);
-                if (target && target.side === this.side) {
-                    replenishShield(target);
-                }
-            }
-        }
-    }
 };
 
 Object.keys(triggers).forEach(key => {

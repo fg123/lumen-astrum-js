@@ -2,7 +2,7 @@ const { Tuple, getSurrounding } = require('../../shared/coordinates');
 const { Resource, tiles } = require('../resources');
 const { getBaseObject, structureList, unitList, units, structures } = require('../../shared/data');
 const { Structure } = require('../../shared/map-objects');
-const { map, withinMap } = require('../../shared/map');
+const { map } = require('../../shared/map');
 const { UnitAttackStateChange } = require('../../shared/state-change');
 const { toDrawCoord, roundToNearest } = require('../utils');
 const PathFinder = require('../../shared/path-finder');
@@ -79,7 +79,7 @@ module.exports = class MapCanvas {
         this.drawRectangle('black', start, y, totalWidth, 16);
         /* Draw Health and Shield Bars (100px x 5px each) */
         const healthPercent = mapObject.currentHealth / mapObject.maxHealth;
-        const healthColor = this.objectOnMySide(mapObject) ? 'green' : 'red';
+        const healthColor = this.objectIsMine(mapObject) ? 'green' : 'red';
         this.drawRectangle(healthColor, start + 2, y + 2, healthPercent * 100, 5);
         const shieldPercent = mapObject.currentShield / mapObject.maxShield;
         this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
@@ -143,8 +143,8 @@ module.exports = class MapCanvas {
         return Tuple.ZERO;
     }
 
-    objectOnMySide(mapObject) {
-        return mapObject.side === this.state.side;
+    objectIsMine(mapObject) {
+        return mapObject.owner === this.state.player;
     }
 
     drawImage(img, x, y, width = -1, height = -1, angle = 0) {
@@ -210,7 +210,7 @@ module.exports = class MapCanvas {
 
             // Consider: unit vs structure, enemy vs mine, currently building vs not!
             let name = selectedObject.name;
-            if (!this.objectOnMySide(selectedObject)) {
+            if (!this.objectIsMine(selectedObject)) {
                 name = 'Enemy ' + name;
             }
             this.drawText(name, 'black', 16, 88,
@@ -245,7 +245,7 @@ module.exports = class MapCanvas {
 
             this.state.hoveredOption = null;
             /* Draw Options */
-            if (this.objectOnMySide(this.state.selectedObject) &&
+            if (this.objectIsMine(this.state.selectedObject) &&
                 this.state.selectedObject.turnsUntilBuilt === 0) {
                 for (let i = 0; i < baseObj.options.length; i++) {
                     // Set Icon: icon can be {UnitName/StructureName} or {x,y}
@@ -271,7 +271,7 @@ module.exports = class MapCanvas {
                             (baseObj.tier - 1) * 38,
                             /* Clip y is 0 if satisfied, 18 if not */
                             this.state.gameState.isTierSatisfied(optionIcon,
-                                this.state.side) ? 0 : 18
+                                this.state.player) ? 0 : 18
                         );
                         this.context.drawImage(
                             this.resourceManager.get(Resource.TIER_ICONS),
@@ -316,7 +316,7 @@ module.exports = class MapCanvas {
             this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 16, 10,
         60, 'left', 'bold');
         const hover = this.inputManager.mouseState.tile;
-        if (withinMap(hover)) {
+        if (map.withinMap(hover)) {
             const tile = map.data[hover.y][hover.x];
             this.drawText(`Hover: (${hover.x}, ${hover.y}) { displayType: ${tile.displayType},
 isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, jungleDist: ${tile.jungleDist} }`,
@@ -326,10 +326,24 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
     }
 
     hasSelectedConstructionBuildingAndIsAllowed(x, y) {
-        return this.state.selectedObject &&
+        // For Redesign, building range is the territorial range
+        /*this.state.selectedObject &&
             Structure.isConstructionBuilding(this.state.selectedObject.name) &&
-            this.objectOnMySide(this.state.selectedObject) &&
-            this.state.gameState.isAllowedBuilding(x, y, this.state.side);
+            this.objectIsMine(this.state.selectedObject) && */
+        return this.state.gameState && this.state.gameState.isAllowedBuilding(x, y, this.state.player);
+    }
+
+    isEnemyBuildingRange(x, y) {
+        if (this.state.gameState === undefined) return false;
+        const players = this.state.gameState.players;
+        for (let i = 0; i < players.length; i++) {
+            if (players[i] !== this.state.player) {
+                if (this.state.gameState.isAllowedBuilding(x, y, players[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;        
     }
 
     drawState(screenWidth, screenHeight) {
@@ -368,12 +382,16 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                 if (map.data[y][x].displayType !== 0) {
                     const drawCoord = toDrawCoord(x, y);
                     if (this.ui.currentScreen !== this.ui.Screen.GAME ||
-                        this.state.gameState.isVisible(x, y, this.state.side)) {
+                        this.state.gameState.isVisible(x, y, this.state.player)) {
                         this.context.globalCompositeOperation = 'destination-over';
                         // Overlays
                         // Drawn first because of Destination Over
                         if (this.hasSelectedConstructionBuildingAndIsAllowed(x, y)) {
-                            this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
+                            this.drawImage(this.resourceManager.get(Resource.BLUE_OVERLAY),
+                                drawCoord.x, drawCoord.y);
+                        }
+                        else if (this.isEnemyBuildingRange(x, y)) {
+                            this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
                                 drawCoord.x, drawCoord.y);
                         }
 
@@ -409,7 +427,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             if (!this.state.gameState.isVisible(
                                 surrounding[i].x,
                                 surrounding[i].y,
-                                this.state.side
+                                this.state.player
                             )) {
                                 allVisible = false;
                             } else {
@@ -417,8 +435,9 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             }
                         }
 
-                        const unitStealthed = mapObject.isUnit && mapObject.isStealthed(this.state.side,
-                            this.state.gameState);
+                        const unitStealthed = mapObject.isUnit &&
+                            mapObject.isStealthed(this.state.player,
+                                this.state.gameState);
                         if (unitStealthed) {
                             allVisible = false;
                             this.context.globalAlpha = 0.5;
@@ -458,7 +477,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                                 }
                                 else if (name in units) {
                                     // Draw Unit
-                                    if (this.objectOnMySide(mapObject)) {
+                                    if (this.objectIsMine(mapObject)) {
                                         this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), drawCoord.x, drawCoord.y);
                                     }
                                     else {
@@ -488,7 +507,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             // Draw Unit desired path
                             if (mapObject.desiredPath.length > 0) {
                                 desiredPathsToDraw.push({
-                                    side: mapObject.side,
+                                    owner: mapObject.owner,
                                     drawnPos: actualDrawnPosition,
                                     position: toDrawCoord(mapObject.position),
                                     path: mapObject.desiredPath,
@@ -502,7 +521,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             if (!this.state.gameState.isVisible(
                                 surrounding[i].x,
                                 surrounding[i].y,
-                                this.state.side
+                                this.state.player
                             )) {
                                 const drawnCoord = toDrawCoord(surrounding[i]);
                                 this.drawImage(this.resourceManager.get(
@@ -530,7 +549,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
         for (let j = 0; j < desiredPathsToDraw.length; j++) {
             const obj = desiredPathsToDraw[j];
 
-            this.context.strokeStyle = obj.side === this.state.side ? 'green' : 'red';
+            this.context.strokeStyle = obj.owner === this.state.player ? 'green' : 'red';
             this.context.lineWidth = 3;
             this.context.setLineDash([]);
             this.context.beginPath();
@@ -572,7 +591,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
         this.state.canCurrentUnitMoveToPosition = false;
         this.state.canCurrentUnitAttackPosition = false;
         if (this.state.selectedObject && this.state.selectedObject.isUnit &&
-            this.objectOnMySide(this.state.selectedObject) &&
+            this.objectIsMine(this.state.selectedObject) &&
             this.state.selectedObject.turnsUntilBuilt === 0) {
             /* This value is used in the calculation below, but we calculate it
              * here since we're already doing a traversal of the unitmoverange
@@ -581,7 +600,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                 if (this.state.movementMode) {
                     let isMouseOverOnUnitMoveRange = false;
                     for (let i = 0; i < this.state.unitMoveRange.length; i++) {
-                        if (withinMap(this.state.unitMoveRange[i]) &&
+                        if (map.withinMap(this.state.unitMoveRange[i]) &&
                         !this.state.gameState.occupied[this.state.unitMoveRange[i].y][this.state.unitMoveRange[i].x]) {
                             const drawnCoord = toDrawCoord(this.state.unitMoveRange[i]);
                             this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),

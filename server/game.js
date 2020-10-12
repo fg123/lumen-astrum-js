@@ -1,24 +1,33 @@
 const GameState = require('../shared/game-state');
 const Constants = require('../shared/constants');
-const { StateChange, TurnPassoverStateChange, GuardianLockdownStateChange, PhaseChangeStateChange, MoveUnitStateChange, UnitAttackStateChange, SetUnitTargetStateChange } = require('../shared/state-change');
+const {
+    StateChange, 
+    TurnPassoverStateChange, 
+    GuardianLockdownStateChange, 
+    PhaseChangeStateChange, 
+    MoveUnitStateChange, 
+    UnitAttackStateChange, 
+    SetUnitTargetStateChange
+} = require('../shared/state-change');
 const PathFinder = require('../shared/path-finder');
 
 module.exports = class Game {
     static fromJson(json) {
-        const game = new Game(json.redPlayer, json.bluePlayer, undefined,
-            undefined, json.gameStartTime);
+        const map = {};
+        map[json.redPlayer] = undefined;
+        map[json.bluePlayer] = undefined;
+        const game = new Game(map, json.gameStartTime);
         clearTimeout(game.initialTurnPassover);
         for (let i = 0; i < json.stateChanges.length; i++) {
             game.processStateChange(StateChange.deserialize(json.stateChanges[i]));
         }
         return game;
     }
-    constructor(redPlayer, bluePlayer, redSocket, blueSocket, gameStartTime) {
-        this.redPlayer = redPlayer;
-        this.bluePlayer = bluePlayer;
-        this.redSocket = redSocket;
-        this.blueSocket = blueSocket;
-        this.state = new GameState(gameStartTime, redPlayer, bluePlayer);
+    constructor(playerSocketMap, gameStartTime) {
+        this.players = Object.keys(playerSocketMap);
+        this.sockets = playerSocketMap;
+
+        this.state = new GameState(gameStartTime, this.players);
         this.stateChanges = [];
 
         this.queuedActions = {
@@ -27,12 +36,10 @@ module.exports = class Game {
 
         this.nextPhaseTimer = undefined;
 
-        // Initial Turn Passover
+        // Initial Phase State Change
         this.initialTurnPassover = setTimeout(() => {
-            // Pretend Blue Side to Trigger Red to be the First
             this.processStateChange(
-                PhaseChangeStateChange.create(
-                    Constants.BLUE_SIDE));
+                PhaseChangeStateChange.create(undefined));
         }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
     }
 
@@ -46,8 +53,10 @@ module.exports = class Game {
     processStateChange(stateChange) {
         console.log('Processing State Change');
 
-        let shouldBroadcastRed = true;
-        let shouldBroadcastBlue = true;
+        const shouldBroadcastMap = {};
+        this.players.forEach(p => {
+            shouldBroadcastMap[p] = true;
+        });
 
         stateChange.simulateStateChange(this.state);
 
@@ -58,7 +67,7 @@ module.exports = class Game {
                     this.nextPhaseTimer = setTimeout(() => {
                         this.nextPhaseTimer = undefined;
                         this.processStateChange(
-                            PhaseChangeStateChange.create(Constants.BLUE_SIDE));
+                            PhaseChangeStateChange.create(undefined));
                     }, Constants.PLANNING_TIME * 1000);
                 }
                 else {
@@ -69,13 +78,12 @@ module.exports = class Game {
                 this.runActionPhase();
             }
         }
+
         if (stateChange instanceof SetUnitTargetStateChange) {
-            if (stateChange.from === Constants.RED_SIDE) {
-                shouldBroadcastBlue = false;
-            }
-            else {
-                shouldBroadcastRed = false;
-            }
+            // Only tell the player it concerns
+            this.players.forEach(p => {
+                shouldBroadcastMap[p] = (p === stateChange.from);
+            });
         }
         let shouldPush = true;
         if (stateChange instanceof GuardianLockdownStateChange) {
@@ -93,38 +101,24 @@ module.exports = class Game {
             this.stateChanges.push(stateChange);
         }
         // TODO: Advanced processing here.
-        if (this.redSocket && shouldBroadcastRed) {
-            this.redSocket.emit('state-change', stateChange);
-        }
-        if (this.blueSocket && shouldBroadcastBlue) {
-            this.blueSocket.emit('state-change', stateChange);
-        }
+        this.players.forEach(p => {
+            if (this.sockets[p] !== undefined && shouldBroadcastMap[p]) {
+                this.sockets[p].emit('state-change', stateChange);
+            }
+        });
         return this.state.getWinner();
     }
 
     updateSocket(username, socket) {
-        if (username === this.redPlayer) {
-            this.redSocket = socket;
-            return;
-        }
-        if (username === this.bluePlayer) {
-            this.blueSocket = socket;
-            return;
-        }
+        this.sockets[username] = socket;
     }
 
     removeSocket(socket) {
-        if (this.redSocket === socket) {
-            this.redSocket = undefined;
-        }
-        if (this.blueSocket === socket) {
-            this.blueSocket = undefined;
-        }
-    }
-
-    getSide(username) {
-        if (this.redPlayer === username) return Constants.RED_SIDE;
-        return Constants.BLUE_SIDE;
+        this.players.forEach(p => {
+            if (this.sockets[p] === socket) {
+                this.sockets[p] = undefined;
+            }
+        })
     }
 
     runActionPhase() {
@@ -139,7 +133,7 @@ module.exports = class Game {
 
                     // Try moving it one tile this tick
                     const pendingMove = MoveUnitStateChange.create(
-                        unit.side, unit.position,
+                        unit.owner, unit.position,
                         unit.desiredPath[0]);
                     console.log('MOVE ', unit.position, unit.desiredPath[0]);
                     if (this.verifyStateChange(pendingMove)) {
@@ -163,7 +157,7 @@ module.exports = class Game {
                 }
                 this.queuedActions.builds = [];
                 setTimeout(() => {
-                    this.processStateChange(PhaseChangeStateChange.create(Constants.BLUE_SIDE));
+                    this.processStateChange(PhaseChangeStateChange.create(undefined));
                 }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
             }
         }, 400);
@@ -176,7 +170,7 @@ module.exports = class Game {
             const potentialEnemies = this.state.getEnemiesInAttackRange(unit.position);
             if (potentialEnemies.length > 0) {
                 queuedAttacks.push({
-                    from: unit.side,
+                    from: unit.owner,
                     posFrom: unit.position,
                     posTo: potentialEnemies[0].position
                 });

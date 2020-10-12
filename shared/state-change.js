@@ -22,7 +22,6 @@ class StateChange {
     constructor(stateChange) {
         this.type = stateChange.type;
         this.from = stateChange.from;
-        this.opponentSide = stateChange.from === Constants.RED_SIDE ? Constants.BLUE_SIDE : Constants.RED_SIDE;
         this.data = stateChange.data;
         this.timestamp = stateChange.timestamp;
     }
@@ -61,7 +60,7 @@ StateChange.subClasses = {};
 /* Helper Functions */
 const { getBaseObject } = require('./data');
 const { Tuple, getSurrounding, tupleDistance } = require('./coordinates');
-const { withinMap, map, Tiles } = require('./map');
+const { map, Tiles } = require('./map');
 const PathFinder = require('./path-finder');
 const Data = require('./data');
 const { default: GameState } = require('./game-state');
@@ -106,7 +105,7 @@ class BuildStructureStateChange extends StateChange {
         let baseObj = getBaseObject(this.data.structureName);
         let surrounding = getSurrounding(this.data.position, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
-            if (!withinMap(surrounding[i]) ||
+            if (!map.withinMap(surrounding[i]) ||
                 state.occupied[surrounding[i].y][surrounding[i].x] ||
                 map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
                 return false;
@@ -197,7 +196,7 @@ class SpawnUnitStateChange extends StateChange {
             this.data.fromBuilding.position,
             this.data.fromBuilding.width + 1);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i]) &&
+            if (map.withinMap(surrounding[i]) &&
                 !state.occupied[surrounding[i].y][surrounding[i].x] &&
                 map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH) {
                 if (this.data.position.x === surrounding[i].x &&
@@ -232,13 +231,13 @@ class SetUnitTargetStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
-        if (!withinMap(this.data.unitPos) || !withinMap(this.data.posTarget)) {
+        if (!map.withinMap(this.data.unitPos) || !map.withinMap(this.data.posTarget)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.unitPos.y][this.data.unitPos.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         return true;
     }
@@ -267,13 +266,13 @@ class MoveUnitStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_ACTION) return false;
-        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         /* Is the place to move to in the movement range? */
         const range = state.getUnitMovementTiles(this.data.posFrom);
@@ -379,36 +378,12 @@ class PhaseChangeStateChange extends StateChange {
                 }
             }
 
-            state.blueGold += 200;
-            state.redGold += 200;
+            Object.keys(state.players).forEach(p => {
+                state.players[p].gold += 200;
+            });
         }
 
         state.phaseStartTime = this.timestamp;
-
-        // Remove all probe locations
-        // state.removeAllProbeLocations(Constants.RED_SIDE);
-        // state.removeAllProbeLocations(Constants.BLUE_SIDE);
-
-        // // Handle Structure End-Turn Procedures
-        
-
-        // Handle General Procedures
-        // if (this.from === Constants.RED_SIDE) {
-        //     state.currentTurn = Constants.BLUE_SIDE;
-        //     if (state.blueTurnCount !== 0) {
-        //         state.blueGold += 200 + ((state.blueTurnCount - 1) * 50);
-        //     }if (state.redTurnCount !== 0) {
-        //         state.redGold += 200 + ((state.redTurnCount - 1) * 50);
-        //     }
-        //     state.blueTurnCount++;
-        // }
-        // else {
-        //     state.currentTurn = Constants.RED_SIDE;
-        //     if (state.redTurnCount !== 0) {
-        //         state.redGold += 200 + ((state.redTurnCount - 1) * 50);
-        //     }
-        //     state.redTurnCount++;
-        // }
     }
 }
 StateChange.registerSubClass(PhaseChangeStateChange);
@@ -431,13 +406,13 @@ class UnitAttackStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         /* Does this unit have any attacks left? */
         if (unit.attacksThisTurn <= 0 || unit.attackDamage === 0) {
@@ -450,7 +425,9 @@ class UnitAttackStateChange extends StateChange {
         if (target === undefined) {
             return false;
         }
-        if (target.side !== this.opponentSide) return false;
+
+        // Can't attack my own unit
+        if (target.owner === this.from) return false;
 
         /* Is the target in the range (including visibility) */
         const range = state.getUnitAttackTiles(this.data.posFrom);
@@ -487,7 +464,7 @@ class UnitAttackStateChange extends StateChange {
             const surrounding = getSurrounding(this.data.posTo, unit.custom.splashRange);
             for (let i = 0; i < surrounding.length; i++) {
                 const target = findTarget(state, surrounding[i]);
-                if (target !== undefined && target.isUnit && target.side === this.opponentSide) {
+                if (target !== undefined && target.isUnit && target.owner !== this.from) {
                     dealDamageToUnit(state, target, unit.custom.splashDamage);
                 }
             }
@@ -521,9 +498,8 @@ class ChatMessageStateChange extends StateChange {
 
     _simulateStateChange(state) {
         state.chatMessages.push({
-            author: this.from === Constants.RED_SIDE ? state.redPlayer : state.bluePlayer,
-            content: this.data.message,
-            color: this.from === Constants.RED_SIDE ? Constants.RED_CHAT_COLOR : Constants.BLUE_CHAT_COLOR
+            author: this.from,
+            content: this.data.message
         });
     }
 }
@@ -545,13 +521,13 @@ class HealUnitStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         /* Is that a medic? */
         if (unit.name !== 'Medic') return false;
@@ -568,7 +544,7 @@ class HealUnitStateChange extends StateChange {
             return false;
         }
         if (!target.isUnit) return false;
-        if (target.side === this.opponentSide) return false;
+        if (target.owner !== this.from) return false;
 
         /* No point healing someone with full health! */
         if (target.currentHealth === target.maxHealth) return false;
@@ -610,13 +586,13 @@ class RepairStructureStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is this from a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         /* Is that a combat engineer? */
         if (unit.name !== 'Combat Engineer') return false;
@@ -633,7 +609,7 @@ class RepairStructureStateChange extends StateChange {
             return false;
         }
         if (target.isUnit) return false;
-        if (target.side === this.opponentSide) return false;
+        if (target.owner !== this.from) return false;
 
         /* No point repairing structure with full health */
         if (target.currentHealth === target.maxHealth) return false;
@@ -674,13 +650,13 @@ class ReaverDetonateStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!withinMap(this.data.posFrom)) {
+        if (!map.withinMap(this.data.posFrom)) {
             return false;
         }
         /* Is this from a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         /* Is that a reaver? */
         if (unit.name !== 'Reaver') return false;
@@ -694,7 +670,7 @@ class ReaverDetonateStateChange extends StateChange {
         const surrounding = getSurrounding(this.data.posFrom, 1);
         for (let i = 0; i < surrounding.length; i++) {
             const target = findTarget(state, surrounding[i]);
-            if (target !== undefined && target.isUnit && target.side === this.opponentSide) {
+            if (target !== undefined && target.isUnit && target.owner !== this.from) {
                 dealDamageToUnit(state, target, unit.custom.explodeDamage);
             }
         }
@@ -721,13 +697,13 @@ class GuardianLockdownStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!withinMap(this.data.posFrom)) {
+        if (!map.withinMap(this.data.posFrom)) {
             return false;
         }
         /* Is this from a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
-        if (unit.side !== this.from) return false;
+        if (unit.owner !== this.from) return false;
 
         /* Is that a guardian? */
         if (unit.name !== 'Guardian') return false;
@@ -783,13 +759,13 @@ class LaunchProbeStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!withinMap(this.data.posFrom) || !withinMap(this.data.posTo)) {
+        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is this from a structure that belongs to the player? */
         const structure = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (structure === undefined || !structure.isStructure) return false;
-        if (structure.side !== this.from) return false;
+        if (structure.owner !== this.from) return false;
 
         /* Is that a scouting tower? */
         if (structure.name !== 'Scouting Tower') return false;
@@ -805,7 +781,7 @@ class LaunchProbeStateChange extends StateChange {
     _simulateStateChange(state) {
         const surrounding = getSurrounding(this.data.posTo, Constants.PROBE_RANGE);
         for (let i = 0; i < surrounding.length; i++) {
-            if (withinMap(surrounding[i])) {
+            if (map.withinMap(surrounding[i])) {
                 state.addProbeLocation(surrounding[i].x, surrounding[i].y, this.from);
             }
         }

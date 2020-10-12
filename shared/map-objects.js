@@ -4,9 +4,9 @@ const triggers = require('./triggers');
 const Constants = require('./constants');
 
 module.exports.Structure = class {
-    constructor(name, side, position) {
+    constructor(name, owner, position) {
         this.name = name;
-        this.side = side;
+        this.owner = owner;
         this.position = position;
         this.rotation = 0;
         this.turnsUntilBuilt = Data.structures[name].turnsToBuild;
@@ -30,9 +30,9 @@ module.exports.Structure = class {
 };
 
 module.exports.Unit = class {
-    constructor(name, side, position) {
+    constructor(name, owner, position) {
         this.name = name;
-        this.side = side;
+        this.owner = owner;
         this.position = position;
         this.rotation = 0;
         this.turnsUntilBuilt = Data.units[name].turnsToBuild;
@@ -75,14 +75,14 @@ module.exports.Unit = class {
         else return 1;
     }
 
-    isStealthed(side, state) {
-        if (this.side === side) {
+    isStealthed(player, state) {
+        if (this.owner === player) {
             // My own unit!
             return false;
         }
 
         if (this.custom && this.custom.stealth) {
-            const visionMap = state.getVisibilityMap(side);
+            const visionMap = state.getVisibilityMap(player);
             const visionValue = visionMap[this.position.y][this.position.x];
 
             /* If not enough vision value, it's stealthed */

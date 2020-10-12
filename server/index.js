@@ -54,8 +54,11 @@ process.on('uncaughtException', (err, origin) => {
         err.stack
     );
     for (let i = 0; i < games.length; i++) {
-        delete games[i].redSocket;
-        delete games[i].blueSocket;
+        games[i].players.forEach(p => {
+            if (games[i].sockets[p] !== undefined) {
+                delete games[i].sockets[p];
+            }
+        });
     }
     fs.writeFileSync('dump.json', safeStringify(games));
     process.exit(1);
@@ -67,8 +70,9 @@ if (fs.existsSync('dump.json')) {
     const dumpedGames = JSON.parse(fs.readFileSync('dump.json'));
     for (let i = 0; i < dumpedGames.length; i++) {
         const game = Game.fromJson(dumpedGames[i]);
-        disconnectedMidGame[game.redPlayer] = game;
-        disconnectedMidGame[game.bluePlayer] = game;
+        game.players.forEach(p => {
+            disconnectedMidGame[p] = game;
+        })
         games.push(game);
     }
 }
@@ -120,6 +124,8 @@ io.on('connection', function (socket) {
                     connectedUsers[socket.id].username = username;
                     connectedUsers[socket.id].elo = res[0].elo;
 
+                    socket.emit('login-success', username);
+                    
                     let potentialGame = disconnectedMidGame[username];
                     if (potentialGame) {
                         console.log('Previously disconnected from a game!');
@@ -127,17 +133,17 @@ io.on('connection', function (socket) {
                         connectedUsers[socket.id].game = potentialGame;
                         potentialGame.updateSocket(username, socket);
                     }
+                    
                     callback(undefined, {
                         username: username,
                         elo: res[0].elo
                     });
 
                     if (potentialGame) {
+                        // TODO: For now games are 2 players
                         socket.emit('game-start',
-                            potentialGame.getSide(username),
                             potentialGame.state.gameStartTime,
-                            potentialGame.redPlayer,
-                            potentialGame.bluePlayer);
+                            potentialGame.players);
                         for (let i = 0; i < potentialGame.stateChanges.length; i++) {
                             socket.emit('state-change', potentialGame.stateChanges[i]);
                         }
@@ -156,25 +162,24 @@ io.on('connection', function (socket) {
                     gameFound = true;
                     const gameStartTime = Date.now();
                     const otherSocket = queue[i].socket;
+                    const socketMap = {};
+                    socketMap[connectedUsers[socket.id].username] = socket;
+                    socketMap[queue[i].requester] = otherSocket;
                     const game = new Game(
-                        connectedUsers[socket.id].username,
-                        queue[i].requester,
-                        socket,
-                        otherSocket,
+                        socketMap,
                         gameStartTime);
                     connectedUsers[socket.id].game = game;
                     connectedUsers[otherSocket.id].game = game;
                     games.push(game);
+                    // 2 player for now
+                    const players = [connectedUsers[socket.id].username,
+                        connectedUsers[otherSocket.id].username];
                     socket.emit('game-start',
-                        Constants.RED_SIDE,
                         gameStartTime,
-                        connectedUsers[socket.id].username,
-                        connectedUsers[otherSocket.id].username);
+                        players);
                     otherSocket.emit('game-start',
-                        Constants.BLUE_SIDE,
                         gameStartTime,
-                        connectedUsers[socket.id].username,
-                        connectedUsers[otherSocket.id].username);
+                        players);
                     queue.splice(i, 1);
                     break;
                 }
@@ -198,22 +203,28 @@ io.on('connection', function (socket) {
         if (game.verifyStateChange(change)) {
             // Process will call simulate and foward as necessary
             const winner = game.processStateChange(change);
-            if (winner !== Constants.NONE_SIDE) {
+            if (winner !== undefined) {
                 if (game.state.nextPhaseTimer) {
                     clearInterval(game.state.nextPhaseTimer);
                 }
                 console.log('Game Over!');
                 const gameOver = {
-                    winner: winner === Constants.RED_SIDE ? game.redPlayer : game.bluePlayer
+                    winner: winner
                 };
-                game.redSocket.emit('game-over', gameOver);
-                game.blueSocket.emit('game-over', gameOver);
-                connectedUsers[game.redSocket.id].game = null;
-                connectedUsers[game.blueSocket.id].game = null;
+                Object.values(game.sockets).forEach(s => {
+                    s.emit('game-over', gameOver);
+                });
+
+                game.players.forEach(p => {
+                    if (game.sockets[p] !== undefined) {
+                        connectedUsers[game.sockets[p].id].game = null;
+                    }
+                });
 
                 for (let i = 0; i < games.length; i++) {
-                    if (games[i].redPlayer === game.redPlayer &&
-                        games[i].bluePlayer == game.bluePlayer) {
+                    // If the first 2 matches it's probably correct.
+                    if (games[i].players[0] === game.players[0] &&
+                        games[i].players[1] === game.players[1]) {
                         games.splice(i, 1);
                         break;
                     }

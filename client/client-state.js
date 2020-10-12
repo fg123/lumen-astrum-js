@@ -1,7 +1,6 @@
 const Constants = require('../shared/constants');
 const { getBaseObject } = require('../shared/data');
 const {
-    withinMap,
     map
 } = require('../shared/map');
 const {
@@ -64,7 +63,7 @@ module.exports = class ClientState {
 
         this.gameStartListeners = [];
 
-        this.side = Constants.NONE_SIDE;
+        this.player = undefined;
         this.gameState = undefined;
         this.selectedObject = null;
         this.hoveredOption = null;
@@ -104,7 +103,7 @@ module.exports = class ClientState {
             }
             for (let i = 0; i < DIGIT_KEYS.length; i++) {
                 if (keyState[DIGIT_KEYS[i]] && !prevKeyState[DIGIT_KEYS[i]]) {
-                    if (this.selectedObject && this.objectOnMySide(this.selectedObject)) {
+                    if (this.selectedObject && this.objectIsMine(this.selectedObject)) {
                         const baseObj = getBaseObject(this.selectedObject.name);
                         if (i < baseObj.options.length) {
                             this.handleOptionClicked(baseObj.options[i]);
@@ -116,7 +115,7 @@ module.exports = class ClientState {
                 this.selectObject(this.commandCenter);
             }
             this.movementMode = keyState[KEY_G] && this.selectedObject && 
-                this.objectOnMySide(this.selectedObject);
+                this.objectIsMine(this.selectedObject);
         });
 
         inputManager.attachMouseDownObserver((button) => {
@@ -140,6 +139,10 @@ module.exports = class ClientState {
             // }
         });
 
+        socket.on('login-success', (username) => {
+            this.player = username;
+        });
+
         socket.on('disconnect', () => {
 	        alert('Server disconnected.');
             window.location.reload(); 
@@ -154,7 +157,7 @@ module.exports = class ClientState {
                 this.pendingAction = null;
                 /* Spawn Animations for buildings being constructed */
                 const animationSpawner = mapObject => {
-                    if (mapObject.side === change.from) {
+                    if (mapObject.owner === change.from) {
                         if (mapObject.turnsUntilBuilt === 1) {
                             /* About to turn, let's start an animation. */
                             if (mapObject.width === 1) {
@@ -269,13 +272,17 @@ module.exports = class ClientState {
                  * that's not properly defined as a prop, so we have to manually
                  * push changes over. */
                 const fakeState = {
-                    chatMessages: [],
-                    /* These are needed by simulateStateChange */
-                    redPlayer: this.gameState.redPlayer,
-                    bluePlayer: this.gameState.bluePlayer
+                    chatMessages: []
                 };
                 change._simulateStateChange(fakeState);
-                chatbox.addMessage(fakeState.chatMessages[0]);
+                const message = fakeState.chatMessages[0];
+                if (this.player === message.author) {
+                    message.color = Constants.BLUE_CHAT_COLOR;
+                }
+                else {
+                    message.color = Constants.RED_CHAT_COLOR;
+                }
+                chatbox.addMessage(message);
             }
             /* Trust Server */
             change.simulateStateChange(this.gameState);
@@ -298,25 +305,23 @@ module.exports = class ClientState {
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
         });
-        socket.on('game-start', (side, gameStartTime, redPlayer, bluePlayer) => {
-            this.addNeutralChat(`${redPlayer} vs ${bluePlayer}`);
-            this.addNeutralChat(`${redPlayer} goes first!`);
+        socket.on('game-start', (gameStartTime, players) => {
+            console.log(players);
             this.ui.goToGame();
-            this.side = side;
-            this.gameState = new GameState(gameStartTime, redPlayer, bluePlayer);
-            console.log(this.side);
-            if (side === Constants.RED_SIDE) {
-                this.commandCenter = this.gameState.mapObjects[
-                    map.redCommandCenterLocation.y][
-                    map.redCommandCenterLocation.x];
-                this.camera.position = toDrawCoord(map.redCommandCenterLocation);
+            
+            const player = this.player;
+            const index = players.indexOf(player);
+            if (index === -1) {
+                console.error(`Cannot start game, can't find ${player} in ${players}`);
+                return;
             }
-            else {
-                this.commandCenter = this.gameState.mapObjects[
-                    map.blueCommandCenterLocation.y][
-                    map.blueCommandCenterLocation.x];
-                this.camera.position = toDrawCoord(map.blueCommandCenterLocation)
-            }
+            const commandCenterLocation = map.commandCenterLocations[index];
+            this.gameState = new GameState(gameStartTime, players);
+            this.commandCenter = this.gameState.mapObjects[
+                commandCenterLocation.y][
+                commandCenterLocation.x];
+            this.camera.position = toDrawCoord(commandCenterLocation);
+        
             const interval = setInterval(() => {
                 const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);
                 if (seconds <= 0) {
@@ -373,8 +378,8 @@ module.exports = class ClientState {
         this.socket.emit('state-change', stateChange);
     }
 
-    objectOnMySide(mapObject) {
-        return mapObject.side === this.side;
+    objectIsMine(mapObject) {
+        return mapObject.owner === this.player;
     }
 
     handleOptionClicked(option) {
@@ -386,12 +391,12 @@ module.exports = class ClientState {
             this.pushAlertMessage('Not enough gold!');
             return;
         }
-        if (!this.gameState.isTierSatisfied(parts[1], this.side)) {
+        if (!this.gameState.isTierSatisfied(parts[1], this.player)) {
             this.pushAlertMessage('Requires tier support building!');
             return;
         }
 
-        if (!this.gameState.arePrereqsSatisfied(option, this.side)) {
+        if (!this.gameState.arePrereqsSatisfied(option, this.player)) {
             let message = 'Missing some of: ' + option.prereq.join(', ') + '!';
             if (option.prereq.length === 1) {
                 message = 'Missing a ' + option.prereq[0] + '!';
@@ -442,14 +447,14 @@ module.exports = class ClientState {
             break;
         }
         case 'detonateReaver': {
-            const change = ReaverDetonateStateChange.create(this.side, this.selectedObject.position);
+            const change = ReaverDetonateStateChange.create(this.player, this.selectedObject.position);
             if (change.verifyStateChange(this.gameState)) {
                 this.sendStateChange(change);
             }
             break;
         }
         case 'guardianLockdown': {
-            const change = GuardianLockdownStateChange.create(this.side, this.selectedObject.position);
+            const change = GuardianLockdownStateChange.create(this.player, this.selectedObject.position);
             if (change.verifyStateChange(this.gameState)) {
                 this.sendStateChange(change);
             }
@@ -462,12 +467,12 @@ module.exports = class ClientState {
     potentialMoveUnitEvent() {
         // Check if is unit:
         if (this.selectedObject && this.selectedObject.isUnit &&
-            this.objectOnMySide(this.selectedObject) &&
+            this.objectIsMind(this.selectedObject) &&
             this.selectedObject.turnsUntilBuilt === 0) {
             if (this.canCurrentUnitMoveToPosition) {
                 this.sendStateChange(
                     MoveUnitStateChange.create(
-                        this.side,
+                        this.player,
                         this.selectedObject.position,
                         this.inputManager.mouseState.tile));
                 this.selectedObject.desiredPath = 
@@ -480,13 +485,13 @@ module.exports = class ClientState {
 
     potentialDesiredMoveEvent() {
         if (this.selectedObject && this.selectedObject.isUnit &&
-            this.objectOnMySide(this.selectedObject) &&
+            this.objectIsMine(this.selectedObject) &&
             this.selectedObject.turnsUntilBuilt === 0) {
             
             if (this.inputManager.mouseState.tile &&
-                withinMap(this.inputManager.mouseState.tile)) {
+                map.withinMap(this.inputManager.mouseState.tile)) {
                 this.sendStateChange(SetUnitTargetStateChange.create(
-                    this.side,
+                    this.player,
                     this.selectedObject.position,
                     this.inputManager.mouseState.tile
                 ));
@@ -495,10 +500,7 @@ module.exports = class ClientState {
     }
 
     getGold() {
-        // GameState gold will not be guaranteed to reflect the correct amount
-        //   of the opposite side.
-        if (this.side === Constants.RED_SIDE) return this.gameState.redGold;
-        else return this.gameState.blueGold;
+        return this.gameState.players[this.player].gold;
     }
 
     pushAlertMessage(message) {
@@ -526,7 +528,7 @@ module.exports = class ClientState {
     }
 
     getHoveredObjectOrNull() {
-        if (withinMap(this.inputManager.mouseState.tile)) {
+        if (map.withinMap(this.inputManager.mouseState.tile)) {
             let obj = null;
             let occupiedPoint = this.gameState.occupied[
                 this.inputManager.mouseState.tile.y][this.inputManager.mouseState.tile.x];
@@ -534,10 +536,10 @@ module.exports = class ClientState {
             if (occupiedPoint && occupiedPoint !== true) {
                 obj = this.gameState.mapObjects[occupiedPoint.y][occupiedPoint.x];
             }
-            if (obj && obj.isUnit && obj.isStealthed(this.side, this.gameState)) {
+            if (obj && obj.isUnit && obj.isStealthed(this.player, this.gameState)) {
                 return null;
             }
-            if (obj && !this.gameState.isVisible(obj.position.x, obj.position.y, this.side)) {
+            if (obj && !this.gameState.isVisible(obj.position.x, obj.position.y, this.player)) {
                 return null;
             }
             return obj;
@@ -547,7 +549,7 @@ module.exports = class ClientState {
 
     gameObjectClickEvent(button) {
         if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
-        if (button === LEFT_MOUSE_BUTTON && withinMap(this.inputManager.mouseState.tile)) {
+        if (button === LEFT_MOUSE_BUTTON && map.withinMap(this.inputManager.mouseState.tile)) {
             if (this.pendingAction) {
                 const result = this.pendingAction.onClick(this);
                 this.pendingAction = null;

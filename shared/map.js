@@ -26,6 +26,12 @@ const setupMap = (map) => {
     console.log('Loading map...');
     if (typeof map.data[0] === 'string') {
         map.data = map.data.map(row => row.split(' ').map(tile => new Tile(tile)));
+        
+        map.withinMap = (tile) => {
+            return !(tile.x < 0 || tile.y < 0 ||
+                tile.x >= map.data[0].length || tile.y >= map.data.length);
+        };
+
         /* Initial Setup for Map Data */
         let nextGroup = 0;
         for (let y = 0; y < map.data.length; y++) {
@@ -41,12 +47,8 @@ const setupMap = (map) => {
     return map;
 }
 
-let map = setupMap(Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small'));
-
-const withinMap = (tile) => {
-    return !(tile.x < 0 || tile.y < 0 ||
-        tile.x >= map.data[0].length || tile.y >= map.data.length);
-};
+// let map = setupMap(Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small'));
+let map = setupMap(require('./maps/redesign'));
 
 /* Recursively applies the group to any high ground surrounding */
 const applyHighGroundGroup = (map, start, group) => {
@@ -59,7 +61,7 @@ const applyHighGroundGroup = (map, start, group) => {
             tile.displayType === Tiles.LOW || tile.highGroundGroup >= 0) {
             continue;
         }
-        Array.prototype.push.apply(nodes, getSurrounding(current, 1).filter(withinMap));
+        Array.prototype.push.apply(nodes, getSurrounding(current, 1).filter(map.withinMap));
         if (tile.displayType !== Tiles.DEFAULT) {
             tile.isHighGround = true;
         }
@@ -89,7 +91,7 @@ const getVisible = (point, sightRange) => {
             const curString = JSON.stringify(hex);
             hex.getNeighbours().forEach((neighbour) => {
                 const n_coord = neighbour.toOffsetCoordinates();
-                if (!withinMap(n_coord) ||
+                if (!map.withinMap(n_coord) ||
                     map.data[n_coord.y][n_coord.x].displayType === Tiles.NONE) {
                     // Don't explore
                     return;
@@ -139,7 +141,7 @@ const findTargetPos = (state, pos) => {
 };
 
 const findTarget = (state, pos) => {
-    if (!withinMap(pos)) {
+    if (!map.withinMap(pos)) {
         return undefined;
     }
     const targetPos = findTargetPos(state, pos);
@@ -158,7 +160,6 @@ const replenishShield = (mapObject) => {
 module.exports = {
     map,
     Tiles,
-    withinMap,
     getVisible,
     findTargetPos,
     findTarget,
