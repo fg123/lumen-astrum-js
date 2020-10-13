@@ -92,7 +92,7 @@ module.exports = class UICanvas {
         this.context.textBaseline = 'middle';
         this.context.fillStyle = 'white';
         this.context.font = 'bold 32px Roboto Slab';
-        this.context.fillText(this.state.getGold(), screenWidth - 185, screenHeight - 182);
+        this.context.fillText(this.state.getGold(), screenWidth - 170, screenHeight - 181);
         this.context.textBaseline = 'alphabetic';
         
         // Show Timer

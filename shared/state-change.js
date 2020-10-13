@@ -137,7 +137,7 @@ class BuildStructureStateChange extends StateChange {
             if (!builder) {
                 return false;
             }
-            if (builder.name !== 'Combat Engineer') {
+            if (builder.name !== 'Engineer') {
                 return false;
             }
             if (tupleDistance(builder.position, this.data.position) !== 1) {

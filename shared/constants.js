@@ -13,6 +13,6 @@ module.exports = {
     MAP_TILE_DRAW_Y_MULTIPLIER: 111,
     PHASE_ACTION: 'phase_action',
     PHASE_PLANNING: 'phase_planning',
-    PLANNING_TIME: is_production ? 12 : 3,
+    PLANNING_TIME: is_production ? 10 : 5,
     TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 1 : 0
 };

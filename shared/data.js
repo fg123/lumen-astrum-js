@@ -8,30 +8,30 @@ const structures = {
         'options':
             [
                 {
-                    'title': 'Spawn Recon Team',
+                    'title': 'Spawn Scout',
                     'cost': 100,
                     'prereq': [],
                     'type': 'Unit',
-                    'description': '{Recon Team}',
-                    'icon': '{Recon Team}',
-                    'command': 'spawn-Recon Team'
+                    'description': '{Scout}',
+                    'icon': '{Scout}',
+                    'command': 'spawn-Scout'
                 },
                 {
-                    'title': 'Spawn Combat Engineer',
+                    'title': 'Spawn Engineer',
                     'cost': 300,
                     'prereq': [],
                     'type': 'Unit',
-                    'description': '{Combat Engineer}',
-                    'icon': '{Combat Engineer}',
-                    'command': 'spawn-Combat Engineer'
+                    'description': '{Engineer}',
+                    'icon': '{Engineer}',
+                    'command': 'spawn-Engineer'
                 }
             ]
     },
     'Barracks': {
-        'description': 'Unit production building, trains majority of the units.',
+        'description': 'Unit production building, trains tier 2 units.',
         'health': 60,
         'shield': 0,
-        'width': 1,
+        'width': 0,
         'turnsToBuild': 1,
         'options':
             [
@@ -45,23 +45,15 @@ const structures = {
                     'command': 'spawn-Marine'
                 },
                 {
-                    'title': 'Spawn Lancer',
+                    'title': 'Spawn Golem',
                     'cost': 850,
                     'prereq': [],
                     'type': 'Unit',
-                    'description': '{Lancer}',
-                    'icon': '{Lancer}',
-                    'command': 'spawn-Lancer'
+                    'description': '{Golem}',
+                    'icon': '{Golem}',
+                    'command': 'spawn-Golem'
                 }
             ]
-    },
-    'Armory': {
-        'description': 'Support facility, used for accessing tier 2 units.',
-        'health': 100,
-        'shield': 0,
-        'width': 0,
-        'turnsToBuild': 1,
-        'options': [],
     },
     'Automation Factory': {
         'description': 'Support facility, required for building turrets.',
@@ -88,7 +80,7 @@ const structures = {
         'options': [],
     },
     'Deployment Outpost': {
-        'description': 'Allows expansion of buildings away from the command center.',
+        'description': 'Claims territory and allows expansion of buildings away from the command center.',
         'health': 50,
         'shield': 0,
         'width': 0,
@@ -98,16 +90,14 @@ const structures = {
 };
 
 const units = {
-    'Recon Team': {
-        'advantagedamage': 0,
-        'attackrange': 2,
-        'damage': 3,
-        'description': 'Weak recon unit. Good for scouting out enemy units and providing basic harrasment.',
+    'Scout': {
+        'attackrange': 0,
+        'damage': 0,
+        'description': 'Scouting unit, high movement range, cannot attack.',
         'health': 15,
         'moverange': 5,
         'shield': 0,
         'sightrange': 5,
-        'squadsize': 2,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
@@ -117,12 +107,11 @@ const units = {
         'advantagedamage': 0,
         'attackrange': 2,
         'damage': 10,
-        'description': 'Sturdy and cheap-to-produce infantry unit. useful against early game units.',
+        'description': 'Sturdy and cheap-to-produce infantry unit.',
         'health': 30,
         'moverange': 4,
         'shield': 0,
         'sightrange': 3,
-        'squadsize': 4,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
@@ -134,17 +123,15 @@ const units = {
             }
         }
     },
-    'Combat Engineer': {
+    'Engineer': {
         'advantagedamage': 0,
         'attackrange': 0,
         'damage': 0,
-        'description': 'Construction unit. Can build turrets, harvesters, deployment outposts and repair structures.',
+        'description': 'Constructs buildings during the planning phase.',
         'health': 12,
         'moverange': 3,
         'shield': 0,
         'sightrange': 3,
-        'special': 'Repair',
-        'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,
         'unitclass': 'Biological',
@@ -207,14 +194,14 @@ const units = {
         'shield': 0,
         'sightrange': 4,
         'squadsize': 1,
-        'tier': 2,
+        'tier': 1,
         'turnsToBuild': 1,
         'options': [],
         'unitclass': 'Light, Mechanical'
     },
-    'Lancer': {
+    'Golem': {
         'advantagedamage': 0,
-        'attackrange': 4,
+        'attackrange': 1,
         'damage': 25,
         'description': 'Slow-moving medium artillery unit. Bombards with long-range attacks',
         'health': 5,
@@ -222,7 +209,7 @@ const units = {
         'shield': 25,
         'sightrange': 1,
         'squadsize': 1,
-        'tier': 3,
+        'tier': 1,
         'turnsToBuild': 1,
         'options': [],
         'unitclass': 'Mechanical',
