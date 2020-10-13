@@ -87,7 +87,7 @@ module.exports = class MapCanvas {
 
     drawText(text, color, fontSize, x, y,
         align = 'left', fontStyle = '', maxWidth = 0,
-        fontFamily = 'Roboto Slab') {
+        fontFamily = 'Prompt') {
         this.context.font = fontStyle + ' ' + fontSize + 'px ' + fontFamily;
         this.context.fillStyle = color;
         this.context.textAlign = align;
@@ -431,6 +431,11 @@ module.exports = class MapCanvas {
                             this.context.globalAlpha = 0.5;
                         }
 
+                        // Desired Rotation
+                        const desiredRotation = mapObject.rotation;
+                        const currentRotation = mapObject.currentRotation;
+                        mapObject.currentRotation = currentRotation + 0.3 * (desiredRotation - currentRotation);
+
                         if (animationManager.hasAnimation()) {
                             // Draw any animations in the animation stack
                             const possiblePositionChange =
@@ -447,10 +452,7 @@ module.exports = class MapCanvas {
                                             possiblePositionChange.x, possiblePositionChange.y,
                                             units[name].image.width,
                                             units[name].image.height,
-                                            mapObject.rotation);
-                                        if (this.state.selectedObject === mapObject) {
-                                            mapObject.rotation = this.calculateRotation(possiblePositionChange);
-                                        }
+                                            mapObject.currentRotation);
                                     }
                                 }
                                 actualDrawnPosition = possiblePositionChange;
@@ -474,10 +476,7 @@ module.exports = class MapCanvas {
                                     this.drawImage(units[name].image, drawCoord.x, drawCoord.y,
                                         units[name].image.width,
                                         units[name].image.height,
-                                        mapObject.rotation);
-                                    if (this.state.selectedObject === mapObject) {
-                                        mapObject.rotation = this.calculateRotation(drawCoord);
-                                    }
+                                        mapObject.currentRotation);
                                 }
                             }
                             else {

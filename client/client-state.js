@@ -214,7 +214,7 @@ module.exports = class ClientState {
                         this.unitAttackRange = [];
                     }
                     unit.animationManager.addAnimation(
-                        new MoveUnitAnimation(path, 10, () => {
+                        new MoveUnitAnimation(unit, path, 10, () => {
                             if (currentlySelected && !this.selectedObject) {
                                 this.selectObject(unit);
                             }

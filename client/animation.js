@@ -22,6 +22,8 @@ class MapObjectAnimation extends BaseAnimator {
     draw(graphicsManager, position) {
         return this._draw(graphicsManager, position);
     }
+    _getPosition() { return undefined; }
+
     getPosition() {
         return this._getPosition();
     }
@@ -30,8 +32,9 @@ class MapObjectAnimation extends BaseAnimator {
 class MoveUnitAnimation extends MapObjectAnimation {
     /* Speed is time it takes to move from one point to another
      * in terms of ticks */
-    constructor(points, speed, onDone = () => {}) {
+    constructor(unit, points, speed, onDone = () => {}) {
         super(onDone);
+        this.unit = unit;
         console.log(points);
         this.points = points.map((x) => toDrawCoord(x));
         console.log(this.points);
@@ -52,6 +55,9 @@ class MoveUnitAnimation extends MapObjectAnimation {
         const delta = (this.totalTicks - fromIndex * this.speed) / this.speed;
         const newX = fromPoint.x + delta * (toPoint.x - fromPoint.x);
         const newY = fromPoint.y + delta * (toPoint.y - fromPoint.y);
+        
+        // Actually modify the unit's rotation
+        this.unit.rotation = Math.atan2(toPoint.y - fromPoint.y, toPoint.x - fromPoint.x) + (Math.PI / 2);
         this.position = new Tuple(newX, newY);
         return true;
     }
@@ -62,6 +68,10 @@ class MoveUnitAnimation extends MapObjectAnimation {
 
     _getPosition() {
         return this.position;
+    }
+
+    _getRotation() {
+        return this.rotation;
     }
 }
 

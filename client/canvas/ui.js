@@ -91,15 +91,15 @@ module.exports = class UICanvas {
         // Gold
         this.context.textBaseline = 'middle';
         this.context.fillStyle = 'white';
-        this.context.font = 'bold 32px Roboto Slab';
+        this.context.font = 'bold 32px Prompt';
         this.context.fillText(this.state.getGold(), screenWidth - 170, screenHeight - 181);
         this.context.textBaseline = 'alphabetic';
         
         // Show Timer
         this.context.fillStyle = 'black';
-        this.context.font = 'bold 18px Roboto Slab';
+        this.context.font = 'bold 18px Prompt';
         
-        this.context.fillText('∣ ' + this.state.gameTimer, screenWidth / 2 + 60, 60);
+        this.context.fillText('∣ ' + this.state.gameTimer, screenWidth / 2 + 55, 60);
 
         const timerBar = this.resourceManager.get(Resource.UI_TIMER_BAR);
         
@@ -110,8 +110,8 @@ module.exports = class UICanvas {
 
         // Show Phase Text
         this.context.fillStyle = 'black';
-        this.context.font = 'bold 18px Roboto Slab';
-        this.context.fillText(this.state.phaseText, screenWidth / 2 - 85, 60);
+        this.context.font = 'bold 18px Prompt';
+        this.context.fillText(this.state.phaseText, screenWidth / 2 - 90, 60);
     }
 
     drawMinimap(screenWidth, screenHeight) {
