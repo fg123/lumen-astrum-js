@@ -41,11 +41,12 @@ module.exports.Unit = class {
         this.currentShield = Data.units[name].shield;
         this.maxHealth = Data.units[name].health;
         this.maxShield = Data.units[name].shield;
-        this.attackRange = Data.units[name].attackrange;
+        this.attackRange = Data.units[name].attackRange;
+        this.attackSpeed = Data.units[name].attackSpeed;
 
         /* Sight range changing is complicated because it affects the cached
          * maps in the game-state. We enforce this to be constant for now */
-        this.__sightRange__ = Data.units[name].sightrange;
+        this.__sightRange__ = Data.units[name].sightRange;
 
         this.attackDamage = Data.units[name].damage;
         this.isStructure = false;
@@ -55,8 +56,8 @@ module.exports.Unit = class {
         this.animationManager = new AnimationManager(true);
 
         /* This is a local copy that changes based on state */
-        this.moveRange = Data.units[name].moverange;
-        this.maxMoveRange = Data.units[name].moverange;
+        this.moveRange = Data.units[name].moveRange;
+        this.maxMoveRange = Data.units[name].moveRange;
         this.attacksThisTurn = 0;
 
         /* These are client specific usage */

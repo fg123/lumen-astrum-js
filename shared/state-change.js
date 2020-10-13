@@ -91,6 +91,7 @@ class BuildStructureStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
+        if (state.phase !== Constants.PHASE_PLANNING) return false;
         const option = this.getOptionToBuild();
         if (!option) {
             return false;
@@ -102,6 +103,10 @@ class BuildStructureStateChange extends StateChange {
             return false;
         }
 
+        if (this.data.builtBy.turnsUntilBuilt !== 0) {
+            return false;
+        }
+        
         let baseObj = getBaseObject(this.data.structureName);
         let surrounding = getSurrounding(this.data.position, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
@@ -180,6 +185,7 @@ class SpawnUnitStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
+        if (state.phase !== Constants.PHASE_PLANNING) return false;
         const option = this.getOptionToBuild();
         if (!option) {
             return false;
@@ -193,6 +199,11 @@ class SpawnUnitStateChange extends StateChange {
         if (!state.arePrereqsSatisfied(option, this.from)) {
             return false;
         }
+
+        if (this.data.fromBuilding.turnsUntilBuilt !== 0) {
+            return false;
+        }
+
         let surrounding = getSurrounding(
             this.data.fromBuilding.position,
             this.data.fromBuilding.width + 1);
@@ -369,7 +380,7 @@ class PhaseChangeStateChange extends StateChange {
                     unit.turnsUntilBuilt -= 1;
                 }
                 /* Reset move range at the end of the turn */
-                unit.moveRange = Data.units[unit.name].moverange;
+                unit.moveRange = Data.units[unit.name].moveRange;
                 /* Reset attack on turn start */
                 if (unit.attacksThisTurn < 1) {
                     unit.attacksThisTurn += 1;
@@ -414,28 +425,33 @@ class UnitAttackStateChange extends StateChange {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         if (unit === undefined || !unit.isUnit) return false;
         if (unit.owner !== this.from) return false;
+        console.log(1);
 
         /* Does this unit have any attacks left? */
-        if (unit.attacksThisTurn <= 0 || unit.attackDamage === 0) {
+        // if (unit.attacksThisTurn <= 0) {
+        //     return false;
+        // }
+
+        if (unit.attackDamage === 0) {
             return false;
         }
-
+        console.log(2);
         /* Is the attack destination a mapObject that belongs to the
          * opponent? */
         const target = findTarget(state, this.data.posTo);
         if (target === undefined) {
             return false;
         }
-
+        console.log(3);
         // Can't attack my own unit
         if (target.owner === this.from) return false;
-
+        console.log(4);
         /* Is the target in the range (including visibility) */
         const range = state.getUnitAttackTiles(this.data.posFrom);
         if (range.find(pos => pos.equals(this.data.posTo)) === undefined) {
             return false;
         }
-
+        console.log(5);
         /* Is the target stealthed? */
         if (target.isUnit) {
             if (target.isStealthed(this.from, state)) {
@@ -717,7 +733,7 @@ class GuardianLockdownStateChange extends StateChange {
 
         if (unit.lockedDown) {
             unit.lockedDown = false;
-            unit.maxMoveRange = Data.units[unit.name].moverange;
+            unit.maxMoveRange = Data.units[unit.name].moveRange;
             unit.moveRange = Math.min(unit.maxMoveRange, unit.moveRange);
             unit.attackRange = Data.units[unit.name].attackrange;
         }

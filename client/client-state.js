@@ -104,7 +104,8 @@ module.exports = class ClientState {
             }
             for (let i = 0; i < DIGIT_KEYS.length; i++) {
                 if (keyState[DIGIT_KEYS[i]] && !prevKeyState[DIGIT_KEYS[i]]) {
-                    if (this.selectedObject && this.objectIsMine(this.selectedObject)) {
+                    if (this.selectedObject && this.objectIsMine(this.selectedObject)
+                            && this.selectedObject.turnsUntilBuilt === 0) {
                         const baseObj = getBaseObject(this.selectedObject.name);
                         if (i < baseObj.options.length) {
                             this.handleOptionClicked(baseObj.options[i]);
@@ -158,27 +159,25 @@ module.exports = class ClientState {
                 this.pendingAction = null;
                 /* Spawn Animations for buildings being constructed */
                 const animationSpawner = mapObject => {
-                    if (mapObject.owner === change.from) {
-                        if (mapObject.turnsUntilBuilt === 1) {
-                            /* About to turn, let's start an animation. */
-                            if (mapObject.width === 1) {
-                                mapObject.animationManager.addAnimation(
-                                    new InPlaceSpriteAnimation(
-                                        this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
-                                        10,
-                                        2
-                                    )
-                                );
-                            }
-                            else if (mapObject.width === 0) {
-                                mapObject.animationManager.addAnimation(
-                                    new InPlaceSpriteAnimation(
-                                        this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
-                                        6,
-                                        2
-                                    )
-                                );
-                            }
+                    if (mapObject.turnsUntilBuilt === 1) {
+                        /* About to turn, let's start an animation. */
+                        if (mapObject.width === 1) {
+                            mapObject.animationManager.addAnimation(
+                                new InPlaceSpriteAnimation(
+                                    this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
+                                    10,
+                                    2
+                                )
+                            );
+                        }
+                        else if (mapObject.width === 0) {
+                            mapObject.animationManager.addAnimation(
+                                new InPlaceSpriteAnimation(
+                                    this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
+                                    6,
+                                    2
+                                )
+                            );
                         }
                     }
                 };
@@ -223,9 +222,12 @@ module.exports = class ClientState {
                 }
             }
             else if (change instanceof UnitAttackStateChange) {
+                const unit = this.gameState.mapObjects[
+                    change.data.posFrom.y][change.data.posFrom.x];
                 this.globalAnimationManager.addAnimation(
                     new AttackProjectileAnimation(
                         this.resourceManager,
+                        unit,
                         change.data.posFrom,
                         change.data.posTo
                     )
@@ -237,6 +239,7 @@ module.exports = class ClientState {
                         this.globalAnimationManager.addAnimation(
                             new AttackProjectileAnimation(
                                 this.resourceManager,
+                                unit,
                                 change.data.posTo,
                                 surrounding[i]
                             )
@@ -261,6 +264,7 @@ module.exports = class ClientState {
                         this.globalAnimationManager.addAnimation(
                             new AttackProjectileAnimation(
                                 this.resourceManager,
+                                unit,
                                 change.data.posFrom,
                                 surrounding[i]
                             )
@@ -341,8 +345,16 @@ module.exports = class ClientState {
             if (this.gameState) {
                 if (this.gameState.phase === Constants.PHASE_ACTION) {
                     this.phaseText = 'ACTION';
-                    this.gameTimer = '00';
-                    this.topProgressBar = 1.0;
+                    const max = (Constants.ACTION_MAX_TIME * 1000);
+                    
+                    const current = max - (Date.now() - this.gameState.phaseStartTime);
+
+                    let diff = current;
+                    // Diff in Millis
+                    diff = Math.ceil(diff / 1000);
+                    // Diff in Seconds
+                    this.gameTimer = ('0' + (diff)).slice(-2);
+                    this.topProgressBar = current / max;
                 }
                 else if (this.gameState.phase === Constants.PHASE_PLANNING) {
                     this.phaseText = 'PLANNING';

@@ -10,8 +10,8 @@ const Constants = require('../../shared/constants');
 
 const DRAW_PADDING = 3;
 const FPS_FILTER_STRENGTH = 20;
-const UNITS_BOTTOM_RIGHT_STATS = ['Health:', 'Shield:', 'Attack Damage:', 'Move Range:', 'Attack Range:', 'Sight Range'];
-const STRUCTURS_BOTTOM_RIGHT_STATS = ['Health:', 'Shield:'];
+const UNITS_BOTTOM_RIGHT_STATS = ['Health:', 'Attack Damage:', 'Attack Speed:', 'Move Range:', 'Attack Range:', 'Sight Range'];
+const STRUCTURS_BOTTOM_RIGHT_STATS = ['Health:'];
 const SMALL_ALERT_SHOW_TIME = 2 * 1000;
 
 const LEFT_MOUSE_BUTTON = 1;
@@ -218,8 +218,7 @@ module.exports = class MapCanvas {
 
             if (selectedObject.turnsUntilBuilt === 0) {
                 const lineHeight = 16;
-                const rightSide = [selectedObject.currentHealth + '/' + selectedObject.maxHealth,
-                    selectedObject.currentShield + '/' + selectedObject.maxShield];
+                const rightSide = [selectedObject.currentHealth + '/' + selectedObject.maxHealth];
                 const leftSide = selectedObject.isUnit ? UNITS_BOTTOM_RIGHT_STATS : STRUCTURS_BOTTOM_RIGHT_STATS;
                 leftSide.forEach((val, index) => {
                     this.drawText(val, 'black', 13, 10,
@@ -229,6 +228,7 @@ module.exports = class MapCanvas {
                     // Could also use concat here but will create more garbage but will be speedier
                     Array.prototype.push.apply(rightSide, [
                         selectedObject.attackDamage,
+                        selectedObject.attackSpeed.toFixed(2),
                         selectedObject.moveRange + '/' + selectedObject.maxMoveRange,
                         selectedObject.attackRange, selectedObject.sightRange]);
                 }

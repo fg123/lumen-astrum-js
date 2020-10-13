@@ -134,7 +134,7 @@ class GenericInPlaceSpriteAnimation extends InPlaceSpriteAnimation {
 const { Resource } = require('./resources');
 
 class AttackProjectileAnimation extends MapObjectAnimation {
-    constructor(resourceManager, from, to, onDone = () => {}) {
+    constructor(resourceManager, unit, from, to, onDone = () => {}) {
         super(onDone);
         this.resourceManager = resourceManager;
 
@@ -151,6 +151,8 @@ class AttackProjectileAnimation extends MapObjectAnimation {
             resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
         );
         this.attackProjectile = resourceManager.get(Resource.ATTACK_PROJECTILE);
+
+        unit.rotation = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
     }
 
     _tick() {

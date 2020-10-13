@@ -91,31 +91,30 @@ const structures = {
 
 const units = {
     'Scout': {
-        'attackrange': 0,
+        'attackRange': 0,
+        'attackSpeed': 0,
         'damage': 0,
         'description': 'Scouting unit, high movement range, cannot attack.',
         'health': 15,
-        'moverange': 5,
+        'moveRange': 5,
         'shield': 0,
-        'sightrange': 5,
+        'sightRange': 5,
         'tier': 1,
         'turnsToBuild': 1,
-        'options': [],
-        'unitclass': 'Light, Biological'
+        'options': []
     },
     'Marine': {
-        'advantagedamage': 0,
-        'attackrange': 2,
-        'damage': 10,
+        'attackRange': 2,
+        'attackSpeed': 0.8,
+        'damage': 5,
         'description': 'Sturdy and cheap-to-produce infantry unit.',
-        'health': 30,
-        'moverange': 4,
+        'health': 40,
+        'moveRange': 5,
         'shield': 0,
-        'sightrange': 3,
+        'sightRange': 3,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Light, Biological',
         'custom': {
             'muzzle': {
                 'x': 0,
@@ -124,17 +123,16 @@ const units = {
         }
     },
     'Engineer': {
-        'advantagedamage': 0,
-        'attackrange': 0,
+        'attackRange': 0,
+        'attackSpeed': 0,
         'damage': 0,
         'description': 'Constructs buildings during the planning phase.',
         'health': 12,
-        'moverange': 3,
+        'moveRange': 3,
         'shield': 0,
-        'sightrange': 3,
+        'sightRange': 3,
         'tier': 1,
         'turnsToBuild': 1,
-        'unitclass': 'Biological',
         'options': [{
             'title': 'Build Deployment Outpost',
             'cost': 400,
@@ -155,19 +153,18 @@ const units = {
         }]
     },
     'Reaver': {
-        'advantagedamage': 0,
-        'attackrange': 0,
+        'attackRange': 0,
+        'attackSpeed': 0,
         'damage': 0,
         'description': 'Kamakazi unit. One time use, high damage.',
         'health': 5,
-        'moverange': 4,
+        'moveRange': 4,
         'shield': 20,
-        'sightrange': 1,
+        'sightRange': 1,
         'special': 'Splash',
         'squadsize': 1,
         'tier': 2,
         'turnsToBuild': 1,
-        'unitclass': 'Light, Mechanical',
         'options':
             [
                 {
@@ -185,37 +182,32 @@ const units = {
         }
     },
     'Turret': {
-        'advantagedamage': 0,
-        'attackrange': 3,
-        'damage': 15,
+        'attackRange': 3,
+        'attackSpeed': 2,
+        'damage': 5,
         'description': 'Stationary, single-target ranged turret. (Only available through Biological tech branch)',
         'health': 30,
-        'moverange': 0,
+        'moveRange': 0,
         'shield': 0,
-        'sightrange': 4,
+        'sightRange': 4,
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
-        'unitclass': 'Light, Mechanical'
     },
     'Golem': {
-        'advantagedamage': 0,
-        'attackrange': 1,
-        'damage': 25,
+        'attackRange': 1,
+        'attackSpeed': 0.3,
+        'damage': 10,
         'description': 'Slow-moving medium artillery unit. Bombards with long-range attacks',
-        'health': 5,
-        'moverange': 2,
-        'shield': 25,
-        'sightrange': 1,
+        'health': 60,
+        'moveRange': 2,
+        'shield': 0,
+        'sightRange': 2,
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,
-        'options': [],
-        'unitclass': 'Mechanical',
-        'custom': {
-            'attackCooldown': 2
-        }
+        'options': []
     }
 };
 

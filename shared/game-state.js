@@ -409,14 +409,23 @@ module.exports = class GameState {
             const occupied = this.occupied[tile.y][tile.x];
             if (occupied && occupied.x && occupied.y) {
                 const obj = this.mapObjects[occupied.y][occupied.x];
-                if (obj.owner !== object.owner) {
-                    result.push(obj);
+                if (obj.owner !== object.owner && obj.currentHealth > 0) {
+                    // The obj might be out of attack range, but the tile is not
+                    result.push({
+                        enemy: obj, 
+                        inRangeTile: tile
+                    });
                 }
             }
         }
         result.sort((a, b) => {
-            return distance(unitPos, a.position) -
-                distance(unitPos, b.position);
+            const difference = distance(unitPos, a.position) - distance(unitPos, b.position);
+            // Prioritize units over structures
+            if (difference === 0) {
+                if (a.isStructure && b.isUnit) return 1;
+                else if (b.isStructure && a.isUnit) return -1;
+            }
+            return difference;
         });
         return result;
     }
