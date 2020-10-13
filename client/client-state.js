@@ -77,6 +77,7 @@ module.exports = class ClientState {
         this.pendingAction = null;
         this.gameTimer = '';
         this.phaseText = '';
+        this.topProgressBar = 0;
         this.cursorMessage = '';
         this.movementMode = false;
 
@@ -340,24 +341,32 @@ module.exports = class ClientState {
             if (this.gameState) {
                 if (this.gameState.phase === Constants.PHASE_ACTION) {
                     this.phaseText = 'ACTION';
-                    this.gameTimer = '00:00';
+                    this.gameTimer = '00';
+                    this.topProgressBar = 1.0;
                 }
                 else if (this.gameState.phase === Constants.PHASE_PLANNING) {
                     this.phaseText = 'PLANNING';
-                    let diff = (Constants.PLANNING_TIME * 1000) - (Date.now() - this.gameState.phaseStartTime);
+                    const max = (Constants.PLANNING_TIME * 1000);
+                    
+                    const current = max - (Date.now() - this.gameState.phaseStartTime);
+
+                    let diff = current;
                     // Diff in Millis
                     diff = Math.ceil(diff / 1000);
                     // Diff in Seconds
-                    this.gameTimer = ('0' + Math.floor(diff / 60)).slice(-2) + ':' + ('0' + (diff % 60)).slice(-2);
+                    this.gameTimer = ('0' + (diff)).slice(-2);
+                    this.topProgressBar = current / max;
                 }
                 else {
                     this.phaseText = '...';
-                    this.gameTimer = '00:00';
+                    this.gameTimer = '00';
+                    this.topProgressBar = 1.0;
                 }
             }
             else {
                 this.phaseText = '...';
-                this.gameTimer = '00:00';
+                this.gameTimer = '00';
+                this.topProgressBar = 1.0;
             }
         }, INTERNAL_TICK_INTERVAL);
     }

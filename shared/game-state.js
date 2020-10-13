@@ -92,6 +92,19 @@ module.exports = class GameState {
         }
     }
 
+    isEnemyBuildingRange(x, y, player) {
+        const players = Object.keys(this.players);
+
+        for (let i = 0; i < players.length; i++) {
+            if (players[i] !== player) {
+                if (this.isAllowedBuilding(x, y, players[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;        
+    }
+
     setAllowedBuilding(x, y, player) {
         const arr = this.getAllowedBuildingMap(player);
         if (arr[y][x]) {
@@ -195,7 +208,7 @@ module.exports = class GameState {
             }
         }
     }
-
+    
     removeMapObject(location) {
         const mapObject = this.mapObjects[location.y][location.x];
         if (!mapObject) {

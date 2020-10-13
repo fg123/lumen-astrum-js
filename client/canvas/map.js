@@ -318,10 +318,11 @@ module.exports = class MapCanvas {
         const hover = this.inputManager.mouseState.tile;
         if (map.withinMap(hover)) {
             const tile = map.data[hover.y][hover.x];
-            this.drawText(`Hover: (${hover.x}, ${hover.y}) { displayType: ${tile.displayType},
-isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, jungleDist: ${tile.jungleDist} }`,
-            'white', 16, 10, 80, 'left', 'bold'
-            );
+            this.drawText(`Hover: (${hover.x}, ${hover.y})`, 'white', 16, 10, 80, 'left', 'bold');
+            this.drawText(`   displayType: ${tile.displayType}`, 'white', 16, 10, 100, 'left', 'bold');
+            this.drawText(`   isHighGround: ${tile.isHighGround}`, 'white', 16, 10, 120, 'left', 'bold');
+            this.drawText(`   highGroundGroup: ${tile.highGroundGroup}`, 'white', 16, 10, 140, 'left', 'bold');
+            this.drawText(`   jungleDist: ${tile.jungleDist}`, 'white', 16, 10, 160, 'left', 'bold');
         }
     }
 
@@ -331,19 +332,6 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
             Structure.isConstructionBuilding(this.state.selectedObject.name) &&
             this.objectIsMine(this.state.selectedObject) && */
         return this.state.gameState && this.state.gameState.isAllowedBuilding(x, y, this.state.player);
-    }
-
-    isEnemyBuildingRange(x, y) {
-        if (this.state.gameState === undefined) return false;
-        const players = this.state.gameState.players;
-        for (let i = 0; i < players.length; i++) {
-            if (players[i] !== this.state.player) {
-                if (this.state.gameState.isAllowedBuilding(x, y, players[i])) {
-                    return true;
-                }
-            }
-        }
-        return false;        
     }
 
     drawState(screenWidth, screenHeight) {
@@ -390,7 +378,7 @@ isHighGround: ${tile.isHighGround}, highGroundGroup: ${tile.highGroundGroup}, ju
                             this.drawImage(this.resourceManager.get(Resource.BLUE_OVERLAY),
                                 drawCoord.x, drawCoord.y);
                         }
-                        else if (this.isEnemyBuildingRange(x, y)) {
+                        else if (this.state.gameState && this.state.gameState.isEnemyBuildingRange(x, y, this.state.player)) {
                             this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
                                 drawCoord.x, drawCoord.y);
                         }

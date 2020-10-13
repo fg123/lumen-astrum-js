@@ -1,7 +1,7 @@
 const { Tuple } = require('../shared/coordinates');
 const { map } = require('../shared/map');
 const Utils = require('./utils');
-const { tiles } = require('./resources');
+const { tiles, Resource } = require('./resources');
 const Constants = require('../shared/constants');
 
 /* The camera manages the minimap rectangle as well as itself. */
@@ -17,6 +17,7 @@ module.exports = class Camera {
         this.resourceManager = resourceManager;
         this.ui = ui;
         this.inputManager = inputManager;
+        this.state = undefined;
 
         this._position = new Tuple(0, 0);
         this.delta = new Tuple(0, 0);
@@ -62,6 +63,11 @@ module.exports = class Camera {
         this.minimapCanvas = document.createElement('canvas');
         this.minimapCanvas.width = MINIMAP_DISPLAY_SIZE.x;
         this.minimapCanvas.height = MINIMAP_DISPLAY_SIZE.y;
+
+        this.minimapFOWCanvas = document.createElement('canvas');
+        this.minimapFOWCanvas.width = MINIMAP_DISPLAY_SIZE.x;
+        this.minimapFOWCanvas.height = MINIMAP_DISPLAY_SIZE.y;
+
         const minimapContext = this.minimapCanvas.getContext('2d');
         for (let y = 0; y < map.data.length; y++) {
             for (let x = 0; x < map.data[0].length; x++) {
@@ -82,9 +88,50 @@ module.exports = class Camera {
         }
         this.tick = window.setInterval(() => {
             this.tickCamera(window.innerWidth, window.innerHeight);
+            this.updateMinimapFOW();
         }, INTERNAL_TICK_INTERVAL);
         this.position = new Tuple(500, 500);
         this.tickCamera(window.innerWidth, window.innerHeight);
+    }
+
+    updateMinimapFOW() {
+        if (this.state === undefined) return;
+        if (this.state.gameState === undefined) return;
+        const context = this.minimapFOWCanvas.getContext('2d');
+
+        context.clearRect(0, 0, MINIMAP_DISPLAY_SIZE.x, MINIMAP_DISPLAY_SIZE.y);
+        const FOWTexture = this.resourceManager.get(Resource.FOG_OF_WAR);
+
+        for (let y = 0; y < map.data.length; y++) {
+            for (let x = 0; x < map.data[0].length; x++) {
+                if (map.data[y][x].displayType !== 0) {
+                    let imageToDraw = undefined;
+                    if (!this.state.gameState.isVisible(x, y, this.state.player)) {
+                        imageToDraw = FOWTexture;
+                    }
+                    else if (this.state.gameState.isAllowedBuilding(x, y, this.state.player)) {
+                        imageToDraw = this.resourceManager.get(Resource.BLUE_OVERLAY);
+                    }
+                    else if (this.state.gameState.isEnemyBuildingRange(x, y, this.state.player)) {
+                        imageToDraw = this.resourceManager.get(Resource.RED_OVERLAY);
+                    }
+                    if (imageToDraw !== undefined) {
+                        const coord = Utils.toDrawCoord(x, y);
+                        context.drawImage(
+                            imageToDraw,
+                            (coord.x * this.minimapScaleFactor) + this.minimapZeroPoint.x,
+                            coord.y * this.minimapScaleFactor + this.minimapZeroPoint.y,
+                            imageToDraw.width * this.minimapScaleFactor,
+                            imageToDraw.height * this.minimapScaleFactor
+                        );
+                    }
+                }
+            }
+        }
+
+    }
+    initializeClientState(clientState) {
+        this.state = clientState;
     }
 
     toCameraCoord(position) {

@@ -110,17 +110,18 @@ class BuildStructureStateChange extends StateChange {
                 map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
                 return false;
             }
-            else if (!this.data.builtBy.isUnit &&
+            else if (/*!this.data.builtBy.isUnit &&*/
                 !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
                 return false;
             }
-            else if (this.data.structureName === 'Harvester') {
-                if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.MINERAL &&
-                    map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BIG_MINERAL) {
-                    // Harvester must be on mineral
-                    return false;
-                }
-            }
+            // Redesign: removed Harvester
+            // else if (this.data.structureName === 'Harvester') {
+            //     if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.MINERAL &&
+            //         map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BIG_MINERAL) {
+            //         // Harvester must be on mineral
+            //         return false;
+            //     }
+            // }
             else {
                 if (map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
                     map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {

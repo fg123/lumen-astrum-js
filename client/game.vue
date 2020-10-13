@@ -65,6 +65,7 @@ module.exports = {
             const animationManager = new AnimationManager(false);
 
             const clientState = new ClientState(this.root.socket, chatbox, camera, inputManager, ui, resourceManager, animationManager);
+            camera.initializeClientState(clientState);
             this.clientState = clientState;
             new MapCanvas(
                 mapCanvas,

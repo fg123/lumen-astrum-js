@@ -22,9 +22,13 @@ module.exports = class UIBackCanvas {
         this.canvas.height = screenHeight;
         const topRight = this.resourceManager.get(Resource.UI_TOP_RIGHT);
         const bottomRight = this.resourceManager.get(Resource.UI_BOTTOM_RIGHT);
+        const top = this.resourceManager.get(Resource.UI_TOP);
         this.context.drawImage(topRight,
             screenWidth - topRight.width,
             0);
+        this.context.drawImage(top,
+            (screenWidth - top.width) / 2,
+        0);
         this.context.drawImage(bottomRight,
             screenWidth - bottomRight.width,
             screenHeight - bottomRight.height);

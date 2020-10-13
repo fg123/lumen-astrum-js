@@ -7,6 +7,7 @@ module.exports = class UICanvas {
         this.state = state;
         this.inputManager = inputManager;
         this.camera = camera;
+        this.resourceManager = resourceManager;
 
         this.ui = ui;
         this.context = canvas.getContext('2d');
@@ -96,18 +97,27 @@ module.exports = class UICanvas {
         
         // Show Timer
         this.context.fillStyle = 'black';
-        this.context.font = 'bold 60px Roboto Slab';
-        this.context.fillText(this.state.gameTimer, screenWidth - 180, 75);
+        this.context.font = 'bold 18px Roboto Slab';
+        
+        this.context.fillText('∣ ' + this.state.gameTimer, screenWidth / 2 + 60, 60);
+
+        const timerBar = this.resourceManager.get(Resource.UI_TIMER_BAR);
+        
+        this.context.drawImage(timerBar,
+            0, 0, timerBar.width * this.state.topProgressBar, timerBar.height,
+            (screenWidth - timerBar.width) / 2, 8,
+            timerBar.width * this.state.topProgressBar, timerBar.height);
 
         // Show Phase Text
         this.context.fillStyle = 'black';
-        this.context.font = 'bold 16px Roboto Slab';
-        this.context.fillText(this.state.phaseText, screenWidth - 140, 100);
+        this.context.font = 'bold 18px Roboto Slab';
+        this.context.fillText(this.state.phaseText, screenWidth / 2 - 85, 60);
     }
 
     drawMinimap(screenWidth, screenHeight) {
         /* We grab a default tile to cache the calculation */
         this.context.drawImage(this.camera.minimapCanvas, screenWidth - 266, screenHeight - 154);
+        this.context.drawImage(this.camera.minimapFOWCanvas, screenWidth - 266, screenHeight - 154);
         this.context.strokeStyle = 'white';
         this.context.lineWidth = '1.5';
         this.context.rect(screenWidth - 266 + this.camera.minimapRectPosition.x,
