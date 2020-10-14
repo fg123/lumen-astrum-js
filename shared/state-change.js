@@ -113,7 +113,7 @@ class BuildStructureStateChange extends StateChange {
             //    intersect another player's territory        
             let surrounding = getSurrounding(this.data.position, baseObj.width + Constants.BUILD_RANGE);  
             for (let i = 0; i < surrounding.length; i++) {
-                if (state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.from)) {
+                if (map.withinMap(surrounding[i]) && state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.from)) {
                     return false;
                 }
             }
