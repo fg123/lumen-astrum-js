@@ -301,7 +301,7 @@ module.exports = class MapCanvas {
                         const dialogSize = new Tuple(300, 100);
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
                         this.drawText(baseObj.options[i].title, 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
-                        this.drawText('Ø' + baseObj.options[i].cost, 'white', 16, dialogPos.x + dialogSize.x - 5, dialogPos.y + 20, 'right', 'bold');
+                        this.drawText('Ø' + baseObj.options[i].cost, Constants.YELLOW_CHAT_COLOR, 16, dialogPos.x + dialogSize.x - 5, dialogPos.y + 20, 'right', 'bold');
 
                         // Set Description
                         let desc = baseObj.options[i].description;

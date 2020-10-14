@@ -6,6 +6,7 @@ const {
     GuardianLockdownStateChange, 
     PhaseChangeStateChange, 
     MoveUnitStateChange, 
+    ChatMessageStateChange,
     UnitAttackStateChange, 
     SetUnitTargetStateChange
 } = require('../shared/state-change');
@@ -31,6 +32,7 @@ module.exports = class Game {
         this.sockets = playerSocketMap;
 
         this.state = new GameState(gameStartTime, this.players);
+
         this.stateChanges = [];
 
         this.queuedActions = {
@@ -40,6 +42,11 @@ module.exports = class Game {
         this.nextPhaseTimer = undefined;
 
         this.isGameOver = false;
+        
+        this.processStateChange(ChatMessageStateChange.create(undefined, 'WASD: Move the Camera'));
+        this.processStateChange(ChatMessageStateChange.create(undefined, 'Mouse Scroll: Zoom In / Out'));
+        this.processStateChange(ChatMessageStateChange.create(undefined, 'G (hold): To Move Units'));
+
 
         // Initial Phase State Change
         this.initialTurnPassover = setTimeout(() => {
@@ -143,18 +150,18 @@ module.exports = class Game {
             return;
         }
 
-        const actionMap = [];
+        const actionMap = {};
         for (let i = 0; i < this.state.units.length; i++) {
             // target is a {enemy: _, inRangeTile: _ } as returned by
             //   getEnemiesInAttackRange
-            actionMap.push({
+            actionMap[this.state.units[i].id] = {
                 nextAttackTime: 0,
                 nextMoveTime: 0,
                 target: undefined
-            });
+            };
         }
  
-        const TICK_TIME = 10;
+        const TICK_TIME = 100;
 
         const MOVE_COOLDOWN = 400;
 
@@ -164,57 +171,69 @@ module.exports = class Game {
             // Each tick is every 10ms, unit tries to acquire target,
             //  given cooldown
             let currentTime = Date.now();
-
+            const nonDeadUnits = [];
             for (let j = 0; j < this.state.units.length; j++) {
-                const unit = this.state.units[j];
-                // Try to acquire target and put into action map
-                const potentialEnemies = this.state.getEnemiesInAttackRange(unit.position);
-                if (potentialEnemies.length > 0) {
-                    if (actionMap[j].target !== undefined) {
-                        // See if current target still in potential enemies
-                        const idToFind = actionMap[j].target.enemy.id;
-                        actionMap[j].target = undefined;
+                if (this.state.units[j].currentHealth > 0) {
+                    nonDeadUnits.push(this.state.units[j]);
+                }
+            }
+            for (let j = 0; j < nonDeadUnits.length; j++) {
+                const unit = nonDeadUnits[j];
+                const id = unit.id;
 
-                        for (let i = 0; i < potentialEnemies.length; i++) {
-                            if (idToFind === potentialEnemies[i].enemy.id) {
-                                actionMap[j].target = potentialEnemies[i];
-                                break;
-                            }
-                        }
-                    }
-                    if (actionMap[j].target === undefined) {
-                        // get (random) target
-                        actionMap[j].target = potentialEnemies[0];
-                    }
-                }
-                else {
-                    actionMap[j].target = undefined;
-                }
-                
                 let didMove = false;
 
+                if (unit.targetPoint) {
+                    // Repath first
+                    const repath = SetUnitTargetStateChange.create(unit.owner, unit.position, unit.targetPoint);
+                    this.processStateChange(repath);
+                }
+
                 if (unit.targetPoint && unit.desiredPath &&
-                        unit.desiredPath.length !== 0 && actionMap[j].nextMoveTime < currentTime &&
+                        unit.desiredPath.length !== 0 && actionMap[id].nextMoveTime < currentTime &&
                         unit.currentHealth > 0) {
                     const pendingMove = MoveUnitStateChange.create(
                         unit.owner, unit.position,
                         unit.desiredPath[0]);
                     if (this.verifyStateChange(pendingMove)) {
                         this.processStateChange(pendingMove);
-                        actionMap[j].nextMoveTime = currentTime + MOVE_COOLDOWN;
+                        actionMap[id].nextMoveTime = currentTime + MOVE_COOLDOWN;
                         didMove = true;
                     }
                 }
-                
-                if (!didMove && actionMap[j].target !== undefined && actionMap[j].nextAttackTime < currentTime) {
+                // Try to acquire target and put into action map
+                const potentialEnemies = this.state.getEnemiesInAttackRange(unit.position);
+                if (potentialEnemies.length > 0) {
+                    if (actionMap[id].target !== undefined) {
+                        // See if current target still in potential enemies
+                        const idToFind = actionMap[id].target.enemy.id;
+                        actionMap[id].target = undefined;
+
+                        for (let i = 0; i < potentialEnemies.length; i++) {
+                            if (idToFind === potentialEnemies[i].enemy.id) {
+                                actionMap[id].target = potentialEnemies[i];
+                                break;
+                            }
+                        }
+                    }
+                    if (actionMap[id].target === undefined) {
+                        // get (random) target
+                        actionMap[id].target = potentialEnemies[0];
+                    }
+                }
+                else {
+                    actionMap[id].target = undefined;
+                }
+                 
+                if (!didMove && actionMap[id].target !== undefined && actionMap[id].nextAttackTime < currentTime) {
                     // Have a target for this tick and attack not cooldown
                     const pendingAttack = UnitAttackStateChange.create(
-                        unit.owner, unit.position, actionMap[j].target.inRangeTile
+                        unit.owner, unit.position, actionMap[id].target.inRangeTile
                     );
                     if (this.verifyStateChange(pendingAttack)) {
                         this.processStateChange(pendingAttack);
                         const timeToNextAttack = 1000.0 / unit.attackSpeed;
-                        actionMap[j].nextAttackTime = currentTime + timeToNextAttack;
+                        actionMap[id].nextAttackTime = currentTime + timeToNextAttack;
                     }
                 }
             }
@@ -225,9 +244,9 @@ module.exports = class Game {
             // We also end action phase if no one has any more targets,
             //   and finished moving
             let finishedActions = true;
-            for (let i = 0; i < this.state.units.length; i++) {
-                const unit = this.state.units[i];
-                if (actionMap[i].target !== undefined) {
+            for (let i = 0; i < nonDeadUnits.length; i++) {
+                const unit = nonDeadUnits[i];
+                if (actionMap[unit.id].target !== undefined) {
                     finishedActions = false;
                 }
                 if (unit.targetPoint && unit.moveRange > 0) {

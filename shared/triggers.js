@@ -15,7 +15,7 @@ const triggers = {
             state.players[this.owner].gold += 200;
             if (state.clientState) {
                 state.clientState.globalAnimationManager.addAnimation(
-                    new PopupTextAnimation("+200", "#f0e130",
+                    new PopupTextAnimation("+200", Constants.YELLOW_CHAT_COLOR,
                         this.position)
                 );
             }
@@ -31,7 +31,7 @@ const triggers = {
             this.currentHealth -= this.custom.value;
             if (state.clientState) {
                 state.clientState.globalAnimationManager.addAnimation(
-                    new PopupTextAnimation(`+${this.custom.value}`, "#f0e130",
+                    new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
                         this.position)
                 );
             }
@@ -51,7 +51,7 @@ const triggers = {
             this.currentHealth -= this.custom.value;
             if (state.clientState) {
                 state.clientState.globalAnimationManager.addAnimation(
-                    new PopupTextAnimation(`+${this.custom.value}`, "#f0e130",
+                    new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
                         this.position)
                 );
             }

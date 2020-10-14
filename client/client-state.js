@@ -284,6 +284,9 @@ module.exports = class ClientState {
                 if (this.player === message.author) {
                     message.color = Constants.BLUE_CHAT_COLOR;
                 }
+                else if (message.author === undefined) {
+                    message.color = Constants.YELLOW_CHAT_COLOR;
+                }
                 else {
                     message.color = Constants.RED_CHAT_COLOR;
                 }
