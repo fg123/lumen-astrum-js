@@ -13,8 +13,8 @@ module.exports = {
     MAP_TILE_DRAW_Y_MULTIPLIER: 111,
     PHASE_ACTION: 'phase_action',
     PHASE_PLANNING: 'phase_planning',
-    PLANNING_TIME: is_production ? 10 : 5,
-    ACTION_MAX_TIME: 5,
+    PLANNING_TIME: is_production ? 15 : 5,
+    ACTION_MAX_TIME: 10,
     PERCENTAGE_CLAIM_TO_WIN: 0.35,
-    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 2 : 0
+    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 1 : 0
 };
