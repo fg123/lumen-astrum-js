@@ -186,7 +186,7 @@ function mapTick() {
         for (let y = 0; y < map.data.length; y++) {
             for (let x = 0; x < map.data[0].length; x++) {
                 const drawCoord = toDrawCoord(x, y);
-                let displayType = map.data[y][x].displayType;
+                let displayType = map.data[y][x].tileType;
                 if (mouseState.tile.equals(new Tuple(x, y))) {
                     displayType = activeBrush;
                 }

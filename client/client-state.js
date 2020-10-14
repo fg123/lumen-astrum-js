@@ -353,10 +353,10 @@ module.exports = class ClientState {
 
                     let diff = current;
                     // Diff in Millis
-                    diff = Math.ceil(diff / 1000);
+                    diff = Math.max(0, Math.ceil(diff / 1000));
                     // Diff in Seconds
                     this.gameTimer = ('0' + (diff)).slice(-2);
-                    this.topProgressBar = current / max;
+                    this.topProgressBar = Math.max(0, current / max);
                 }
                 else if (this.gameState.phase === Constants.PHASE_PLANNING) {
                     this.phaseText = 'PLANNING';
@@ -366,10 +366,10 @@ module.exports = class ClientState {
 
                     let diff = current;
                     // Diff in Millis
-                    diff = Math.ceil(diff / 1000);
+                    diff = Math.max(0, Math.ceil(diff / 1000));
                     // Diff in Seconds
                     this.gameTimer = ('0' + (diff)).slice(-2);
-                    this.topProgressBar = current / max;
+                    this.topProgressBar = Math.max(0, current / max);
                 }
                 else {
                     this.phaseText = '...';
