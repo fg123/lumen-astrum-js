@@ -322,6 +322,8 @@ module.exports = class ClientState {
             }
             const commandCenterLocation = map.commandCenterLocations[index];
             this.gameState = new GameState(gameStartTime, players);
+            this.gameState.clientState = this;
+
             this.commandCenter = this.gameState.mapObjects[
                 commandCenterLocation.y][
                 commandCenterLocation.x];

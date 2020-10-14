@@ -86,7 +86,32 @@ const structures = {
         'width': 0,
         'turnsToBuild': 1,
         'options': [],
-    }
+    },
+    'Ether Harvester': {
+        // The harvester health represents amount of gold provided.
+        'description': 'Harvester for small, blue minerals.',
+        'health': 2000,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': 0,
+        'options': [],
+        'custom': {
+            'value': 100
+        },
+        'targetable': false
+    },
+    'Gem Harvester': {
+        'description': 'Harvester for large, purple minerals.',
+        'health': 3000,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': 0,
+        'options': [],
+        'custom': {
+            'value': 200
+        },
+        'targetable': false
+    },
 };
 
 const units = {

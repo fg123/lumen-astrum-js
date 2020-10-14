@@ -26,8 +26,7 @@ module.exports = class AnimationManager {
         }
     }
 
-    draw(graphicsManager, defaultPosition) {
-
+    draw(graphicsManager, clientState, defaultPosition) {
         if (this.isBlockingPipeline) {
             /* If any animation returns, it blocks the rest of the animating
             * pipeline */
@@ -39,15 +38,23 @@ module.exports = class AnimationManager {
                     break;
                 }
             }
-            if (!this.animations.some(animation =>
-                animation.draw(graphicsManager, actualPosition))) {
+            if (!this.animations.some(animation => {
+                if (animation.isVisible(clientState)) {
+                    return animation.draw(graphicsManager, actualPosition);
+                }
+                return false;
+            })) {
                 return actualPosition;
             }
         }
         else {
             /* No blocking pipeline */
-            this.animations.forEach(animation => animation.draw(graphicsManager,
-                animation.getPosition()));
+            this.animations.forEach(animation => {
+                if (animation.isVisible(clientState)) {
+                    return animation.draw(graphicsManager, animation.getPosition());
+                }
+                return false;
+            });
         }
         return undefined;
     }

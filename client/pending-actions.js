@@ -93,24 +93,6 @@ class PlaceStructurePendingAction extends PendingAction {
             mapCanvas.state.selectedObject
         ).verifyStateChange(mapCanvas.state.gameState);
 
-        // Draw Object to be Placed
-        let baseObj = getBaseObject(this.structureName);
-        let surrounding = getSurrounding(mapCanvas.inputManager.mouseState.tile, baseObj.width);
-        for (let i = 0; i < surrounding.length; i++) {
-            if (map.withinMap(surrounding[i])) {
-                if (this.isValid) {
-                    mapCanvas.state.cursorMessage = 'Build ' + this.structureName;
-                }
-                else {
-                    mapCanvas.state.cursorMessage = 'Cannot build there!';
-                }
-                const drawn = toDrawCoord(surrounding[i]);
-                mapCanvas.drawImage(mapCanvas.resourceManager.get(
-                    this.isValid ? Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
-                    drawn.x, drawn.y);
-            }
-        }
-
         // Draw Building Range
         if (mapCanvas.state.selectedObject.isUnit) {
             surrounding = getSurrounding(mapCanvas.state.selectedObject.position, 1);
@@ -124,6 +106,38 @@ class PlaceStructurePendingAction extends PendingAction {
                 }
             }
         }
+
+        // Draw Object to be Placed
+        let baseObj = getBaseObject(this.structureName);
+        let surrounding = getSurrounding(mapCanvas.inputManager.mouseState.tile, baseObj.width);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (map.withinMap(surrounding[i])) {
+                if (this.isValid) {
+                    mapCanvas.state.cursorMessage = 'Build ' + this.structureName;
+                }
+                else {
+                    mapCanvas.state.cursorMessage = 'Cannot build there!';
+                }
+                const drawn = toDrawCoord(surrounding[i]);
+                const oldOpacity = mapCanvas.context.globalAlpha;
+                if (!this.isValid) {
+                    mapCanvas.context.globalAlpha = 0.5;
+                }
+                else {
+                    mapCanvas.context.globalAlpha = 0.9;
+                }
+                mapCanvas.drawImage(baseObj.image, drawn.x, drawn.y);
+                mapCanvas.context.globalAlpha = oldOpacity;
+                
+                if (!this.isValid) {
+                    mapCanvas.drawImage(mapCanvas.resourceManager.get(
+                        Resource.RED_OVERLAY),
+                        drawn.x, drawn.y);
+                }
+            }
+        }
+
+       
     }
 
     _onClick(state) {

@@ -14,8 +14,10 @@ const PathFinder = require('../shared/path-finder');
 module.exports = class Game {
     static fromJson(json) {
         const map = {};
-        map[json.redPlayer] = undefined;
-        map[json.bluePlayer] = undefined;
+        json.players.forEach(p => {
+            map[p] = undefined;
+        });
+
         const game = new Game(map, json.gameStartTime);
         clearTimeout(game.initialTurnPassover);
         for (let i = 0; i < json.stateChanges.length; i++) {
@@ -25,6 +27,7 @@ module.exports = class Game {
     }
     constructor(playerSocketMap, gameStartTime) {
         this.players = Object.keys(playerSocketMap);
+        console.log("Constructing a new game with players: ", this.players);
         this.sockets = playerSocketMap;
 
         this.state = new GameState(gameStartTime, this.players);
@@ -35,6 +38,8 @@ module.exports = class Game {
         };
 
         this.nextPhaseTimer = undefined;
+
+        this.isGameOver = false;
 
         // Initial Phase State Change
         this.initialTurnPassover = setTimeout(() => {
@@ -132,7 +137,12 @@ module.exports = class Game {
             }
         }
         this.queuedActions.builds = [];
-            
+
+        // Someone claimed everything.
+        if (this.isGameOver) {
+            return;
+        }
+
         const actionMap = [];
         for (let i = 0; i < this.state.units.length; i++) {
             // target is a {enemy: _, inRangeTile: _ } as returned by
@@ -143,12 +153,13 @@ module.exports = class Game {
                 target: undefined
             });
         }
+ 
         const TICK_TIME = 10;
-        // Move a tile every 400ms.
+
         const MOVE_COOLDOWN = 400;
 
         const actionPhaseStart = Date.now();
-
+        
         const actionPhaseTick = setInterval(() => {
             // Each tick is every 10ms, unit tries to acquire target,
             //  given cooldown
@@ -157,26 +168,34 @@ module.exports = class Game {
             for (let j = 0; j < this.state.units.length; j++) {
                 const unit = this.state.units[j];
                 // Try to acquire target and put into action map
-                let acquireNewTarget = false;
-                if (actionMap[j].target === undefined) {
-                    acquireNewTarget = true; 
-                }
-                else if (actionMap[j].target.enemy.currentHealth <= 0) {
-                    acquireNewTarget = true;
-                }
-                if (acquireNewTarget) {
-                    const potentialEnemies = this.state.getEnemiesInAttackRange(unit.position);
-                    if (potentialEnemies.length > 0) {
+                const potentialEnemies = this.state.getEnemiesInAttackRange(unit.position);
+                if (potentialEnemies.length > 0) {
+                    if (actionMap[j].target !== undefined) {
+                        // See if current target still in potential enemies
+                        const idToFind = actionMap[j].target.enemy.id;
+                        actionMap[j].target = undefined;
+
+                        for (let i = 0; i < potentialEnemies.length; i++) {
+                            if (idToFind === potentialEnemies[i].enemy.id) {
+                                actionMap[j].target = potentialEnemies[i];
+                                break;
+                            }
+                        }
+                    }
+                    if (actionMap[j].target === undefined) {
+                        // get (random) target
                         actionMap[j].target = potentialEnemies[0];
                     }
-                    else {
-                        actionMap[j].target = undefined;
-                    }
                 }
-                const didMove = false;
+                else {
+                    actionMap[j].target = undefined;
+                }
+                
+                let didMove = false;
 
                 if (unit.targetPoint && unit.desiredPath &&
-                        unit.desiredPath.length !== 0 && actionMap[j].nextMoveTime < currentTime) {
+                        unit.desiredPath.length !== 0 && actionMap[j].nextMoveTime < currentTime &&
+                        unit.currentHealth > 0) {
                     const pendingMove = MoveUnitStateChange.create(
                         unit.owner, unit.position,
                         unit.desiredPath[0]);
@@ -215,14 +234,14 @@ module.exports = class Game {
                     finishedActions = false;
                 }
             }
-            console.log("Time Up:", timeUp);
-            console.log("Finished Actions:", finishedActions)
             // No one did a move, we can proceed with ending this action phase.
-            if (timeUp || finishedActions) {
+            if (timeUp || finishedActions || this.isGameOver) {
                 clearInterval(actionPhaseTick);
-                setTimeout(() => {
-                    this.processStateChange(PhaseChangeStateChange.create(undefined));
-                }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
+                if (!this.isGameOver) {
+                    setTimeout(() => {
+                        this.processStateChange(PhaseChangeStateChange.create(undefined));
+                    }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
+                }
             }
         }, TICK_TIME);
     }

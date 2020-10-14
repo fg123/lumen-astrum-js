@@ -1,5 +1,7 @@
 /* Dynamic Parts of the UI */
 const { Resource } = require('../resources');
+const { map } = require('../../shared/map');
+const Constants = require('../../shared/constants');
 
 module.exports = class UICanvas {
     constructor(canvas, state, inputManager, ui, resourceManager, camera) {
@@ -82,8 +84,37 @@ module.exports = class UICanvas {
             }
             this.drawGoldAndTurnControls(screenWidth, screenHeight);
             this.drawMinimap(screenWidth, screenHeight);
+            this.drawTerritoryClaims(screenWidth, screenHeight);
             this.context.drawImage(this.cursorResource, this.inputManager.mouseState.position.x - this.cursorResource.width / 2,
                 this.inputManager.mouseState.position.y - this.cursorResource.height / 2);
+        }
+    }
+
+    drawOneClaim(num, den, username, x, y) {
+        this.context.fillText(`${username}: ${num} / ${den} [${((num / den) * 100).toFixed(2)}%]`, x, y);
+    }
+
+    drawTerritoryClaims(screenWidth, screenHeight) {
+        this.context.textBaseline = 'left';
+        this.context.fillStyle = 'black';
+        this.context.font = 'bold 14px Prompt';
+
+        this.context.fillText(`${Constants.PERCENTAGE_CLAIM_TO_WIN * 100}% Territory To Win`, screenWidth - 230, 15);
+
+        const total = map.territorialTiles;
+        const playerStateMap = this.state.gameState.players;
+        const myOwn = playerStateMap[this.state.player].calculateTerritorySize();
+        this.drawOneClaim(myOwn, total, this.state.player, screenWidth - 230, 32);
+
+        const players = Object.keys(playerStateMap);
+
+        let j = 1;
+        for (let i = 0; i < players.length; i++) {
+            if (players[i] !== this.state.player) {
+                this.drawOneClaim(playerStateMap[players[i]].calculateTerritorySize(),
+                    total, players[i], screenWidth - 230, 32 + (j) * 17);
+                j++;
+            }
         }
     }
 

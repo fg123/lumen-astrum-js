@@ -15,5 +15,6 @@ module.exports = {
     PHASE_PLANNING: 'phase_planning',
     PLANNING_TIME: is_production ? 10 : 5,
     ACTION_MAX_TIME: 5,
-    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 1 : 0
+    PERCENTAGE_CLAIM_TO_WIN: 0.35,
+    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 2 : 0
 };

@@ -33,6 +33,10 @@ const setupMap = (map) => {
         };
 
         /* Initial Setup for Map Data */
+        map.territorialTiles = 0;
+        map.bigMineralLocations = [];
+        map.smallMineralLocations = [];
+
         let nextGroup = 0;
         for (let y = 0; y < map.data.length; y++) {
             for (let x = 0; x < map.data[0].length; x++) {
@@ -40,6 +44,18 @@ const setupMap = (map) => {
                 if (type === Tiles.HIGH && map.data[y][x].highGroundGroup <= 0) {
                     applyHighGroundGroup(map, new Tuple(x, y), nextGroup);
                     nextGroup += 1;
+                }
+                if (type !== Tiles.BRUSH &&
+                    type !== Tiles.ROCK) {
+                    map.territorialTiles += 1;
+                }
+                if (type === Tiles.BIG_MINERAL) {
+                    map.bigMineralLocations.push(new Tuple(x, y));
+                    map.data[y][x].displayType = Tiles.DEFAULT;
+                }
+                else if (type === Tiles.MINERAL) {
+                    map.smallMineralLocations.push(new Tuple(x, y));
+                    map.data[y][x].displayType = Tiles.DEFAULT;
                 }
             }
         }

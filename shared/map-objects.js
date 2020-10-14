@@ -17,9 +17,19 @@ module.exports.Structure = class {
         this.maxShield = Data.structures[name].shield;
         this.isStructure = true;
         this.isUnit = false;
+        
+        /* This stores any unit specific custom data */
+        this.custom = Data.structures[name].custom;
 
         /* true indicates a blocking pipeline, only one animation can play */
         this.animationManager = new AnimationManager(true);
+
+        if (Data.structures[name].targetable !== undefined) {
+            this.targetable = Data.structures[name].targetable;
+        }
+        else {
+            this.targetable = true;
+        }
 
         Object.assign(this, triggers[name]);
     }
@@ -43,6 +53,13 @@ module.exports.Unit = class {
         this.maxShield = Data.units[name].shield;
         this.attackRange = Data.units[name].attackRange;
         this.attackSpeed = Data.units[name].attackSpeed;
+        
+        if (Data.units[name].targetable !== undefined) {
+            this.targetable = Data.units[name].targetable;
+        }
+        else {
+            this.targetable = true;
+        }
 
         /* Sight range changing is complicated because it affects the cached
          * maps in the game-state. We enforce this to be constant for now */

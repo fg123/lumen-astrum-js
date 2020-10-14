@@ -4,13 +4,22 @@ const { toDrawCoord } = require('./utils');
 class BaseAnimator {
     constructor(onDone) {
         this.onDone = onDone;
+        this.lastTick = 0;
     }
 
     tick() {
-        if (!this._tick()) {
+        const tickTime = Date.now();
+        if (!this._tick(tickTime)) {
             this.onDone();
             return false;
         }
+        this.lastTick = tickTime;
+        return true;
+    }
+
+    isVisible(clientState) {
+        if (this._isVisible) 
+            return this._isVisible(clientState);
         return true;
     }
 }
@@ -138,6 +147,9 @@ class AttackProjectileAnimation extends MapObjectAnimation {
         super(onDone);
         this.resourceManager = resourceManager;
 
+        this.mapCoordFrom = from;
+        this.mapCoordTo = to;
+
         this.from = toDrawCoord(from);
         this.to = toDrawCoord(to);
 
@@ -146,13 +158,23 @@ class AttackProjectileAnimation extends MapObjectAnimation {
         this.totalTicks = 0;
         this.flyingTicks = 20;
         this.hasFlown = false;
+        this.unit = unit;
 
         this.explodeAnimation = new InPlaceSpriteAnimation(
             resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
         );
         this.attackProjectile = resourceManager.get(Resource.ATTACK_PROJECTILE);
 
+        this.popupTextAnimation = undefined;
+
         unit.rotation = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+    }
+
+    _isVisible(clientState) {
+        return clientState.gameState.isVisible(
+            this.mapCoordFrom.x, this.mapCoordFrom.y, clientState.player) ||
+                clientState.gameState.isVisible(
+                    this.mapCoordTo.x, this.mapCoordTo.y, clientState.player);
     }
 
     _tick() {
@@ -167,12 +189,20 @@ class AttackProjectileAnimation extends MapObjectAnimation {
             this.currentPos = new Tuple(newX, newY);
             return true;
         }
-        return this.explodeAnimation.tick();
+        const explode = this.explodeAnimation.tick();
+        const text = this.popupTextAnimation && this.popupTextAnimation.tick();
+        
+        return explode || text;
     }
 
     _draw(graphicsManager, position) {
         if (this.hasFlown) {
             this.explodeAnimation.draw(graphicsManager, this.getPosition());
+            if (this.popupTextAnimation === undefined) {
+                this.popupTextAnimation = new PopupTextAnimation(`-${this.unit.attackDamage}`, 'red', this.mapCoordTo);
+            }
+
+            this.popupTextAnimation.draw(graphicsManager, this.getPosition());
         }
         else {
             graphicsManager.drawImage(
@@ -195,6 +225,7 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
     constructor(resourceManager, attacker, onDone = () => {}) {
         super(onDone);
         this.resourceManager = resourceManager;
+        this.attacker = attacker;
         this.location = toDrawCoord(attacker.position);
         this.muzzleOffset = attacker.custom.muzzle;
         this.totalTicks = 0;
@@ -215,14 +246,12 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
     }
 
     _draw(graphicsManager, position) {
-        // console.log(position);
         if (this.totalTicks % (this.framesOn * 2) >= this.framesOn) {
             return false;
         }
         if (this.totalTicks % (this.framesOn * 2) === 0) {
             this.flash = this.resourceManager.get(Muzzles[Math.floor(Math.random() * Muzzles.length)]);
         }
-        console.log(this.muzzleOffset);
         const transformedMuzzle = new Tuple(
             Math.cos(this.rotation) * this.muzzleOffset.x - Math.sin(this.rotation) * this.muzzleOffset.y,
             Math.sin(this.rotation) * this.muzzleOffset.x + Math.cos(this.rotation) * this.muzzleOffset.y
@@ -233,6 +262,60 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
         graphicsManager.context.rotate(-this.rotation);
         graphicsManager.context.translate(-position.x - transformedMuzzle.x, -position.y - transformedMuzzle.y);
         return true;
+    }
+    
+    _isVisible(clientState) {
+        return clientState.gameState.isVisible(
+            this.attacker.position.x, this.attacker.position.y, clientState.player);
+    }
+
+    _getPosition() {
+        return this.location;
+    }
+}
+
+// Floating text popup 
+class PopupTextAnimation extends MapObjectAnimation {
+    constructor(text, color, location, onDone = () => {}) {
+        super(onDone);
+        this.mapCoordLoc = location;
+        this.location = toDrawCoord(location);
+        this.text = text;
+        this.color = color;
+
+        this.popupDuration = 600;
+        this.start = Date.now();
+    }
+
+    _tick(tickTime) {
+        if (tickTime - this.start > this.popupDuration) {
+            return false;
+        }
+        return true;
+    }
+
+    _draw(graphicsManager, position) {
+        const duration = (this.lastTick - this.start);
+        const yDelta = (duration / this.popupDuration) * 50;
+
+        const oldOpacity = graphicsManager.context.globalAlpha;
+        graphicsManager.context.globalAlpha = (1 - duration / this.popupDuration);
+        graphicsManager.context.textAlign = 'center';
+        graphicsManager.context.textBaseline = 'middle';
+        
+        graphicsManager.context.font = 'bold 25px Prompt';
+        graphicsManager.context.fillStyle = "#000";
+        graphicsManager.context.fillText(this.text, position.x + 2, position.y - yDelta + 2);
+        graphicsManager.context.fillStyle = this.color;
+        graphicsManager.context.fillText(this.text, position.x, position.y - yDelta);
+
+        graphicsManager.context.globalAlpha = oldOpacity;
+        return true;
+    }
+
+    _isVisible(clientState) {
+        return clientState.gameState.isVisible(
+            this.mapCoordLoc.x, this.mapCoordLoc.y, clientState.player);
     }
 
     _getPosition() {
@@ -245,5 +328,6 @@ module.exports = {
     GenericInPlaceSpriteAnimation,
     MoveUnitAnimation,
     AttackProjectileAnimation,
-    MuzzleFlashAnimation
+    MuzzleFlashAnimation,
+    PopupTextAnimation
 };

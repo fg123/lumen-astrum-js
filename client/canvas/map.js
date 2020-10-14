@@ -79,7 +79,13 @@ module.exports = class MapCanvas {
         this.drawRectangle('black', start, y, totalWidth, 16);
         /* Draw Health and Shield Bars (100px x 5px each) */
         const healthPercent = mapObject.currentHealth / mapObject.maxHealth;
-        const healthColor = this.objectIsMine(mapObject) ? 'green' : 'red';
+        let healthColor = 'red';
+        if (this.objectIsMine(mapObject)) {
+            healthColor = 'green';
+        }
+        else if (this.objectIsNeutral(mapObject)) {
+            healthColor = 'dodgerblue';
+        }
         this.drawRectangle(healthColor, start + 2, y + 2, healthPercent * 100, 5);
         const shieldPercent = mapObject.currentShield / mapObject.maxShield;
         this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
@@ -147,6 +153,10 @@ module.exports = class MapCanvas {
         return mapObject.owner === this.state.player;
     }
 
+    objectIsNeutral(mapObject) {
+        return mapObject.owner === undefined;
+    }
+
     drawImage(img, x, y, width = -1, height = -1, angle = 0) {
         if (width === -1) width = img.width;
         if (height === -1) height = img.height;
@@ -210,7 +220,8 @@ module.exports = class MapCanvas {
 
             // Consider: unit vs structure, enemy vs mine, currently building vs not!
             let name = selectedObject.name;
-            if (!this.objectIsMine(selectedObject)) {
+
+            if (!this.objectIsMine(selectedObject) && !this.objectIsNeutral(selectedObject)) {
                 name = 'Enemy ' + name;
             }
             this.drawText(name, 'black', 16, 88,
@@ -307,22 +318,24 @@ module.exports = class MapCanvas {
         }
 
         this.drawText(parseInt(1000 / this.fps.frameTime) + ' fps', 'white', 16, 10, 20, 'left', 'bold');
-        this.drawText('Camera: (' + this.camera.position.x.toFixed(2) + ', ' +
-            this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 16, 10,
-        40, 'left', 'bold');
-        this.drawText('Minimap Rect: (' + this.camera.minimapRectPosition.x.toFixed(2) + ', ' +
-            this.camera.minimapRectPosition.y.toFixed(2) + ', ' +
-            this.camera.minimapRectSize.x.toFixed(2) + ', ' +
-            this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 16, 10,
-        60, 'left', 'bold');
-        const hover = this.inputManager.mouseState.tile;
-        if (map.withinMap(hover)) {
-            const tile = map.data[hover.y][hover.x];
-            this.drawText(`Hover: (${hover.x}, ${hover.y})`, 'white', 16, 10, 80, 'left', 'bold');
-            this.drawText(`   displayType: ${tile.displayType}`, 'white', 16, 10, 100, 'left', 'bold');
-            this.drawText(`   isHighGround: ${tile.isHighGround}`, 'white', 16, 10, 120, 'left', 'bold');
-            this.drawText(`   highGroundGroup: ${tile.highGroundGroup}`, 'white', 16, 10, 140, 'left', 'bold');
-            this.drawText(`   jungleDist: ${tile.jungleDist}`, 'white', 16, 10, 160, 'left', 'bold');
+        if (!Constants.IS_PRODUCTION) {
+            this.drawText('Camera: (' + this.camera.position.x.toFixed(2) + ', ' +
+                this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 16, 10,
+            40, 'left', 'bold');
+            this.drawText('Minimap Rect: (' + this.camera.minimapRectPosition.x.toFixed(2) + ', ' +
+                this.camera.minimapRectPosition.y.toFixed(2) + ', ' +
+                this.camera.minimapRectSize.x.toFixed(2) + ', ' +
+                this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 16, 10,
+            60, 'left', 'bold');
+            const hover = this.inputManager.mouseState.tile;
+            if (map.withinMap(hover)) {
+                const tile = map.data[hover.y][hover.x];
+                this.drawText(`Hover: (${hover.x}, ${hover.y})`, 'white', 16, 10, 80, 'left', 'bold');
+                this.drawText(`   displayType: ${tile.displayType}`, 'white', 16, 10, 100, 'left', 'bold');
+                this.drawText(`   isHighGround: ${tile.isHighGround}`, 'white', 16, 10, 120, 'left', 'bold');
+                this.drawText(`   highGroundGroup: ${tile.highGroundGroup}`, 'white', 16, 10, 140, 'left', 'bold');
+                this.drawText(`   jungleDist: ${tile.jungleDist}`, 'white', 16, 10, 160, 'left', 'bold');
+            }
         }
     }
 
@@ -349,7 +362,7 @@ module.exports = class MapCanvas {
     drawGlobalAnimations() {
         /* Global Animations don't have a default position, it is assumed they
          * will handle their own positions */
-        this.animationManager.draw(this, Tuple.ZERO);
+        this.animationManager.draw(this, this.state, Tuple.ZERO);
         this.animationManager.tick();
     }
 
@@ -397,7 +410,8 @@ module.exports = class MapCanvas {
                             drawCoord.x, drawCoord.y);
                     }
                     if (this.ui.currentScreen === this.ui.Screen.GAME &&
-                        this.state.gameState.mapObjects[y][x]) {
+                        this.state.gameState.mapObjects[y][x] && 
+                        this.state.gameState.mapObjects[y][x].currentHealth > 0) {
                         const mapObject = this.state.gameState.mapObjects[y][x];
                         const animationManager =
                             mapObject.animationManager;
@@ -409,9 +423,13 @@ module.exports = class MapCanvas {
                         let allVisible = true;
                         let anyVisible = false;
                         const surrounding = getSurrounding(mapObject.position, mapObject.width);
+                        if (mapObject.owner === undefined) {
+                            anyVisible = true;
+                        }
+                        
                         for (let i = 0; i < surrounding.length; i++) {
                             /* Every node here must be withinMap for mapObject
-                             * to have been constructed */
+                            * to have been constructed */
                             if (!this.state.gameState.isVisible(
                                 surrounding[i].x,
                                 surrounding[i].y,
@@ -439,7 +457,7 @@ module.exports = class MapCanvas {
                         if (animationManager.hasAnimation()) {
                             // Draw any animations in the animation stack
                             const possiblePositionChange =
-                                animationManager.draw(this, actualDrawnPosition);
+                                animationManager.draw(this, this.state, actualDrawnPosition);
                             if (possiblePositionChange) {
                                 /* No animation drew! */
                                 if (anyVisible) {
@@ -511,9 +529,11 @@ module.exports = class MapCanvas {
                                 this.state.player
                             )) {
                                 const drawnCoord = toDrawCoord(surrounding[i]);
-                                this.drawImage(this.resourceManager.get(
-                                    tiles[map.data[surrounding[i].y][surrounding[i].x].displayType - 1]
-                                ), drawnCoord.x, drawnCoord.y);
+                                if (mapObject.owner !== undefined) {
+                                    this.drawImage(this.resourceManager.get(
+                                        tiles[map.data[surrounding[i].y][surrounding[i].x].displayType - 1]
+                                    ), drawnCoord.x, drawnCoord.y);
+                                }
                                 this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                                     drawnCoord.x, drawnCoord.y);
                             }

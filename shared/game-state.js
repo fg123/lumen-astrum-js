@@ -30,6 +30,19 @@ class PlayerState {
             this.allowedBuildingCache.push([]);
         }
     }
+
+    calculateTerritorySize() {
+        const cache = this.allowedBuildingCache;
+        let count = 0;
+        for (let i = 0; i < cache.length; i++) {
+            for (let j = 0; j < cache[i].length; j++) {
+                if (cache[i][j] && cache[i][j] !== 0) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }
 };
 
 module.exports = class GameState {
@@ -37,6 +50,8 @@ module.exports = class GameState {
     //   right now it is the username of the player, it's whatever keys into
     //   this.players.
     constructor(gameStartTime, playerUsernameList) {
+        this.nextObjectId = 0;
+
         this.players = {};
         for (let i = 0; i < playerUsernameList.length; i++) {
             const username = playerUsernameList[i];
@@ -58,11 +73,16 @@ module.exports = class GameState {
 
         this.deadObjects = [];
 
+        // Undefined on server, defined on client, useful for shared code to
+        //   trigger client animations for example
+        this.clientState = undefined;
+
         /* Setup two dimensional arrays */
         for (let i = 0; i < map.data.length; i++) {
             this.mapObjects.push([]);
             this.occupied.push([]);
         }
+
         for (let y = 0; y < map.data.length; y++) {
             for (let x = 0; x < map.data[0].length; x++) {
                 if (map.data[y][x].displayType === 0 || map.data[y][x].displayType === 5) {
@@ -74,8 +94,28 @@ module.exports = class GameState {
         /* Pre-constructed buildings */
         console.log(playerUsernameList);
         for (let i = 0; i < playerUsernameList.length; i++) {
-            console.log(playerUsernameList[i], map.commandCenterLocations[i]);
             this.insertMapObject(map.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
+            if (!Constants.IS_PRODUCTION && i < 2) {
+                const barracksLocation = new Tuple(0, 0);
+                if (i === 0) {
+                    barracksLocation.x = 5;
+                    barracksLocation.y = 4;
+                }
+                else {
+                    barracksLocation.x = 25;
+                    barracksLocation.y = 14;
+                }
+                this.insertMapObject(barracksLocation, 'Barracks', playerUsernameList[i]);
+            }
+        }
+
+        /* Setup Harvesters on Minerals */
+        for (let i = 0; i < map.bigMineralLocations.length; i++) {
+            this.insertMapObject(map.bigMineralLocations[i], 'Gem Harvester', undefined);
+        }
+
+        for (let i = 0; i < map.smallMineralLocations.length; i++) {
+            this.insertMapObject(map.smallMineralLocations[i], 'Ether Harvester', undefined);
         }
     }
 
@@ -91,7 +131,7 @@ module.exports = class GameState {
             return false;
         }
     }
-
+    
     isEnemyBuildingRange(x, y, player) {
         const players = Object.keys(this.players);
 
@@ -103,6 +143,19 @@ module.exports = class GameState {
             }
         }
         return false;        
+    }
+
+    // returns player name who has the tile in their territory,
+    //   or undefined if it's not claimed / owned
+    getTileOwner(x, y) {
+        const players = Object.keys(this.players);
+
+        for (let i = 0; i < players.length; i++) {
+            if (this.isAllowedBuilding(x, y, players[i])) {
+                return players[i];
+            }
+        }
+        return undefined;     
     }
 
     setAllowedBuilding(x, y, player) {
@@ -166,6 +219,8 @@ module.exports = class GameState {
     insertMapObject(location, name, player) {
         if (name in Data.structures) {
             const structure = new Structure(name, player, location);
+            structure.id = this.nextObjectId;
+            this.nextObjectId += 1;
             this.mapObjects[location.y][location.x] = structure;
             this.structures.push(structure);
             let surrounding = getSurrounding(location, structure.width);
@@ -174,26 +229,32 @@ module.exports = class GameState {
                     this.occupied[surrounding[i].y][surrounding[i].x] = location;
                 }
             }
-
-            if (Structure.isConstructionBuilding(name)) {
-                const surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
-                for (let i = 0; i < surrounding.length; i++) {
-                    if (map.withinMap(surrounding[i])) {
-                        if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                            map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
-                            this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, player);
+            
+            // Neutral buildings are owned by undefined
+            if (player !== undefined) {
+                if (Structure.isConstructionBuilding(name)) {
+                    const surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
+                    for (let i = 0; i < surrounding.length; i++) {
+                        if (map.withinMap(surrounding[i])) {
+                            if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
+                                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.NONE) {
+                                this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, player);
+                            }
                         }
                     }
                 }
-            }
 
-            surrounding = getVisible(location, structure.width + Constants.BUILDING_VISION_RANGE);
-            surrounding.forEach(pos => {
-                this.addVisibility(pos.x, pos.y, player);
-            });
+                surrounding = getVisible(location, structure.width + Constants.BUILDING_VISION_RANGE);
+                surrounding.forEach(pos => {
+                    this.addVisibility(pos.x, pos.y, player);
+                });
+            }
         }
         else if (name in Data.units) {
             const unit = new Unit(name, player, location);
+            unit.id = this.nextObjectId;
+            this.nextObjectId += 1;
             this.mapObjects[location.y][location.x] = unit;
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
@@ -230,23 +291,25 @@ module.exports = class GameState {
                     break;
                 }
             }
-
-            if (Structure.isConstructionBuilding(mapObject.name)) {
-                const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
-                for (let i = 0; i < surrounding.length; i++) {
-                    if (map.withinMap(surrounding[i])) {
-                        if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                            map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
-                            this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.owner);
+            // Neutral buildings are owned by undefined
+            if (mapObject.owner !== undefined) {
+                if (Structure.isConstructionBuilding(mapObject.name)) {
+                    const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
+                    for (let i = 0; i < surrounding.length; i++) {
+                        if (map.withinMap(surrounding[i])) {
+                            if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                                this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.owner);
+                            }
                         }
                     }
                 }
-            }
 
-            surrounding = getVisible(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
-            surrounding.forEach(pos => {
-                this.removeVisibility(pos.x, pos.y, mapObject.owner);
-            });
+                surrounding = getVisible(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
+                surrounding.forEach(pos => {
+                    this.removeVisibility(pos.x, pos.y, mapObject.owner);
+                });
+            }
         }
         else if (mapObject.name in Data.units) {
             for (let i = 0; i < this.units.length; i++) {
@@ -409,7 +472,7 @@ module.exports = class GameState {
             const occupied = this.occupied[tile.y][tile.x];
             if (occupied && occupied.x && occupied.y) {
                 const obj = this.mapObjects[occupied.y][occupied.x];
-                if (obj.owner !== object.owner && obj.currentHealth > 0) {
+                if (obj.owner !== object.owner && obj.currentHealth > 0 && obj.targetable) {
                     // The obj might be out of attack range, but the tile is not
                     result.push({
                         enemy: obj, 
@@ -418,12 +481,12 @@ module.exports = class GameState {
                 }
             }
         }
-        result.sort((a, b) => {
-            const difference = distance(unitPos, a.position) - distance(unitPos, b.position);
+        result.sort((ao, bo) => {
+            const difference = distance(unitPos, ao.inRangeTile) - distance(unitPos, bo.inRangeTile);
             // Prioritize units over structures
             if (difference === 0) {
-                if (a.isStructure && b.isUnit) return 1;
-                else if (b.isStructure && a.isUnit) return -1;
+                if (ao.enemy.isStructure && bo.enemy.isUnit) return 1;
+                else if (bo.enemy.isStructure && ao.enemy.isUnit) return -1;
             }
             return difference;
         });
@@ -431,7 +494,14 @@ module.exports = class GameState {
     }
 
     getWinner() {
-        // TODO: Check for territory
+        const playerNames = Object.keys(this.players);
+        for (let i = 0; i < playerNames.length; i++) {
+            const size = this.players[playerNames[i]].calculateTerritorySize();
+            // console.log(playerNames[i], size, map.territorialTiles, size / map.territorialTiles);
+            if ((size / map.territorialTiles) > Constants.PERCENTAGE_CLAIM_TO_WIN) {
+                return playerNames[i];
+            }
+        }
         return undefined;
     }
 };

@@ -31,7 +31,8 @@ client.connect(function(err) {
 
 const connectedUsers = {};
 const disconnectedMidGame = {};
-const queue = [];
+const twoPlayerQueue = [];
+const fourPlayerQueue = [];
 const games = [];
 
 function generateHash(string) {
@@ -125,7 +126,7 @@ io.on('connection', function (socket) {
                     connectedUsers[socket.id].elo = res[0].elo;
 
                     socket.emit('login-success', username);
-                    
+
                     let potentialGame = disconnectedMidGame[username];
                     if (potentialGame) {
                         console.log('Previously disconnected from a game!');
@@ -140,7 +141,6 @@ io.on('connection', function (socket) {
                     });
 
                     if (potentialGame) {
-                        // TODO: For now games are 2 players
                         socket.emit('game-start',
                             potentialGame.state.gameStartTime,
                             potentialGame.players);
@@ -155,39 +155,10 @@ io.on('connection', function (socket) {
     socket.on('join-queue', function (type, callback) {
         if (connectedUsers[socket.id].username != null &&
 			connectedUsers[socket.id].queueID === -1) {
-            let gameFound = false;
-            for (let i = 0; i < queue.length; i++) {
-                if (Math.abs(queue[i].elo - connectedUsers[socket.id].elo) < 300) {
-                    // ELO Between 300 difference, start game processes here
-                    gameFound = true;
-                    const gameStartTime = Date.now();
-                    const otherSocket = queue[i].socket;
-                    const socketMap = {};
-                    socketMap[connectedUsers[socket.id].username] = socket;
-                    socketMap[queue[i].requester] = otherSocket;
-                    const game = new Game(
-                        socketMap,
-                        gameStartTime);
-                    connectedUsers[socket.id].game = game;
-                    connectedUsers[otherSocket.id].game = game;
-                    games.push(game);
-                    // 2 player for now
-                    const players = [connectedUsers[socket.id].username,
-                        connectedUsers[otherSocket.id].username];
-                    socket.emit('game-start',
-                        gameStartTime,
-                        players);
-                    otherSocket.emit('game-start',
-                        gameStartTime,
-                        players);
-                    queue.splice(i, 1);
-                    break;
-                }
-            }
-            if (!gameFound) {
-                console.log('Joining queue for: ' + connectedUsers[socket.id].username);
-                connectedUsers[socket.id].queueID = queue.length;
-                queue.push({
+            if (type === '2p') {
+                console.log('Joining 2p queue for: ' + connectedUsers[socket.id].username);
+                connectedUsers[socket.id].queueID = twoPlayerQueue.length;
+                twoPlayerQueue.push({
                     type: type,
                     requester: connectedUsers[socket.id].username,
                     socket: socket,
@@ -195,11 +166,57 @@ io.on('connection', function (socket) {
                 });
                 callback();
             }
+            else if (type === '4p') {
+                console.log('Joining 4p queue for: ' + connectedUsers[socket.id].username);
+                connectedUsers[socket.id].queueID = fourPlayerQueue.length;
+                fourPlayerQueue.push({
+                    type: type,
+                    requester: connectedUsers[socket.id].username,
+                    socket: socket,
+                    elo: connectedUsers[socket.id].elo
+                });
+                
+                callback();
+            }
+            let startGame = (queuedPlayers) => {
+                const socketMap = {};
+                const gameStartTime = Date.now();
+                queuedPlayers.forEach(p => {
+                    socketMap[p.requester] = p.socket;
+                });
+                const game = new Game(socketMap, gameStartTime);
+
+                queuedPlayers.forEach(p => {
+                    connectedUsers[p.socket.id].game = game;
+                });
+
+                games.push(game);
+                // 2 player for now
+                const players = queuedPlayers.map(p => p.requester);
+                queuedPlayers.forEach(p => {
+                    p.socket.emit('game-start',
+                        gameStartTime,
+                        players);
+                });
+            };
+
+            if (twoPlayerQueue.length >= 2) {
+                startGame([twoPlayerQueue[0], twoPlayerQueue[1]]);
+                twoPlayerQueue.splice(0, 2);
+            }
+            if (fourPlayerQueue.length >= 4) {
+                startGame([fourPlayerQueue[0], fourPlayerQueue[1],
+                    fourPlayerQueue[2], fourPlayerQueue[3]]);
+                fourPlayerQueue.splice(0, 4);
+            }
         }
     });
     socket.on('state-change', function (stateChange) {
         const change = StateChange.deserialize(stateChange);
+        console.log(connectedUsers[socket.id]);
+
         let game = connectedUsers[socket.id].game;
+        console.log(game);
         if (game.verifyStateChange(change)) {
             // Process will call simulate and foward as necessary
             const winner = game.processStateChange(change);
@@ -214,7 +231,7 @@ io.on('connection', function (socket) {
                 Object.values(game.sockets).forEach(s => {
                     s.emit('game-over', gameOver);
                 });
-
+                game.isGameOver = true;
                 game.players.forEach(p => {
                     if (game.sockets[p] !== undefined) {
                         connectedUsers[game.sockets[p].id].game = null;
@@ -241,16 +258,30 @@ io.on('connection', function (socket) {
             socket.emit('invalid-state-change');
         }
     });
+    const leaveQueue = () => {
+        for (let i = 0; i < twoPlayerQueue.length; i++) {
+            if (twoPlayerQueue[i].requester === connectedUsers[socket.id].username) {
+                twoPlayerQueue.splice(i, 1);
+                connectedUsers[socket.id].queueID = -1;
+                break;
+            }
+        }
+        for (let i = 0; i < fourPlayerQueue.length; i++) {
+            if (fourPlayerQueue[i].requester === connectedUsers[socket.id].username) {
+                fourPlayerQueue.splice(i, 1);
+                connectedUsers[socket.id].queueID = -1;
+                break;
+            }
+        }
+    };
+
     socket.on('leave-queue', function (callback) {
-        queue.splice(connectedUsers[socket.id].queueID, 1);
-        connectedUsers[socket.id].queueID = -1;
+        leaveQueue();
         callback();
     });
     socket.on('disconnect', function() {
         console.log('Got disconnect!');
-        if (connectedUsers[socket.id].queueID != -1) {
-            queue.splice(connectedUsers[socket.id].queueID, 1);
-        }
+        leaveQueue();
         let potentialGame = connectedUsers[socket.id].game;
         if (potentialGame) {
             console.log('Disconnected mid game! Storing in list!');

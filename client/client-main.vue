@@ -2,8 +2,8 @@
     <dashboard-wrapper v-bind:user="user">
         <div class="joinGameDialog">
             <div class="notInQueue" v-if="!inQueue">
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('ranked')">Join Ranked Queue</gradient-button>
-                <gradient-button medium style="display: block" @click="joinQueue('unranked')">Join Unranked Queue</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Join 2 Player Queue</gradient-button>
+                <gradient-button medium style="display: block" @click="joinQueue('4p')">Join 4 Player Queue</gradient-button>
             </div>
         </div>
         <div class="inQueue" v-if="inQueue">
