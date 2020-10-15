@@ -270,6 +270,13 @@ class SetUnitTargetStateChange extends StateChange {
 
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.unitPos.y][this.data.unitPos.x];
+        if (unit.maxMoveRange === 0) {
+            return;
+        }
+        if (unit.position.x === this.data.posTarget.x &&
+            unit.position.y === this.data.posTarget.y) {
+            return;
+        }
         unit.targetPoint = this.data.posTarget;
         unit.desiredPath = PathFinder.findPath(state,
             unit.position, unit.targetPoint);

@@ -153,6 +153,15 @@ const triggers = {
                 u.removeModifierByAdder(adder);
             });
         }
+    },
+    'Turret': {
+        onActionStart(state) {
+            // Convert myself into a turret unit
+            const position = this.position;
+            const owner = this.owner;
+            state.removeMapObject(position);
+            state.insertMapObject(position, 'Armed Turret', owner);
+        },
     }
 };
 

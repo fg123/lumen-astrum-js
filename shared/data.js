@@ -55,16 +55,25 @@ const structures = {
                     'description': '{Golem}',
                     'icon': '{Golem}',
                     'command': 'spawn-Golem'
+                },
+                {
+                    'title': 'Spawn Reaver',
+                    'cost': 500,
+                    'prereq': ['Automation Factory'],
+                    'type': 'Unit',
+                    'description': '{Reaver}',
+                    'icon': '{Reaver}',
+                    'command': 'spawn-Reaver'
                 }
             ]
     },
     'Automation Factory': {
-        'description': 'Support facility, required for building turrets.',
+        'description': 'Support facility, required for building turrets and reavers.',
         'health': 75,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
-        'options': [],
+        'options': []
     },
     'Tech Lab': {
         'description': 'Support facility, used for accessing tier 3 units.',
@@ -169,6 +178,16 @@ const structures = {
         'custom': {
             'healthMultiplier': 1.50,
         }
+    },
+    "Turret": {
+        'description': 'Requires Automation Factory. Stationary, single-target ranged turret.',
+        // The health is irrelevant because this gets converted to an Armed Turret on action
+        //   start
+        'health': 1,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': 1,
+        'options': []
     }
 };
 
@@ -235,6 +254,24 @@ const units = {
             'command': 'build-Barracks'
         },
         {
+            'title': 'Build Automation Factory',
+            'cost': 100,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Automation Factory}',
+            'icon': '{Automation Factory}',
+            'command': 'build-Automation Factory'
+        },
+        {
+            'title': 'Build Turret',
+            'cost': 350,
+            'prereq': ['Automation Factory'],
+            'type': 'Structure',
+            'description': '{Turret}',
+            'icon': '{Turret}',
+            'command': 'build-Turret'
+        },
+        {
             'title': 'Build Stim Lab',
             'cost': 2000,
             'prereq': [],
@@ -284,43 +321,31 @@ const units = {
         'attackRange': 0,
         'attackSpeed': 0,
         'damage': 0,
-        'description': 'Kamakazi unit. One time use, high damage.',
-        'health': 5,
+        'description': 'Requires Automation Factory. The reaver explodes when dying, dealing 50 damage to all units around it.',
+        'health': 20,
         'moveRange': 4,
-        'shield': 20,
-        'sightRange': 1,
-        'special': 'Splash',
+        'shield': 0,
+        'sightRange': 2,
         'squadsize': 1,
-        'tier': 2,
+        'tier': 1,
         'turnsToBuild': 1,
-        'options':
-            [
-                {
-                    'title': 'Detonate',
-                    'cost': 0,
-                    'prereq': [],
-                    'type': 'Action',
-                    'description': 'Explodes in a circle, dealing damage and killing itself.',
-                    'icon': '{2,2}',
-                    'command': 'custom-detonateReaver'
-                }
-            ],
+        'options': [],
         'custom': {
             'explodeDamage': 50
         }
     },
-    'Turret': {
+    'Armed Turret': {
         'attackRange': 3,
-        'attackSpeed': 2,
-        'damage': 5,
-        'description': 'Stationary, single-target ranged turret. (Only available through Biological tech branch)',
-        'health': 30,
+        'attackSpeed': 1.5,
+        'damage': 3,
+        'description': 'This is constructed by the Turret building.',
+        'health': 100,
         'moveRange': 0,
         'shield': 0,
         'sightRange': 4,
         'squadsize': 1,
         'tier': 1,
-        'turnsToBuild': 1,
+        'turnsToBuild': 0,
         'options': [],
     },
     'Golem': {

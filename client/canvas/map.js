@@ -77,6 +77,7 @@ module.exports = class MapCanvas {
         const start = x - (totalWidth / 2);
         /* Draw black background */
         this.drawRectangle('black', start, y, totalWidth, 16);
+        
         /* Draw Health and Shield Bars (100px x 5px each) */
         const maxHealth = mapObject.maxHealth;
         const healthPercent = mapObject.currentHealth / maxHealth;
@@ -344,30 +345,27 @@ module.exports = class MapCanvas {
                             const split = optionIcon.split(',');
                             return new Tuple(48 * Number(split[0]), 48 * Number(split[1]));
                         })();
-                    const pos = new Tuple(176 + i * 48, screenHeight - 48);
+                    let pos = new Tuple(176 + i * 48, screenHeight - 48);
                     this.context.drawImage(
                         this.resourceManager.get(Resource.UI_ICONS),
                         clipIcon.x,
                         clipIcon.y, 48, 48, pos.x, pos.y,
                         48, 48);
-                    if (baseObj.options[i].type === 'Unit') {
-                        /* Check for Tier Requirement */
-                        /* For Units, the optionIcon is the name */
-                        const baseObj = getBaseObject(optionIcon);
-                        const pos = new Tuple(176 + i * 48 + 5, screenHeight - 48 - 18);
-                        const clip = new Tuple(
-                            /* Clip x is based on the tier 1 - 4 */
-                            (baseObj.tier - 1) * 38,
-                            /* Clip y is 0 if satisfied, 18 if not */
-                            this.state.gameState.isTierSatisfied(optionIcon,
-                                this.state.player) ? 0 : 18
-                        );
-                        this.context.drawImage(
-                            this.resourceManager.get(Resource.TIER_ICONS),
-                            clip.x, clip.y, 38, 18,
-                            pos.x, pos.y, 38, 18
-                        );
-                    }
+                    /* Draw Hotkey */
+                    pos = new Tuple(176 + i * 48 + 5, screenHeight - 48 - 18);
+                    const clip = new Tuple(
+                        0,
+                        /* Clip y is 0 if satisfied, 18 if not */
+                        this.state.gameState.arePrereqsSatisfied(baseObj.options[i],
+                            this.state.player) ? 0 : 18
+                    );
+                    this.context.drawImage(
+                        this.resourceManager.get(Resource.TIER_ICONS),
+                        clip.x, clip.y, 38, 18,
+                        pos.x, pos.y, 38, 18
+                    );
+                    this.drawText(i + 1, 'black', 14, pos.x + 19, pos.y + 16, 'center', 'bold');
+
                     // Test Mouse Over
                     if (this.inputManager.mouseState.position.x > pos.x &&
                         this.inputManager.mouseState.position.x < pos.x + 48 &&

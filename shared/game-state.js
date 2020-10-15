@@ -375,9 +375,6 @@ module.exports = class GameState {
     }
 
     arePrereqsSatisfied(option, player) {
-        if (!Constants.IS_PRODUCTION) {
-            return true;
-        }
         return option.prereq.every(name =>
             this.structures.some(structure =>
                 structure.owner === player &&
