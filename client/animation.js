@@ -44,9 +44,7 @@ class MoveUnitAnimation extends MapObjectAnimation {
     constructor(unit, points, speed, onDone = () => {}) {
         super(onDone);
         this.unit = unit;
-        console.log(points);
         this.points = points.map((x) => toDrawCoord(x));
-        console.log(this.points);
         this.speed = speed;
         this.totalTicks = 0;
         this.maxTicks = speed * (points.length - 1);
