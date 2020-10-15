@@ -119,6 +119,16 @@ module.exports = class GameState {
         }
     }
 
+    getUnitsOnMyTeam(player) {
+        const results = [];
+        this.units.forEach(u => {
+            if (u.owner === player) {
+                results.push(u);
+            }
+        });
+        return results;
+    }
+
     getAllowedBuildingMap(player) {
         return this.players[player].allowedBuildingCache;
     }
@@ -250,6 +260,7 @@ module.exports = class GameState {
                     this.addVisibility(pos.x, pos.y, player);
                 });
             }
+            return structure;
         }
         else if (name in Data.units) {
             const unit = new Unit(name, player, location);
@@ -267,6 +278,7 @@ module.exports = class GameState {
                         unit.getVisionValue());
                 }
             }
+            return unit;
         }
     }
     

@@ -15,6 +15,9 @@ const dealDamageToUnit = (state, target, damage) => {
         target.currentHealth = 0;
         /* Kill Unit / Structure */
         state.deadObjects.push(target.position);
+        if (target.onDestroy) {
+            target.onDestroy(state);
+        }
     }
 }
 
@@ -351,8 +354,11 @@ class PhaseChangeStateChange extends StateChange {
             state.phase = Constants.PHASE_ACTION;
             for (let i = 0; i < state.units.length; i++) {
                 const unit = state.units[i];
-                if (unit.turnsUntilBuilt !== 0) {
+                if (!this.isBuilt(unit)) {
                     unit.turnsUntilBuilt -= 1;
+                    if (this.isBuilt(unit) && unit.onCreate) {
+                        unit.onCreate(state);
+                    }
                 }
                 if (this.isBuilt(unit) && unit.onActionStart) {
                     unit.onActionStart(state);
@@ -362,6 +368,9 @@ class PhaseChangeStateChange extends StateChange {
                 const structure = state.structures[i];
                 if (!this.isBuilt(structure)) {
                     structure.turnsUntilBuilt -= 1;
+                    if (this.isBuilt(structure) && structure.onCreate) {
+                        structure.onCreate(state);
+                    }
                 } 
                 if (this.isBuilt(structure) && structure.onActionStart) {
                     structure.onActionStart(state);
@@ -393,7 +402,7 @@ class PhaseChangeStateChange extends StateChange {
                 replenishShield(unit);
 
                 /* Reset move range at the end of the turn */
-                unit.moveRange = Data.units[unit.name].moveRange;
+                unit.moveRange = unit.maxMoveRange;
                 /* Reset attack on turn start */
                 if (unit.attacksThisTurn < 1) {
                     unit.attacksThisTurn += 1;
@@ -478,6 +487,7 @@ class UnitAttackStateChange extends StateChange {
         // else {
         //     unit.attacksThisTurn -= 1;
         // }
+        unit.onLaunchAttack(state, target, unit.attackDamage);
         dealDamageToUnit(state, target, unit.attackDamage);
 
         if (unit.custom && unit.custom.splashDamage) {

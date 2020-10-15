@@ -42,16 +42,14 @@ module.exports = class Game {
         this.nextPhaseTimer = undefined;
 
         this.isGameOver = false;
-        
-        this.processStateChange(ChatMessageStateChange.create(undefined, 'WASD: Move the Camera'));
-        this.processStateChange(ChatMessageStateChange.create(undefined, 'Mouse Scroll: Zoom In / Out'));
-        this.processStateChange(ChatMessageStateChange.create(undefined, 'G (hold): To Move Units'));
-
 
         // Initial Phase State Change
         this.initialTurnPassover = setTimeout(() => {
             this.processStateChange(
                 PhaseChangeStateChange.create(undefined));
+            this.processStateChange(ChatMessageStateChange.create(undefined, 'WASD: Move the Camera'));
+            this.processStateChange(ChatMessageStateChange.create(undefined, 'Mouse Scroll: Zoom In / Out'));
+            this.processStateChange(ChatMessageStateChange.create(undefined, 'G (hold): To Move Units'));
         }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
     }
 
@@ -151,15 +149,6 @@ module.exports = class Game {
         }
 
         const actionMap = {};
-        for (let i = 0; i < this.state.units.length; i++) {
-            // target is a {enemy: _, inRangeTile: _ } as returned by
-            //   getEnemiesInAttackRange
-            actionMap[this.state.units[i].id] = {
-                nextAttackTime: 0,
-                nextMoveTime: 0,
-                target: undefined
-            };
-        }
  
         const TICK_TIME = 100;
 
@@ -180,7 +169,15 @@ module.exports = class Game {
             for (let j = 0; j < nonDeadUnits.length; j++) {
                 const unit = nonDeadUnits[j];
                 const id = unit.id;
-
+                if (actionMap[id] === undefined) {
+                    // target is a {enemy: _, inRangeTile: _ } as returned by
+                    //   getEnemiesInAttackRange
+                    actionMap[id] = {
+                        nextAttackTime: 0,
+                        nextMoveTime: 0,
+                        target: undefined
+                    };
+                }
                 let didMove = false;
 
                 if (unit.targetPoint) {

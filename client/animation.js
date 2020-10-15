@@ -299,7 +299,7 @@ class PopupTextAnimation extends MapObjectAnimation {
         const yDelta = (duration / this.popupDuration) * 50;
 
         const oldOpacity = graphicsManager.context.globalAlpha;
-        graphicsManager.context.globalAlpha = (1 - duration / this.popupDuration);
+        graphicsManager.context.globalAlpha = (1 - Math.max(0, (duration - 100) / (this.popupDuration - 100)));
         graphicsManager.context.textAlign = 'center';
         graphicsManager.context.textBaseline = 'middle';
         

@@ -8,6 +8,19 @@ const {
     PopupTextAnimation
 } = require('../client/animation');
 
+const {
+    StimModifier,
+    ThievesModifier,
+    ArtilleryModifier,
+    CloudModifier,
+    VitalityModifier
+} = require('./modifier');
+
+// Triggers that are available:
+//   onPlanningStart
+//   onActionStart
+//   onCreate
+//   onDestroy
 const triggers = {
     'Command Base': {
         onPlanningStart(state) {
@@ -61,7 +74,84 @@ const triggers = {
             }
         }
     },
+    'Stim Lab': {
+        onActionStart(state) {
+            // Add modifier to everyone on my team            
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.addModifier(new StimModifier(this.custom.attackSpeedMultiplier), true);
+            });
+        },
+        onDestroy(state) {
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.removeModifierByName("StimModifier");
+            });
+        }
+    },
+    "Thieves' Cave": {
+        onActionStart(state) {
+            // Add modifier to everyone on my team
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.addModifier(new ThievesModifier(this.custom.attackGoldGen), true);
+            });
+        },
+        onDestroy(state) {
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.removeModifierByName("ThievesModifier");
+            });
+        }
+    },
+    "Artillery Bay": {
+        onActionStart(state) {
+            // Add modifier to everyone on my team
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.addModifier(new ArtilleryModifier(this.custom.attackDamageMultiplier), true);
+            });
+        },
+        onDestroy(state) {
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.removeModifierByName("ArtilleryModifier");
+            });
+        }
+    },
+    "Cloud Gate": {
+        onActionStart(state) {
+            // Add modifier to everyone on my team
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.addModifier(new CloudModifier(this.custom.moveRangeDelta), true);
+            });
+        },
+        onDestroy(state) {
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.removeModifierByName("CloudModifier");
+            });
+        }
+    },
+    "Vitality Fountain": {
+        onActionStart(state) {
+            // Add modifier to everyone on my team
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.addModifier(new VitalityModifier(this.custom.healthMultiplier), true);
+            });
+        },
+        onDestroy(state) {
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.removeModifierByName("VitalityModifier");
+            });
+        }
+    }
 };
+
+
 
 Object.keys(triggers).forEach(key => {
     if (!(key in units) && !(key in structures)) {

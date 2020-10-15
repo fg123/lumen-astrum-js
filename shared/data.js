@@ -1,3 +1,5 @@
+const Constants = require('./constants');
+
 const structures = {
     'Command Base': {
         'description': 'Main Base. Defend yours while destroying opponent\'s.',
@@ -25,7 +27,8 @@ const structures = {
                     'icon': '{Engineer}',
                     'command': 'spawn-Engineer'
                 }
-            ]
+            ],
+        'targetable': false
     },
     'Barracks': {
         'description': 'Unit production building, trains tier 2 units.',
@@ -112,6 +115,61 @@ const structures = {
         },
         'targetable': false
     },
+    'Stim Lab': {
+        'description': 'Takes 2 turns to build. Enhances attack speed of all allies by 50%.',
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'attackSpeedMultiplier': 1.5
+        }
+    },
+    "Thieves' Cave": {
+        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 75% of damage dealt.',
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'attackGoldGen': 0.75,
+        }
+    },
+    "Artillery Bay": {
+        'description': 'Takes 2 turns to build. Enhances attack damage of all allies by 75%.',
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'attackDamageMultiplier': 1.75,
+        }
+    },
+    "Cloud Gate": {
+        'description': 'Takes 2 turns to build. Enhances movement range of all allies by 3.',
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'moveRangeDelta': 3,
+        }
+    },
+    "Vitality Fountain": {
+        'description': 'Takes 2 turns to build. Enhances health of all allies by 100%.',
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'healthMultiplier': 2,
+        }
+    }
 };
 
 const units = {
@@ -175,8 +233,53 @@ const units = {
             'description': '{Barracks}',
             'icon': '{Barracks}',
             'command': 'build-Barracks'
-        }]
-    },
+        },
+        {
+            'title': 'Build Stim Lab',
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Stim Lab}',
+            'icon': '{Stim Lab}',
+            'command': 'build-Stim Lab'
+        },
+        {
+            'title': "Build Thieves' Cave",
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': "{Thieves' Cave}",
+            'icon': "{Thieves' Cave}",
+            'command': "build-Thieves' Cave"
+        },
+        {
+            'title': 'Build Artillery Bay',
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Artillery Bay}',
+            'icon': '{Artillery Bay}',
+            'command': 'build-Artillery Bay'
+        },
+        {
+            'title': 'Build Cloud Gate',
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Cloud Gate}',
+            'icon': '{Cloud Gate}',
+            'command': 'build-Cloud Gate'
+        },
+        {
+            'title': 'Build Vitality Fountain',
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Vitality Fountain}',
+            'icon': '{Vitality Fountain}',
+            'command': 'build-Vitality Fountain'
+        }
+    ]},
     'Reaver': {
         'attackRange': 0,
         'attackSpeed': 0,

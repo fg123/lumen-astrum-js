@@ -2,6 +2,7 @@ const Data = require('./data');
 const AnimationManager = require('./animation-manager');
 const triggers = require('./triggers');
 const Constants = require('./constants');
+const { default: modifier } = require('./modifier');
 
 module.exports.Structure = class {
     constructor(name, owner, position) {
@@ -14,6 +15,7 @@ module.exports.Structure = class {
         this.currentHealth = Data.structures[name].health;
         this.currentShield = Data.structures[name].shield;
         this.maxHealth = Data.structures[name].health;
+        this.maxBaseHealth = Data.structures[name].health;
         this.maxShield = Data.structures[name].shield;
         this.isStructure = true;
         this.isUnit = false;
@@ -49,10 +51,10 @@ module.exports.Unit = class {
         this.width = 0;
         this.currentHealth = Data.units[name].health;
         this.currentShield = Data.units[name].shield;
-        this.maxHealth = Data.units[name].health;
+        this.maxBaseHealth = Data.units[name].health;
         this.maxShield = Data.units[name].shield;
         this.attackRange = Data.units[name].attackRange;
-        this.attackSpeed = Data.units[name].attackSpeed;
+        this.baseAttackSpeed = Data.units[name].attackSpeed;
         
         if (Data.units[name].targetable !== undefined) {
             this.targetable = Data.units[name].targetable;
@@ -65,7 +67,7 @@ module.exports.Unit = class {
          * maps in the game-state. We enforce this to be constant for now */
         this.__sightRange__ = Data.units[name].sightRange;
 
-        this.attackDamage = Data.units[name].damage;
+        this.baseAttackDamage = Data.units[name].damage;
         this.isStructure = false;
         this.isUnit = true;
 
@@ -74,7 +76,7 @@ module.exports.Unit = class {
 
         /* This is a local copy that changes based on state */
         this.moveRange = Data.units[name].moveRange;
-        this.maxMoveRange = Data.units[name].moveRange;
+        this.maxBaseMoveRange = Data.units[name].moveRange;
         this.attacksThisTurn = 0;
 
         /* These are client specific usage */
@@ -87,7 +89,47 @@ module.exports.Unit = class {
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;
 
+        this.modifiers = {};
+
         Object.assign(this, triggers[name]);
+    }
+
+    onLaunchAttack(state, target, damage) {
+        Object.values(this.modifiers).forEach(m => {
+            m.onLaunchAttack(state, this, target, damage);
+        });
+    }
+
+    addModifier(modifier, onlyOne = false) {
+        if (onlyOne) {
+            // See if already exists
+            const mods = Object.keys(this.modifiers);
+            for (let i = 0; i < mods.length; i++) {
+                if (this.modifiers[mods[i]].getName() === modifier.getName()) {
+                    return mods[i];
+                }
+            }
+        }
+        const modifierKey = Date.now() + '/' + Object.keys(this.modifiers).length;
+        this.modifiers[modifierKey] = modifier;
+        modifier.onAttach(this);
+        return modifierKey;
+    }  
+    
+    removeModifierByName(modifierName) {
+        const mods = Object.keys(this.modifiers);
+        for (let i = 0; i < mods.length; i++) {
+            if (this.modifiers[mods[i]].getName() === modifierName) {
+                this.removeModifier(mods[i]);
+            }
+        }
+    }
+    removeModifier(modifierKey) {
+        if (this.modifiers[modifierKey]) {
+            const mod = this.modifiers[modifierKey];
+            delete this.modifiers[modifierKey];
+            mod.onDetach(this);
+        }
     }
 
     getVisionValue() {
@@ -114,4 +156,41 @@ module.exports.Unit = class {
 
     get sightRange() { return this.__sightRange__; }
     set sightRange(val) { throw new Error('Trying to set readonly property!'); }
+    
+    get attackSpeed() {
+        let val = this.baseAttackSpeed;
+        Object.values(this.modifiers).forEach(m => {
+            val = m.attackSpeed(val);
+        });
+        return val;
+    }
+    set attackSpeed(val) { this.baseAttackSpeed = val;}
+    
+    get attackDamage() {
+        let val = this.baseAttackDamage;
+        Object.values(this.modifiers).forEach(m => {
+            val = m.attackDamage(val);
+        });
+        return val;
+    }
+    set attackDamage(val) { this.baseAttackDamage = val;}
+
+    get maxMoveRange() {
+        let val = this.maxBaseMoveRange;
+        Object.values(this.modifiers).forEach(m => {
+            val = m.moveRange(val);
+        });
+        return val;
+    }
+
+    set maxMoveRange(val) { this.maxBaseMoveRange = val; }
+
+    get maxHealth() {
+        let val = this.maxBaseHealth;
+        Object.values(this.modifiers).forEach(m => {
+            val = m.health(val);
+        });
+        return val;
+    }
+    set maxHealth(val) { this.maxBaseHealth = val;}
 };

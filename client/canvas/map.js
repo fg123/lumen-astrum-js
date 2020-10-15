@@ -78,7 +78,8 @@ module.exports = class MapCanvas {
         /* Draw black background */
         this.drawRectangle('black', start, y, totalWidth, 16);
         /* Draw Health and Shield Bars (100px x 5px each) */
-        const healthPercent = mapObject.currentHealth / mapObject.maxHealth;
+        const maxHealth = mapObject.maxHealth;
+        const healthPercent = mapObject.currentHealth / maxHealth;
         let healthColor = 'red';
         if (this.objectIsMine(mapObject)) {
             healthColor = 'green';
@@ -86,7 +87,18 @@ module.exports = class MapCanvas {
         else if (this.objectIsNeutral(mapObject)) {
             healthColor = 'dodgerblue';
         }
-        this.drawRectangle(healthColor, start + 2, y + 2, healthPercent * 100, 5);
+        this.drawRectangle(healthColor, start + 2, y + 2, healthPercent * 100, 6);
+
+        let smallTickIncrement = maxHealth > 1000 ? 100 : (maxHealth > 200 ? 50 : 10);
+        let ten = smallTickIncrement;
+        while (ten < maxHealth) {
+            const height = ten % 100 === 0 ? 6 : 3;
+            const width = ten % 100 === 0 ? 2 : 1;
+            this.drawRectangle('black', start + 2 + ((ten / maxHealth) * 100), y + 2, width, height);
+            ten += smallTickIncrement;
+        }
+        
+
         const shieldPercent = mapObject.currentShield / mapObject.maxShield;
         this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
     }
@@ -229,7 +241,11 @@ module.exports = class MapCanvas {
 
             if (selectedObject.turnsUntilBuilt === 0) {
                 const lineHeight = 16;
-                const rightSide = [selectedObject.currentHealth + '/' + selectedObject.maxHealth];
+                const rightSide = [{
+                    text: selectedObject.currentHealth + '/' + selectedObject.maxHealth,
+                    color: selectedObject.maxHealth === selectedObject.maxBaseHealth ?
+                        'black' : Constants.BLUE_CHAT_COLOR
+                }];
                 const leftSide = selectedObject.isUnit ? UNITS_BOTTOM_RIGHT_STATS : STRUCTURS_BOTTOM_RIGHT_STATS;
                 leftSide.forEach((val, index) => {
                     this.drawText(val, 'black', 13, 10,
@@ -238,20 +254,65 @@ module.exports = class MapCanvas {
                 if (selectedObject.isUnit) {
                     // Could also use concat here but will create more garbage but will be speedier
                     Array.prototype.push.apply(rightSide, [
-                        selectedObject.attackDamage,
-                        selectedObject.attackSpeed.toFixed(2),
-                        selectedObject.moveRange + '/' + selectedObject.maxMoveRange,
+                        {
+                            text: `${selectedObject.attackDamage}`,
+                            color: selectedObject.attackDamage === selectedObject.baseAttackDamage ?
+                                'black' : Constants.BLUE_CHAT_COLOR
+                        },
+                        {
+                            text: `${selectedObject.attackSpeed.toFixed(2)}`,
+                            color: selectedObject.attackSpeed === selectedObject.baseAttackSpeed ?
+                                'black' : Constants.BLUE_CHAT_COLOR
+                        },
+                        {
+                            text: selectedObject.moveRange + '/' + selectedObject.maxMoveRange,
+                            color: selectedObject.maxMoveRange === selectedObject.maxBaseMoveRange ?
+                                'black' : Constants.BLUE_CHAT_COLOR
+                        },
                         selectedObject.attackRange, selectedObject.sightRange]);
                 }
                 rightSide.forEach((val, index) => {
-                    this.drawText(val, 'black', 13, 176 - 10,
-                        screenHeight - bottomLeft.height + 130 + index * lineHeight, 'right', 'bold');
+                    if (typeof val === 'object') {
+                        this.drawText(val.text, val.color, 13, 176 - 10,
+                            screenHeight - bottomLeft.height + 130 + index * lineHeight, 'right', 'bold');
+                    } else {
+                        this.drawText(val, 'black', 13, 176 - 10,
+                            screenHeight - bottomLeft.height + 130 + index * lineHeight, 'right', 'bold');
+                    }
                 });
             }
             else {
                 let t = selectedObject.turnsUntilBuilt;
                 this.drawText('Constructing...(' + t + ' turn' + (t != 1 ? 's' : '') + ' left!)', 'black', 13, 88,
                     screenHeight - bottomLeft.height + 130, 'center', 'bold');
+            }
+
+            /* Draw Modifiers */
+            if (selectedObject.modifiers) {
+                const modifiers = Object.values(selectedObject.modifiers);
+                for (let i = 0; i < modifiers.length; i++) {
+                    const modifier = modifiers[i];
+                    const pos = new Tuple(176, screenHeight - 195 + (i * 24));
+                    this.context.drawImage(
+                        this.resourceManager.get(Resource.UI_ICONS),
+                        modifier.getIconIndex() * 24, 144, 24, 24,
+                        pos.x, pos.y,
+                        24, 24);
+                    // Test Mouse Over
+                    if (this.inputManager.mouseState.position.x > pos.x &&
+                        this.inputManager.mouseState.position.x < pos.x + 24 &&
+                        this.inputManager.mouseState.position.y > pos.y &&
+                        this.inputManager.mouseState.position.y < pos.y + 24) {
+                        // Show Dialog
+                        const dialogPos = new Tuple(pos.x + 30, pos.y);
+                        const dialogSize = new Tuple(300, 100);
+                        this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
+                        this.drawText(modifier.getDisplayName(), Constants.YELLOW_CHAT_COLOR, 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
+
+                        // Set Description
+                        this.drawText(modifier.getDescription(), 'white', 16, dialogPos.x + 5, dialogPos.y + 40, 'left', '', dialogSize.x - 10);
+                    }
+                }
             }
 
             this.state.hoveredOption = null;
@@ -370,6 +431,24 @@ module.exports = class MapCanvas {
         const input = this.camera.toWorldCoord(this.inputManager.mouseState.position);
         const result = Math.atan2(input.y - position.y, input.x - position.x) + (Math.PI / 2);
         return result; // roundToNearest(result, Math.PI / 3);
+    }
+
+    drawArrow(from, to, headLength, thickness, color) {
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const angle = Math.atan2(dy, dx);
+        this.context.strokeStyle = color;
+        this.context.lineWidth = thickness;
+        this.context.beginPath();
+        this.context.moveTo(from.x, from.y);
+        this.context.lineTo(to.x, to.y);
+        this.context.moveTo(to.x, to.y);
+        this.context.lineTo(to.x - headLength * Math.cos(angle - Math.PI / 6),
+            to.y - headLength * Math.sin(angle - Math.PI / 6));
+        this.context.moveTo(to.x, to.y);
+        this.context.lineTo(to.x - headLength * Math.cos(angle + Math.PI / 6),
+            to.y - headLength * Math.sin(angle + Math.PI / 6));
+        this.context.stroke();
     }
 
     drawMap() {
@@ -516,6 +595,7 @@ module.exports = class MapCanvas {
                                     drawnPos: actualDrawnPosition,
                                     position: toDrawCoord(mapObject.position),
                                     path: mapObject.desiredPath,
+                                    target: mapObject.targetPoint,
                                     range: mapObject.moveRange
                                 });
                             }
@@ -552,42 +632,18 @@ module.exports = class MapCanvas {
             }
         }
             
-        // Draw full desired path
+        // Since we have limited movement range, let's draw points towards
+        //   where we want to go based on movement range
         for (let j = 0; j < desiredPathsToDraw.length; j++) {
             const obj = desiredPathsToDraw[j];
-
-            this.context.strokeStyle = obj.owner === this.state.player ? 'green' : 'red';
-            this.context.lineWidth = 3;
-            this.context.setLineDash([]);
-            this.context.beginPath();
-            this.context.moveTo(obj.drawnPos.x, obj.drawnPos.y);
-            this.context.lineTo(obj.position.x, obj.position.y);
-            for (let i = 0; i < obj.path.length; i++) {
-                const destination = toDrawCoord(obj.path[i].x,
-                    obj.path[i].y);
-                this.context.lineTo(destination.x, destination.y);
+            if (obj.target) {
+                //const wayPoints = [];
+                // let i = 0;
+                // while (obj.desiredPath.length - i > obj. )
+                const targetDrawCoord = toDrawCoord(obj.target);
+                this.drawArrow(obj.drawnPos, targetDrawCoord, 15, 3, 'green');
             }
-            this.context.stroke();
         }
-        // Draw path up to move range
-        for (let j = 0; j < desiredPathsToDraw.length; j++) {
-            const obj = desiredPathsToDraw[j];
-
-            this.context.strokeStyle =  'white';
-            this.context.lineWidth = 3;
-            
-            this.context.setLineDash([10, 10]);
-            this.context.beginPath();
-            this.context.moveTo(obj.drawnPos.x, obj.drawnPos.y);
-            this.context.lineTo(obj.position.x, obj.position.y);
-            for (let i = 0; i < Math.min(obj.path.length, obj.range); i++) {
-                const destination = toDrawCoord(obj.path[i].x,
-                    obj.path[i].y);
-                this.context.lineTo(destination.x, destination.y);
-            }
-            this.context.stroke();
-        }
-
         this.drawGlobalAnimations();
 
         this.state.cursorMessage = '';
