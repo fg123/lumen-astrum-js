@@ -188,6 +188,7 @@ io.on('connection', function (socket) {
 
                 queuedPlayers.forEach(p => {
                     connectedUsers[p.socket.id].game = game;
+                    connectedUsers[p.socket.id].queueID = -1;
                 });
 
                 games.push(game);
