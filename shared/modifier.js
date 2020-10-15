@@ -183,10 +183,12 @@ class CloudModifier extends BaseModifier {
     }
 
     _moveRange(inMoveRange) {
+        if (inMoveRange === 0) return 0;
         return inMoveRange + this.moveDelta;
     }
 
     _onAttach(unit) {
+        if (unit.moveRange === 0) return;
         unit.moveRange += this.moveDelta;
     }
 

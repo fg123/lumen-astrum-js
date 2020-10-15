@@ -589,7 +589,7 @@ module.exports = class MapCanvas {
                         
                         if (name in units && mapObject.turnsUntilBuilt === 0) {
                             // Draw Unit desired path
-                            if (mapObject.desiredPath.length > 0) {
+                            if (mapObject.targetPoint !== undefined) {
                                 desiredPathsToDraw.push({
                                     owner: mapObject.owner,
                                     drawnPos: actualDrawnPosition,

@@ -93,7 +93,7 @@ const structures = {
     'Ether Harvester': {
         // The harvester health represents amount of gold provided.
         'description': 'Harvester for small, blue minerals.',
-        'health': 2000,
+        'health': 10000,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
@@ -105,7 +105,7 @@ const structures = {
     },
     'Gem Harvester': {
         'description': 'Harvester for large, purple minerals.',
-        'health': 3000,
+        'health': 15000,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
@@ -116,36 +116,36 @@ const structures = {
         'targetable': false
     },
     'Stim Lab': {
-        'description': 'Takes 2 turns to build. Enhances attack speed of all allies by 50%.',
+        'description': 'Takes 2 turns to build. Enhances attack speed of all allies by 25%.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'attackSpeedMultiplier': 1.5
+            'attackSpeedMultiplier': 1.25
         }
     },
     "Thieves' Cave": {
-        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 100% of damage dealt.',
+        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 150% of damage dealt.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'attackGoldGen': 1,
+            'attackGoldGen': 1.50,
         }
     },
     "Artillery Bay": {
-        'description': 'Takes 2 turns to build. Enhances attack damage of all allies by 75%.',
+        'description': 'Takes 2 turns to build. Enhances attack damage of all allies by 25%.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'attackDamageMultiplier': 1.75,
+            'attackDamageMultiplier': 1.25,
         }
     },
     "Cloud Gate": {
@@ -160,14 +160,14 @@ const structures = {
         }
     },
     "Vitality Fountain": {
-        'description': 'Takes 2 turns to build. Enhances health of all allies by 100%.',
+        'description': 'Takes 2 turns to build. Enhances health of all allies by 25%.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'healthMultiplier': 2,
+            'healthMultiplier': 1.25,
         }
     }
 };
