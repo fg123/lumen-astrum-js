@@ -32,7 +32,7 @@ const structures = {
     },
     'Barracks': {
         'description': 'Unit production building, trains tier 2 units.',
-        'health': 60,
+        'health': 200,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
@@ -49,7 +49,7 @@ const structures = {
                 },
                 {
                     'title': 'Spawn Golem',
-                    'cost': 850,
+                    'cost': 250,
                     'prereq': [],
                     'type': 'Unit',
                     'description': '{Golem}',
@@ -84,7 +84,7 @@ const structures = {
     },
     'Deployment Outpost': {
         'description': 'Claims territory and allows expansion of buildings away from the command center.',
-        'health': 50,
+        'health': 200,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
@@ -127,14 +127,14 @@ const structures = {
         }
     },
     "Thieves' Cave": {
-        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 75% of damage dealt.',
+        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 100% of damage dealt.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'attackGoldGen': 0.75,
+            'attackGoldGen': 1,
         }
     },
     "Artillery Bay": {
@@ -179,7 +179,7 @@ const units = {
         'damage': 0,
         'description': 'Scouting unit, high movement range, cannot attack.',
         'health': 15,
-        'moveRange': 5,
+        'moveRange': 8,
         'shield': 0,
         'sightRange': 5,
         'tier': 1,
@@ -325,11 +325,11 @@ const units = {
     },
     'Golem': {
         'attackRange': 1,
-        'attackSpeed': 0.3,
+        'attackSpeed': 0.5,
         'damage': 10,
-        'description': 'Slow-moving medium artillery unit. Bombards with long-range attacks',
-        'health': 60,
-        'moveRange': 2,
+        'description': 'Slow-moving melee unit.',
+        'health': 120,
+        'moveRange': 3,
         'shield': 0,
         'sightRange': 2,
         'squadsize': 1,
