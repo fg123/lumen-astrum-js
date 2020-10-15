@@ -37,8 +37,12 @@ module.exports = class PathFinder {
 
             current.position.getNeighbours().filter(node => {
                 const offset = node.toOffsetCoordinates();
-                return map.withinMap(offset) && !gameState.occupied[offset.y][offset.x];
+                return map.withinMap(offset);
             }).forEach(next => {
+                const nextOffset = next.toOffsetCoordinates();
+                if (!next.equals(end) && gameState.occupied[nextOffset.y][nextOffset.x]) {
+                    return;
+                }
                 const newCost = costSoFar[current.position.hash()] + 5;
                 if (costSoFar[next.hash()] === undefined || newCost < costSoFar[next.hash()]) {
                     costSoFar[next.hash()] = newCost;

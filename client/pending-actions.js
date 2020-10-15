@@ -20,6 +20,7 @@ const {
     HealUnitStateChange,
     RepairStructureStateChange,
     LaunchProbeStateChange } = require('../shared/state-change');
+const Constants = require('../shared/constants');
 
 class PlaceUnitPendingAction extends PendingAction {
     constructor(unitName) {
@@ -109,7 +110,26 @@ class PlaceStructurePendingAction extends PendingAction {
 
         // Draw Object to be Placed
         let baseObj = getBaseObject(this.structureName);
-        let surrounding = getSurrounding(mapCanvas.inputManager.mouseState.tile, baseObj.width);
+        const oldOpacity = mapCanvas.context.globalAlpha;
+        if (!this.isValid) {
+            mapCanvas.context.globalAlpha = 0.5;
+        }
+        else {
+            mapCanvas.context.globalAlpha = 0.9;
+        }
+
+        const drawn = toDrawCoord(mapCanvas.inputManager.mouseState.tile);
+        mapCanvas.drawImage(baseObj.image, drawn.x, drawn.y);
+        mapCanvas.context.globalAlpha = oldOpacity;
+        
+        let isDeployment = false;
+        let width = baseObj.width;
+        if (this.structureName === 'Deployment Outpost') {
+            width += Constants.BUILD_RANGE;
+            isDeployment = true;
+        }
+
+        let surrounding = getSurrounding(mapCanvas.inputManager.mouseState.tile, width);
         for (let i = 0; i < surrounding.length; i++) {
             if (map.withinMap(surrounding[i])) {
                 if (this.isValid) {
@@ -119,25 +139,20 @@ class PlaceStructurePendingAction extends PendingAction {
                     mapCanvas.state.cursorMessage = 'Cannot build there!';
                 }
                 const drawn = toDrawCoord(surrounding[i]);
-                const oldOpacity = mapCanvas.context.globalAlpha;
-                if (!this.isValid) {
-                    mapCanvas.context.globalAlpha = 0.5;
-                }
-                else {
-                    mapCanvas.context.globalAlpha = 0.9;
-                }
-                mapCanvas.drawImage(baseObj.image, drawn.x, drawn.y);
-                mapCanvas.context.globalAlpha = oldOpacity;
                 
                 if (!this.isValid) {
                     mapCanvas.drawImage(mapCanvas.resourceManager.get(
                         Resource.RED_OVERLAY),
                         drawn.x, drawn.y);
                 }
+                else if (isDeployment) {
+                    // Draw potential territorial claim
+                    mapCanvas.drawImage(mapCanvas.resourceManager.get(
+                        Resource.BLUE_OVERLAY),
+                        drawn.x, drawn.y);
+                }
             }
-        }
-
-       
+        }        
     }
 
     _onClick(state) {
