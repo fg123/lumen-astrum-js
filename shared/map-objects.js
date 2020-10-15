@@ -100,22 +100,33 @@ module.exports.Unit = class {
         });
     }
 
-    addModifier(modifier, onlyOne = false) {
+    addModifier(adder, modifier, onlyOne = false) {
         if (onlyOne) {
             // See if already exists
             const mods = Object.keys(this.modifiers);
             for (let i = 0; i < mods.length; i++) {
-                if (this.modifiers[mods[i]].getName() === modifier.getName()) {
+                if (this.modifiers[mods[i]].getName() === modifier.getName() &&
+                    this.modifiers[mods[i]].adder === adder.id) {
                     return mods[i];
                 }
             }
         }
         const modifierKey = Date.now() + '/' + Object.keys(this.modifiers).length;
+        modifier.adder = adder.id;
         this.modifiers[modifierKey] = modifier;
         modifier.onAttach(this);
         return modifierKey;
     }  
     
+    removeModifierByAdder(adder) {
+        const mods = Object.keys(this.modifiers);
+        for (let i = 0; i < mods.length; i++) {
+            if (this.modifiers[mods[i]].adder === adder.id) {
+                this.removeModifier(mods[i]);
+            }
+        }
+    }
+
     removeModifierByName(modifierName) {
         const mods = Object.keys(this.modifiers);
         for (let i = 0; i < mods.length; i++) {

@@ -160,14 +160,14 @@ const structures = {
         }
     },
     "Vitality Fountain": {
-        'description': 'Takes 2 turns to build. Enhances health of all allies by 25%.',
+        'description': 'Takes 2 turns to build. Enhances health of all allies by 50%.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'healthMultiplier': 1.25,
+            'healthMultiplier': 1.50,
         }
     }
 };

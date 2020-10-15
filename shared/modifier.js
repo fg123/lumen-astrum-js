@@ -158,7 +158,7 @@ class ArtilleryModifier extends BaseModifier {
     }
 
     _attackDamage(inAttackDamage) {
-        return inAttackDamage * this.attackDamageRatio;
+        return Math.ceil(inAttackDamage * this.attackDamageRatio);
     }
 };
 

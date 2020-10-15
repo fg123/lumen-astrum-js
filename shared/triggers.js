@@ -79,13 +79,14 @@ const triggers = {
             // Add modifier to everyone on my team            
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(new StimModifier(this.custom.attackSpeedMultiplier), true);
+                u.addModifier(this, new StimModifier(this.custom.attackSpeedMultiplier), true);
             });
         },
         onDestroy(state) {
             const units = state.getUnitsOnMyTeam(this.owner);
+            const adder = this;
             units.forEach(u => {
-                u.removeModifierByName("StimModifier");
+                u.removeModifierByAdder(adder);
             });
         }
     },
@@ -94,13 +95,14 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(new ThievesModifier(this.custom.attackGoldGen), true);
+                u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), true);
             });
         },
         onDestroy(state) {
             const units = state.getUnitsOnMyTeam(this.owner);
+            const adder = this;
             units.forEach(u => {
-                u.removeModifierByName("ThievesModifier");
+                u.removeModifierByAdder(adder);
             });
         }
     },
@@ -109,13 +111,14 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(new ArtilleryModifier(this.custom.attackDamageMultiplier), true);
+                u.addModifier(this, new ArtilleryModifier(this.custom.attackDamageMultiplier), true);
             });
         },
         onDestroy(state) {
             const units = state.getUnitsOnMyTeam(this.owner);
+            const adder = this;
             units.forEach(u => {
-                u.removeModifierByName("ArtilleryModifier");
+                u.removeModifierByAdder(adder);
             });
         }
     },
@@ -124,13 +127,14 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(new CloudModifier(this.custom.moveRangeDelta), true);
+                u.addModifier(this, new CloudModifier(this.custom.moveRangeDelta), true);
             });
         },
         onDestroy(state) {
             const units = state.getUnitsOnMyTeam(this.owner);
+            const adder = this;
             units.forEach(u => {
-                u.removeModifierByName("CloudModifier");
+                u.removeModifierByAdder(adder);
             });
         }
     },
@@ -139,13 +143,14 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(new VitalityModifier(this.custom.healthMultiplier), true);
+                u.addModifier(this, new VitalityModifier(this.custom.healthMultiplier), true);
             });
         },
         onDestroy(state) {
             const units = state.getUnitsOnMyTeam(this.owner);
+            const adder = this;
             units.forEach(u => {
-                u.removeModifierByName("VitalityModifier");
+                u.removeModifierByAdder(adder);
             });
         }
     }

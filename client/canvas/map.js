@@ -289,15 +289,32 @@ module.exports = class MapCanvas {
 
             /* Draw Modifiers */
             if (selectedObject.modifiers) {
+                const modifierWithCount = {};
                 const modifiers = Object.values(selectedObject.modifiers);
                 for (let i = 0; i < modifiers.length; i++) {
                     const modifier = modifiers[i];
+                    if (modifierWithCount[modifier.getDisplayName()] === undefined) {
+                        modifierWithCount[modifier.getDisplayName()] = {
+                            count: 0,
+                            modifier: modifiers[i],
+                        };
+                    }
+                    modifierWithCount[modifier.getDisplayName()].count += 1;
+                }
+
+                const modifierDisplays = Object.keys(modifierWithCount);
+                for (let i = 0; i < modifierDisplays.length; i++) {
+                    const modifier = modifierWithCount[modifierDisplays[i]].modifier;
                     const pos = new Tuple(176, screenHeight - 195 + (i * 24));
                     this.context.drawImage(
                         this.resourceManager.get(Resource.UI_ICONS),
                         modifier.getIconIndex() * 24, 144, 24, 24,
                         pos.x, pos.y,
                         24, 24);
+                    this.drawText(
+                        `x${modifierWithCount[modifierDisplays[i]].count}`,
+                        'white', 16, pos.x + 26, pos.y + 15
+                    );
                     // Test Mouse Over
                     if (this.inputManager.mouseState.position.x > pos.x &&
                         this.inputManager.mouseState.position.x < pos.x + 24 &&
