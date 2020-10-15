@@ -1,11 +1,12 @@
 const { map, Tiles, findTarget, replenishShield } = require('./map');
 const Constants = require('./constants');
 const { units, structures } = require('./data');
-const { getSurrounding } = require('./coordinates');
-const { dealDamageToUnit } = require('./state-change');
+const { getSurrounding, tupleDistance } = require('./coordinates');
+const { UnitAttackStateChange } = require('./state-change');
 const { toDrawCoord } = require('../client/utils');
+const { Resource } = require('../client/resources');
 const {
-    PopupTextAnimation
+    PopupTextAnimation, GenericInPlaceSpriteAnimation
 } = require('../client/animation');
 
 const {
@@ -162,6 +163,43 @@ const triggers = {
             state.removeMapObject(position);
             state.insertMapObject(position, 'Armed Turret', owner);
         },
+    },
+    'Reaver': {
+        onDestroy(state) {
+            console.log("Reaver dead!");
+            const damageArea = getSurrounding(this.position, 2);
+            for (let i = 0; i < damageArea.length; i++) {
+                const tile = damageArea[i];
+                if (tupleDistance(tile, this.position) === 1) {
+                    const target = findTarget(state, tile);
+                    if (target && target.owner !== undefined && target.targetable) {
+                        state.dealDamageToUnit(target, this.custom.explodeDamage1);
+                        if (state.clientState) {
+                            state.clientState.globalAnimationManager.addAnimation(
+                                new GenericInPlaceSpriteAnimation(
+                                    toDrawCoord(tile),
+                                    state.clientState.resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
+                                )
+                            );
+                        }
+                    }
+                }
+                else if (tupleDistance(tile, this.position) === 2) {
+                    const target = findTarget(state, tile);
+                    if (target && target.owner !== undefined && target.targetable) {
+                        state.dealDamageToUnit(target, this.custom.explodeDamage2);
+                        if (state.clientState) {
+                            state.clientState.globalAnimationManager.addAnimation(
+                                new GenericInPlaceSpriteAnimation(
+                                    toDrawCoord(tile), 
+                                    state.clientState.resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 };
 

@@ -1,26 +1,6 @@
 const Constants = require('./constants');
 const { findTarget, replenishShield } = require('./map');
 
-const dealDamageToUnit = (state, target, damage) => {
-    if (target.currentShield !== 0) {
-        target.currentShield -= damage;
-        damage = 0;
-        if (target.currentShield < 0) {
-            damage = -target.currentShield;
-            target.currentShield = 0;
-        }
-    }
-    target.currentHealth -= damage;
-    if (target.currentHealth <= 0) {
-        target.currentHealth = 0;
-        /* Kill Unit / Structure */
-        state.deadObjects.push(target.position);
-        if (target.onDestroy) {
-            target.onDestroy(state);
-        }
-    }
-}
-
 class StateChange {
     constructor(stateChange) {
         this.type = stateChange.type;
@@ -426,12 +406,13 @@ class PhaseChangeStateChange extends StateChange {
 StateChange.registerSubClass(PhaseChangeStateChange);
 
 class UnitAttackStateChange extends StateChange {
-    static create(from, posFrom, posTo) {
+    static create(from, posFrom, posTo, allowFriendlyFire = false) {
         return new UnitAttackStateChange(
             StateChange.create(
                 from, 'UnitAttackStateChange', {
                     posFrom: posFrom,
-                    posTo: posTo
+                    posTo: posTo,
+                    allowFriendlyFire
                 }
             )
         );
@@ -467,8 +448,8 @@ class UnitAttackStateChange extends StateChange {
             return false;
         }
         
-        // Can't attack my own unit
-        if (target.owner === this.from) return false;
+        // Can't attack my own unit if no friendlyfire
+        if (!this.data.allowFriendlyFire && target.owner === this.from) return false;
         
         /* Is the target in the range (including visibility) */
         const range = state.getUnitAttackTiles(this.data.posFrom);
@@ -495,7 +476,7 @@ class UnitAttackStateChange extends StateChange {
         //     unit.attacksThisTurn -= 1;
         // }
         unit.onLaunchAttack(state, target, unit.attackDamage);
-        dealDamageToUnit(state, target, unit.attackDamage);
+        state.dealDamageToUnit(target, unit.attackDamage);
 
         if (unit.custom && unit.custom.splashDamage) {
             // Apply damage to surrounding units
@@ -503,7 +484,7 @@ class UnitAttackStateChange extends StateChange {
             for (let i = 0; i < surrounding.length; i++) {
                 const target = findTarget(state, surrounding[i]);
                 if (target !== undefined && target.isUnit && target.owner !== this.from) {
-                    dealDamageToUnit(state, target, unit.custom.splashDamage);
+                    state.dealDamageToUnit(target, unit.custom.splashDamage);
                 }
             }
         }
@@ -709,7 +690,7 @@ class ReaverDetonateStateChange extends StateChange {
         for (let i = 0; i < surrounding.length; i++) {
             const target = findTarget(state, surrounding[i]);
             if (target !== undefined && target.isUnit && target.owner !== this.from) {
-                dealDamageToUnit(state, target, unit.custom.explodeDamage);
+                state.dealDamageToUnit(target, unit.custom.explodeDamage);
             }
         }
 

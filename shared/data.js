@@ -321,17 +321,18 @@ const units = {
         'attackRange': 0,
         'attackSpeed': 0,
         'damage': 0,
-        'description': 'Requires Automation Factory. The reaver explodes when dying, dealing 50 damage to all units around it.',
+        'description': 'Requires Automation Factory. The Reaver explodes when dying, dealing 50 damage to all units range 1, and 25 range 2.',
         'health': 20,
-        'moveRange': 4,
+        'moveRange': 3,
         'shield': 0,
-        'sightRange': 2,
+        'sightRange': 3,
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
         'custom': {
-            'explodeDamage': 50
+            'explodeDamage1': 50,
+            'explodeDamage2': 25
         }
     },
     'Armed Turret': {

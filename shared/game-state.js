@@ -281,7 +281,27 @@ module.exports = class GameState {
             return unit;
         }
     }
-    
+
+    dealDamageToUnit(target, damage) {
+        if (target.currentShield !== 0) {
+            target.currentShield -= damage;
+            damage = 0;
+            if (target.currentShield < 0) {
+                damage = -target.currentShield;
+                target.currentShield = 0;
+            }
+        }
+        target.currentHealth -= damage;
+        if (target.currentHealth <= 0) {
+            target.currentHealth = 0;
+            /* Kill Unit / Structure */
+            this.deadObjects.push(target.position);
+            if (target.onDestroy) {
+                target.onDestroy(this);
+            }
+        }
+    }
+
     removeMapObject(location) {
         const mapObject = this.mapObjects[location.y][location.x];
         if (!mapObject) {
