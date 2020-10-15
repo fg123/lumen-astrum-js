@@ -264,7 +264,7 @@ const units = {
         },
         {
             'title': 'Build Turret',
-            'cost': 350,
+            'cost': 400,
             'prereq': ['Automation Factory'],
             'type': 'Structure',
             'description': '{Turret}',
@@ -336,7 +336,7 @@ const units = {
         }
     },
     'Armed Turret': {
-        'attackRange': 3,
+        'attackRange': 2,
         'attackSpeed': 1.5,
         'damage': 3,
         'description': 'This is constructed by the Turret building.',
