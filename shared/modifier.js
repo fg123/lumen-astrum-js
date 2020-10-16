@@ -33,6 +33,7 @@ class BaseModifier {
     }
 
     onAttach(target) {
+        this.target = target;
         if (this._onAttach) {
             this._onAttach(target);
         }
@@ -72,11 +73,11 @@ class BaseModifier {
         return this._getDisplayName();
     }
 
-    getDescription() {
+    getDescription(state) {
         if (!this._getDescription) {
             return "";
         }
-        return this._getDescription();
+        return this._getDescription(state);
     }
 };
 
@@ -121,13 +122,15 @@ class ThievesModifier extends BaseModifier {
 
     _getIconIndex() { return 1; }
 
-    _getDescription() {
+    _getDescription(state) {
         return `Unit generates extra gold equal to ${this.damageModifierForGold}x damage dealt!`
     }
 
     _onLaunchAttack(state, attacker, target, damage) {
         const goldGain = Math.ceil(damage * this.damageModifierForGold);
         state.players[attacker.owner].gold += goldGain;
+        state.getPlayerStats(attacker.owner)["ThievesCaveGold"] += goldGain;
+
         if (state.clientState) {
             state.clientState.globalAnimationManager.addAnimation(
                 new PopupTextAnimation(`+${goldGain}`, Constants.YELLOW_CHAT_COLOR,
@@ -250,17 +253,18 @@ class VampiricModifier extends BaseModifier {
 
     _getIconIndex() { return 5; }
 
-    _getDescription() {
+    _getDescription(state) {
         return `Unit heals for ${this.healMultiplier}x damage dealt!`
     }
 
     _onLaunchAttack(state, attacker, target, damage) {
-        const heal = Math.ceil(damage * this.healMultiplier);
-        attacker.currentHealth += heal;
+        let heal = Math.ceil(damage * this.healMultiplier);
         const maxHealth = attacker.maxHealth;
-        if (attacker.currentHealth > maxHealth) {
-            attacker.currentHealth = maxHealth;
+        if (attacker.currentHealth + heal > maxHealth) {
+            heal = maxHealth - attacker.currentHealth;
         }
+        attacker.currentHealth += heal;
+        state.getPlayerStats(attacker.owner)["VampiricHeal"] += heal;
         if (state.clientState) {
             state.clientState.globalAnimationManager.addAnimation(
                 new PopupTextAnimation(`+${heal}`, "green",

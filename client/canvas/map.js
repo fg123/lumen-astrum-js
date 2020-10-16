@@ -328,7 +328,7 @@ module.exports = class MapCanvas {
                         this.drawText(modifier.getDisplayName(), Constants.YELLOW_CHAT_COLOR, 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
 
                         // Set Description
-                        this.drawText(modifier.getDescription(), 'white', 16, dialogPos.x + 5, dialogPos.y + 40, 'left', '', dialogSize.x - 10);
+                        this.drawText(modifier.getDescription(this.state.gameState), 'white', 16, dialogPos.x + 5, dialogPos.y + 40, 'left', '', dialogSize.x - 10);
                     }
                 }
             }

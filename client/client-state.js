@@ -36,6 +36,7 @@ const {
 const { Resource } = require('./resources');
 const { toDrawCoord } = require('./utils');
 
+const KEY_ENTER = 13;
 const KEY_W = 87;
 const KEY_A = 65;
 const KEY_S = 83;
@@ -93,6 +94,9 @@ module.exports = class ClientState {
             }
             if (keyState[KEY_S]) {
                 this.camera.delta.y = CAMERA_SPEED;
+            }
+            if (keyState[KEY_ENTER] && !prevKeyState[KEY_ENTER]) {
+                this.chatbox.focus();
             }
             if (keyState[KEY_ESCAPE] && !prevKeyState[KEY_ESCAPE]) {
                 if (this.pendingAction) {

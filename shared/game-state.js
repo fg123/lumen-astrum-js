@@ -24,6 +24,10 @@ class PlayerState {
 
         this.gold = Constants.STARTING_GOLD;
 
+        this.stats = new Proxy({}, {
+            get: (target, name) => name in target ? target[name] : 0
+        });
+
         // Setup 2D Maps
         for (let i = 0; i < map.data.length; i++) {
             this.visibilityCache.push([]);
@@ -175,6 +179,10 @@ module.exports = class GameState {
         } else {
             arr[y][x] = 1;
         }
+    }
+
+    getPlayerStats(player) {
+        return this.players[player].stats;
     }
 
     revokeAllowedBuilding(x, y, player) {

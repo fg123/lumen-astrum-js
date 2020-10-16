@@ -46,11 +46,15 @@ module.exports = {
             console.log(message);
             this.messages.push(message);
         },
+        focus() {
+            this.$refs.chatInput.focus();
+        },
         onKey(e) {
             const code = e.keyCode || e.which;
-            if (code === 13) {
+            if (code === 13 && this.$refs.chatInput.value) {
                 this.game.sendChat(this.$refs.chatInput.value);
                 this.$refs.chatInput.value = "";
+                this.$refs.chatInput.blur();
             }
             else if (code === 27) {
                 this.$refs.chatInput.blur();

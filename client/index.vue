@@ -30,7 +30,12 @@ module.exports = {
         };
     },
     mounted() {
-
+        this.socket.on('changed-username', (newUsername) => {
+            this.user.username = newUsername;
+        });
+        this.socket.on('alert-error', (alert) => {
+            window.alert(alert);
+        });
     },
     methods: {
         goToLogin() {
@@ -49,7 +54,10 @@ module.exports = {
         login(username, password, callback) {
             this.socket.emit('login', username, password, callback);
         },
-        loginSuccess(data, username) {
+        glogin(id_token, callback) {
+            this.socket.emit('glogin', id_token, callback);
+        },
+        loginSuccess(data) {
             this.user = data;
             this.goToClientMain();
         },

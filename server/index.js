@@ -7,7 +7,9 @@ const crypto = require('crypto');
 const Game = require('./game');
 const Constants = require('../shared/constants');
 const { StateChange } = require('../shared/state-change');
-
+const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
+const { OAuth2Client } = require('google-auth-library');
+const oauthClient = new OAuth2Client(clientId);
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
@@ -94,19 +96,119 @@ if (!Constants.IS_PRODUCTION) {
     });
 }
 
+function createNewUser(id, name, email, picture) {
+    return {
+        username: 'User' + id,
+        name: name,
+        password: 'notavalidbcrypthash',
+        email: email,
+        picture: picture,
+        created_time: Date.now(),
+        id: id,
+        elo: 1000
+    };
+}
+
+async function verifyAndGetPayload(idToken) {
+    const ticket = await oauthClient.verifyIdToken({
+        idToken: idToken,
+        audience: clientId
+    });
+    return ticket.getPayload();
+}
+
 io.on('connection', function (socket) {
     console.log('User connected!');
     connectedUsers[socket.id] = {
         socket: socket,
         status: 'connected',
         username: null,
-        ping: 0,
         queueID: -1,
         game: null
     };
     socket.on('ping', function (date) {
         connectedUsers[socket.id].ping = (Date.now() - date) * 2;
         socket.emit('ping', Date.now());
+    });
+    let authSuccessProcedure = (userObject, callback) => {
+        const username = userObject.username;
+        const elo = userObject.elo;
+
+        connectedUsers[socket.id].username = username;
+        connectedUsers[socket.id].elo = elo;
+
+        socket.emit('login-success', username);
+
+        let potentialGame = disconnectedMidGame[username];
+        if (potentialGame) {
+            console.log('Previously disconnected from a game!');
+            delete disconnectedMidGame[username];
+            connectedUsers[socket.id].game = potentialGame;
+            potentialGame.updateSocket(username, socket);
+        }
+        
+        callback(undefined, {
+            username: username,
+            picture: userObject.picture,
+            elo: elo
+        });
+
+        if (potentialGame) {
+            socket.emit('game-start',
+                potentialGame.state.gameStartTime,
+                potentialGame.players);
+            for (let i = 0; i < potentialGame.stateChanges.length; i++) {
+                socket.emit('state-change', potentialGame.stateChanges[i]);
+            }
+        }
+    };
+    socket.on('glogin', function (oauthKey, callback) {
+        verifyAndGetPayload(oauthKey).then(payload => {
+            db.collection('users').find({ id: payload.sub }).toArray(function(err, user) {
+                if (err) {
+                    console.log('DB Error: ' + err);
+                    socket.emit('login-failed');
+                    return;
+                }
+                if (user.length > 0) {
+                    db.collection('users').findOneAndUpdate(
+                        {
+                            id: payload.sub
+                        }, {
+                            $set: {
+                                'name': payload.name,
+                                'email': payload.email,
+                                'picture': payload.picture,
+                                'id': payload.sub
+                            }
+                        }, {
+                            returnOriginal: false
+                        }, function(err, updatedUser) {
+                            if (err) {
+                                console.log('DB Error: ' + err);
+                                socket.emit('login-failed');
+                                return;
+                            }
+                            authSuccessProcedure(updatedUser.value, callback);
+                        }
+                    );
+                } else {
+                    let newUser = createNewUser(payload.sub, payload.name, payload.email, payload.picture);
+                    db.collection('users').insertOne(newUser, function(err) {
+                        if (err) {
+                            console.log('DB Error: ' + err);
+                            socket.emit('login-failed');
+                            return;
+                        }
+                        authSuccessProcedure(newUser, callback);
+                    });
+                }
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            socket.emit('login-failed');
+        });
     });
     socket.on('login', function (username, password, callback) {
         db.collection('users').find({ username, password: generateHash(password) }).toArray(function(err, res) {
@@ -122,34 +224,49 @@ io.on('connection', function (socket) {
                 else {
                     console.log('Auth success for: ' + username);
                     console.log(res[0]);
-                    connectedUsers[socket.id].username = username;
-                    connectedUsers[socket.id].elo = res[0].elo;
-
-                    socket.emit('login-success', username);
-
-                    let potentialGame = disconnectedMidGame[username];
-                    if (potentialGame) {
-                        console.log('Previously disconnected from a game!');
-                        delete disconnectedMidGame[username];
-                        connectedUsers[socket.id].game = potentialGame;
-                        potentialGame.updateSocket(username, socket);
-                    }
                     
-                    callback(undefined, {
-                        username: username,
-                        elo: res[0].elo
-                    });
-
-                    if (potentialGame) {
-                        socket.emit('game-start',
-                            potentialGame.state.gameStartTime,
-                            potentialGame.players);
-                        for (let i = 0; i < potentialGame.stateChanges.length; i++) {
-                            socket.emit('state-change', potentialGame.stateChanges[i]);
-                        }
-                    }
+                    authSuccessProcedure(res[0], callback);
                 }
             }
+        });
+    });
+    socket.on('change-username', function (newValue) {
+        console.log('Trying to change to', newValue);
+        newValue = newValue.trim();
+        if (newValue.length === 0 || newValue === connectedUsers[socket.id].username) {
+            return;
+        }
+        db.collection('users').find({ username: newValue }).toArray((err, res) => {
+            if (err) {
+                console.log('DB Error: ' + err);
+                return;
+            }
+            if (res.length !== 0) {
+                console.log('Username taken already!');
+                socket.emit('alert-error', 'Username already taken!');
+                return;
+            }
+            // 0 means no one else has this username so we can change it
+            db.collection('users').findOneAndUpdate(
+                {
+                    username: connectedUsers[socket.id].username
+                },
+                {
+                    $set: {
+                        'username': newValue
+                    }
+                }, {
+                    returnOriginal: false
+                }, (err, updatedUser) => {
+                    if (err) {
+                        console.log('DB Error: ' + err);
+                        errorCallback();
+                        return;
+                    }
+                    connectedUsers[socket.id].username = newValue;
+                    console.log('Changed username', newValue);
+                    socket.emit('changed-username', newValue);
+                });
         });
     });
     socket.on('join-queue', function (type, callback) {

@@ -32,6 +32,7 @@
     "dotenv": "^4.0.0",
     "envify": "^4.1.0",
     "express": "^4.17.1",
+    "google-auth-library": "^6.1.1",
     "howler": "^2.2.0",
     "jquery-browserify": "^1.8.1",
     "jquery-mousewheel": "^3.1.13",
@@ -42,6 +43,7 @@
     "socket.io-client": "^2.3.1",
     "tinyqueue": "^2.0.3",
     "vue": "^2.6.12",
+    "vue-google-login": "^2.0.5",
     "vue-template-compiler": "^2.6.12",
     "vueify": "^9.4.1"
   },
