@@ -14,7 +14,8 @@ const {
     ThievesModifier,
     ArtilleryModifier,
     CloudModifier,
-    VitalityModifier
+    VitalityModifier,
+    VampiricModifier
 } = require('./modifier');
 
 // Triggers that are available:
@@ -145,6 +146,22 @@ const triggers = {
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
                 u.addModifier(this, new VitalityModifier(this.custom.healthMultiplier), true);
+            });
+        },
+        onDestroy(state) {
+            const units = state.getUnitsOnMyTeam(this.owner);
+            const adder = this;
+            units.forEach(u => {
+                u.removeModifierByAdder(adder);
+            });
+        }
+    },
+    "Vampiric Lair": {
+        onActionStart(state) {
+            // Add modifier to everyone on my team
+            const units = state.getUnitsOnMyTeam(this.owner);
+            units.forEach(u => {
+                u.addModifier(this, new VampiricModifier(this.custom.healMultiplier), true);
             });
         },
         onDestroy(state) {

@@ -188,7 +188,18 @@ const structures = {
         'width': 0,
         'turnsToBuild': 1,
         'options': []
-    }
+    },
+    "Vampiric Lair": {
+        'description': 'Takes 2 turns to build. Allies heal for 20% of damage dealt.',
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'healMultiplier': 0.20,
+        }
+    },
 };
 
 const units = {
@@ -315,6 +326,15 @@ const units = {
             'description': '{Vitality Fountain}',
             'icon': '{Vitality Fountain}',
             'command': 'build-Vitality Fountain'
+        },
+        {
+            'title': 'Build Vampiric Lair',
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': '{Vampiric Lair}',
+            'icon': '{Vampiric Lair}',
+            'command': 'build-Vampiric Lair'
         }
     ]},
     'Reaver': {

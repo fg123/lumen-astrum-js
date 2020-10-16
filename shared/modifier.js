@@ -234,11 +234,48 @@ class VitalityModifier extends BaseModifier {
     }
 };
 
+class VampiricModifier extends BaseModifier {
+    constructor(healMultiplier) {
+        super();
+        this.healMultiplier = healMultiplier;
+    }
+
+    _getName() {
+        return "VampiricModifier";
+    }
+
+    _getDisplayName() {
+        return "Y'all Suck";
+    }
+
+    _getIconIndex() { return 5; }
+
+    _getDescription() {
+        return `Unit heals for ${this.healMultiplier}x damage dealt!`
+    }
+
+    _onLaunchAttack(state, attacker, target, damage) {
+        const heal = Math.ceil(damage * this.healMultiplier);
+        attacker.currentHealth += heal;
+        const maxHealth = attacker.maxHealth;
+        if (attacker.currentHealth > maxHealth) {
+            attacker.currentHealth = maxHealth;
+        }
+        if (state.clientState) {
+            state.clientState.globalAnimationManager.addAnimation(
+                new PopupTextAnimation(`+${heal}`, "green",
+                    attacker.position)
+            );
+        }
+    }
+};
+
 module.exports = {
     BaseModifier,
     StimModifier,
     ThievesModifier,
     ArtilleryModifier,
     CloudModifier,
-    VitalityModifier
+    VitalityModifier,
+    VampiricModifier
 };
