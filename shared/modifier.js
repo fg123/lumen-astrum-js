@@ -245,7 +245,7 @@ class VampiricModifier extends BaseModifier {
     }
 
     _getDisplayName() {
-        return "Y'all Suck";
+        return "Y'all Succ";
     }
 
     _getIconIndex() { return 5; }
