@@ -121,6 +121,10 @@ module.exports = class GameState {
         for (let i = 0; i < map.smallMineralLocations.length; i++) {
             this.insertMapObject(map.smallMineralLocations[i], 'Ether Harvester', undefined);
         }
+
+        if (map.onMapStart) {
+            map.onMapStart(this);
+        }
     }
 
     getUnitsOnMyTeam(player) {

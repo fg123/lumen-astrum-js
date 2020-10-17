@@ -274,6 +274,39 @@ class VampiricModifier extends BaseModifier {
     }
 };
 
+class SilverBulletModifier extends BaseModifier {
+    constructor(healthMultiplier) {
+        super();
+        this.healthMultiplier = healthMultiplier;
+    }
+
+    _getName() {
+        return "SilverBulletModifier";
+    }
+
+    _getDisplayName() {
+        return "Silver Bullets";
+    }
+
+    _getIconIndex() { return 6; }
+
+    _getDescription(state) {
+        return `Unit deals ${this.healthMultiplier}x enemy max health as extra damage!`
+    }
+
+    _onLaunchAttack(state, attacker, target, damage) {
+        let extraDamage = Math.ceil(target.maxHealth * this.healthMultiplier);
+        state.dealDamageToUnit(target, extraDamage);
+
+        if (state.clientState) {
+            state.clientState.globalAnimationManager.addAnimation(
+                new PopupTextAnimation(`-${extraDamage}`, "white",
+                target.position)
+            );
+        }
+    }
+};
+
 module.exports = {
     BaseModifier,
     StimModifier,
@@ -281,5 +314,6 @@ module.exports = {
     ArtilleryModifier,
     CloudModifier,
     VitalityModifier,
-    VampiricModifier
+    VampiricModifier,
+    SilverBulletModifier
 };

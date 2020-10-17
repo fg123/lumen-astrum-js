@@ -200,6 +200,17 @@ const structures = {
             'healMultiplier': 0.20,
         }
     },
+    "Shauna's Forge": {
+        'description': "Takes 2 turns to build. Ally attacks deal 5% of enemy's total health as extra damage.",
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'healthMultiplier': 0.05
+        }
+    },
 };
 
 const units = {
@@ -335,6 +346,15 @@ const units = {
             'description': '{Vampiric Lair}',
             'icon': '{Vampiric Lair}',
             'command': 'build-Vampiric Lair'
+        },
+        {
+            'title': "Build Shauna's Forge",
+            'cost': 2000,
+            'prereq': [],
+            'type': 'Structure',
+            'description': "{Shauna's Forge}",
+            'icon': "{Shauna's Forge}",
+            'command': "build-Shauna's Forge"
         }
     ]},
     'Reaver': {
