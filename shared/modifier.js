@@ -33,7 +33,8 @@ class BaseModifier {
     }
 
     onAttach(target) {
-        this.target = target;
+        // Can't make a circular reference here.
+        // this.target = target;
         if (this._onAttach) {
             this._onAttach(target);
         }
