@@ -23,6 +23,8 @@ module.exports = class Camera {
         this.delta = new Tuple(0, 0);
         this.scale = 1;
 
+        this.fowCanvasTick = 0;
+
         /* This allows map drawing operations to only iterate through visible
          * map tiles */
         this.topLeftVisible = new Tuple(0, 0);
@@ -97,6 +99,15 @@ module.exports = class Camera {
     updateMinimapFOW() {
         if (this.state === undefined) return;
         if (this.state.gameState === undefined) return;
+
+        // Only update minimap stuff every 4 frames
+        if (this.fowCanvasTick < 4) {
+            this.fowCanvasTick += 1;
+            return;
+        }
+        else {
+            this.fowCanvasTick = 0;
+        }
         const context = this.minimapFOWCanvas.getContext('2d');
 
         context.clearRect(0, 0, MINIMAP_DISPLAY_SIZE.x, MINIMAP_DISPLAY_SIZE.y);
