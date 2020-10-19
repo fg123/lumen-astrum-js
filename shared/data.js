@@ -20,7 +20,7 @@ const structures = {
                 },
                 {
                     'title': 'Spawn Engineer',
-                    'cost': 300,
+                    'cost': 400,
                     'prereq': [],
                     'type': 'Unit',
                     'description': '{Engineer}',
@@ -147,14 +147,14 @@ const structures = {
         }
     },
     "Artillery Bay": {
-        'description': 'Takes 2 turns to build. Enhances attack damage of all allies by 25%.',
+        'description': 'Takes 2 turns to build. Enhances attack damage of all allies by 30%.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'attackDamageMultiplier': 1.25,
+            'attackDamageMultiplier': 1.3,
         }
     },
     "Cloud Gate": {
@@ -259,7 +259,7 @@ const units = {
         'turnsToBuild': 1,
         'options': [{
             'title': 'Build Deployment Outpost',
-            'cost': 400,
+            'cost': 500,
             'prereq': [],
             'type': 'Structure',
             'description': '{Deployment Outpost}',
