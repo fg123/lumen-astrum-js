@@ -408,6 +408,57 @@ class PhaseChangeStateChange extends StateChange {
 }
 StateChange.registerSubClass(PhaseChangeStateChange);
 
+class ActionTickStateChange extends StateChange {
+    // TickTime from Server
+    static create(from, tickTime) {
+        return new ActionTickStateChange(
+            StateChange.create(
+                from, 'ActionTickStateChange', {
+                    tickTime: tickTime
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        state.didAnyoneTick = false;
+        for (let j = 0; j < state.structures.length; j++) {
+            const structure = state.structures[j];
+            if (structure.currentHealth > 0) {
+                if (structure.onActionTick) {
+                    if (structure.onActionTick(state)) {
+                        // Someone ticked
+                        state.didAnyoneTick = true;
+                    }
+                }
+            }
+        }
+        for (let j = 0; j < state.units.length; j++) {
+            const unit = state.units[j];
+            if (unit.currentHealth > 0) {
+                if (unit.onActionTick) {
+                    if (unit.onActionTick(state)) {
+                        state.didAnyoneTick = true;
+                    }
+                }
+            }
+            const modifiers = Object.keys(unit.modifiers);
+            for (let i = 0; i < modifiers.length; i++) {
+                const key = modifiers[i];
+                if (unit.modifiers[key].attachTime + unit.modifiers[key].duration > currentTime) {
+                    // Modifier has Timed Out
+                    unit.removeModifier(key);
+                }
+            }
+        }
+    }
+}
+StateChange.registerSubClass(ActionTickStateChange);
+
 class UnitAttackStateChange extends StateChange {
     static create(from, posFrom, posTo, allowFriendlyFire = false) {
         return new UnitAttackStateChange(
@@ -526,35 +577,6 @@ class ChatMessageStateChange extends StateChange {
     }
 }
 StateChange.registerSubClass(ChatMessageStateChange);
-
-class GroundClaimStateChange extends StateChange {
-    static create(from, posFrom, posClaim) {
-        return new GroundClaimStateChange(
-            StateChange.create(
-                from, 'GroundClaimStateChange', {
-                    posClaim: posClaim,
-                    posFrom: posFrom
-                }
-            )
-        );
-    }
-
-    _verifyStateChange(/* state */) {
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        const deployment = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        if (!deployment) {
-            return;
-        }
-        const claimPos = new Tuple(this.data.posClaim.x, this.data.posClaim.y);
-        deployment.claimedTiles.push(claimPos);
-        deployment.claimedHash.add(claimPos.hash());    
-        state.setAllowedBuilding(claimPos.x, claimPos.y, this.from);    
-    }
-}
-StateChange.registerSubClass(GroundClaimStateChange);
 
 class HealUnitStateChange extends StateChange {
     static create(from, posFrom, posTo) {
@@ -856,5 +878,5 @@ module.exports = {
     ReaverDetonateStateChange,
     GuardianLockdownStateChange,
     LaunchProbeStateChange,
-    GroundClaimStateChange
+    ActionTickStateChange
 };

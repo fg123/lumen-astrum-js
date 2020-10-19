@@ -6,8 +6,10 @@ const {
     MoveUnitStateChange, 
     ChatMessageStateChange,
     UnitAttackStateChange, 
-    SetUnitTargetStateChange
+    SetUnitTargetStateChange,
+    ActionTickStateChange
 } = require('../shared/state-change');
+const { default: modifier } = require('../shared/modifier');
 
 module.exports = class Game {
     static fromJson(json) {
@@ -141,31 +143,17 @@ module.exports = class Game {
         
         const actionPhaseTick = setInterval(() => {
             // Before any combat, units and structures tick
-            // Each tick is every 10ms, unit tries to acquire target,
+            // Each tick is every 100ms, unit tries to acquire target,
             //  given cooldown
             let currentTime = Date.now();
-            let noOneTick = true;
-            for (let j = 0; j < this.state.structures.length; j++) {
-                const structure = this.state.structures[j];
-                if (structure.currentHealth > 0) {
-                    if (structure.onActionTick) {
-                        if (structure.onActionTick(this)) {
-                            // Someone ticked
-                            noOneTick = false;
-                        }
-                    }
-                }
-            }
+            
+            this.processStateChange(ActionTickStateChange.create(undefined, currentTime));
+            
             const nonDeadUnits = [];
             for (let j = 0; j < this.state.units.length; j++) {
                 const unit = this.state.units[j];
                 if (unit.currentHealth > 0) {
                     nonDeadUnits.push(unit);
-                    if (unit.onActionTick) {
-                        if (unit.onActionTick(this)) {
-                            noOneTick = false;
-                        }
-                    }
                 }
             }
             for (let j = 0; j < nonDeadUnits.length; j++) {
@@ -242,7 +230,7 @@ module.exports = class Game {
 
             // We also end action phase if no one has any more targets,
             //   and finished moving
-            let finishedActions = noOneTick;
+            let finishedActions = !this.state.didAnyoneTick;
             for (let i = 0; i < nonDeadUnits.length; i++) {
                 const unit = nonDeadUnits[i];
                 if (actionMap[unit.id].target !== undefined) {

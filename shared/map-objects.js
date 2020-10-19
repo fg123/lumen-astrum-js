@@ -19,7 +19,7 @@ module.exports.Structure = class {
         this.maxShield = Data.structures[name].shield;
         this.isStructure = true;
         this.isUnit = false;
-        
+
         /* This stores any unit specific custom data */
         this.custom = Data.structures[name].custom;
 
@@ -103,8 +103,11 @@ module.exports.Unit = class {
         });
     }
 
-    addModifier(adder, modifier, onlyOne = false) {
-        if (onlyOne) {
+    addModifier(adder, modifier, options = {
+        duration: undefined,
+        onlyOne: false
+    }) {
+        if (options.onlyOne) {
             // See if already exists
             const mods = Object.keys(this.modifiers);
             for (let i = 0; i < mods.length; i++) {
@@ -116,6 +119,8 @@ module.exports.Unit = class {
         }
         const modifierKey = Date.now() + '/' + Object.keys(this.modifiers).length;
         modifier.adder = adder.id;
+        modifier.duration = options.duration;
+        modifier.attachTime = Date.now();
         this.modifiers[modifierKey] = modifier;
         modifier.onAttach(this);
         return modifierKey;
@@ -138,6 +143,7 @@ module.exports.Unit = class {
             }
         }
     }
+    
     removeModifier(modifierKey) {
         if (this.modifiers[modifierKey]) {
             const mod = this.modifiers[modifierKey];

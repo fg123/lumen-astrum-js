@@ -34,7 +34,6 @@ class BaseModifier {
 
     onAttach(target) {
         // Can't make a circular reference here.
-        // this.target = target;
         if (this._onAttach) {
             this._onAttach(target);
         }
@@ -79,6 +78,13 @@ class BaseModifier {
             return "";
         }
         return this._getDescription(state);
+    }
+
+    // returns the time at which you would be unstunned
+    stunned(state) {
+        if (this._stunned) {
+            return this._stunned();
+        }
     }
 };
 

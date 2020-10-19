@@ -72,7 +72,8 @@ module.exports = class GameState {
         // Action so we can phase change it to planning at start of game
         this.phase = Constants.PHASE_ACTION;
         this.phaseStartTime = 0;
-
+        this.didAnyoneTick = false;
+        
         this.chatMessages = [];
 
         this.deadObjects = [];

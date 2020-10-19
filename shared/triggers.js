@@ -2,7 +2,7 @@ const { map, Tiles, findTarget, replenishShield } = require('./map');
 const Constants = require('./constants');
 const { units, structures } = require('./data');
 const { getSurrounding, tupleDistance } = require('./coordinates');
-const { UnitAttackStateChange, GroundClaimStateChange } = require('./state-change');
+const { UnitAttackStateChange } = require('./state-change');
 const { toDrawCoord } = require('../client/utils');
 const { Resource } = require('../client/resources');
 const {
@@ -24,7 +24,7 @@ const {
 //   onActionStart
 //   onCreate
 //   onDestroy
-//   onActionTick - (SERVER ONLY) called every tick of the action phase, return true
+//   onActionTick - called every tick of the action phase, return true
 //                  if you want to continue the action phase
 //                  (more stuff happening)
 const triggers = {
@@ -85,7 +85,9 @@ const triggers = {
             // Add modifier to everyone on my team            
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new StimModifier(this.custom.attackSpeedMultiplier), true);
+                u.addModifier(this, new StimModifier(this.custom.attackSpeedMultiplier), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -101,7 +103,9 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), true);
+                u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -117,7 +121,9 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new ArtilleryModifier(this.custom.attackDamageMultiplier), true);
+                u.addModifier(this, new ArtilleryModifier(this.custom.attackDamageMultiplier), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -133,7 +139,9 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new CloudModifier(this.custom.moveRangeDelta), true);
+                u.addModifier(this, new CloudModifier(this.custom.moveRangeDelta), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -149,7 +157,9 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new VitalityModifier(this.custom.healthMultiplier), true);
+                u.addModifier(this, new VitalityModifier(this.custom.healthMultiplier), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -165,7 +175,9 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new VampiricModifier(this.custom.healMultiplier), true);
+                u.addModifier(this, new VampiricModifier(this.custom.healMultiplier), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -181,7 +193,9 @@ const triggers = {
             // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner);
             units.forEach(u => {
-                u.addModifier(this, new SilverBulletModifier(this.custom.healthMultiplier), true);
+                u.addModifier(this, new SilverBulletModifier(this.custom.healthMultiplier), {
+                    onlyOne: true
+                });
             });
         },
         onDestroy(state) {
@@ -243,10 +257,15 @@ const triggers = {
             this.claimedRange = 0;
             this.claimedHash = new Set();
             this.claimedTiles = [];
+            this.tickCounter = 0;
         },
-        onActionTick(game) {
-            // Server only, any changes we need to notify client
-            const state = game.state;
+        onActionTick(state) {
+            // Every 2 ticks we expand 
+            if (this.tickCounter < 2) {
+                this.tickCounter += 1;
+                return true;
+            }
+            this.tickCounter = 0;
 
             let didWeClaim = false;
             const surrounding = getSurrounding(this.position, this.width + this.claimedRange);
@@ -259,9 +278,9 @@ const triggers = {
                             // And we didn't claim it
                             if (!this.claimedHash.has(surrounding[i].hash())) {
                                 didWeClaim = true;
-                                game.processStateChange(
-                                    GroundClaimStateChange.create(this.owner, this.position,
-                                        surrounding[i]));
+                                this.claimedHash.add(surrounding[i].hash());
+                                this.claimedTiles.push(surrounding[i]);
+                                state.setAllowedBuilding(surrounding[i].x, surrounding[i].y, this.owner);
                             }
                         }
                     }
