@@ -253,11 +253,13 @@ class SetUnitTargetStateChange extends StateChange {
         if (unit.maxMoveRange === 0) {
             return;
         }
+        if (unit.owner !== this.from) return;
         if (unit.position.x === this.data.posTarget.x &&
             unit.position.y === this.data.posTarget.y) {
+            unit.targetPoint = undefined;
+            unit.desiredPath = [];
             return;
         }
-        if (unit.owner !== this.from) return;
         unit.targetPoint = this.data.posTarget;
         unit.desiredPath = PathFinder.findPath(state,
             unit.position, unit.targetPoint);
