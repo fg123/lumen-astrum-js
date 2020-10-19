@@ -254,7 +254,9 @@ module.exports = class GameState {
             
             // Neutral buildings are owned by undefined
             if (player !== undefined) {
-                if (Structure.isConstructionBuilding(name)) {
+                // Structure.isConstructionBuilding(name), allowed building now
+                //   expands out from deployment outposts
+                if (name === 'Command Base') {
                     const surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
                     for (let i = 0; i < surrounding.length; i++) {
                         if (map.withinMap(surrounding[i])) {
@@ -337,7 +339,9 @@ module.exports = class GameState {
             }
             // Neutral buildings are owned by undefined
             if (mapObject.owner !== undefined) {
-                if (Structure.isConstructionBuilding(mapObject.name)) {
+                // Structure.isConstructionBuilding(name), allowed building now
+                //   expands out from deployment outposts
+                if (mapObject.name === 'Command Base') {
                     const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
                     for (let i = 0; i < surrounding.length; i++) {
                         if (map.withinMap(surrounding[i])) {

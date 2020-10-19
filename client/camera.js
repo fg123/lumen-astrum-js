@@ -139,8 +139,8 @@ module.exports = class Camera {
                 }
             }
         }
-
     }
+    
     initializeClientState(clientState) {
         this.state = clientState;
     }

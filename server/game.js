@@ -23,6 +23,8 @@ module.exports = class Game {
             stateChange.simulateStateChange(game.state);
             game.stateChanges.push(stateChange);
         }
+        // Don't have any idea what phase we're actually in, so let's just:
+        game.processStateChange(PhaseChangeStateChange.create(undefined));
         return game;
     }
     constructor(playerSocketMap, gameStartTime) {
@@ -150,13 +152,32 @@ module.exports = class Game {
         const actionPhaseStart = Date.now();
         
         const actionPhaseTick = setInterval(() => {
+            // Before any combat, units and structures tick
             // Each tick is every 10ms, unit tries to acquire target,
             //  given cooldown
             let currentTime = Date.now();
+            let noOneTick = true;
+            for (let j = 0; j < this.state.structures.length; j++) {
+                const structure = this.state.structures[j];
+                if (structure.currentHealth > 0) {
+                    if (structure.onActionTick) {
+                        if (structure.onActionTick(this)) {
+                            // Someone ticked
+                            noOneTick = false;
+                        }
+                    }
+                }
+            }
             const nonDeadUnits = [];
             for (let j = 0; j < this.state.units.length; j++) {
-                if (this.state.units[j].currentHealth > 0) {
-                    nonDeadUnits.push(this.state.units[j]);
+                const unit = this.state.units[j];
+                if (unit.currentHealth > 0) {
+                    nonDeadUnits.push(unit);
+                    if (unit.onActionTick) {
+                        if (unit.onActionTick(this)) {
+                            noOneTick = false;
+                        }
+                    }
                 }
             }
             for (let j = 0; j < nonDeadUnits.length; j++) {
@@ -233,7 +254,7 @@ module.exports = class Game {
 
             // We also end action phase if no one has any more targets,
             //   and finished moving
-            let finishedActions = true;
+            let finishedActions = noOneTick;
             for (let i = 0; i < nonDeadUnits.length; i++) {
                 const unit = nonDeadUnits[i];
                 if (actionMap[unit.id].target !== undefined) {

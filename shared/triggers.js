@@ -2,7 +2,7 @@ const { map, Tiles, findTarget, replenishShield } = require('./map');
 const Constants = require('./constants');
 const { units, structures } = require('./data');
 const { getSurrounding, tupleDistance } = require('./coordinates');
-const { UnitAttackStateChange } = require('./state-change');
+const { UnitAttackStateChange, GroundClaimStateChange } = require('./state-change');
 const { toDrawCoord } = require('../client/utils');
 const { Resource } = require('../client/resources');
 const {
@@ -24,6 +24,9 @@ const {
 //   onActionStart
 //   onCreate
 //   onDestroy
+//   onActionTick - (SERVER ONLY) called every tick of the action phase, return true
+//                  if you want to continue the action phase
+//                  (more stuff happening)
 const triggers = {
     'Command Base': {
         onPlanningStart(state) {
@@ -232,6 +235,52 @@ const triggers = {
                         }
                     }
                 }
+            }
+        }
+    },
+    'Deployment Outpost': {
+        onCreate(state) {
+            this.claimedRange = 0;
+            this.claimedHash = new Set();
+            this.claimedTiles = [];
+        },
+        onActionTick(game) {
+            // Server only, any changes we need to notify client
+            const state = game.state;
+
+            let didWeClaim = false;
+            console.log('Want to claim', this.claimedRange, 'range!');
+            const surrounding = getSurrounding(this.position, this.width + this.claimedRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (map.withinMap(surrounding[i])) {
+                    if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        // Check no one else has this tile
+                        if (!state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.owner)) {
+                            // And we didn't claim it
+                            if (!this.claimedHash.has(surrounding[i].hash())) {
+                                didWeClaim = true;
+                                game.processStateChange(
+                                    GroundClaimStateChange.create(this.owner, this.position,
+                                        surrounding[i]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (this.claimedRange < Constants.BUILD_RANGE) {
+                this.claimedRange += 1;    
+            }
+            return didWeClaim;
+        },
+        onDestroy(state) {
+            console.log("Dying", this);
+            if (this.claimedTiles) {
+                console.log("Unclaiming tiles", this.claimedTiles);
+                this.claimedTiles.forEach(t => {
+                    state.revokeAllowedBuilding(t.x, t.y, this.owner);
+                });
             }
         }
     }

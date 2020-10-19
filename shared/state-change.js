@@ -91,16 +91,16 @@ class BuildStructureStateChange extends StateChange {
         }
         
         let baseObj = getBaseObject(this.data.structureName);
-        if (this.data.structureName === 'Deployment Outpost') {
-            // Deployment outpost, make sure new territory claim doesn't
-            //    intersect another player's territory        
-            let surrounding = getSurrounding(this.data.position, baseObj.width + Constants.BUILD_RANGE);  
-            for (let i = 0; i < surrounding.length; i++) {
-                if (map.withinMap(surrounding[i]) && state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.from)) {
-                    return false;
-                }
-            }
-        }
+        // if (this.data.structureName === 'Deployment Outpost') {
+        //     // Deployment outpost, make sure new territory claim doesn't
+        //     //    intersect another player's territory        
+        //     let surrounding = getSurrounding(this.data.position, baseObj.width + Constants.BUILD_RANGE);  
+        //     for (let i = 0; i < surrounding.length; i++) {
+        //         if (map.withinMap(surrounding[i]) && state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.from)) {
+        //             return false;
+        //         }
+        //     }
+        // }
 
         let surrounding = getSurrounding(this.data.position, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
@@ -525,6 +525,35 @@ class ChatMessageStateChange extends StateChange {
 }
 StateChange.registerSubClass(ChatMessageStateChange);
 
+class GroundClaimStateChange extends StateChange {
+    static create(from, posFrom, posClaim) {
+        return new GroundClaimStateChange(
+            StateChange.create(
+                from, 'GroundClaimStateChange', {
+                    posClaim: posClaim,
+                    posFrom: posFrom
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(/* state */) {
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const deployment = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
+        if (!deployment) {
+            return;
+        }
+        const claimPos = new Tuple(this.data.posClaim.x, this.data.posClaim.y);
+        deployment.claimedTiles.push(claimPos);
+        deployment.claimedHash.add(claimPos.hash());    
+        state.setAllowedBuilding(claimPos.x, claimPos.y, this.from);    
+    }
+}
+StateChange.registerSubClass(GroundClaimStateChange);
+
 class HealUnitStateChange extends StateChange {
     static create(from, posFrom, posTo) {
         return new HealUnitStateChange(
@@ -824,5 +853,6 @@ module.exports = {
     RepairStructureStateChange,
     ReaverDetonateStateChange,
     GuardianLockdownStateChange,
-    LaunchProbeStateChange
+    LaunchProbeStateChange,
+    GroundClaimStateChange
 };
