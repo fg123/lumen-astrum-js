@@ -201,14 +201,14 @@ const structures = {
         }
     },
     "Shauna's Forge": {
-        'description': "Takes 2 turns to build. Ally attacks deal 5% of enemy's total health as extra damage.",
+        'description': "Takes 2 turns to build. Ally attacks deal 2% of enemy's total health as extra damage.",
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'healthMultiplier': 0.05
+            'healthMultiplier': 0.02
         }
     },
 };

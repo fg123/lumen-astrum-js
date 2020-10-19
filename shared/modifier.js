@@ -224,11 +224,11 @@ class VitalityModifier extends BaseModifier {
     }
 
     _health(inHealth) {
-        return inHealth * this.healthMultiplier;
+        return Math.ceil(inHealth * this.healthMultiplier);
     }
 
     _onAttach(unit) {
-        unit.currentHealth *= this.healthMultiplier;
+        unit.currentHealth = Math.ceil(unit.currentHealth * this.healthMultiplier);
     }
 
     _onDetach(unit) {
