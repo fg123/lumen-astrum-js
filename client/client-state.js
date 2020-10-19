@@ -155,7 +155,6 @@ module.exports = class ClientState {
         });
 
         socket.on('state-change', (stateChange) => {
-            console.log('State Change!');
             console.log(stateChange);
             const change = StateChange.deserialize(stateChange);
 

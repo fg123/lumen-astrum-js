@@ -36,10 +36,6 @@ module.exports = class Game {
 
         this.stateChanges = [];
 
-        this.queuedActions = {
-            builds: []
-        };
-
         // Holds the timer object for transitions from Action to Planning or Vice Versa
         this.nextPhaseTimer = undefined;
 
@@ -132,14 +128,6 @@ module.exports = class Game {
         
         // Action Phase Lasts a Set Amount of Time
         // After this time, all attack / movement is stopped for the round
-        
-        // Process Buildings
-        for (let i = 0; i < this.queuedActions.builds.length; i++) {
-            if (this.verifyStateChange(this.queuedActions.builds[i])) {
-                this.processStateChange(this.queuedActions.builds[i]);
-            }
-        }
-        this.queuedActions.builds = [];
 
         // Someone claimed everything.
         if (this.isGameOver) {

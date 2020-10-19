@@ -249,7 +249,6 @@ const triggers = {
             const state = game.state;
 
             let didWeClaim = false;
-            console.log('Want to claim', this.claimedRange, 'range!');
             const surrounding = getSurrounding(this.position, this.width + this.claimedRange);
             for (let i = 0; i < surrounding.length; i++) {
                 if (map.withinMap(surrounding[i])) {
