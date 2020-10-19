@@ -229,10 +229,7 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
         this.totalTicks = 0;
         this.rotation = attacker.rotation;
         this.framesOn = 4;
-
-        this.shots = Math.floor(attacker.attackDamage / 10);
-        // i.e. shots = 4
-        this.maxTicks = this.shots * this.framesOn * 2;
+        this.maxTicks = this.framesOn * 2;
     }
 
     _tick() {
