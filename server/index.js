@@ -331,10 +331,7 @@ io.on('connection', function (socket) {
     });
     socket.on('state-change', function (stateChange) {
         const change = StateChange.deserialize(stateChange);
-        console.log(connectedUsers[socket.id]);
-
         let game = connectedUsers[socket.id].game;
-        console.log(game);
         if (game.verifyStateChange(change)) {
             // Process will call simulate and foward as necessary
             const winner = game.processStateChange(change);

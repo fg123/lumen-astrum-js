@@ -39,6 +39,7 @@ module.exports = class Game {
             builds: []
         };
 
+        // Holds the timer object for transitions from Action to Planning or Vice Versa
         this.nextPhaseTimer = undefined;
 
         this.isGameOver = false;
@@ -73,6 +74,10 @@ module.exports = class Game {
         if (stateChange instanceof PhaseChangeStateChange) {
             if (this.state.phase === Constants.PHASE_PLANNING) {
                 // Starting planning phase now
+                // During a Replay Event, this won't be triggered from nextPhaseTimer
+                if (this.nextPhaseTimer) clearInterval(this.nextPhaseTimer);
+                this.nextPhaseTimer = undefined;
+
                 if (this.nextPhaseTimer === undefined) {
                     this.nextPhaseTimer = setTimeout(() => {
                         this.nextPhaseTimer = undefined;
@@ -132,9 +137,13 @@ module.exports = class Game {
     }
 
     runActionPhase() {
+        // During a Replay Event, this won't be triggered from nextPhaseTimer
+        if (this.nextPhaseTimer) clearInterval(this.nextPhaseTimer);
+        this.nextPhaseTimer = undefined;
+        
         // Action Phase Lasts a Set Amount of Time
         // After this time, all attack / movement is stopped for the round
-
+        
         // Process Buildings
         for (let i = 0; i < this.queuedActions.builds.length; i++) {
             if (this.verifyStateChange(this.queuedActions.builds[i])) {
@@ -254,7 +263,8 @@ module.exports = class Game {
             if (timeUp || finishedActions || this.isGameOver) {
                 clearInterval(actionPhaseTick);
                 if (!this.isGameOver) {
-                    setTimeout(() => {
+                    this.nextPhaseTimer = setTimeout(() => {
+                        this.nextPhaseTimer = undefined;
                         this.processStateChange(PhaseChangeStateChange.create(undefined));
                     }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
                 }
