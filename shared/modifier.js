@@ -52,6 +52,13 @@ class BaseModifier {
         }
     }
 
+    getTimeRemaining() {
+        if (this.duration && this.attachTime) {
+            return ((this.attachTime + this.duration) - Date.now());
+        }
+        return undefined;
+    }
+
     getName() {
         if (!this._getName) {
             throw "Every modifier needs to override _getName()!";

@@ -214,7 +214,7 @@ module.exports = class Game {
                  
                 if (!didMove && actionMap[id].target !== undefined &&
                     actionMap[id].nextAttackTime < currentTime &&
-                    !unit.isStunned()) {
+                    unit.getStunnedTime() === 0) {
                     // Have a target for this tick and attack not cooldown
                     const pendingAttack = UnitAttackStateChange.create(
                         unit.owner, unit.position, actionMap[id].target.inRangeTile

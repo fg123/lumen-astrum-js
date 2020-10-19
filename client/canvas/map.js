@@ -78,7 +78,7 @@ module.exports = class MapCanvas {
         /* Draw black background */
         this.drawRectangle('black', start, y, totalWidth, 16);
         
-        /* Draw Health and Shield Bars (100px x 5px each) */
+        /* Draw Health Bars (100px x 5px each) */
         const maxHealth = mapObject.maxHealth;
         const healthPercent = mapObject.currentHealth / maxHealth;
         let healthColor = 'red';
@@ -99,9 +99,12 @@ module.exports = class MapCanvas {
             ten += smallTickIncrement;
         }
         
-
-        const shieldPercent = mapObject.currentShield / mapObject.maxShield;
-        this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
+        // Use shield to show how much longer stun is.
+        if (mapObject.modifiers) {
+            const shieldPercent = mapObject.getStunnedTime() / mapObject.getStunnedTotalTime();
+            this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
+        }
+        
     }
 
     drawText(text, color, fontSize, x, y,
@@ -306,8 +309,8 @@ module.exports = class MapCanvas {
                 const modifierDisplays = Object.keys(modifierWithCount);
                 for (let i = 0; i < modifierDisplays.length; i++) {
                     const modifier = modifierWithCount[modifierDisplays[i]].modifier;
-                    const timeRemaining = modifier.duration ?
-                        ((modifier.attachTime + modifier.duration) - Date.now()) : undefined;
+                    const timeRemaining = modifier.getTimeRemaining();
+
                     const pos = new Tuple(176, screenHeight - 195 + (i * 24));
                     this.context.drawImage(
                         this.resourceManager.get(Resource.UI_ICONS),

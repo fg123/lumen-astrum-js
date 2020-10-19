@@ -174,12 +174,24 @@ module.exports.Unit = class {
         return false;
     }
 
-    isStunned() {
-        let val = false;
+    getStunnedTime() {
+        let maxTime = 0;
         Object.values(this.modifiers).forEach(m => {
-            val |= m.stunned();
+            if (m.stunned()) {                
+                maxTime = Math.max(m.getTimeRemaining(), maxTime);
+            }
         });
-        return val;
+        return maxTime;
+    }
+
+    getStunnedTotalTime() {
+        let maxTime = 0;
+        Object.values(this.modifiers).forEach(m => {
+            if (m.stunned()) {
+                maxTime = Math.max(m.duration, maxTime);
+            }
+        });
+        return maxTime;
     }
 
     get sightRange() { return this.__sightRange__; }
