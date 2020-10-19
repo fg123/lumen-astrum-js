@@ -23,6 +23,7 @@ class PlayerState {
         this.probeLocationCache = [];
 
         this.gold = Constants.STARTING_GOLD;
+        this.commandBase = undefined;
 
         this.stats = new Proxy({}, {
             get: (target, name) => name in target ? target[name] : 0
@@ -73,7 +74,7 @@ module.exports = class GameState {
         this.phase = Constants.PHASE_ACTION;
         this.phaseStartTime = 0;
         this.didAnyoneTick = false;
-        
+
         this.chatMessages = [];
 
         this.deadObjects = [];
@@ -99,7 +100,8 @@ module.exports = class GameState {
         /* Pre-constructed buildings */
         console.log(playerUsernameList);
         for (let i = 0; i < playerUsernameList.length; i++) {
-            this.insertMapObject(map.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
+            this.players[playerUsernameList[i]].commandBase =
+                this.insertMapObject(map.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
             if (!Constants.IS_PRODUCTION && i < 2) {
                 const barracksLocation = new Tuple(0, 0);
                 if (i === 0) {
@@ -128,6 +130,9 @@ module.exports = class GameState {
         }
     }
 
+    getCommandBase(player) {
+        return this.players[player].commandBase;
+    }
     getUnitsOnMyTeam(player) {
         const results = [];
         this.units.forEach(u => {

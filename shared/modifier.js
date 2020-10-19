@@ -81,10 +81,36 @@ class BaseModifier {
     }
 
     // returns the time at which you would be unstunned
-    stunned(state) {
+    stunned() {
         if (this._stunned) {
             return this._stunned();
         }
+        return false;
+    }
+};
+
+class StunnedModifier extends BaseModifier {
+    constructor(displayName) {
+        super();    
+        this.displayName = displayName;    
+    }
+
+    _getName() {
+        return "Stunned";
+    }
+
+    _getDisplayName() {
+        return this.displayName;
+    }
+
+    _getIconIndex() { return 7; }
+
+    _getDescription() {
+        return `Unit is disabled and cannot attack!`;
+    }
+
+    _stunned() {
+        return true;
     }
 };
 
@@ -322,5 +348,6 @@ module.exports = {
     CloudModifier,
     VitalityModifier,
     VampiricModifier,
-    SilverBulletModifier
+    SilverBulletModifier,
+    StunnedModifier
 };

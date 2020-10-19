@@ -47,6 +47,7 @@ const { map, Tiles } = require('./map');
 const PathFinder = require('./path-finder');
 const Data = require('./data');
 const { default: GameState } = require('./game-state');
+const { StunnedModifier } = require('./modifier');
 
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the
@@ -346,8 +347,15 @@ class PhaseChangeStateChange extends StateChange {
                 const unit = state.units[i];
                 if (!this.isBuilt(unit)) {
                     unit.turnsUntilBuilt -= 1;
-                    if (this.isBuilt(unit) && unit.onCreate) {
-                        unit.onCreate(state);
+                    if (this.isBuilt(unit)) {
+                        // Stun newly built units for half an action
+                        if (unit.onCreate) {
+                            unit.onCreate(state);
+                        }
+                        unit.addModifier(state.getCommandBase(unit.owner),
+                            new StunnedModifier("Newly created unit!"), {
+                                duration: Constants.ACTION_MAX_TIME * 500
+                            });
                     }
                 }
                 if (this.isBuilt(unit) && unit.onActionStart) {
@@ -400,6 +408,14 @@ class PhaseChangeStateChange extends StateChange {
                 if (this.isBuilt(unit) && unit.onPlanningStart) {
                     unit.onPlanningStart(state);
                 }
+                const modifiers = Object.keys(unit.modifiers);
+                for (let i = 0; i < modifiers.length; i++) {
+                    const key = modifiers[i];
+                    if (unit.modifiers[key].duration) {
+                        // All modifiers that have duration time out after combat!
+                        unit.removeModifier(key);
+                    }
+                }
             }
         }
 
@@ -449,7 +465,7 @@ class ActionTickStateChange extends StateChange {
             const modifiers = Object.keys(unit.modifiers);
             for (let i = 0; i < modifiers.length; i++) {
                 const key = modifiers[i];
-                if (unit.modifiers[key].attachTime + unit.modifiers[key].duration > currentTime) {
+                if (unit.modifiers[key].duration && this.timestamp > unit.modifiers[key].attachTime + unit.modifiers[key].duration) {
                     // Modifier has Timed Out
                     unit.removeModifier(key);
                 }

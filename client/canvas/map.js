@@ -4,7 +4,7 @@ const { getBaseObject, structureList, unitList, units, structures } = require('.
 const { Structure } = require('../../shared/map-objects');
 const { map } = require('../../shared/map');
 const { UnitAttackStateChange } = require('../../shared/state-change');
-const { toDrawCoord, roundToNearest } = require('../utils');
+const { toDrawCoord, roundToNearest, toRectanglePerimeter } = require('../utils');
 const PathFinder = require('../../shared/path-finder');
 const Constants = require('../../shared/constants');
 
@@ -306,6 +306,8 @@ module.exports = class MapCanvas {
                 const modifierDisplays = Object.keys(modifierWithCount);
                 for (let i = 0; i < modifierDisplays.length; i++) {
                     const modifier = modifierWithCount[modifierDisplays[i]].modifier;
+                    const timeRemaining = modifier.duration ?
+                        ((modifier.attachTime + modifier.duration) - Date.now()) : undefined;
                     const pos = new Tuple(176, screenHeight - 195 + (i * 24));
                     this.context.drawImage(
                         this.resourceManager.get(Resource.UI_ICONS),
@@ -316,6 +318,22 @@ module.exports = class MapCanvas {
                         `x${modifierWithCount[modifierDisplays[i]].count}`,
                         'white', 16, pos.x + 26, pos.y + 15
                     );
+                    if (modifier.duration) {
+                        // Show duration indicator
+                        this.context.strokeStyle = "white";
+                        this.context.lineWidth = 2;
+                        this.context.beginPath();
+                        this.context.moveTo(pos.x + 12, pos.y);
+                        this.context.lineTo(pos.x + 12, pos.y + 12);
+
+                        const perimeter = toRectanglePerimeter({
+                            width: 24,
+                            height: 24
+                        }, ((2 * Math.PI) * ((timeRemaining / modifier.duration))) + Math.PI / 2);
+                        console.log(timeRemaining / modifier.duration, perimeter);
+                        this.context.lineTo(pos.x + perimeter.x, pos.y + perimeter.y);
+                        this.context.stroke();
+                    }
                     // Test Mouse Over
                     if (this.inputManager.mouseState.position.x > pos.x &&
                         this.inputManager.mouseState.position.x < pos.x + 24 &&
@@ -325,7 +343,10 @@ module.exports = class MapCanvas {
                         const dialogPos = new Tuple(pos.x + 30, pos.y);
                         const dialogSize = new Tuple(300, 100);
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
-                        this.drawText(modifier.getDisplayName(), Constants.YELLOW_CHAT_COLOR, 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
+                        this.drawText(modifier.getDisplayName(), 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
+                        if (modifier.duration) {
+                            this.drawText(Math.round(timeRemaining / 1000) + 's left', Constants.YELLOW_CHAT_COLOR, 16, dialogPos.x + dialogSize.x - 5, dialogPos.y + 20, 'right', 'bold');
+                        }
 
                         // Set Description
                         this.drawText(modifier.getDescription(this.state.gameState), 'white', 16, dialogPos.x + 5, dialogPos.y + 40, 'left', '', dialogSize.x - 10);

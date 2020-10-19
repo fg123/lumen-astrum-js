@@ -25,5 +25,52 @@ module.exports = {
     
     roundToNearest(n, roundTo) {
         return Math.round(n / roundTo) * roundTo;
+    },
+
+    toRectanglePerimeter(rect, theta) {
+        const twoPI = Math.PI * 2;
+        
+        while (theta < -Math.PI) {
+            theta += twoPI;
+        }
+        
+        while (theta > Math.PI) {
+            theta -= twoPI;
+        }
+        
+        const rectAtan = Math.atan2(rect.height, rect.width);
+        const tanTheta = Math.tan(theta);
+        let region;
+        
+        if ((theta > -rectAtan) && (theta <= rectAtan)) {
+            region = 1;
+        } else if ((theta > rectAtan) && (theta <= (Math.PI - rectAtan))) {
+            region = 2;
+        } else if ((theta > (Math.PI - rectAtan)) || (theta <= -(Math.PI - rectAtan))) {
+            region = 3;
+        } else {
+            region = 4;
+        }
+        
+        const edgePoint = {x: rect.width/2, y: rect.height/2};
+        let xFactor = 1;
+        let yFactor = 1;
+        
+        switch (region) {
+            case 1: yFactor = -1; break;
+            case 2: yFactor = -1; break;
+            case 3: xFactor = -1; break;
+            case 4: xFactor = -1; break;
+        }
+        
+        if ((region === 1) || (region === 3)) {
+            edgePoint.x += xFactor * (rect.width / 2.);                                     // "Z0"
+            edgePoint.y += yFactor * (rect.width / 2.) * tanTheta;
+        } else {
+            edgePoint.x += xFactor * (rect.height / (2. * tanTheta));                        // "Z1"
+            edgePoint.y += yFactor * (rect.height /  2.);
+        }
+        
+        return edgePoint;
     }
 };

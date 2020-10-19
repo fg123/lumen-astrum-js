@@ -143,7 +143,7 @@ module.exports.Unit = class {
             }
         }
     }
-    
+
     removeModifier(modifierKey) {
         if (this.modifiers[modifierKey]) {
             const mod = this.modifiers[modifierKey];
@@ -172,6 +172,14 @@ module.exports.Unit = class {
             return visionValue < this.custom.stealth;
         }
         return false;
+    }
+
+    isStunned() {
+        let val = false;
+        Object.values(this.modifiers).forEach(m => {
+            val |= m.stunned();
+        });
+        return val;
     }
 
     get sightRange() { return this.__sightRange__; }
