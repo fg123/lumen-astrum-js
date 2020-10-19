@@ -238,7 +238,6 @@ const triggers = {
 };
 
 
-
 Object.keys(triggers).forEach(key => {
     if (!(key in units) && !(key in structures)) {
         console.error(key + ' in trigger list is not a unit or structure');

@@ -2,15 +2,12 @@ const GameState = require('../shared/game-state');
 const Constants = require('../shared/constants');
 const {
     StateChange, 
-    TurnPassoverStateChange, 
-    GuardianLockdownStateChange, 
     PhaseChangeStateChange, 
     MoveUnitStateChange, 
     ChatMessageStateChange,
     UnitAttackStateChange, 
     SetUnitTargetStateChange
 } = require('../shared/state-change');
-const PathFinder = require('../shared/path-finder');
 
 module.exports = class Game {
     static fromJson(json) {
@@ -22,7 +19,9 @@ module.exports = class Game {
         const game = new Game(map, json.gameStartTime);
         clearTimeout(game.initialTurnPassover);
         for (let i = 0; i < json.stateChanges.length; i++) {
-            game.processStateChange(StateChange.deserialize(json.stateChanges[i]));
+            const stateChange = StateChange.deserialize(json.stateChanges[i]);
+            stateChange.simulateStateChange(game.state);
+            game.stateChanges.push(stateChange);
         }
         return game;
     }
@@ -100,21 +99,9 @@ module.exports = class Game {
                 shouldBroadcastMap[p] = (p === stateChange.from);
             });
         }
-        let shouldPush = true;
-        if (stateChange instanceof GuardianLockdownStateChange) {
-            let lastStateChange = this.stateChanges[this.stateChanges.length - 1];
-            if (lastStateChange instanceof GuardianLockdownStateChange) {
-                if (stateChange.data.posFrom.x === lastStateChange.data.posFrom.x &&
-                    stateChange.data.posFrom.y === lastStateChange.data.posFrom.y) {
-                    // Remove Last One
-                    this.stateChanges.pop();
-                    shouldPush = false;
-                }
-            }
-        }
-        if (shouldPush) {
-            this.stateChanges.push(stateChange);
-        }
+       
+        this.stateChanges.push(stateChange);
+
         // TODO: Advanced processing here.
         this.players.forEach(p => {
             if (this.sockets[p] !== undefined && shouldBroadcastMap[p]) {
@@ -158,11 +145,8 @@ module.exports = class Game {
         }
 
         const actionMap = {};
- 
         const TICK_TIME = 100;
-
         const MOVE_COOLDOWN = 400;
-
         const actionPhaseStart = Date.now();
         
         const actionPhaseTick = setInterval(() => {
