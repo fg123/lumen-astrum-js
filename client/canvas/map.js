@@ -333,7 +333,6 @@ module.exports = class MapCanvas {
                             width: 24,
                             height: 24
                         }, ((2 * Math.PI) * ((timeRemaining / modifier.duration))) + Math.PI / 2);
-                        console.log(timeRemaining / modifier.duration, perimeter);
                         this.context.lineTo(pos.x + perimeter.x, pos.y + perimeter.y);
                         this.context.stroke();
                     }
