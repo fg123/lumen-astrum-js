@@ -221,6 +221,10 @@ const triggers = {
             const damageArea = getSurrounding(this.position, 2);
             for (let i = 0; i < damageArea.length; i++) {
                 const tile = damageArea[i];
+                if (tile.equals(this.position)) {
+                    // Don't try to destroy myself.
+                    continue;
+                }
                 if (tupleDistance(tile, this.position) === 1) {
                     const target = findTarget(state, tile);
                     if (target && target.owner !== undefined && target.targetable) {
@@ -293,9 +297,7 @@ const triggers = {
             return didWeClaim;
         },
         onDestroy(state) {
-            console.log("Dying", this);
             if (this.claimedTiles) {
-                console.log("Unclaiming tiles", this.claimedTiles);
                 this.claimedTiles.forEach(t => {
                     state.revokeAllowedBuilding(t.x, t.y, this.owner);
                 });

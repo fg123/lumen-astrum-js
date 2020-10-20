@@ -1,4 +1,5 @@
 const is_production = process.env.NODE_ENV === 'production';
+
 module.exports = {
     RED_CHAT_COLOR: 'red',
     BLUE_CHAT_COLOR: 'dodgerblue',
