@@ -12,13 +12,13 @@ const {
 const { default: modifier } = require('../shared/modifier');
 
 module.exports = class Game {
-    static fromJson(json) {
+    static fromJson(json, onGameOver) {
         const map = {};
         json.players.forEach(p => {
             map[p] = undefined;
         });
 
-        const game = new Game(map, json.gameStartTime);
+        const game = new Game(map, json.gameStartTime, onGameOver);
         clearTimeout(game.initialTurnPassover);
         for (let i = 0; i < json.stateChanges.length; i++) {
             const stateChange = StateChange.deserialize(json.stateChanges[i]);
@@ -29,8 +29,10 @@ module.exports = class Game {
         game.processStateChange(PhaseChangeStateChange.create(undefined));
         return game;
     }
-    constructor(playerSocketMap, gameStartTime) {
+    constructor(playerSocketMap, gameStartTime, onGameOver) {
         this.players = Object.keys(playerSocketMap);
+        this.onGameOver = onGameOver;
+
         console.log("Constructing a new game with players: ", this.players);
         this.sockets = playerSocketMap;
 
@@ -245,11 +247,15 @@ module.exports = class Game {
             // No one did a move, we can proceed with ending this action phase.
             if (timeUp || finishedActions || this.isGameOver) {
                 clearInterval(actionPhaseTick);
-                if (!this.isGameOver) {
+                const gameStateOver = this.state.getWinner();
+                if (gameStateOver === undefined) {
                     this.nextPhaseTimer = setTimeout(() => {
                         this.nextPhaseTimer = undefined;
                         this.processStateChange(PhaseChangeStateChange.create(undefined));
                     }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
+                }
+                else {
+                    this.onGameOver(this, gameStateOver);
                 }
             }
         }, TICK_TIME);
