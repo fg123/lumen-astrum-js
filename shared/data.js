@@ -181,9 +181,7 @@ const structures = {
     },
     "Turret": {
         'description': 'Requires Automation Factory. Stationary, single-target ranged turret.',
-        // The health is irrelevant because this gets converted to an Armed Turret on action
-        //   start
-        'health': 1,
+        'health': 100,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
