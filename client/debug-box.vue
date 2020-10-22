@@ -2,9 +2,25 @@
     <div class="debugBox" ref="debugBox">
         <table>
             <tr>
-                <td>Selected: ({{ selectedLocation.x }},{{ selectedLocation.y }})</td>
-                <td><button @click="cheatKill()">Kill</button></td>
-                <td></td>
+                <td>
+                    Selected: ({{ selectedLocation.x }},{{ selectedLocation.y }})
+                    <button @click="cheatKill()">Kill</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <select v-model="selectedPlayer">
+                        <option v-for="p in players" :key="p">
+                            {{ p }}
+                        </option>
+                    </select>
+                    <select v-model="selectedMapObject">
+                        <option v-for="obj in mapObjectNames" :key="obj">
+                            {{ obj }}
+                        </option>
+                    </select>
+                    <button @click="cheatSpawn()">Spawn</button>
+                </td>
             </tr>
         </table>
     </div>
@@ -12,9 +28,10 @@
 
 <script>
 const { Tuple } = require("../shared/coordinates");
-const { DebugCheatStateChange, DealDamageStateChange }=require("../shared/state-change");
+const { DebugCheatStateChange, DealDamageStateChange, SpawnMapObject }=require("../shared/state-change");
 const { Resource } = require("./resources");
 const { toDrawCoord } = require("./utils");
+const { structures, units } = require('../shared/data');
 
 module.exports = {
     name: 'debug-box',
@@ -23,8 +40,21 @@ module.exports = {
             selectedLocation: new Tuple(0, 0),
             inputManager: undefined,
             socket: undefined,
-            mouseOverDebugBox: false
+            mouseOverDebugBox: false,
+            clientState: undefined,
+            selectedPlayer: "",
+            selectedMapObject: "Deployment Outpost"
         };
+    },
+    computed: {
+        players() {
+            if (!this.clientState) return [];
+            if (!this.clientState.gameState) return [];
+            return Object.keys(this.clientState.gameState.players);
+        },
+        mapObjectNames() {
+            return Object.keys(structures).concat(Object.keys(units));
+        }
     },
     mounted() {
         this.$refs.debugBox.addEventListener('mouseenter', () => {
@@ -63,6 +93,25 @@ module.exports = {
                     )
                 )
             );
+        },
+        cheatSpawn() {
+            if (this.selectedMapObject) {
+                let player = this.selectedPlayer;
+                if (!player) {
+                    player = this.clientState.player;
+                }
+                this.clientState.sendStateChange(
+                    DebugCheatStateChange.create(
+                        this.clientState.player,
+                        SpawnMapObject.create(
+                            this.clientState.player,
+                            this.selectedLocation,
+                            this.selectedMapObject,
+                            player
+                        )
+                    )
+                );
+            }
         },
         isMouseOverDebugBox() {
             return this.mouseOverDebugBox;

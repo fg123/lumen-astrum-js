@@ -924,11 +924,44 @@ class DealDamageStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
+        if (!this._verifyStateChange(state)) return;
+
         const target = findTarget(state, this.data.posTo);
         state.dealDamageToUnit(target, this.data.damage);
     }
 }
 StateChange.registerSubClass(DealDamageStateChange);
+
+class SpawnMapObject extends StateChange {
+    static create(from, posTo, mapObject, owner) {
+        return new SpawnMapObject(
+            StateChange.create(
+                from, 'SpawnMapObject', {
+                    posTo,
+                    mapObject,
+                    owner
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (!map.withinMap(this.data.posTo)) {
+            return false;
+        }
+        const mapObject = state.occupied[this.data.posTo.y][this.data.posTo.x];
+        if (mapObject) {
+            return false;
+        }
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        if (!this._verifyStateChange(state)) return;
+        state.insertMapObject(this.data.posTo, this.data.mapObject, this.data.owner);
+    }
+}
+StateChange.registerSubClass(SpawnMapObject);
 
 module.exports = {
     StateChange,
@@ -946,5 +979,6 @@ module.exports = {
     LaunchProbeStateChange,
     ActionTickStateChange,
     DealDamageStateChange,
+    SpawnMapObject,
     DebugCheatStateChange
 };
