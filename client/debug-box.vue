@@ -32,6 +32,7 @@ const { DebugCheatStateChange, DealDamageStateChange, SpawnMapObject }=require("
 const { Resource } = require("./resources");
 const { toDrawCoord } = require("./utils");
 const { structures, units } = require('../shared/data');
+const Constants = require("../shared/constants");
 
 module.exports = {
     name: 'debug-box',
@@ -69,18 +70,20 @@ module.exports = {
             this.socket = socket;
             this.clientState = clientState;
             this.inputManager = inputManager;
-            inputManager.attachMouseDownObserver((key) => {
-                // Left button
-                if (key === 1) {
-                    this.selectedLocation = this.inputManager.mouseState.tile;
-                }
-                return false;
-            });
-            mapCanvas.postDrawHooks.push((context) => {
-                const drawCoord = toDrawCoord(this.selectedLocation.x, this.selectedLocation.y);
-                mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.DEBUG_RING),
-                    drawCoord.x, drawCoord.y);
-            });
+            if (!Constants.IS_PRODUCTION) {
+                inputManager.attachMouseDownObserver((key) => {
+                    // Left button
+                    if (key === 1) {
+                        this.selectedLocation = this.inputManager.mouseState.tile;
+                    }
+                    return false;
+                });
+                mapCanvas.postDrawHooks.push((context) => {
+                    const drawCoord = toDrawCoord(this.selectedLocation.x, this.selectedLocation.y);
+                    mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.DEBUG_RING),
+                        drawCoord.x, drawCoord.y);
+                });
+            }
         },
         cheatKill() {
             this.clientState.sendStateChange(
