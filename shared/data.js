@@ -376,7 +376,7 @@ const units = {
     'Armed Turret': {
         'attackRange': 2,
         'attackSpeed': 1.5,
-        'damage': 3,
+        'damage': 5,
         'description': 'This is constructed by the Turret building.',
         'health': 100,
         'moveRange': 0,
