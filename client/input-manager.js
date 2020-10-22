@@ -44,6 +44,9 @@ module.exports = class InputManager {
             this.keyState[code] = false;
         });
         $(document).mousedown((e) => {
+            if (this.isMouseOverChatBox() || this.isChatBoxFocused()) {
+                return;
+            }
             this.mouseState.mouseDownListeners.some((fn) => {
                 return fn(e.which);
             });

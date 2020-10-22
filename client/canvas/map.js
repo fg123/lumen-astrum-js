@@ -42,6 +42,7 @@ module.exports = class MapCanvas {
             thisLoop: 0
         };
 
+        this.postDrawHooks = [];
         /* Start Graphics Loop */
         const tick = () => {
             this.drawContext.screenWidth = window.innerWidth;
@@ -455,6 +456,9 @@ module.exports = class MapCanvas {
         this.context.translate(-(this.camera.position.x - offsetX),
             -(this.camera.position.y - offsetY));
         this.drawMap();
+        for (let i = 0; i < this.postDrawHooks.length; i++) {   
+            this.postDrawHooks[i](this.context);
+        }
         this.context.restore();
     }
 

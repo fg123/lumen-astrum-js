@@ -879,6 +879,56 @@ class LaunchProbeStateChange extends StateChange {
 }
 StateChange.registerSubClass(LaunchProbeStateChange);
 
+class DebugCheatStateChange extends StateChange {
+    static create(from, stateChange) {
+        return new DebugCheatStateChange(
+            StateChange.create(
+                from, 'DebugCheatStateChange', {
+                    stateChange: stateChange
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        return !Constants.IS_PRODUCTION;
+    }
+
+    _simulateStateChange(state) {
+        const sc = StateChange.deserialize(this.data.stateChange);
+        sc._simulateStateChange(state);
+    }
+}
+StateChange.registerSubClass(DebugCheatStateChange);
+
+class DealDamageStateChange extends StateChange {
+    static create(from, posTo, damage) {
+        return new DealDamageStateChange(
+            StateChange.create(
+                from, 'DealDamageStateChange', {
+                    posTo,
+                    damage
+                }
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (!map.withinMap(this.data.posTo)) {
+            return false;
+        }
+        /* Is this from a structure that belongs to the player? */
+        const mapObject = state.mapObjects[this.data.posTo.y][this.data.posTo.x];
+        if (mapObject === undefined) return false;
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        const target = findTarget(state, this.data.posTo);
+        state.dealDamageToUnit(target, this.data.damage);
+    }
+}
+StateChange.registerSubClass(DealDamageStateChange);
 
 module.exports = {
     StateChange,
@@ -894,5 +944,7 @@ module.exports = {
     ReaverDetonateStateChange,
     GuardianLockdownStateChange,
     LaunchProbeStateChange,
-    ActionTickStateChange
+    ActionTickStateChange,
+    DealDamageStateChange,
+    DebugCheatStateChange
 };

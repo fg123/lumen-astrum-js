@@ -40,6 +40,7 @@ module.exports = {
         this.$refs.chatBox.addEventListener('mouseleave', () => {
             this.mouseOverChatBox = false;
         });
+        this.$refs.chatInput.disabled = true;
     },
     methods: {
         addMessage(message) {
@@ -47,6 +48,7 @@ module.exports = {
             this.messages.push(message);
         },
         focus() {
+            this.$refs.chatInput.disabled = false;
             this.$refs.chatInput.focus();
         },
         onKey(e) {
@@ -55,9 +57,11 @@ module.exports = {
                 this.game.sendChat(this.$refs.chatInput.value);
                 this.$refs.chatInput.value = "";
                 this.$refs.chatInput.blur();
+                this.$refs.chatInput.disabled = true;
             }
             else if (code === 27) {
                 this.$refs.chatInput.blur();
+                this.$refs.chatInput.disabled = true;
             }
         },
         isFocused() {

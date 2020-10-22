@@ -589,7 +589,7 @@ module.exports = class ClientState {
 
             let obj = this.getHoveredObjectOrNull();
             this.selectObject(obj);
-            return true;
+            return false;
         }
         return false;
     }
