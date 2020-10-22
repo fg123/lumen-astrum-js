@@ -329,15 +329,21 @@ module.exports = class GameState {
                 target.currentShield = 0;
             }
         }
-        target.currentHealth -= damage;
+        const damageToDeal = Math.min(damage, target.currentHealth);
+        target.currentHealth -= damageToDeal;
+
         if (target.currentHealth <= 0) {
-            target.currentHealth = 0;
+            if (target.currentHealth < 0) {
+                console.error('Should not happen! damage', damage, 'damage to deal', damageToDeal);
+                target.currentHealth = 0;
+            }
             /* Kill Unit / Structure */
             this.deadObjects.push(target.position);
             if (target.onDestroy) {
                 target.onDestroy(this);
             }
         }
+        return damageToDeal;
     }
 
     removeMapObject(location) {
