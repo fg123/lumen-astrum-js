@@ -44,7 +44,6 @@ module.exports = {
     },
     methods: {
         addMessage(message) {
-            console.log(message);
             this.messages.push(message);
         },
         focus() {

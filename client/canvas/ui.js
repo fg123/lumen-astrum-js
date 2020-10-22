@@ -123,7 +123,8 @@ module.exports = class UICanvas {
         this.context.textBaseline = 'middle';
         this.context.fillStyle = 'white';
         this.context.font = 'bold 32px Prompt';
-        this.context.fillText(this.state.getGold(), screenWidth - 170, screenHeight - 181);
+        const gold = this.state.hasForfeited() ? "FORFEIT" : this.state.getGold();
+        this.context.fillText(gold, screenWidth - 170, screenHeight - 181);
         this.context.textBaseline = 'alphabetic';
         
         // Show Timer

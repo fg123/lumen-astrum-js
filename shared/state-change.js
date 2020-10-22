@@ -76,6 +76,7 @@ class BuildStructureStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
+        if (state.hasPlayerForfeited(this.from)) return false;
         const option = this.getOptionToBuild();
         if (!option) {
             return false;
@@ -181,6 +182,7 @@ class SpawnUnitStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
+        if (state.hasPlayerForfeited(this.from)) return false;
         const option = this.getOptionToBuild();
         if (!option) {
             return false;
@@ -238,6 +240,7 @@ class SetUnitTargetStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
+        if (state.hasPlayerForfeited(this.from)) return false;
         if (!map.withinMap(this.data.unitPos) || !map.withinMap(this.data.posTarget)) {
             return false;
         }
@@ -283,6 +286,7 @@ class MoveUnitStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_ACTION) return false;
+        if (state.hasPlayerForfeited(this.from)) return false;
         if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
@@ -494,6 +498,7 @@ class UnitAttackStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
+        if (state.hasPlayerForfeited(this.from)) return false;
         if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
             return false;
         }
@@ -586,10 +591,19 @@ class ChatMessageStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
-        state.chatMessages.push({
-            author: this.from,
-            content: this.data.message
-        });
+        if (this.data.message === '/ff') {
+            state.forfeit(this.from);
+            state.chatMessages.push({
+                author: undefined,
+                content: `${this.from} has forfeited!`
+            });
+        }
+        else {
+            state.chatMessages.push({
+                author: this.from,
+                content: this.data.message
+            });
+        }
     }
 }
 StateChange.registerSubClass(ChatMessageStateChange);
@@ -963,6 +977,34 @@ class SpawnMapObject extends StateChange {
 }
 StateChange.registerSubClass(SpawnMapObject);
 
+
+class ForfeitStateChange extends StateChange {
+    static create(from) {
+        return new ForfeitStateChange(
+            StateChange.create(
+                from, 'ForfeitStateChange'
+            )
+        );
+    }
+
+    _verifyStateChange(state) {
+        if (!map.withinMap(this.data.posTo)) {
+            return false;
+        }
+        const mapObject = state.occupied[this.data.posTo.y][this.data.posTo.x];
+        if (mapObject) {
+            return false;
+        }
+        return true;
+    }
+
+    _simulateStateChange(state) {
+        if (!this._verifyStateChange(state)) return;
+        state.insertMapObject(this.data.posTo, this.data.mapObject, this.data.owner);
+    }
+}
+StateChange.registerSubClass(ForfeitStateChange);
+
 module.exports = {
     StateChange,
     BuildStructureStateChange,
@@ -980,5 +1022,6 @@ module.exports = {
     ActionTickStateChange,
     DealDamageStateChange,
     SpawnMapObject,
-    DebugCheatStateChange
+    DebugCheatStateChange,
+    ForfeitStateChange
 };

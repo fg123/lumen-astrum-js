@@ -360,7 +360,8 @@ module.exports = class MapCanvas {
             this.state.hoveredOption = null;
             /* Draw Options */
             if (this.objectIsMine(this.state.selectedObject) &&
-                this.state.selectedObject.turnsUntilBuilt === 0) {
+                this.state.selectedObject.turnsUntilBuilt === 0 &&
+                !this.state.hasForfeited()) {
                 for (let i = 0; i < baseObj.options.length; i++) {
                     // Set Icon: icon can be {UnitName/StructureName} or {x,y}
                     const optionIcon = baseObj.options[i].icon.slice(1, -1);

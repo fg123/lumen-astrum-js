@@ -13,6 +13,8 @@ class PlayerState {
     constructor(playerName) {
         this.playerName = playerName;
         
+        this.forfeited = false;
+
         // Caches what tiles we have visibility of
         this.visibilityCache = [];
 
@@ -130,9 +132,25 @@ module.exports = class GameState {
         }
     }
 
+    forfeit(player) {
+        this.players[player].forfeited = true;
+        // Remove Fog Of War
+
+        for (let i = 0; i < map.data.length; i++) {
+            for (let j = 0; j < map.data[i].length; j++) {
+                this.addVisibility(j, i, player);
+            }
+        }
+    }
+
+    hasPlayerForfeited(player) {
+        return this.players[player].forfeited;
+    }
+
     getCommandBase(player) {
         return this.players[player].commandBase;
     }
+
     getUnitsOnMyTeam(player) {
         const results = [];
         this.units.forEach(u => {

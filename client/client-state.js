@@ -108,8 +108,10 @@ module.exports = class ClientState {
             }
             for (let i = 0; i < DIGIT_KEYS.length; i++) {
                 if (keyState[DIGIT_KEYS[i]] && !prevKeyState[DIGIT_KEYS[i]]) {
-                    if (this.selectedObject && this.objectIsMine(this.selectedObject)
-                            && this.selectedObject.turnsUntilBuilt === 0) {
+                    if (this.selectedObject &&
+                            this.objectIsMine(this.selectedObject) &&
+                            this.selectedObject.turnsUntilBuilt === 0 &&
+                            !this.hasForfeited()) {
                         const baseObj = getBaseObject(this.selectedObject.name);
                         if (i < baseObj.options.length) {
                             this.handleOptionClicked(baseObj.options[i]);
@@ -280,7 +282,8 @@ module.exports = class ClientState {
                  * that's not properly defined as a prop, so we have to manually
                  * push changes over. */
                 const fakeState = {
-                    chatMessages: []
+                    chatMessages: [],
+                    forfeit(player) {}
                 };
                 change._simulateStateChange(fakeState);
                 const message = fakeState.chatMessages[0];
@@ -447,6 +450,10 @@ module.exports = class ClientState {
             break;
         }
         return;
+    }
+
+    hasForfeited() {
+        return this.gameState.hasPlayerForfeited(this.player);
     }
 
     customActionDispatch(name, option) {
