@@ -68,9 +68,7 @@ module.exports.Unit = class {
         this.__sightRange__ = Data.units[name].sightRange;
 
         this.baseAttackDamage = Data.units[name].damage;
-        if (this.baseAttackDamage !== 0 && !Constants.IS_PRODUCTION) {
-            this.baseAttackDamage += 25;
-        }
+
         this.isStructure = false;
         this.isUnit = true;
 

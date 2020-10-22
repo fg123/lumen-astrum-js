@@ -244,6 +244,7 @@ module.exports = class Game {
                     finishedActions = false;
                 }
             }
+
             // No one did a move, we can proceed with ending this action phase.
             if (timeUp || finishedActions || this.isGameOver) {
                 clearInterval(actionPhaseTick);

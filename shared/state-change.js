@@ -381,8 +381,8 @@ class PhaseChangeStateChange extends StateChange {
         }
         else {
             state.phase = Constants.PHASE_PLANNING;
-
-            // Delete dead objects from trade in action
+            
+            // Remove all dead units from this tick
             for (let i = 0; i < state.deadObjects.length; i++) {
                 state.removeMapObject(state.deadObjects[i]);
             }
@@ -475,6 +475,12 @@ class ActionTickStateChange extends StateChange {
                 }
             }
         }
+
+        // Remove all dead units from this tick
+        for (let i = 0; i < state.deadObjects.length; i++) {
+            state.removeMapObject(state.deadObjects[i]);
+        }
+        state.deadObjects = [];
     }
 }
 StateChange.registerSubClass(ActionTickStateChange);
