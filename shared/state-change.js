@@ -977,34 +977,6 @@ class SpawnMapObject extends StateChange {
 }
 StateChange.registerSubClass(SpawnMapObject);
 
-
-class ForfeitStateChange extends StateChange {
-    static create(from) {
-        return new ForfeitStateChange(
-            StateChange.create(
-                from, 'ForfeitStateChange'
-            )
-        );
-    }
-
-    _verifyStateChange(state) {
-        if (!map.withinMap(this.data.posTo)) {
-            return false;
-        }
-        const mapObject = state.occupied[this.data.posTo.y][this.data.posTo.x];
-        if (mapObject) {
-            return false;
-        }
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        if (!this._verifyStateChange(state)) return;
-        state.insertMapObject(this.data.posTo, this.data.mapObject, this.data.owner);
-    }
-}
-StateChange.registerSubClass(ForfeitStateChange);
-
 module.exports = {
     StateChange,
     BuildStructureStateChange,
@@ -1022,6 +994,5 @@ module.exports = {
     ActionTickStateChange,
     DealDamageStateChange,
     SpawnMapObject,
-    DebugCheatStateChange,
-    ForfeitStateChange
+    DebugCheatStateChange
 };
