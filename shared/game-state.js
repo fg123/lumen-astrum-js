@@ -570,12 +570,23 @@ module.exports = class GameState {
 
     getWinner() {
         const playerNames = Object.keys(this.players);
+        const nonForfeitedPlayers = [];
         for (let i = 0; i < playerNames.length; i++) {
+            if (this.hasPlayerForfeited(playerNames[i])) {
+                // Cannot be a winner if you've forfeited
+                continue;
+            }
+            nonForfeitedPlayers.push(playerNames[i]);
+
             const size = this.players[playerNames[i]].calculateTerritorySize();
             // console.log(playerNames[i], size, map.territorialTiles, size / map.territorialTiles);
             if ((size / map.territorialTiles) > Constants.PERCENTAGE_CLAIM_TO_WIN) {
                 return playerNames[i];
             }
+        }
+        if (nonForfeitedPlayers.length === 1) {
+            // One player left 
+            return nonForfeitedPlayers[0];
         }
         return undefined;
     }

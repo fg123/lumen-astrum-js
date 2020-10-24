@@ -358,22 +358,10 @@ function startServer() {
         socket.on('state-change', function (stateChange) {
             const change = StateChange.deserialize(stateChange);
             let game = connectedUsers[socket.id].game;
-            if (game !== null)
-            {
+            if (game !== null && !game.isGameOver) {
                 if (game.verifyStateChange(change)) {
                     // Process will call simulate and foward as necessary
-                    const winner = game.processStateChange(change);
-                    if (winner !== undefined) {
-                        if (game.state.nextPhaseTimer) {
-                            clearInterval(game.state.nextPhaseTimer);
-                        }
-
-                        // const eloChange = parseInt(16 +
-                        //     (connectedUsers[game.redSocket.id].elo - connectedUsers[game.blueSocket.id]) * 0.04);
-                        // if (eloChange > 31) eloChange = 31;
-                        // if (eloChange < 1) eloChange = 1;
-                        // db.collection('users').find({ username, password: generateHash(password) })
-                    }
+                    game.processStateChange(change);
                 }
                 else {
                     socket.emit('invalid-state-change');

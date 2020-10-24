@@ -110,6 +110,15 @@ module.exports = class Game {
                 this.sockets[p].emit('state-change', stateChange);
             }
         });
+
+        const winner = this.state.getWinner();
+        if (winner !== undefined) {
+            if (this.state.nextPhaseTimer) {
+                clearInterval(this.state.nextPhaseTimer);
+                this.state.nextPhaseTimer = undefined;
+            }
+            this.onGameOver(this, winner);
+        }
         return this.state.getWinner();
     }
 
