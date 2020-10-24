@@ -26,7 +26,43 @@ const structures = {
                     'description': '{Engineer}',
                     'icon': '{Engineer}',
                     'command': 'spawn-Engineer'
-                }
+                },
+                {
+                    'title': 'Build Stim Lab',
+                    'cost': 2000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': '{Stim Lab}',
+                    'icon': '{Stim Lab}',
+                    'command': 'build-Stim Lab'
+                },
+                {
+                    'title': 'Build Artillery Bay',
+                    'cost': 2000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': '{Artillery Bay}',
+                    'icon': '{Artillery Bay}',
+                    'command': 'build-Artillery Bay'
+                },
+                {
+                    'title': 'Build Cloud Gate',
+                    'cost': 2000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': '{Cloud Gate}',
+                    'icon': '{Cloud Gate}',
+                    'command': 'build-Cloud Gate'
+                },
+                {
+                    'title': 'Build Vitality Fountain',
+                    'cost': 2000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': '{Vitality Fountain}',
+                    'icon': '{Vitality Fountain}',
+                    'command': 'build-Vitality Fountain'
+                },
             ],
         'targetable': false
     },
@@ -292,15 +328,6 @@ const units = {
             'command': 'build-Turret'
         },
         {
-            'title': 'Build Stim Lab',
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': '{Stim Lab}',
-            'icon': '{Stim Lab}',
-            'command': 'build-Stim Lab'
-        },
-        {
             'title': "Build Thieves' Cave",
             'cost': 2000,
             'prereq': [],
@@ -308,33 +335,6 @@ const units = {
             'description': "{Thieves' Cave}",
             'icon': "{Thieves' Cave}",
             'command': "build-Thieves' Cave"
-        },
-        {
-            'title': 'Build Artillery Bay',
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': '{Artillery Bay}',
-            'icon': '{Artillery Bay}',
-            'command': 'build-Artillery Bay'
-        },
-        {
-            'title': 'Build Cloud Gate',
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': '{Cloud Gate}',
-            'icon': '{Cloud Gate}',
-            'command': 'build-Cloud Gate'
-        },
-        {
-            'title': 'Build Vitality Fountain',
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': '{Vitality Fountain}',
-            'icon': '{Vitality Fountain}',
-            'command': 'build-Vitality Fountain'
         },
         {
             'title': 'Build Vampiric Lair',

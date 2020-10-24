@@ -5,5 +5,6 @@
 <style>
 img.logo {
     display: block;
+    margin-bottom: 20px;
 }
 </style>

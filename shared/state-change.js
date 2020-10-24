@@ -131,20 +131,16 @@ class BuildStructureStateChange extends StateChange {
                 }
             }
         }
-        if (this.data.builtBy.isUnit) {
-            // Check if building place is near a builder!
-            const builder = state.mapObjects[this.data.builtBy.position.y][
-                this.data.builtBy.position.x];
-            if (!builder) {
-                return false;
-            }
-            if (builder.name !== 'Engineer') {
-                return false;
-            }
-            if (tupleDistance(builder.position, this.data.position) !== 1) {
-                return false;
-            }
+        
+        const builder = state.mapObjects[this.data.builtBy.position.y][
+            this.data.builtBy.position.x];
+        if (!builder) {
+            return false;
         }
+        if (tupleDistance(builder.position, this.data.position) !== 1 + builder.width) {
+            return false;
+        }
+        
         return true;
     }
 

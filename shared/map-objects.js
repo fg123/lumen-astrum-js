@@ -84,9 +84,6 @@ module.exports.Unit = class {
         this.desiredPath = [];
         this.targetPoint = undefined;
 
-        // Rotation is the desired rotation
-        this.currentRotation = 0;
-
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;
 

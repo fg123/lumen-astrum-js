@@ -249,7 +249,6 @@ function startServer() {
                     }
                     else {
                         console.log('Auth success for: ' + username);
-                        console.log(res[0]);
                         
                         authSuccessProcedure(res[0], callback);
                     }

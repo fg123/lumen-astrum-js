@@ -95,16 +95,14 @@ class PlaceStructurePendingAction extends PendingAction {
         ).verifyStateChange(mapCanvas.state.gameState);
 
         // Draw Building Range
-        if (mapCanvas.state.selectedObject.isUnit) {
-            surrounding = getSurrounding(mapCanvas.state.selectedObject.position, 1);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (map.withinMap(surrounding[i]) &&
-                    !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
-                    map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
-                    const drawn = toDrawCoord(surrounding[i]);
-                    mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
-                        drawn.x, drawn.y);
-                }
+        surrounding = getSurrounding(mapCanvas.state.selectedObject.position, mapCanvas.state.selectedObject.width + 1);
+        for (let i = 0; i < surrounding.length; i++) {
+            if (map.withinMap(surrounding[i]) &&
+                !mapCanvas.state.gameState.occupied[surrounding[i].y][surrounding[i].x] &&
+                map.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
+                const drawn = toDrawCoord(surrounding[i]);
+                mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.GREEN_OVERLAY),
+                    drawn.x, drawn.y);
             }
         }
 
