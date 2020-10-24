@@ -73,15 +73,27 @@ module.exports = class MapCanvas {
         }
     }
 
+    interpolateTowards(current, desired) {
+        return current + 0.3 * (desired - current);
+    }
+
     drawHealthAndShieldBar(x, y, mapObject) {
         const totalWidth = 104;
         const start = x - (totalWidth / 2);
         /* Draw black background */
         this.drawRectangle('black', start, y, totalWidth, 16);
         
+        // Tick / transition health
+        if (!mapObject.clientHealth) {
+            mapObject.clientHealth = mapObject.currentHealth;
+        }
+        const desiredHealth = mapObject.currentHealth;
+        const currentHealth = mapObject.clientHealth;
+        mapObject.clientHealth = this.interpolateTowards(currentHealth, desiredHealth);
+
         /* Draw Health Bars (100px x 5px each) */
         const maxHealth = mapObject.maxHealth;
-        const healthPercent = mapObject.currentHealth / maxHealth;
+        const healthPercent = currentHealth / maxHealth;
         let healthColor = 'red';
         if (this.objectIsMine(mapObject)) {
             healthColor = 'green';
@@ -573,8 +585,11 @@ module.exports = class MapCanvas {
 
                         // Desired Rotation
                         const desiredRotation = mapObject.rotation;
-                        const currentRotation = mapObject.currentRotation;
-                        mapObject.currentRotation = currentRotation + 0.3 * (desiredRotation - currentRotation);
+                        if (!mapObject.clientRotation) {
+                            mapObject.clientRotation = mapObject.rotation;
+                        }
+                        const currentRotation = mapObject.clientRotation;
+                        mapObject.clientRotation = this.interpolateTowards(currentRotation, desiredRotation);
 
                         if (animationManager.hasAnimation()) {
                             // Draw any animations in the animation stack
@@ -592,7 +607,7 @@ module.exports = class MapCanvas {
                                             possiblePositionChange.x, possiblePositionChange.y,
                                             units[name].image.width,
                                             units[name].image.height,
-                                            mapObject.currentRotation);
+                                            currentRotation);
                                     }
                                 }
                                 actualDrawnPosition = possiblePositionChange;
@@ -616,7 +631,7 @@ module.exports = class MapCanvas {
                                     this.drawImage(units[name].image, drawCoord.x, drawCoord.y,
                                         units[name].image.width,
                                         units[name].image.height,
-                                        mapObject.currentRotation);
+                                        currentRotation);
                                 }
                             }
                             else {
