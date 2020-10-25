@@ -230,6 +230,7 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
         this.rotation = attacker.rotation;
         this.framesOn = 4;
         this.maxTicks = this.framesOn * 2;
+        this.flash = this.resourceManager.get(Muzzles[Math.floor(Math.random() * Muzzles.length)]);
     }
 
     _tick() {
