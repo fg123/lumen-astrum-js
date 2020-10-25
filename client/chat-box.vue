@@ -50,6 +50,9 @@ module.exports = {
             this.$refs.chatInput.disabled = false;
             this.$refs.chatInput.focus();
         },
+        clearChat() {
+            this.messages = [];
+        },
         onKey(e) {
             const code = e.keyCode || e.which;
             if (code === 13 && this.$refs.chatInput.value) {

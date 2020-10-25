@@ -83,26 +83,29 @@ function startServer() {
     }
 
     function handleGameOver(game, winner) {
-        console.log('Game Over!');
-        const gameOver = {
-            winner: winner
-        };
-        Object.values(game.sockets).forEach(s => {
-            s.emit('game-over', gameOver);
-        });
-        game.isGameOver = true;
-        game.players.forEach(p => {
-            if (game.sockets[p] !== undefined) {
-                connectedUsers[game.sockets[p].id].game = null;
-            }
-        });
+        if (!game.isGameOver) {
+            console.log('Game Over!');
+            
+            const gameOver = {
+                winner: winner
+            };
+            Object.values(game.sockets).forEach(s => {
+                s.emit('game-over', gameOver);
+            });
+            game.isGameOver = true;
+            game.players.forEach(p => {
+                if (game.sockets[p] !== undefined) {
+                    connectedUsers[game.sockets[p].id].game = null;
+                }
+            });
 
-        for (let i = 0; i < games.length; i++) {
-            // If the first 2 matches it's probably correct.
-            if (games[i].players[0] === game.players[0] &&
-                games[i].players[1] === game.players[1]) {
-                games.splice(i, 1);
-                break;
+            for (let i = 0; i < games.length; i++) {
+                // If the first 2 matches it's probably correct.
+                if (games[i].players[0] === game.players[0] &&
+                    games[i].players[1] === game.players[1]) {
+                    games.splice(i, 1);
+                    break;
+                }
             }
         }
     }

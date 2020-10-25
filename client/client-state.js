@@ -322,7 +322,7 @@ module.exports = class ClientState {
         socket.on('game-start', (gameStartTime, players) => {
             console.log(players);
             this.ui.goToGame();
-            
+            this.chatbox.clearChat();
             const player = this.player;
             const index = players.indexOf(player);
             if (index === -1) {
