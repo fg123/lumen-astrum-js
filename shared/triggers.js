@@ -19,6 +19,10 @@ const {
     SilverBulletModifier
 } = require('./modifier');
 
+function buffableUnit(u) {
+    return u.buffable;
+}
+
 // Triggers that are available:
 //   onPlanningStart
 //   onActionStart
@@ -83,7 +87,7 @@ const triggers = {
     'Stim Lab': {
         onActionStart(state) {
             // Add modifier to everyone on my team            
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new StimModifier(this.custom.attackSpeedMultiplier), {
                     onlyOne: true
@@ -91,7 +95,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -101,7 +105,7 @@ const triggers = {
     "Thieves' Cave": {
         onActionStart(state) {
             // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), {
                     onlyOne: true
@@ -109,7 +113,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -119,7 +123,7 @@ const triggers = {
     "Artillery Bay": {
         onActionStart(state) {
             // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new ArtilleryModifier(this.custom.attackDamageMultiplier), {
                     onlyOne: true
@@ -127,7 +131,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -137,7 +141,7 @@ const triggers = {
     "Cloud Gate": {
         onActionStart(state) {
             // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new CloudModifier(this.custom.moveRangeDelta), {
                     onlyOne: true
@@ -145,7 +149,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -155,7 +159,7 @@ const triggers = {
     "Vitality Fountain": {
         onActionStart(state) {
             // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new VitalityModifier(this.custom.healthMultiplier), {
                     onlyOne: true
@@ -163,7 +167,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -173,7 +177,7 @@ const triggers = {
     "Vampiric Lair": {
         onActionStart(state) {
             // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new VampiricModifier(this.custom.healMultiplier), {
                     onlyOne: true
@@ -181,7 +185,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -191,7 +195,7 @@ const triggers = {
     "Shauna's Forge": {
         onActionStart(state) {
             // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new SilverBulletModifier(this.custom.healthMultiplier), {
                     onlyOne: true
@@ -199,7 +203,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner);
+            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             const adder = this;
             units.forEach(u => {
                 u.removeModifierByAdder(adder);

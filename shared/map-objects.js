@@ -63,6 +63,14 @@ module.exports.Unit = class {
             this.targetable = true;
         }
 
+        if (Data.units[name].buffable !== undefined) {
+            this.buffable = Data.units[name].buffable;
+        }
+        else {
+            this.buffable = true;
+        }
+
+
         /* Sight range changing is complicated because it affects the cached
          * maps in the game-state. We enforce this to be constant for now */
         this.__sightRange__ = Data.units[name].sightRange;

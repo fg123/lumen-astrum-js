@@ -386,6 +386,7 @@ const units = {
         'tier': 1,
         'turnsToBuild': 0,
         'options': [],
+        'buffable': false
     },
     'Golem': {
         'attackRange': 1,

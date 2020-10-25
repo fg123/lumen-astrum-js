@@ -151,11 +151,13 @@ module.exports = class GameState {
         return this.players[player].commandBase;
     }
 
-    getUnitsOnMyTeam(player) {
+    getUnitsOnMyTeam(player, filter = () => true) {
         const results = [];
         this.units.forEach(u => {
             if (u.owner === player) {
-                results.push(u);
+                if (filter(u)) {
+                    results.push(u);
+                }
             }
         });
         return results;
