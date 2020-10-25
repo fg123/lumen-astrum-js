@@ -33,6 +33,11 @@ module.exports = class Camera {
         this.minimapRectPosition = new Tuple(0, 0);
         this.minimapRectSize = new Tuple(0, 0);
 
+    }
+ 
+    initializeClientState(clientState) {
+        this.state = clientState;
+        
         /* Minimap Scaling is cached here */
         /* Each hexagon adds 3/4 width due to overlapping, with 1/4 added at
          * the end for the last hexagon */
@@ -140,11 +145,7 @@ module.exports = class Camera {
             }
         }
     }
-    
-    initializeClientState(clientState) {
-        this.state = clientState;
-    }
-
+   
     toCameraCoord(position) {
         return new Tuple(
             (position.x - this.position.x) * this.scale + window.innerWidth / 2,
