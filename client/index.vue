@@ -50,6 +50,7 @@ module.exports = {
         },
         goToClientMain() {
             this.currentScreen = Screen.CLIENT_MAIN;
+            this.lastGameOver = undefined;
         },
         login(username, password, callback) {
             this.socket.emit('login', username, password, callback);

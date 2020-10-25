@@ -69,7 +69,7 @@ const triggers = {
             // Gain Extra Gold
             const owner = state.getTileOwner(this.position.x, this.position.y);
             if (owner === undefined) return;
-            
+
             state.players[owner].gold += this.custom.value;
             this.currentHealth -= this.custom.value;
             if (state.clientState) {
@@ -86,7 +86,7 @@ const triggers = {
     },
     'Stim Lab': {
         onActionStart(state) {
-            // Add modifier to everyone on my team            
+            // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
             units.forEach(u => {
                 u.addModifier(this, new StimModifier(this.custom.attackSpeedMultiplier), {
@@ -250,7 +250,7 @@ const triggers = {
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
                                 new GenericInPlaceSpriteAnimation(
-                                    toDrawCoord(tile), 
+                                    toDrawCoord(tile),
                                     state.clientState.resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
                                 )
                             );
@@ -268,7 +268,7 @@ const triggers = {
             this.tickCounter = 0;
         },
         onActionTick(state) {
-            // Every 2 ticks we expand 
+            // Every 2 ticks we expand
             if (this.tickCounter < 2) {
                 this.tickCounter += 1;
                 return true;
@@ -296,7 +296,7 @@ const triggers = {
             }
 
             if (this.claimedRange < Constants.BUILD_RANGE) {
-                this.claimedRange += 1;    
+                this.claimedRange += 1;
             }
             return didWeClaim;
         },

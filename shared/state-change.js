@@ -91,12 +91,12 @@ class BuildStructureStateChange extends StateChange {
         if (this.data.builtBy.turnsUntilBuilt !== 0) {
             return false;
         }
-        
+
         let baseObj = getBaseObject(this.data.structureName);
         // if (this.data.structureName === 'Deployment Outpost') {
         //     // Deployment outpost, make sure new territory claim doesn't
-        //     //    intersect another player's territory        
-        //     let surrounding = getSurrounding(this.data.position, baseObj.width + Constants.BUILD_RANGE);  
+        //     //    intersect another player's territory
+        //     let surrounding = getSurrounding(this.data.position, baseObj.width + Constants.BUILD_RANGE);
         //     for (let i = 0; i < surrounding.length; i++) {
         //         if (map.withinMap(surrounding[i]) && state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.from)) {
         //             return false;
@@ -131,7 +131,7 @@ class BuildStructureStateChange extends StateChange {
                 }
             }
         }
-        
+
         const builder = state.mapObjects[this.data.builtBy.position.y][
             this.data.builtBy.position.x];
         if (!builder) {
@@ -140,7 +140,7 @@ class BuildStructureStateChange extends StateChange {
         if (tupleDistance(builder.position, this.data.position) !== 1 + builder.width) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -343,8 +343,12 @@ class PhaseChangeStateChange extends StateChange {
     _simulateStateChange(state) {
         if (state.phase == Constants.PHASE_PLANNING) {
             state.phase = Constants.PHASE_ACTION;
-            for (let i = 0; i < state.units.length; i++) {
-                const unit = state.units[i];
+            // Units and structures can change the array when they do action
+            // start, so we should make a copy of all the objects.
+            const units = state.units.slice();
+            const structures = state.structures.slice();
+            for (let i = 0; i < units.length; i++) {
+                const unit = units[i];
                 if (!this.isBuilt(unit)) {
                     unit.turnsUntilBuilt -= 1;
                     if (this.isBuilt(unit)) {
@@ -362,14 +366,15 @@ class PhaseChangeStateChange extends StateChange {
                     unit.onActionStart(state);
                 }
             }
-            for (let i = 0; i < state.structures.length; i++) {
-                const structure = state.structures[i];
+
+            for (let i = 0; i < structures.length; i++) {
+                const structure = structures[i];
                 if (!this.isBuilt(structure)) {
                     structure.turnsUntilBuilt -= 1;
                     if (this.isBuilt(structure) && structure.onCreate) {
                         structure.onCreate(state);
                     }
-                } 
+                }
                 if (this.isBuilt(structure) && structure.onActionStart) {
                     structure.onActionStart(state);
                 }
@@ -377,7 +382,7 @@ class PhaseChangeStateChange extends StateChange {
         }
         else {
             state.phase = Constants.PHASE_PLANNING;
-            
+
             // Remove all dead units from this tick
             for (let i = 0; i < state.deadObjects.length; i++) {
                 state.removeMapObject(state.deadObjects[i]);
@@ -388,12 +393,12 @@ class PhaseChangeStateChange extends StateChange {
             for (let i = 0; i < state.structures.length; i++) {
                 const structure = state.structures[i];
                 replenishShield(structure);
-               
+
                 if (this.isBuilt(structure) && structure.onPlanningStart) {
                     structure.onPlanningStart(state);
                 }
             }
-    
+
             // Process Units
             for (let i = 0; i < state.units.length; i++) {
                 const unit = state.units[i];
@@ -517,23 +522,23 @@ class UnitAttackStateChange extends StateChange {
         if (unit.attackDamage === 0) {
             return false;
         }
-    
+
         /* Is the attack destination a mapObject that belongs to the
          * opponent? */
         const target = findTarget(state, this.data.posTo);
         if (target === undefined) {
             return false;
         }
-        
+
         // Can't attack my own unit if no friendlyfire
         if (!this.data.allowFriendlyFire && target.owner === this.from) return false;
-        
+
         /* Is the target in the range (including visibility) */
         const range = state.getUnitAttackTiles(this.data.posFrom);
         if (range.find(pos => pos.equals(this.data.posTo)) === undefined) {
             return false;
         }
-        
+
         /* Is the target stealthed? */
         if (target.isUnit) {
             if (target.isStealthed(this.from, state)) {
