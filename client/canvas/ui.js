@@ -99,9 +99,9 @@ module.exports = class UICanvas {
         this.context.fillStyle = 'black';
         this.context.font = 'bold 14px Prompt';
 
-        this.context.fillText(`${Constants.PERCENTAGE_CLAIM_TO_WIN * 100}% Territory To Win`, screenWidth - 230, 15);
+        this.context.fillText(`${this.state.getMap().percentageClaimToWin * 100}% Territory To Win`, screenWidth - 230, 15);
 
-        const total = map.territorialTiles;
+        const total = this.state.getMap().territorialTiles;
         const playerStateMap = this.state.gameState.players;
         const myOwn = playerStateMap[this.state.player].calculateTerritorySize();
         this.drawOneClaim(myOwn, total, this.state.player, screenWidth - 230, 32);

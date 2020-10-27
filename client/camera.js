@@ -38,12 +38,23 @@ module.exports = class Camera {
     initializeClientState(clientState) {
         this.state = clientState;
         
+        this.updateMinimapCache();
+        this.tick = window.setInterval(() => {
+            this.tickCamera(window.innerWidth, window.innerHeight);
+            this.updateMinimapFOW();
+        }, INTERNAL_TICK_INTERVAL);
+        this.position = new Tuple(500, 500);
+        this.tickCamera(window.innerWidth, window.innerHeight);
+    }
+
+    updateMinimapCache() {
+        const gameMap = this.state.getMap();
         /* Minimap Scaling is cached here */
         /* Each hexagon adds 3/4 width due to overlapping, with 1/4 added at
          * the end for the last hexagon */
         /* We also add 2 for extra padding */
-        const entireMapWidth = Constants.MAP_TILE_DRAW_X_MULTIPLIER * (map.data[0].length + 2) + (Constants.MAP_TILE_DRAW_X_MULTIPLIER / 3);
-        const entireMapHeight = Constants.MAP_TILE_DRAW_Y_MULTIPLIER * (map.data.length + 2);
+        const entireMapWidth = Constants.MAP_TILE_DRAW_X_MULTIPLIER * (gameMap.data[0].length + 2) + (Constants.MAP_TILE_DRAW_X_MULTIPLIER / 3);
+        const entireMapHeight = Constants.MAP_TILE_DRAW_Y_MULTIPLIER * (gameMap.data.length + 2);
         const widthScaleFactor = MINIMAP_DISPLAY_SIZE.x / entireMapWidth;
         const heightScaleFactor = MINIMAP_DISPLAY_SIZE.y / entireMapHeight;
 
@@ -76,11 +87,11 @@ module.exports = class Camera {
         this.minimapFOWCanvas.height = MINIMAP_DISPLAY_SIZE.y;
 
         const minimapContext = this.minimapCanvas.getContext('2d');
-        for (let y = 0; y < map.data.length; y++) {
-            for (let x = 0; x < map.data[0].length; x++) {
-                if (map.data[y][x].displayType !== 0) {
+        for (let y = 0; y < gameMap.data.length; y++) {
+            for (let x = 0; x < gameMap.data[0].length; x++) {
+                if (gameMap.data[y][x].displayType !== 0) {
                     const img = this.resourceManager.get(
-                        tiles[map.data[y][x].displayType - 1]
+                        tiles[gameMap.data[y][x].displayType - 1]
                     );
                     const coord = Utils.toDrawCoord(x, y);
                     minimapContext.drawImage(
@@ -93,17 +104,13 @@ module.exports = class Camera {
                 }
             }
         }
-        this.tick = window.setInterval(() => {
-            this.tickCamera(window.innerWidth, window.innerHeight);
-            this.updateMinimapFOW();
-        }, INTERNAL_TICK_INTERVAL);
-        this.position = new Tuple(500, 500);
-        this.tickCamera(window.innerWidth, window.innerHeight);
     }
 
     updateMinimapFOW() {
         if (this.state === undefined) return;
         if (this.state.gameState === undefined) return;
+
+        const gameMap = this.state.getMap();
 
         // Only update minimap stuff every 4 frames
         if (this.fowCanvasTick < 4) {
@@ -118,9 +125,9 @@ module.exports = class Camera {
         context.clearRect(0, 0, MINIMAP_DISPLAY_SIZE.x, MINIMAP_DISPLAY_SIZE.y);
         const FOWTexture = this.resourceManager.get(Resource.FOG_OF_WAR);
 
-        for (let y = 0; y < map.data.length; y++) {
-            for (let x = 0; x < map.data[0].length; x++) {
-                if (map.data[y][x].displayType !== 0) {
+        for (let y = 0; y < gameMap.data.length; y++) {
+            for (let x = 0; x < gameMap.data[0].length; x++) {
+                if (gameMap.data[y][x].displayType !== 0) {
                     let imageToDraw = undefined;
                     if (!this.state.gameState.isVisible(x, y, this.state.player)) {
                         imageToDraw = FOWTexture;
@@ -172,14 +179,16 @@ module.exports = class Camera {
     }
 
     tickCamera(screenWidth, screenHeight) {
+        const gameMap = this.state.getMap();
+
         if (this.ui.currentScreen !== this.ui.Screen.GAME) {
-            let d = Utils.distance(this.position, map.movement[map.movementIndex]);
+            let d = Utils.distance(this.position, gameMap.movement[gameMap.movementIndex]);
             if (d < 1) {
-                map.movementIndex = (map.movementIndex + 1) % map.movement.length;
-                d = Utils.distance(this.position, map.movement[map.movementIndex]);
+                gameMap.movementIndex = (gameMap.movementIndex + 1) % gameMap.movement.length;
+                d = Utils.distance(this.position, gameMap.movement[gameMap.movementIndex]);
             }
-            const a = new Tuple(map.movement[map.movementIndex].x - this.position.x,
-                map.movement[map.movementIndex].y - this.position.y);
+            const a = new Tuple(gameMap.movement[gameMap.movementIndex].x - this.position.x,
+                gameMap.movement[gameMap.movementIndex].y - this.position.y);
 
             this._position.x += a.x / d * 1;
             this._position.y += a.y / d * 1;

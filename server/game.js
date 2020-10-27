@@ -10,6 +10,7 @@ const {
     ActionTickStateChange
 } = require('../shared/state-change');
 const { default: modifier } = require('../shared/modifier');
+const { maps, setupMap } = require('../shared/map');
 
 module.exports = class Game {
     static fromJson(json, onGameOver) {
@@ -29,14 +30,16 @@ module.exports = class Game {
         game.processStateChange(PhaseChangeStateChange.create(undefined));
         return game;
     }
-    constructor(playerSocketMap, gameStartTime, onGameOver) {
+    constructor(playerSocketMap, gameStartTime, onGameOver, mapName) {
+        this.mapName = mapName;
+        
         this.players = Object.keys(playerSocketMap);
         this.onGameOver = onGameOver;
 
         console.log("Constructing a new game with players: ", this.players);
         this.sockets = playerSocketMap;
-
-        this.state = new GameState(gameStartTime, this.players);
+        const gameMap = setupMap(maps[mapName]);
+        this.state = new GameState(gameStartTime, this.players, gameMap);
 
         this.stateChanges = [];
 

@@ -31,7 +31,7 @@ const setupMap = (map) => {
             return !(tile.x < 0 || tile.y < 0 ||
                 tile.x >= map.data[0].length || tile.y >= map.data.length);
         };
-
+        
         /* Initial Setup for Map Data */
         map.territorialTiles = 0;
         map.bigMineralLocations = [];
@@ -63,8 +63,6 @@ const setupMap = (map) => {
     return map;
 }
 
-// let map = setupMap(Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small'));
-
 /* Recursively applies the group to any high ground surrounding */
 const applyHighGroundGroup = (map, start, group) => {
     const nodes = [start];
@@ -84,87 +82,6 @@ const applyHighGroundGroup = (map, start, group) => {
     }
 };
 
-let map = setupMap(require('./maps/redesign'));
-
-const getVisible = (point, sightRange) => {
-    /* Returns visibility map of a given point */
-    /* Checks for Brush, High Ground and High Ground Groups */
-    if (map.data[point.y][point.x].displayType === Tiles.BRUSH) {
-        sightRange = Constants.BRUSH_VISION;
-    }
-    const start = new Tuple(point.x, point.y).toCubeCoordinates();
-    const visited = new Set();
-    let result = [];
-    const jungDist = {};
-    visited.add(JSON.stringify(start));
-    result.push(start.toOffsetCoordinates());
-    const fringes = [];
-    fringes.push([start]);
-
-    for (let i = 0; i < sightRange; i++) {
-        fringes.push([]);
-        fringes[i].forEach((hex) => {
-            const curString = JSON.stringify(hex);
-            hex.getNeighbours().forEach((neighbour) => {
-                const n_coord = neighbour.toOffsetCoordinates();
-                if (!map.withinMap(n_coord) ||
-                    map.data[n_coord.y][n_coord.x].displayType === Tiles.NONE) {
-                    // Don't explore
-                    return;
-                }
-                const neighbourString = JSON.stringify(neighbour);
-                if (!visited.has(neighbourString)) {
-                    let keepExplore = true;
-                    if (map.data[n_coord.y][n_coord.x].displayType === Tiles.BRUSH) {
-                        jungDist[neighbourString] = curString in jungDist ? jungDist[curString] + 1 : 0;
-                        if (jungDist[neighbourString] >= Constants.BRUSH_VISION) {
-                            keepExplore = false;
-                        }
-                    }
-                    if (map.data[point.y][point.x].displayType === Tiles.LOW &&
-                        map.data[n_coord.y][n_coord.x].isHighGround) {
-                        // Trying to see high ground from low ground
-                        keepExplore = false;
-                    }
-                    else if (map.data[n_coord.y][n_coord.x].isHighGround &&
-                             map.data[n_coord.y][n_coord.x].highGroundGroup !==
-                                map.data[point.y][point.x].highGroundGroup) {
-                        // Trying to see high ground from different high ground group
-                        keepExplore = false;
-                    }
-                    visited.add(neighbourString);
-                    if (keepExplore) {
-                        result.push(n_coord);
-                        fringes[i + 1].push(neighbour);
-                    }
-                }
-            });
-        });
-    }
-    return result;
-};
-
-const findTargetPos = (state, pos) => {
-    let target = state.mapObjects[pos.y][pos.x];
-    if (target === undefined) {
-        /* No direct target, check for occupied mapping */
-        const occupiedPoint = state.occupied[pos.y][pos.x];
-        if (occupiedPoint && occupiedPoint !== true) {
-            return occupiedPoint;
-        }
-    }
-    return pos;
-};
-
-const findTarget = (state, pos) => {
-    if (!map.withinMap(pos)) {
-        return undefined;
-    }
-    const targetPos = findTargetPos(state, pos);
-    let target = state.mapObjects[targetPos.y][targetPos.x];
-    return target;
-};
-
 const replenishShield = (mapObject) => {
     const shieldToReplenish = Math.ceil(mapObject.maxShield / 10);
     mapObject.currentShield += shieldToReplenish;
@@ -173,13 +90,16 @@ const replenishShield = (mapObject) => {
     }
 };
 
+const maps = {
+    '4p': require("./maps/redesign.js"),
+    '3p': require('./maps/3player.js'),
+    '2p': require('./maps/redesign.js')
+};
+
 module.exports = {
-    map,
     Tiles,
-    getVisible,
-    findTargetPos,
-    findTarget,
     replenishShield,
     setupMap,
-    Tile
+    Tile,
+    maps
 };

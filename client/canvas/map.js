@@ -207,6 +207,7 @@ module.exports = class MapCanvas {
     }
 
     drawUI(screenWidth, screenHeight) {
+        const gameMap = this.state.getMap();
         if (this.state.bigMessage) {
             this.setFontSize(50);
 
@@ -438,8 +439,8 @@ module.exports = class MapCanvas {
                 this.camera.minimapRectSize.y.toFixed(2) + ')', 'white', 16, 10,
             60, 'left', 'bold');
             const hover = this.inputManager.mouseState.tile;
-            if (map.withinMap(hover)) {
-                const tile = map.data[hover.y][hover.x];
+            if (gameMap.withinMap(hover)) {
+                const tile = gameMap.data[hover.y][hover.x];
                 this.drawText(`Hover: (${hover.x}, ${hover.y})`, 'white', 16, 10, 80, 'left', 'bold');
                 this.drawText(`   displayType: ${tile.displayType}`, 'white', 16, 10, 100, 'left', 'bold');
                 this.drawText(`   isHighGround: ${tile.isHighGround}`, 'white', 16, 10, 120, 'left', 'bold');
@@ -504,14 +505,15 @@ module.exports = class MapCanvas {
     }
 
     drawMap() {
+        const gameMap = this.state.getMap();
         const healthbarsToDraw = [];
         const desiredPathsToDraw = [];
         for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
-            y < Math.min(map.data.length, this.drawContext.bottomRightVisible.y); y++) {
+            y < Math.min(gameMap.data.length, this.drawContext.bottomRightVisible.y); y++) {
             for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
-                x < Math.min(map.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
+                x < Math.min(gameMap.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
                 this.context.globalAlpha = 1;
-                if (map.data[y][x].displayType !== 0) {
+                if (gameMap.data[y][x].displayType !== 0) {
                     const drawCoord = toDrawCoord(x, y);
                     if (this.ui.currentScreen !== this.ui.Screen.GAME ||
                         this.state.gameState.isVisible(x, y, this.state.player)) {
@@ -530,14 +532,14 @@ module.exports = class MapCanvas {
                         }
 
                         this.drawImage(this.resourceManager.get(
-                            tiles[map.data[y][x].displayType - 1]
+                            tiles[gameMap.data[y][x].displayType - 1]
                         ), drawCoord.x, drawCoord.y);
 
                         this.context.globalCompositeOperation = 'source-over';
                     }
                     else {
                         this.drawImage(this.resourceManager.get(
-                            tiles[map.data[y][x].displayType - 1]
+                            tiles[gameMap.data[y][x].displayType - 1]
                         ), drawCoord.x, drawCoord.y);
                         this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
                             drawCoord.x, drawCoord.y);
@@ -668,7 +670,7 @@ module.exports = class MapCanvas {
                                 const drawnCoord = toDrawCoord(surrounding[i]);
                                 if (mapObject.owner !== undefined) {
                                     this.drawImage(this.resourceManager.get(
-                                        tiles[map.data[surrounding[i].y][surrounding[i].x].displayType - 1]
+                                        tiles[gameMap.data[surrounding[i].y][surrounding[i].x].displayType - 1]
                                     ), drawnCoord.x, drawnCoord.y);
                                 }
                                 this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
@@ -705,7 +707,7 @@ module.exports = class MapCanvas {
 
         this.state.cursorMessage = '';
         if (this.state.pendingAction) {
-            this.state.pendingAction.onTick(this);
+            this.state.pendingAction.onTick(this.state, this);
         }
 
         this.state.canCurrentUnitMoveToPosition = false;
@@ -720,7 +722,7 @@ module.exports = class MapCanvas {
                 if (this.state.movementMode) {
                     let isMouseOverOnUnitMoveRange = false;
                     for (let i = 0; i < this.state.unitMoveRange.length; i++) {
-                        if (map.withinMap(this.state.unitMoveRange[i]) &&
+                        if (gameMap.withinMap(this.state.unitMoveRange[i]) &&
                         !this.state.gameState.occupied[this.state.unitMoveRange[i].y][this.state.unitMoveRange[i].x]) {
                             const drawnCoord = toDrawCoord(this.state.unitMoveRange[i]);
                             this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),

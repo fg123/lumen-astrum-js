@@ -1,6 +1,5 @@
 const TinyQueue = require('tinyqueue');
 const { Tuple } = require('./coordinates');
-const { map } = require('./map');
 
 class Node {
     constructor(position, costToEnd) {
@@ -12,6 +11,7 @@ class Node {
 module.exports = class PathFinder {
     /* Does not include start */
     static findPath(gameState, start, end) {
+        const gameMap = gameState.gameMap;
         start = new Tuple(start.x, start.y).toCubeCoordinates();
         end = new Tuple(end.x, end.y).toCubeCoordinates();
 
@@ -37,7 +37,7 @@ module.exports = class PathFinder {
 
             current.position.getNeighbours().filter(node => {
                 const offset = node.toOffsetCoordinates();
-                return map.withinMap(offset);
+                return gameMap.withinMap(offset);
             }).forEach(next => {
                 const nextOffset = next.toOffsetCoordinates();
                 if (!next.equals(end) && gameState.occupied[nextOffset.y][nextOffset.x]) {

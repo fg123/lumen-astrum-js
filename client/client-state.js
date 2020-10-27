@@ -1,7 +1,7 @@
 const Constants = require('../shared/constants');
 const { getBaseObject } = require('../shared/data');
 const {
-    map
+    setupMap, maps
 } = require('../shared/map');
 const {
     StateChange,
@@ -17,10 +17,7 @@ const {
 
 const {
     PlaceUnitPendingAction,
-    PlaceStructurePendingAction,
-    HealUnitPendingAction,
-    RepairStructurePendingAction,
-    LaunchProbePendingAction
+    PlaceStructurePendingAction
 } = require('./pending-actions');
 
 const GameState = require('../shared/game-state');
@@ -63,6 +60,7 @@ module.exports = class ClientState {
         this.globalAnimationManager = animationManager;
 
         this.gameStartListeners = [];
+        this.defaultMap = setupMap(require('../shared/maps/redesign.js'));
 
         this.player = undefined;
         this.gameState = undefined;
@@ -321,7 +319,7 @@ module.exports = class ClientState {
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
         });
-        socket.on('game-start', (gameStartTime, players) => {
+        socket.on('game-start', (gameStartTime, players, mapName) => {
             console.log(players);
             this.ui.goToGame();
             this.chatbox.clearChat();
@@ -342,9 +340,13 @@ module.exports = class ClientState {
                 }
             }
             
-            const commandCenterLocation = map.commandCenterLocations[index];
-            this.gameState = new GameState(gameStartTime, players);
+            const gameMap = setupMap(maps[mapName]);
+            const commandCenterLocation = gameMap.commandCenterLocations[index];
+            this.gameState = new GameState(gameStartTime, players, gameMap);
             this.gameState.clientState = this;
+
+            // New Map
+            this.camera.updateMinimapCache();
 
             this.commandCenter = this.gameState.mapObjects[
                 commandCenterLocation.y][
@@ -406,7 +408,14 @@ module.exports = class ClientState {
             }
         }, INTERNAL_TICK_INTERVAL);
     }
-    
+
+    getMap() {
+        if (this.gameState) {
+            return this.gameState.gameMap;
+        }
+        return this.defaultMap;
+    }
+
     getHarvesterGoldValues() {
         const gem = getBaseObject('Gem Harvester');
         const ether = getBaseObject('Ether Harvester');
@@ -437,7 +446,6 @@ module.exports = class ClientState {
             // Neutral
             return this.resourceManager.get(Resource.BLUE_OVERLAY);
         }
-        console.log(player, this.enemyOverlayMap);
         return this.enemyOverlayMap[player];
     }
 
@@ -505,30 +513,6 @@ module.exports = class ClientState {
 
     customActionDispatch(name, option) {
         switch (name) {
-        case 'healUnit': {
-            if (this.selectedObject.attacksThisTurn === 0) {
-                this.pushAlertMessage('Already healed this turn!');
-                break;
-            }
-            this.pendingAction = new HealUnitPendingAction();
-            break;
-        }
-        case 'repairStructure': {
-            if (this.selectedObject.attacksThisTurn === 0) {
-                this.pushAlertMessage('Already repaired this turn!');
-                break;
-            }
-            this.pendingAction = new RepairStructurePendingAction();
-            break;
-        }
-        case 'launchProbe': {
-            if (option.cost > this.getGold()) {
-                this.pushAlertMessage('Not enough gold!');
-                return;
-            }
-            this.pendingAction = new LaunchProbePendingAction();
-            break;
-        }
         case 'detonateReaver': {
             const change = ReaverDetonateStateChange.create(this.player, this.selectedObject.position);
             if (change.verifyStateChange(this.gameState)) {
@@ -572,7 +556,7 @@ module.exports = class ClientState {
             this.selectedObject.turnsUntilBuilt === 0) {
             
             if (this.inputManager.mouseState.tile &&
-                map.withinMap(this.inputManager.mouseState.tile)) {
+                this.getMap().withinMap(this.inputManager.mouseState.tile)) {
                 this.sendStateChange(SetUnitTargetStateChange.create(
                     this.player,
                     this.selectedObject.position,
@@ -611,7 +595,7 @@ module.exports = class ClientState {
     }
 
     getHoveredObjectOrNull() {
-        if (map.withinMap(this.inputManager.mouseState.tile)) {
+        if (this.getMap().withinMap(this.inputManager.mouseState.tile)) {
             let obj = null;
             let occupiedPoint = this.gameState.occupied[
                 this.inputManager.mouseState.tile.y][this.inputManager.mouseState.tile.x];
@@ -632,7 +616,7 @@ module.exports = class ClientState {
 
     gameObjectClickEvent(button) {
         if (this.ui.currentScreen !== this.ui.Screen.GAME) return false;
-        if (button === LEFT_MOUSE_BUTTON && map.withinMap(this.inputManager.mouseState.tile)) {
+        if (button === LEFT_MOUSE_BUTTON && this.getMap().withinMap(this.inputManager.mouseState.tile)) {
             if (this.pendingAction) {
                 const result = this.pendingAction.onClick(this);
                 this.pendingAction = null;

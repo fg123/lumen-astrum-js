@@ -1,5 +1,4 @@
 const Constants = require('./constants');
-const { findTarget, replenishShield } = require('./map');
 
 class StateChange {
     constructor(stateChange) {
@@ -43,7 +42,7 @@ StateChange.subClasses = {};
 /* Helper Functions */
 const { getBaseObject } = require('./data');
 const { Tuple, getSurrounding, tupleDistance } = require('./coordinates');
-const { map, Tiles } = require('./map');
+const { replenishShield, Tiles } = require('./map');
 const PathFinder = require('./path-finder');
 const Data = require('./data');
 const { default: GameState } = require('./game-state');
@@ -93,39 +92,21 @@ class BuildStructureStateChange extends StateChange {
         }
 
         let baseObj = getBaseObject(this.data.structureName);
-        // if (this.data.structureName === 'Deployment Outpost') {
-        //     // Deployment outpost, make sure new territory claim doesn't
-        //     //    intersect another player's territory
-        //     let surrounding = getSurrounding(this.data.position, baseObj.width + Constants.BUILD_RANGE);
-        //     for (let i = 0; i < surrounding.length; i++) {
-        //         if (map.withinMap(surrounding[i]) && state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.from)) {
-        //             return false;
-        //         }
-        //     }
-        // }
 
         let surrounding = getSurrounding(this.data.position, baseObj.width);
         for (let i = 0; i < surrounding.length; i++) {
-            if (!map.withinMap(surrounding[i]) ||
+            if (!state.gameMap.withinMap(surrounding[i]) ||
                 state.occupied[surrounding[i].y][surrounding[i].x] ||
-                map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
+                state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BRUSH) {
                 return false;
             }
             else if (/*!this.data.builtBy.isUnit &&*/
                 !state.isAllowedBuilding(surrounding[i].x, surrounding[i].y, this.from)) {
                 return false;
             }
-            // Redesign: removed Harvester
-            // else if (this.data.structureName === 'Harvester') {
-            //     if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.MINERAL &&
-            //         map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BIG_MINERAL) {
-            //         // Harvester must be on mineral
-            //         return false;
-            //     }
-            // }
             else {
-                if (map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
-                    map.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {
+                if (state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.MINERAL ||
+                    state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType === Tiles.BIG_MINERAL) {
                     // Nothing else can be on mineral
                     return false;
                 }
@@ -201,9 +182,9 @@ class SpawnUnitStateChange extends StateChange {
             this.data.fromBuilding.position,
             this.data.fromBuilding.width + 1);
         for (let i = 0; i < surrounding.length; i++) {
-            if (map.withinMap(surrounding[i]) &&
+            if (state.gameMap.withinMap(surrounding[i]) &&
                 !state.occupied[surrounding[i].y][surrounding[i].x] &&
-                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH) {
+                state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH) {
                 if (this.data.position.x === surrounding[i].x &&
                     this.data.position.y === surrounding[i].y) {
                     return true;
@@ -240,7 +221,7 @@ class SetUnitTargetStateChange extends StateChange {
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
         if (state.hasPlayerForfeited(this.from)) return false;
-        if (!map.withinMap(this.data.unitPos) || !map.withinMap(this.data.posTarget)) {
+        if (!state.gameMap.withinMap(this.data.unitPos) || !state.gameMap.withinMap(this.data.posTarget)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
@@ -286,7 +267,7 @@ class MoveUnitStateChange extends StateChange {
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_ACTION) return false;
         if (state.hasPlayerForfeited(this.from)) return false;
-        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
@@ -505,7 +486,7 @@ class UnitAttackStateChange extends StateChange {
 
     _verifyStateChange(state) {
         if (state.hasPlayerForfeited(this.from)) return false;
-        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
@@ -524,7 +505,7 @@ class UnitAttackStateChange extends StateChange {
 
         /* Is the attack destination a mapObject that belongs to the
          * opponent? */
-        const target = findTarget(state, this.data.posTo);
+        const target = state.findTarget(this.data.posTo);
         if (target === undefined) {
             return false;
         }
@@ -549,7 +530,7 @@ class UnitAttackStateChange extends StateChange {
 
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        const target = findTarget(state, this.data.posTo);
+        const target = state.findTarget(this.data.posTo);
         // if (unit.custom && unit.custom.attackCooldown) {
         //     unit.attacksThisTurn -= unit.custom.attackCooldown;
         // }
@@ -563,7 +544,7 @@ class UnitAttackStateChange extends StateChange {
             // Apply damage to surrounding units
             const surrounding = getSurrounding(this.data.posTo, unit.custom.splashRange);
             for (let i = 0; i < surrounding.length; i++) {
-                const target = findTarget(state, surrounding[i]);
+                const target = state.findTarget(surrounding[i]);
                 if (target !== undefined && target.isUnit && target.owner !== this.from) {
                     state.dealDamageToUnit(unit, target, unit.custom.splashDamage);
                 }
@@ -630,7 +611,7 @@ class HealUnitStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is there a unit that belongs to the player? */
@@ -695,7 +676,7 @@ class RepairStructureStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is this from a unit that belongs to the player? */
@@ -713,7 +694,7 @@ class RepairStructureStateChange extends StateChange {
         }
 
         /* Is the attack destination a structure that belongs to me? */
-        const target = findTarget(state, this.data.posTo);
+        const target = state.findTarget(this.data.posTo);
         if (target === undefined) {
             return false;
         }
@@ -732,7 +713,7 @@ class RepairStructureStateChange extends StateChange {
 
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        const target = findTarget(state, this.data.posTo);
+        const target = state.findTarget(this.data.posTo);
 
         unit.attacksThisTurn -= 1;
         target.currentHealth += unit.custom.repairFor;
@@ -759,7 +740,7 @@ class ReaverDetonateStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!map.withinMap(this.data.posFrom)) {
+        if (!state.gameMap.withinMap(this.data.posFrom)) {
             return false;
         }
         /* Is this from a unit that belongs to the player? */
@@ -778,7 +759,7 @@ class ReaverDetonateStateChange extends StateChange {
         // Apply damage to surrounding units
         const surrounding = getSurrounding(this.data.posFrom, 1);
         for (let i = 0; i < surrounding.length; i++) {
-            const target = findTarget(state, surrounding[i]);
+            const target = state.findTarget(surrounding[i]);
             if (target !== undefined && target.isUnit && target.owner !== this.from) {
                 state.dealDamageToUnit(unit, target, unit.custom.explodeDamage);
             }
@@ -806,7 +787,7 @@ class GuardianLockdownStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!map.withinMap(this.data.posFrom)) {
+        if (!state.gameMap.withinMap(this.data.posFrom)) {
             return false;
         }
         /* Is this from a unit that belongs to the player? */
@@ -868,7 +849,7 @@ class LaunchProbeStateChange extends StateChange {
         if (state.currentTurn !== this.from) {
             return false;
         }
-        if (!map.withinMap(this.data.posFrom) || !map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is this from a structure that belongs to the player? */
@@ -890,7 +871,7 @@ class LaunchProbeStateChange extends StateChange {
     _simulateStateChange(state) {
         const surrounding = getSurrounding(this.data.posTo, Constants.PROBE_RANGE);
         for (let i = 0; i < surrounding.length; i++) {
-            if (map.withinMap(surrounding[i])) {
+            if (state.gameMap.withinMap(surrounding[i])) {
                 state.addProbeLocation(surrounding[i].x, surrounding[i].y, this.from);
             }
         }
@@ -934,7 +915,7 @@ class DealDamageStateChange extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (!map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         /* Is this from a structure that belongs to the player? */
@@ -946,7 +927,7 @@ class DealDamageStateChange extends StateChange {
     _simulateStateChange(state) {
         if (!this._verifyStateChange(state)) return;
 
-        const target = findTarget(state, this.data.posTo);
+        const target = state.findTarget(this.data.posTo);
         state.dealDamageToUnit(undefined, target, this.data.damage);
     }
 }
@@ -966,7 +947,7 @@ class SpawnMapObject extends StateChange {
     }
 
     _verifyStateChange(state) {
-        if (!map.withinMap(this.data.posTo)) {
+        if (!state.gameMap.withinMap(this.data.posTo)) {
             return false;
         }
         const mapObject = state.occupied[this.data.posTo.y][this.data.posTo.x];

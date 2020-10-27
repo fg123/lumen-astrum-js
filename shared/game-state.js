@@ -1,6 +1,5 @@
 const Constants = require('./constants');
 const {
-    map,
     Tiles,
     getVisible
 } = require('./map');
@@ -10,7 +9,7 @@ const Data = require('./data');
 const { distance } = require('../client/utils');
 
 class PlayerState {
-    constructor(playerName) {
+    constructor(playerName, gameMap) {
         this.playerName = playerName;
         
         this.forfeited = false;
@@ -32,7 +31,7 @@ class PlayerState {
         });
 
         // Setup 2D Maps
-        for (let i = 0; i < map.data.length; i++) {
+        for (let i = 0; i < gameMap.data.length; i++) {
             this.visibilityCache.push([]);
             this.allowedBuildingCache.push([]);
         }
@@ -56,13 +55,14 @@ module.exports = class GameState {
     // All functions that take "player" is the designated player identifier,
     //   right now it is the username of the player, it's whatever keys into
     //   this.players.
-    constructor(gameStartTime, playerUsernameList) {
+    constructor(gameStartTime, playerUsernameList, gameMap) {
+        this.gameMap = gameMap;
         this.nextObjectId = 0;
 
         this.players = {};
         for (let i = 0; i < playerUsernameList.length; i++) {
             const username = playerUsernameList[i];
-            this.players[username] = new PlayerState(username);
+            this.players[username] = new PlayerState(username, gameMap);
         }
         
         this.mapObjects = [];
@@ -86,14 +86,14 @@ module.exports = class GameState {
         this.clientState = undefined;
 
         /* Setup two dimensional arrays */
-        for (let i = 0; i < map.data.length; i++) {
+        for (let i = 0; i < gameMap.data.length; i++) {
             this.mapObjects.push([]);
             this.occupied.push([]);
         }
 
-        for (let y = 0; y < map.data.length; y++) {
-            for (let x = 0; x < map.data[0].length; x++) {
-                if (map.data[y][x].displayType === 0 || map.data[y][x].displayType === 5) {
+        for (let y = 0; y < gameMap.data.length; y++) {
+            for (let x = 0; x < gameMap.data[0].length; x++) {
+                if (gameMap.data[y][x].displayType === 0 || gameMap.data[y][x].displayType === 5) {
                     this.occupied[y][x] = true;
                 }
             }
@@ -103,7 +103,7 @@ module.exports = class GameState {
         console.log(playerUsernameList);
         for (let i = 0; i < playerUsernameList.length; i++) {
             this.players[playerUsernameList[i]].commandBase =
-                this.insertMapObject(map.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
+                this.insertMapObject(gameMap.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
             if (!Constants.IS_PRODUCTION && i < 2) {
                 const barracksLocation = new Tuple(0, 0);
                 if (i === 0) {
@@ -119,16 +119,16 @@ module.exports = class GameState {
         }
 
         /* Setup Harvesters on Minerals */
-        for (let i = 0; i < map.bigMineralLocations.length; i++) {
-            this.insertMapObject(map.bigMineralLocations[i], 'Gem Harvester', undefined);
+        for (let i = 0; i < gameMap.bigMineralLocations.length; i++) {
+            this.insertMapObject(gameMap.bigMineralLocations[i], 'Gem Harvester', undefined);
         }
 
-        for (let i = 0; i < map.smallMineralLocations.length; i++) {
-            this.insertMapObject(map.smallMineralLocations[i], 'Ether Harvester', undefined);
+        for (let i = 0; i < gameMap.smallMineralLocations.length; i++) {
+            this.insertMapObject(gameMap.smallMineralLocations[i], 'Ether Harvester', undefined);
         }
 
-        if (map.onMapStart) {
-            map.onMapStart(this);
+        if (gameMap.onMapStart) {
+            gameMap.onMapStart(this);
         }
     }
 
@@ -136,8 +136,8 @@ module.exports = class GameState {
         this.players[player].forfeited = true;
         // Remove Fog Of War
 
-        for (let i = 0; i < map.data.length; i++) {
-            for (let j = 0; j < map.data[i].length; j++) {
+        for (let i = 0; i < this.gameMap.data.length; i++) {
+            for (let j = 0; j < this.gameMap.data[i].length; j++) {
                 this.addVisibility(j, i, player);
             }
         }
@@ -285,7 +285,7 @@ module.exports = class GameState {
             this.structures.push(structure);
             let surrounding = getSurrounding(location, structure.width);
             for (let i = 0; i < surrounding.length; i++) {
-                if (map.withinMap(surrounding[i])) {
+                if (this.gameMap.withinMap(surrounding[i])) {
                     this.occupied[surrounding[i].y][surrounding[i].x] = location;
                 }
             }
@@ -297,17 +297,17 @@ module.exports = class GameState {
                 if (name === 'Command Base') {
                     const surrounding = getSurrounding(location, structure.width + Constants.BUILD_RANGE);
                     for (let i = 0; i < surrounding.length; i++) {
-                        if (map.withinMap(surrounding[i])) {
-                            if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
-                                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.NONE) {
+                        if (this.gameMap.withinMap(surrounding[i])) {
+                            if (this.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                                this.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
+                                this.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.NONE) {
                                 this.setAllowedBuilding(surrounding[i].x, surrounding[i].y, player);
                             }
                         }
                     }
                 }
 
-                surrounding = getVisible(location, structure.width + Constants.BUILDING_VISION_RANGE);
+                surrounding = this.getVisible(location, structure.width + Constants.BUILDING_VISION_RANGE);
                 surrounding.forEach(pos => {
                     this.addVisibility(pos.x, pos.y, player);
                 });
@@ -322,9 +322,9 @@ module.exports = class GameState {
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
 
-            let surrounding = getVisible(location, unit.sightRange);
+            let surrounding = this.getVisible(location, unit.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
-                if (map.withinMap(surrounding[i])) {
+                if (this.gameMap.withinMap(surrounding[i])) {
                     this.addVisibility(
                         surrounding[i].x, surrounding[i].y, player,
                         unit.getVisionValue());
@@ -386,7 +386,7 @@ module.exports = class GameState {
         this.mapObjects[location.y][location.x] = undefined;
         let surrounding = getSurrounding(location, mapObject.width);
         for (let i = 0; i < surrounding.length; i++) {
-            if (map.withinMap(surrounding[i])) {
+            if (this.gameMap.withinMap(surrounding[i])) {
                 this.occupied[surrounding[i].y][surrounding[i].x] = false;
             }
         }
@@ -405,16 +405,16 @@ module.exports = class GameState {
                 if (mapObject.name === 'Command Base') {
                     const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
                     for (let i = 0; i < surrounding.length; i++) {
-                        if (map.withinMap(surrounding[i])) {
-                            if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                                map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        if (this.gameMap.withinMap(surrounding[i])) {
+                            if (this.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                                this.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
                                 this.revokeAllowedBuilding(surrounding[i].x, surrounding[i].y, mapObject.owner);
                             }
                         }
                     }
                 }
 
-                surrounding = getVisible(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
+                surrounding = this.getVisible(location, mapObject.width + Constants.BUILDING_VISION_RANGE);
                 surrounding.forEach(pos => {
                     this.removeVisibility(pos.x, pos.y, mapObject.owner);
                 });
@@ -428,7 +428,7 @@ module.exports = class GameState {
                     break;
                 }
             }
-            let surrounding = getVisible(location, mapObject.sightRange);
+            let surrounding = this.getVisible(location, mapObject.sightRange);
             for (let i = 0; i < surrounding.length; i++) {
                 this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.owner, mapObject.getVisionValue());
             }
@@ -493,12 +493,12 @@ module.exports = class GameState {
         this.occupied[to.y][to.x] = to;
 
         /* Change visibility from previous position to new position */
-        let surrounding = getVisible(from, unit.sightRange);
+        let surrounding = this.getVisible(from, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
             this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
         }
 
-        surrounding = getVisible(to, unit.sightRange);
+        surrounding = this.getVisible(to, unit.sightRange);
         for (let i = 0; i < surrounding.length; i++) {
             this.addVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
         }
@@ -513,7 +513,7 @@ module.exports = class GameState {
     }
 
     getObjectVisibileTiles(objectPos) {
-        if (!map.withinMap(objectPos)) {
+        if (!this.gameMap.withinMap(objectPos)) {
             return [];
         }
         const object = this.mapObjects[objectPos.y][objectPos.x];
@@ -524,7 +524,7 @@ module.exports = class GameState {
     }
 
     getUnitMovementTiles(unitPos) {
-        if (!map.withinMap(unitPos)) {
+        if (!this.gameMap.withinMap(unitPos)) {
             return [];
         }
         const object = this.mapObjects[unitPos.y][unitPos.x];
@@ -538,13 +538,13 @@ module.exports = class GameState {
             object.moveRange,
             (pos) => {
                 // It's blocked if it's not in the map, occupied, or out of vision range
-                return !map.withinMap(pos) || this.occupied[pos.y][pos.x] ||
+                return !this.gameMap.withinMap(pos) || this.occupied[pos.y][pos.x] ||
                     !this.isVisible(pos.x, pos.y, object.owner);
             });
     }
 
     getUnitAttackTiles(unitPos) {
-        if (!map.withinMap(unitPos)) {
+        if (!this.gameMap.withinMap(unitPos)) {
             return [];
         }
         const object = this.mapObjects[unitPos.y][unitPos.x];
@@ -555,13 +555,13 @@ module.exports = class GameState {
             return [];
         }
         return getSurrounding(object.position, object.attackRange).filter(
-            pos => map.withinMap(pos) && this.isVisible(pos.x, pos.y, object.owner)
+            pos => this.gameMap.withinMap(pos) && this.isVisible(pos.x, pos.y, object.owner)
             && !pos.equals(unitPos));
     }
 
     // TODO: pass in priority / sorting function
     getEnemiesInAttackRange(unitPos) {
-        if (!map.withinMap(unitPos)) {
+        if (!this.gameMap.withinMap(unitPos)) {
             return [];
         }
         const object = this.mapObjects[unitPos.y][unitPos.x];
@@ -610,8 +610,7 @@ module.exports = class GameState {
             nonForfeitedPlayers.push(playerNames[i]);
 
             const size = this.players[playerNames[i]].calculateTerritorySize();
-            // console.log(playerNames[i], size, map.territorialTiles, size / map.territorialTiles);
-            if ((size / map.territorialTiles) > Constants.PERCENTAGE_CLAIM_TO_WIN) {
+            if ((size / this.gameMap.territorialTiles) > this.gameMap.percentageClaimToWin) {
                 return playerNames[i];
             }
         }
@@ -621,4 +620,83 @@ module.exports = class GameState {
         }
         return undefined;
     }
+    
+    getVisible (point, sightRange) {
+        /* Returns visibility map of a given point */
+        /* Checks for Brush, High Ground and High Ground Groups */
+        if (this.gameMap.data[point.y][point.x].displayType === Tiles.BRUSH) {
+            sightRange = Constants.BRUSH_VISION;
+        }
+        const start = new Tuple(point.x, point.y).toCubeCoordinates();
+        const visited = new Set();
+        let result = [];
+        const jungDist = {};
+        visited.add(JSON.stringify(start));
+        result.push(start.toOffsetCoordinates());
+        const fringes = [];
+        fringes.push([start]);
+    
+        for (let i = 0; i < sightRange; i++) {
+            fringes.push([]);
+            fringes[i].forEach((hex) => {
+                const curString = JSON.stringify(hex);
+                hex.getNeighbours().forEach((neighbour) => {
+                    const n_coord = neighbour.toOffsetCoordinates();
+                    if (!this.gameMap.withinMap(n_coord) ||
+                        this.gameMap.data[n_coord.y][n_coord.x].displayType === Tiles.NONE) {
+                        // Don't explore
+                        return;
+                    }
+                    const neighbourString = JSON.stringify(neighbour);
+                    if (!visited.has(neighbourString)) {
+                        let keepExplore = true;
+                        if (this.gameMap.data[n_coord.y][n_coord.x].displayType === Tiles.BRUSH) {
+                            jungDist[neighbourString] = curString in jungDist ? jungDist[curString] + 1 : 0;
+                            if (jungDist[neighbourString] >= Constants.BRUSH_VISION) {
+                                keepExplore = false;
+                            }
+                        }
+                        if (this.gameMap.data[point.y][point.x].displayType === Tiles.LOW &&
+                            this.gameMap.data[n_coord.y][n_coord.x].isHighGround) {
+                            // Trying to see high ground from low ground
+                            keepExplore = false;
+                        }
+                        else if (this.gameMap.data[n_coord.y][n_coord.x].isHighGround &&
+                                this.gameMap.data[n_coord.y][n_coord.x].highGroundGroup !==
+                                this.gameMap.data[point.y][point.x].highGroundGroup) {
+                            // Trying to see high ground from different high ground group
+                            keepExplore = false;
+                        }
+                        visited.add(neighbourString);
+                        if (keepExplore) {
+                            result.push(n_coord);
+                            fringes[i + 1].push(neighbour);
+                        }
+                    }
+                });
+            });
+        }
+        return result;
+    }
+    
+    findTargetPos(pos) {
+        let target = this.mapObjects[pos.y][pos.x];
+        if (target === undefined) {
+            /* No direct target, check for occupied mapping */
+            const occupiedPoint = state.occupied[pos.y][pos.x];
+            if (occupiedPoint && occupiedPoint !== true) {
+                return occupiedPoint;
+            }
+        }
+        return pos;
+    };
+    
+    findTarget(pos) {
+        if (!this.gameMap.withinMap(pos)) {
+            return undefined;
+        }
+        const targetPos = this.findTargetPos(pos);
+        let target = this.mapObjects[targetPos.y][targetPos.x];
+        return target;
+    };
 };

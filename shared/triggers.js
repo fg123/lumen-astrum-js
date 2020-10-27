@@ -1,4 +1,4 @@
-const { map, Tiles, findTarget, replenishShield } = require('./map');
+const { Tiles } = require('./map');
 const Constants = require('./constants');
 const { units, structures } = require('./data');
 const { getSurrounding, tupleDistance } = require('./coordinates');
@@ -258,7 +258,7 @@ const triggers = {
                     continue;
                 }
                 if (tupleDistance(tile, this.position) === 1) {
-                    const target = findTarget(state, tile);
+                    const target = state.findTarget(tile);
                     if (target && target.owner !== undefined && target.targetable) {
                         state.dealDamageToUnit(this, target, this.custom.explodeDamage1);
                         if (state.clientState) {
@@ -272,7 +272,7 @@ const triggers = {
                     }
                 }
                 else if (tupleDistance(tile, this.position) === 2) {
-                    const target = findTarget(state, tile);
+                    const target = state.findTarget(tile);
                     if (target && target.owner !== undefined && target.targetable) {
                         state.dealDamageToUnit(this, target, this.custom.explodeDamage2);
                         if (state.clientState) {
@@ -306,10 +306,10 @@ const triggers = {
             let didWeClaim = false;
             const surrounding = getSurrounding(this.position, this.width + this.claimedRange);
             for (let i = 0; i < surrounding.length; i++) {
-                if (map.withinMap(surrounding[i])) {
-                    if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.HIGH) {
+                if (state.gameMap.withinMap(surrounding[i])) {
+                    if (state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
+                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.HIGH) {
                         // Check no one else has this tile
                         if (!state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.owner)) {
                             // And we didn't claim it

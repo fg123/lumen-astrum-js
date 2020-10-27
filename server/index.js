@@ -19,6 +19,8 @@ const dbName = 'lumen';
 const client = new MongoClient(url);
 let db;
 
+const { maps } = require('../shared/map');
+
 client.connect(function(err) {
     assert.equal(null, err);
     console.log('Connected successfully to server');
@@ -36,6 +38,7 @@ function startServer() {
     const connectedUsers = {};
     const disconnectedMidGame = {};
     const twoPlayerQueue = [];
+    const threePlayerQueue = [];
     const fourPlayerQueue = [];
     const games = [];
 
@@ -187,7 +190,8 @@ function startServer() {
             if (potentialGame) {
                 socket.emit('game-start',
                     potentialGame.state.gameStartTime,
-                    potentialGame.players);
+                    potentialGame.players,
+                    potentialGame.mapName);
                 for (let i = 0; i < potentialGame.stateChanges.length; i++) {
                     socket.emit('state-change', potentialGame.stateChanges[i]);
                 }
@@ -313,6 +317,18 @@ function startServer() {
                     });
                     callback();
                 }
+                else if (type === '3p') {
+                    console.log('Joining 3p queue for: ' + connectedUsers[socket.id].username);
+                    connectedUsers[socket.id].queueID = threePlayerQueue.length;
+                    threePlayerQueue.push({
+                        type: type,
+                        requester: connectedUsers[socket.id].username,
+                        socket: socket,
+                        elo: connectedUsers[socket.id].elo
+                    });
+                    
+                    callback();
+                }
                 else if (type === '4p') {
                     console.log('Joining 4p queue for: ' + connectedUsers[socket.id].username);
                     connectedUsers[socket.id].queueID = fourPlayerQueue.length;
@@ -331,7 +347,7 @@ function startServer() {
                     queuedPlayers.forEach(p => {
                         socketMap[p.requester] = p.socket;
                     });
-                    const game = new Game(socketMap, gameStartTime, handleGameOver);
+                    const game = new Game(socketMap, gameStartTime, handleGameOver, type);
 
                     queuedPlayers.forEach(p => {
                         connectedUsers[p.socket.id].game = game;
@@ -339,18 +355,23 @@ function startServer() {
                     });
 
                     games.push(game);
-                    // 2 player for now
                     const players = queuedPlayers.map(p => p.requester);
                     queuedPlayers.forEach(p => {
                         p.socket.emit('game-start',
                             gameStartTime,
-                            players);
+                            players,
+                            type);
                     });
                 };
 
                 if (twoPlayerQueue.length >= 2) {
                     startGame([twoPlayerQueue[0], twoPlayerQueue[1]]);
                     twoPlayerQueue.splice(0, 2);
+                }
+                if (threePlayerQueue.length >= 3) {
+                    startGame([threePlayerQueue[0], threePlayerQueue[1],
+                        threePlayerQueue[2]]);
+                    threePlayerQueue.splice(0, 3);
                 }
                 if (fourPlayerQueue.length >= 4) {
                     startGame([fourPlayerQueue[0], fourPlayerQueue[1],
@@ -383,6 +404,13 @@ function startServer() {
             for (let i = 0; i < fourPlayerQueue.length; i++) {
                 if (fourPlayerQueue[i].requester === connectedUsers[socket.id].username) {
                     fourPlayerQueue.splice(i, 1);
+                    connectedUsers[socket.id].queueID = -1;
+                    break;
+                }
+            }
+            for (let i = 0; i < threePlayerQueue.length; i++) {
+                if (threePlayerQueue[i].requester === connectedUsers[socket.id].username) {
+                    threePlayerQueue.splice(i, 1);
                     connectedUsers[socket.id].queueID = -1;
                     break;
                 }
