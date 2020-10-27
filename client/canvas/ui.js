@@ -124,7 +124,18 @@ module.exports = class UICanvas {
         this.context.fillStyle = 'white';
         this.context.font = 'bold 32px Prompt';
         const gold = this.state.hasForfeited() ? "FORFEIT" : this.state.getGold();
-        this.context.fillText(gold, screenWidth - 170, screenHeight - 181);
+        this.context.fillText(gold, screenWidth - 205, screenHeight - 179);
+
+        const count = this.state.getHarvesterCount();
+        const values = this.state.getHarvesterGoldValues();
+
+        this.context.fillText(gold, screenWidth - 205, screenHeight - 179);
+
+        this.context.font = '15px Prompt';
+        this.context.fillText(`+${200 + (count.gem * values.gem + count.ether * values.ether)}`,
+            screenWidth - 60, screenHeight - 182);
+        
+    
         this.context.textBaseline = 'alphabetic';
         
         // Show Timer

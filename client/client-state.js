@@ -406,6 +406,31 @@ module.exports = class ClientState {
             }
         }, INTERNAL_TICK_INTERVAL);
     }
+    
+    getHarvesterGoldValues() {
+        const gem = getBaseObject('Gem Harvester');
+        const ether = getBaseObject('Ether Harvester');
+        return { gem: gem.custom.value, ether: ether.custom.value };
+    }
+
+    getHarvesterCount() {
+        if (!this.gameState) return { ether: 0, gem: 0 };
+
+        const result = { ether: 0, gem: 0};
+        for (let i = 0; i < this.gameState.structures.length; i++) {
+            const structure = this.gameState.structures[i];
+            if (structure.name === 'Ether Harvester' &&
+                this.gameState.isAllowedBuilding(structure.position.x,
+                    structure.position.y, this.player)) {
+                result.ether += 1;
+            }
+            else if (structure.name === 'Gem Harvester' &&
+                structure.owner === this.player) {
+                result.gem += 1;
+            }
+        }
+        return result;
+    }
 
     getEnemyOverlay(player) {
         if (player === undefined) {

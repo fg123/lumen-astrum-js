@@ -50,7 +50,7 @@ const triggers = {
         onPlanningStart(state) {
             // Gain Passive Gold Per Turn
             state.players[this.owner].gold += 200;
-            if (state.clientState) {
+            if (state.clientState && state.clientState.player === this.owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation("+200", Constants.YELLOW_CHAT_COLOR,
                         this.position)

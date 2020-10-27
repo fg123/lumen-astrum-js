@@ -26,7 +26,7 @@ class PlayerState {
 
         this.gold = Constants.STARTING_GOLD;
         this.commandBase = undefined;
-
+        
         this.stats = new Proxy({}, {
             get: (target, name) => name in target ? target[name] : 0
         });

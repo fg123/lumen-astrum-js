@@ -250,9 +250,6 @@ module.exports = class MapCanvas {
             // Consider: unit vs structure, enemy vs mine, currently building vs not!
             let name = selectedObject.name;
 
-            if (!this.objectIsMine(selectedObject) && !this.objectIsNeutral(selectedObject)) {
-                name = 'Enemy ' + name;
-            }
             this.drawText(name, 'black', 16, 88,
                 screenHeight - bottomLeft.height + 43, 'center', 'bold');
 
