@@ -31,6 +31,12 @@ function rangeOneBarracks(buffBuilding) {
     };
 }
 
+function allBarracks(buffBuilding) {
+    return (structure) => {
+        return structure.name === 'Barracks';
+    };
+}
+
 // Triggers that are available:
 //   onPlanningStart
 //   onActionStart
@@ -94,72 +100,80 @@ const triggers = {
     },
     'Stim Lab': {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new StimModifier(this.custom.attackSpeedMultiplier), {
+            // Add modifier to all barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new StimModifier(this.custom.attackSpeedMultiplier);
+                }), {
                     onlyOne: true
                 });
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
             const adder = this;
-            units.forEach(u => {
+            barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
             });
         }
     },
     "Artillery Bay": {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new ArtilleryModifier(this.custom.attackDamageMultiplier), {
+            // Add modifier to all barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new ArtilleryModifier(this.custom.attackDamageMultiplier);
+                }), {
                     onlyOne: true
                 });
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
             const adder = this;
-            units.forEach(u => {
+            barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
             });
         }
     },
     "Cloud Gate": {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new CloudModifier(this.custom.moveRangeDelta), {
+            // Add modifier to all barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new CloudModifier(this.custom.moveRangeDelta);
+                }), {
                     onlyOne: true
                 });
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
             const adder = this;
-            units.forEach(u => {
+            barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
             });
         }
     },
     "Vitality Fountain": {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new VitalityModifier(this.custom.healthMultiplier), {
+            // Add modifier to all barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new VitalityModifier(this.custom.healthMultiplier);
+                }), {
                     onlyOne: true
                 });
             });
         },
         onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
+            const barracks = state.getStructuresOnMyTeam(this.owner, allBarracks(this));
             const adder = this;
-            units.forEach(u => {
+            barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
             });
         }
@@ -177,7 +191,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks);
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -197,7 +211,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks);
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
@@ -217,7 +231,7 @@ const triggers = {
             });
         },
         onDestroy(state) {
-            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks);
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
                 u.removeModifierByAdder(adder);
