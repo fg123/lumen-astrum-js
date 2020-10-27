@@ -100,6 +100,33 @@ const structures = {
                     'description': '{Reaver}',
                     'icon': '{Reaver}',
                     'command': 'spawn-Reaver'
+                },
+                {
+                    'title': "Build Thieves' Cave",
+                    'cost': 1000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': "{Thieves' Cave}",
+                    'icon': "{Thieves' Cave}",
+                    'command': "build-Thieves' Cave"
+                },
+                {
+                    'title': 'Build Vampiric Lair',
+                    'cost': 1000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': '{Vampiric Lair}',
+                    'icon': '{Vampiric Lair}',
+                    'command': 'build-Vampiric Lair'
+                },
+                {
+                    'title': "Build Shauna's Forge",
+                    'cost': 1000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': "{Shauna's Forge}",
+                    'icon': "{Shauna's Forge}",
+                    'command': "build-Shauna's Forge"
                 }
             ]
     },
@@ -172,14 +199,14 @@ const structures = {
         }
     },
     "Thieves' Cave": {
-        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 150% of damage dealt.',
+        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 75% of damage dealt.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'attackGoldGen': 1.50,
+            'attackGoldGen': 0.75,
         }
     },
     "Artillery Bay": {
@@ -231,7 +258,7 @@ const structures = {
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'healMultiplier': 0.20,
+            'healMultiplier': 0.10,
         }
     },
     "Shauna's Forge": {
@@ -242,7 +269,7 @@ const structures = {
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'healthMultiplier': 0.02
+            'healthMultiplier': 0.01
         }
     },
 };
@@ -326,33 +353,6 @@ const units = {
             'description': '{Turret}',
             'icon': '{Turret}',
             'command': 'build-Turret'
-        },
-        {
-            'title': "Build Thieves' Cave",
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': "{Thieves' Cave}",
-            'icon': "{Thieves' Cave}",
-            'command': "build-Thieves' Cave"
-        },
-        {
-            'title': 'Build Vampiric Lair',
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': '{Vampiric Lair}',
-            'icon': '{Vampiric Lair}',
-            'command': 'build-Vampiric Lair'
-        },
-        {
-            'title': "Build Shauna's Forge",
-            'cost': 2000,
-            'prereq': [],
-            'type': 'Structure',
-            'description': "{Shauna's Forge}",
-            'icon': "{Shauna's Forge}",
-            'command': "build-Shauna's Forge"
         }
     ]},
     'Reaver': {
