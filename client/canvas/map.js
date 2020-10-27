@@ -524,10 +524,12 @@ module.exports = class MapCanvas {
                         if (this.hasSelectedConstructionBuildingAndIsAllowed(x, y)) {
                             this.drawImage(this.resourceManager.get(Resource.BLUE_OVERLAY),
                                 drawCoord.x, drawCoord.y);
-                        }
-                        else if (this.state.gameState && this.state.gameState.isEnemyBuildingRange(x, y, this.state.player)) {
-                            this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY),
-                                drawCoord.x, drawCoord.y);
+                        } else if (this.state.gameState) {
+                            const isEnemyBuildingRange = this.state.gameState.isEnemyBuildingRange(x, y, this.state.player);
+                            if (isEnemyBuildingRange) {
+                                this.drawImage(this.state.getEnemyOverlay(isEnemyBuildingRange),
+                                    drawCoord.x, drawCoord.y);
+                            }
                         }
 
                         this.drawImage(this.resourceManager.get(
@@ -626,7 +628,7 @@ module.exports = class MapCanvas {
                                         this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), drawCoord.x, drawCoord.y);
                                     }
                                     else {
-                                        this.drawImage(this.resourceManager.get(Resource.RED_OVERLAY), drawCoord.x, drawCoord.y);
+                                        this.drawImage(this.state.getEnemyOverlay(mapObject.owner), drawCoord.x, drawCoord.y);
                                     }
                                     this.drawImage(units[name].image, drawCoord.x, drawCoord.y,
                                         units[name].image.width,

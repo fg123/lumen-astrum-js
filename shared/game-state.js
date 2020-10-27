@@ -194,7 +194,7 @@ module.exports = class GameState {
         for (let i = 0; i < players.length; i++) {
             if (players[i] !== player) {
                 if (this.isAllowedBuilding(x, y, players[i])) {
-                    return true;
+                    return players[i];
                 }
             }
         }

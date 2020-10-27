@@ -82,6 +82,8 @@ module.exports = class ClientState {
         this.cursorMessage = '';
         this.movementMode = false;
 
+        this.enemyOverlayMap = {};
+
         inputManager.attachInputPollingListener((keyState, prevKeyState) => {
             if (keyState[KEY_A]) {
                 this.camera.delta.x = -CAMERA_SPEED;
@@ -329,6 +331,17 @@ module.exports = class ClientState {
                 console.error(`Cannot start game, can't find ${player} in ${players}`);
                 return;
             }
+            // TODO: CHANGE IF MORE THAN 4 PEOPLE
+            const overlays = [Resource.RED_OVERLAY, Resource.PINK_OVERLAY, Resource.PURPLE_OVERLAY];
+            this.enemyOverlayMap[player] = this.resourceManager.get(Resource.GREEN_OVERLAY);
+            let j = 0;
+            for (let i = 0; i < players.length; i++) {
+                if (players[i] !== player) {
+                    console.log(players[i], j, overlays[j]);
+                    this.enemyOverlayMap[players[i]] = this.resourceManager.get(overlays[j++]);
+                }
+            }
+            
             const commandCenterLocation = map.commandCenterLocations[index];
             this.gameState = new GameState(gameStartTime, players);
             this.gameState.clientState = this;
@@ -392,6 +405,15 @@ module.exports = class ClientState {
                 this.topProgressBar = 1.0;
             }
         }, INTERNAL_TICK_INTERVAL);
+    }
+
+    getEnemyOverlay(player) {
+        if (player === undefined) {
+            // Neutral
+            return this.resourceManager.get(Resource.BLUE_OVERLAY);
+        }
+        console.log(player, this.enemyOverlayMap);
+        return this.enemyOverlayMap[player];
     }
 
     addNeutralChat(message) {

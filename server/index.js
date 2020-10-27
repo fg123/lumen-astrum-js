@@ -85,12 +85,14 @@ function startServer() {
     function handleGameOver(game, winner) {
         if (!game.isGameOver) {
             console.log('Game Over!');
-            
+
             const gameOver = {
                 winner: winner
             };
             Object.values(game.sockets).forEach(s => {
-                s.emit('game-over', gameOver);
+                if (s !== undefined) {
+                    s.emit('game-over', gameOver);
+                }
             });
             game.isGameOver = true;
             game.players.forEach(p => {
