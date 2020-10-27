@@ -16,11 +16,19 @@ const {
     CloudModifier,
     VitalityModifier,
     VampiricModifier,
-    SilverBulletModifier
+    SilverBulletModifier,
+    BarracksBuffGiver
 } = require('./modifier');
 
 function buffableUnit(u) {
     return u.buffable;
+}
+
+function rangeOneBarracks(buffBuilding) {
+    return (structure) => {
+        return structure.name === 'Barracks' &&
+            tupleDistance(buffBuilding.position, structure.position) === 1;
+    };
 }
 
 // Triggers that are available:
@@ -158,34 +166,61 @@ const triggers = {
     },
     "Vampiric Lair": {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new VampiricModifier(this.custom.healMultiplier), {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new VampiricModifier(this.custom.healMultiplier);
+                }), {
                     onlyOne: true
                 });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks);
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
             });
         }
     },
     "Shauna's Forge": {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new SilverBulletModifier(this.custom.healthMultiplier), {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new SilverBulletModifier(this.custom.healthMultiplier);
+                }), {
                     onlyOne: true
                 });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks);
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
             });
         }
     },
     "Thieves' Cave": {
         onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new ThievesModifier(this.custom.attackGoldGen);
+                }), {
                     onlyOne: true
                 });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks);
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
             });
         }
     },

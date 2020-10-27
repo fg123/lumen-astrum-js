@@ -95,6 +95,13 @@ module.exports.Structure = class extends ModifierHolder {
     static isConstructionBuilding(name) {
         return name === 'Command Base' || name === 'Deployment Outpost';
     }
+
+    // Modifier events that affect both structures and units
+    onSpawnedAnotherUnit(otherUnit) {
+        Object.values(this.modifiers).forEach(m => {
+            m.onSpawnedAnotherUnit(this, otherUnit);
+        });
+    }
 };
 
 module.exports.Unit = class extends ModifierHolder {

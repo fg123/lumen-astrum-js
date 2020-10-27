@@ -214,9 +214,12 @@ class SpawnUnitStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
-        state.insertMapObject(this.data.position,
+        const spawned = state.insertMapObject(this.data.position,
             this.data.unitName,
             this.from);
+            
+        const fromBuilding = state.mapObjects[this.data.fromBuilding.position.y][this.data.fromBuilding.position.x];
+        fromBuilding.onSpawnedAnotherUnit(spawned);
         state.changeGold(this.from, -(this.getOptionToBuild().cost));
     }
 }
@@ -349,7 +352,7 @@ class PhaseChangeStateChange extends StateChange {
                 state.removeMapObject(state.deadObjects[i]);
             }
             state.deadObjects = [];
-            
+
             const units = state.units.slice();
             const structures = state.structures.slice();
             for (let i = 0; i < units.length; i++) {

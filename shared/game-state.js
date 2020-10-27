@@ -151,6 +151,18 @@ module.exports = class GameState {
         return this.players[player].commandBase;
     }
 
+    getStructuresOnMyTeam(player, filter = () => true) {
+        const results = [];
+        this.structures.forEach(u => {
+            if (u.owner === player) {
+                if (filter(u)) {
+                    results.push(u);
+                }
+            }
+        });
+        return results;
+    }
+
     getUnitsOnMyTeam(player, filter = () => true) {
         const results = [];
         this.units.forEach(u => {

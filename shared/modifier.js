@@ -46,6 +46,12 @@ class BaseModifier {
         }
     }
 
+    onSpawnedAnotherUnit(spawner, otherUnit) {
+        if (this._onSpawnedAnotherUnit) {
+            this._onSpawnedAnotherUnit(spawner, otherUnit);
+        }
+    }
+
     onLaunchAttack(state, attacker, target, damage) {
         if (this._onLaunchAttack) {
             this._onLaunchAttack(state, attacker, target, damage);
@@ -347,6 +353,33 @@ class SilverBulletModifier extends BaseModifier {
     }
 };
 
+// Applied to buildings, lets the building apply buff to units constructed
+class BarracksBuffGiver extends BaseModifier {
+    constructor(buffConstructor) {
+        super();
+        this.buffConstructor = buffConstructor;
+        this.buff = buffConstructor();
+    }
+
+    _getName() {
+        return "BarracksBuffGiver" + this.buff.getName();
+    }
+
+    _getDisplayName() {
+        return "Giver of " + this.buff.getDisplayName();
+    }
+
+    _getIconIndex() { return this.buff.getIconIndex(); }
+
+    _getDescription(state) {
+        return `Constructed units will gain ${this.buff.getDisplayName()}!`;
+    }
+
+    _onSpawnedAnotherUnit(spawner, otherUnit) {
+        otherUnit.addModifier(spawner, this.buff);
+    }
+};
+
 module.exports = {
     BaseModifier,
     StimModifier,
@@ -356,5 +389,6 @@ module.exports = {
     VitalityModifier,
     VampiricModifier,
     SilverBulletModifier,
-    StunnedModifier
+    StunnedModifier,
+    BarracksBuffGiver
 };
