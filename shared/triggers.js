@@ -308,7 +308,8 @@ const triggers = {
             for (let i = 0; i < surrounding.length; i++) {
                 if (map.withinMap(surrounding[i])) {
                     if (map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
-                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK) {
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
+                        map.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.HIGH) {
                         // Check no one else has this tile
                         if (!state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.owner)) {
                             // And we didn't claim it
