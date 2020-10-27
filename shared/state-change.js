@@ -345,6 +345,11 @@ class PhaseChangeStateChange extends StateChange {
             state.phase = Constants.PHASE_ACTION;
             // Units and structures can change the array when they do action
             // start, so we should make a copy of all the objects.
+            for (let i = 0; i < state.deadObjects.length; i++) {
+                state.removeMapObject(state.deadObjects[i]);
+            }
+            state.deadObjects = [];
+            
             const units = state.units.slice();
             const structures = state.structures.slice();
             for (let i = 0; i < units.length; i++) {

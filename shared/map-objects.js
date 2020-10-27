@@ -4,8 +4,64 @@ const triggers = require('./triggers');
 const Constants = require('./constants');
 const { default: modifier } = require('./modifier');
 
-module.exports.Structure = class {
+class ModifierHolder {
+    constructor() {
+        this.modifiers = {};
+    }
+
+    addModifier(adder, modifier, options = {
+        duration: undefined,
+        onlyOne: false
+    }) {
+        if (options.onlyOne) {
+            // See if already exists
+            const mods = Object.keys(this.modifiers);
+            for (let i = 0; i < mods.length; i++) {
+                if (this.modifiers[mods[i]].getName() === modifier.getName() &&
+                    this.modifiers[mods[i]].adder === adder.id) {
+                    return mods[i];
+                }
+            }
+        }
+        const modifierKey = Date.now() + '/' + Object.keys(this.modifiers).length;
+        modifier.adder = adder.id;
+        modifier.duration = options.duration;
+        modifier.attachTime = Date.now();
+        this.modifiers[modifierKey] = modifier;
+        modifier.onAttach(this);
+        return modifierKey;
+    }  
+    
+    removeModifierByAdder(adder) {
+        const mods = Object.keys(this.modifiers);
+        for (let i = 0; i < mods.length; i++) {
+            if (this.modifiers[mods[i]].adder === adder.id) {
+                this.removeModifier(mods[i]);
+            }
+        }
+    }
+
+    removeModifierByName(modifierName) {
+        const mods = Object.keys(this.modifiers);
+        for (let i = 0; i < mods.length; i++) {
+            if (this.modifiers[mods[i]].getName() === modifierName) {
+                this.removeModifier(mods[i]);
+            }
+        }
+    }
+
+    removeModifier(modifierKey) {
+        if (this.modifiers[modifierKey]) {
+            const mod = this.modifiers[modifierKey];
+            delete this.modifiers[modifierKey];
+            mod.onDetach(this);
+        }
+    }
+};
+
+module.exports.Structure = class extends ModifierHolder {
     constructor(name, owner, position) {
+        super();
         this.name = name;
         this.owner = owner;
         this.position = position;
@@ -41,8 +97,9 @@ module.exports.Structure = class {
     }
 };
 
-module.exports.Unit = class {
+module.exports.Unit = class extends ModifierHolder {
     constructor(name, owner, position) {
+        super();
         this.name = name;
         this.owner = owner;
         this.position = position;
@@ -95,8 +152,6 @@ module.exports.Unit = class {
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;
 
-        this.modifiers = {};
-
         Object.assign(this, triggers[name]);
     }
 
@@ -104,55 +159,6 @@ module.exports.Unit = class {
         Object.values(this.modifiers).forEach(m => {
             m.onLaunchAttack(state, this, target, damage);
         });
-    }
-
-    addModifier(adder, modifier, options = {
-        duration: undefined,
-        onlyOne: false
-    }) {
-        if (options.onlyOne) {
-            // See if already exists
-            const mods = Object.keys(this.modifiers);
-            for (let i = 0; i < mods.length; i++) {
-                if (this.modifiers[mods[i]].getName() === modifier.getName() &&
-                    this.modifiers[mods[i]].adder === adder.id) {
-                    return mods[i];
-                }
-            }
-        }
-        const modifierKey = Date.now() + '/' + Object.keys(this.modifiers).length;
-        modifier.adder = adder.id;
-        modifier.duration = options.duration;
-        modifier.attachTime = Date.now();
-        this.modifiers[modifierKey] = modifier;
-        modifier.onAttach(this);
-        return modifierKey;
-    }  
-    
-    removeModifierByAdder(adder) {
-        const mods = Object.keys(this.modifiers);
-        for (let i = 0; i < mods.length; i++) {
-            if (this.modifiers[mods[i]].adder === adder.id) {
-                this.removeModifier(mods[i]);
-            }
-        }
-    }
-
-    removeModifierByName(modifierName) {
-        const mods = Object.keys(this.modifiers);
-        for (let i = 0; i < mods.length; i++) {
-            if (this.modifiers[mods[i]].getName() === modifierName) {
-                this.removeModifier(mods[i]);
-            }
-        }
-    }
-
-    removeModifier(modifierKey) {
-        if (this.modifiers[modifierKey]) {
-            const mod = this.modifiers[modifierKey];
-            delete this.modifiers[modifierKey];
-            mod.onDetach(this);
-        }
     }
 
     getVisionValue() {

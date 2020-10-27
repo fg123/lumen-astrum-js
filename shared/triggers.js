@@ -102,24 +102,6 @@ const triggers = {
             });
         }
     },
-    "Thieves' Cave": {
-        onActionStart(state) {
-            // Add modifier to everyone on my team
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            units.forEach(u => {
-                u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), {
-                    onlyOne: true
-                });
-            });
-        },
-        onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            const adder = this;
-            units.forEach(u => {
-                u.removeModifierByAdder(adder);
-            });
-        }
-    },
     "Artillery Bay": {
         onActionStart(state) {
             // Add modifier to everyone on my team
@@ -183,13 +165,6 @@ const triggers = {
                     onlyOne: true
                 });
             });
-        },
-        onDestroy(state) {
-            const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            const adder = this;
-            units.forEach(u => {
-                u.removeModifierByAdder(adder);
-            });
         }
     },
     "Shauna's Forge": {
@@ -201,12 +176,16 @@ const triggers = {
                     onlyOne: true
                 });
             });
-        },
-        onDestroy(state) {
+        }
+    },
+    "Thieves' Cave": {
+        onActionStart(state) {
+            // Add modifier to everyone on my team
             const units = state.getUnitsOnMyTeam(this.owner, buffableUnit);
-            const adder = this;
             units.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.addModifier(this, new ThievesModifier(this.custom.attackGoldGen), {
+                    onlyOne: true
+                });
             });
         }
     },

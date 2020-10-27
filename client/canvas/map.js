@@ -113,7 +113,7 @@ module.exports = class MapCanvas {
         }
         
         // Use shield to show how much longer stun is.
-        if (mapObject.modifiers) {
+        if (mapObject.modifiers && mapObject.isUnit) {
             const shieldPercent = mapObject.getStunnedTime() / mapObject.getStunnedTotalTime();
             this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
         }
