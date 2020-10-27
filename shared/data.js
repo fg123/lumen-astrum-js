@@ -2,7 +2,7 @@ const Constants = require('./constants');
 
 const structures = {
     'Command Base': {
-        'description': 'Main Base. Used to spawn Scouts, Engineers and to construct upgrade modules. Cannot be destroyed.\'s.',
+        'description': 'Main Base. Used to spawn Scouts, Engineers and to construct upgrade modules. Cannot be destroyed.',
         'health': 250,
         'shield': 0,
         'width': 1,
