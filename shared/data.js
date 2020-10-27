@@ -2,7 +2,7 @@ const Constants = require('./constants');
 
 const structures = {
     'Command Base': {
-        'description': 'Main Base. Defend yours while destroying opponent\'s.',
+        'description': 'Main Base. Used to spawn Scouts, Engineers and to construct upgrade modules. Cannot be destroyed.',
         'health': 250,
         'shield': 0,
         'width': 1,
@@ -67,7 +67,7 @@ const structures = {
         'targetable': false
     },
     'Barracks': {
-        'description': 'Unit production building, trains tier 2 units.',
+        'description': 'Unit production building, trains combat units.',
         'health': 200,
         'shield': 0,
         'width': 0,
@@ -94,7 +94,7 @@ const structures = {
                 },
                 {
                     'title': 'Spawn Reaver',
-                    'cost': 500,
+                    'cost': 300,
                     'prereq': ['Automation Factory'],
                     'type': 'Unit',
                     'description': '{Reaver}',
@@ -164,7 +164,7 @@ const structures = {
     },
     'Ether Harvester': {
         // The harvester health represents amount of gold provided.
-        'description': 'Harvester for small, blue minerals.',
+        'description': 'Standard resource harvester. Construct a Deployment Outpost nearby to claim.',
         'health': 10000,
         'shield': 0,
         'width': 0,
@@ -176,7 +176,7 @@ const structures = {
         'targetable': false
     },
     'Gem Harvester': {
-        'description': 'Harvester for large, purple minerals.',
+        'description': 'Upgraded resource harvester. Construct a Deployment Outpost nearby to claim.',
         'health': 100,
         'shield': 0,
         'width': 0,
@@ -250,7 +250,7 @@ const structures = {
         'options': []
     },
     "Vampiric Lair": {
-        'description': 'Takes 2 turns to build. Allies heal for 20% of damage dealt.',
+        'description': 'Takes 2 turns to build. Allies heal for 10% of damage dealt.',
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -268,7 +268,7 @@ const structures = {
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'healthMultiplier': 0.01
+            'healthMultiplier': 0.02
         }
     },
 };
@@ -359,7 +359,7 @@ const units = {
         'attackSpeed': 0,
         'damage': 0,
         'description': 'Requires Automation Factory. The Reaver explodes when dying, dealing 50 damage to all units range 1, and 25 range 2.',
-        'health': 20,
+        'health': 30,
         'moveRange': 3,
         'shield': 0,
         'sightRange': 3,
