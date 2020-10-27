@@ -64,7 +64,6 @@ const setupMap = (map) => {
 }
 
 // let map = setupMap(Constants.IS_PRODUCTION ? require('./maps/big') : require('./maps/small'));
-let map = setupMap(require('./maps/redesign'));
 
 /* Recursively applies the group to any high ground surrounding */
 const applyHighGroundGroup = (map, start, group) => {
@@ -85,6 +84,7 @@ const applyHighGroundGroup = (map, start, group) => {
     }
 };
 
+let map = setupMap(require('./maps/redesign'));
 
 const getVisible = (point, sightRange) => {
     /* Returns visibility map of a given point */

@@ -66,7 +66,7 @@ const triggers = {
 
             state.players[owner].gold += this.custom.value;
             this.currentHealth -= this.custom.value;
-            if (state.clientState) {
+            if (state.clientState && state.clientState.player === this.owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
                         this.position)
@@ -79,22 +79,22 @@ const triggers = {
         }
     },
     'Gem Harvester': {
+        onDestroy(state, attacker) {
+            const newOwner = attacker === undefined ? undefined : attacker.owner;
+            state.removeMapObject(this.position);
+            state.insertMapObject(this.position, 'Gem Harvester', newOwner);
+        },
         onPlanningStart(state) {
-            // Gain Extra Gold
-            const owner = state.getTileOwner(this.position.x, this.position.y);
+            // As long as someone captures this we gucci
+            const owner = this.owner;
             if (owner === undefined) return;
 
             state.players[owner].gold += this.custom.value;
-            this.currentHealth -= this.custom.value;
-            if (state.clientState) {
+            if (state.clientState && state.clientState.player === this.owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
                         this.position)
                 );
-            }
-            if (this.currentHealth <= 0) {
-                this.currentHealth = 0;
-                state.deadObjects.push(this.position);
             }
         }
     },
@@ -260,7 +260,7 @@ const triggers = {
                 if (tupleDistance(tile, this.position) === 1) {
                     const target = findTarget(state, tile);
                     if (target && target.owner !== undefined && target.targetable) {
-                        state.dealDamageToUnit(target, this.custom.explodeDamage1);
+                        state.dealDamageToUnit(this, target, this.custom.explodeDamage1);
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
                                 new GenericInPlaceSpriteAnimation(
@@ -274,7 +274,7 @@ const triggers = {
                 else if (tupleDistance(tile, this.position) === 2) {
                     const target = findTarget(state, tile);
                     if (target && target.owner !== undefined && target.targetable) {
-                        state.dealDamageToUnit(target, this.custom.explodeDamage2);
+                        state.dealDamageToUnit(this, target, this.custom.explodeDamage2);
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
                                 new GenericInPlaceSpriteAnimation(

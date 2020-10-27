@@ -342,7 +342,7 @@ class SilverBulletModifier extends BaseModifier {
 
     _onLaunchAttack(state, attacker, target, damage) {
         let extraDamage = Math.ceil(target.maxHealth * this.healthMultiplier);
-        state.dealDamageToUnit(target, extraDamage);
+        state.dealDamageToUnit(attacker, target, extraDamage);
 
         if (state.clientState) {
             state.clientState.globalAnimationManager.addAnimation(

@@ -177,15 +177,14 @@ const structures = {
     },
     'Gem Harvester': {
         'description': 'Harvester for large, purple minerals.',
-        'health': 15000,
+        'health': 100,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
         'options': [],
         'custom': {
-            'value': 200
-        },
-        'targetable': false
+            'value': 150
+        }
     },
     'Stim Lab': {
         'description': 'Takes 2 turns to build. Enhances attack speed of all allies by 25%.',

@@ -334,7 +334,7 @@ module.exports = class GameState {
         }
     }
 
-    dealDamageToUnit(target, damage) {
+    dealDamageToUnit(attacker, target, damage) {
         if (target.currentShield !== 0) {
             target.currentShield -= damage;
             damage = 0;
@@ -354,10 +354,17 @@ module.exports = class GameState {
             /* Kill Unit / Structure */
             this.deadObjects.push(target.position);
             if (target.onDestroy) {
-                target.onDestroy(this);
+                target.onDestroy(this, attacker);
             }
         }
         return damageToDeal;
+    }
+
+    purgeDeadObjects() {
+        for (let i = 0; i < this.deadObjects.length; i++) {
+            this.removeMapObject(this.deadObjects[i]);
+        }
+        this.deadObjects = [];
     }
 
     removeMapObject(location) {
@@ -366,6 +373,16 @@ module.exports = class GameState {
             console.error('Tried to remove map object that didn\'t exist!');
             return;
         }
+
+        // Could be queued to be removed
+        for (let i = 0; i < this.deadObjects.length; i++) {
+            if (this.deadObjects[i].x === location.x && 
+                this.deadObjects[i].y === location.y) {
+                this.deadObjects.splice(i, 1);
+                i--;
+            }
+        }
+
         this.mapObjects[location.y][location.x] = undefined;
         let surrounding = getSurrounding(location, mapObject.width);
         for (let i = 0; i < surrounding.length; i++) {

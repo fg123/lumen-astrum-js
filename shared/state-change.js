@@ -348,10 +348,7 @@ class PhaseChangeStateChange extends StateChange {
             state.phase = Constants.PHASE_ACTION;
             // Units and structures can change the array when they do action
             // start, so we should make a copy of all the objects.
-            for (let i = 0; i < state.deadObjects.length; i++) {
-                state.removeMapObject(state.deadObjects[i]);
-            }
-            state.deadObjects = [];
+            state.purgeDeadObjects();
 
             const units = state.units.slice();
             const structures = state.structures.slice();
@@ -392,10 +389,7 @@ class PhaseChangeStateChange extends StateChange {
             state.phase = Constants.PHASE_PLANNING;
 
             // Remove all dead units from this tick
-            for (let i = 0; i < state.deadObjects.length; i++) {
-                state.removeMapObject(state.deadObjects[i]);
-            }
-            state.deadObjects = [];
+            state.purgeDeadObjects();
 
             // Process Structures
             for (let i = 0; i < state.structures.length; i++) {
@@ -486,10 +480,7 @@ class ActionTickStateChange extends StateChange {
         }
 
         // Remove all dead units from this tick
-        for (let i = 0; i < state.deadObjects.length; i++) {
-            state.removeMapObject(state.deadObjects[i]);
-        }
-        state.deadObjects = [];
+        state.purgeDeadObjects();
     }
 }
 StateChange.registerSubClass(ActionTickStateChange);
@@ -566,7 +557,7 @@ class UnitAttackStateChange extends StateChange {
         //     unit.attacksThisTurn -= 1;
         // }
         unit.onLaunchAttack(state, target, unit.attackDamage);
-        state.dealDamageToUnit(target, unit.attackDamage);
+        state.dealDamageToUnit(unit, target, unit.attackDamage);
 
         if (unit.custom && unit.custom.splashDamage) {
             // Apply damage to surrounding units
@@ -574,7 +565,7 @@ class UnitAttackStateChange extends StateChange {
             for (let i = 0; i < surrounding.length; i++) {
                 const target = findTarget(state, surrounding[i]);
                 if (target !== undefined && target.isUnit && target.owner !== this.from) {
-                    state.dealDamageToUnit(target, unit.custom.splashDamage);
+                    state.dealDamageToUnit(unit, target, unit.custom.splashDamage);
                 }
             }
         }
@@ -789,7 +780,7 @@ class ReaverDetonateStateChange extends StateChange {
         for (let i = 0; i < surrounding.length; i++) {
             const target = findTarget(state, surrounding[i]);
             if (target !== undefined && target.isUnit && target.owner !== this.from) {
-                state.dealDamageToUnit(target, unit.custom.explodeDamage);
+                state.dealDamageToUnit(unit, target, unit.custom.explodeDamage);
             }
         }
 
@@ -956,7 +947,7 @@ class DealDamageStateChange extends StateChange {
         if (!this._verifyStateChange(state)) return;
 
         const target = findTarget(state, this.data.posTo);
-        state.dealDamageToUnit(target, this.data.damage);
+        state.dealDamageToUnit(undefined, target, this.data.damage);
     }
 }
 StateChange.registerSubClass(DealDamageStateChange);
