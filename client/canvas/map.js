@@ -355,7 +355,7 @@ module.exports = class MapCanvas {
                         this.inputManager.mouseState.position.y > pos.y &&
                         this.inputManager.mouseState.position.y < pos.y + 24) {
                         // Show Dialog
-                        const dialogPos = new Tuple(pos.x + 30, pos.y);
+                        const dialogPos = new Tuple(pos.x + 50, pos.y);
                         const dialogSize = new Tuple(300, 100);
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
                         this.drawText(modifier.getDisplayName(), 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
