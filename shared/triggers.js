@@ -259,7 +259,7 @@ const triggers = {
                 }
                 if (tupleDistance(tile, this.position) === 1) {
                     const target = state.findTarget(tile);
-                    if (target && target.owner !== undefined && target.targetable) {
+                    if (target && target.owner !== undefined && target.owner !== this.owner && target.targetable) {
                         state.dealDamageToUnit(this, target, this.custom.explodeDamage1);
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
@@ -273,7 +273,7 @@ const triggers = {
                 }
                 else if (tupleDistance(tile, this.position) === 2) {
                     const target = state.findTarget(tile);
-                    if (target && target.owner !== undefined && target.targetable) {
+                    if (target && target.owner !== undefined && target.owner !== this.owner && target.targetable) {
                         state.dealDamageToUnit(this, target, this.custom.explodeDamage2);
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
