@@ -19,7 +19,7 @@ module.exports = class Game {
             map[p] = undefined;
         });
 
-        const game = new Game(map, json.gameStartTime, onGameOver);
+        const game = new Game(map, json.gameStartTime, onGameOver, json.mapName);
         clearTimeout(game.initialTurnPassover);
         for (let i = 0; i < json.stateChanges.length; i++) {
             const stateChange = StateChange.deserialize(json.stateChanges[i]);
