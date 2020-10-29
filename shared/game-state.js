@@ -683,7 +683,7 @@ module.exports = class GameState {
         let target = this.mapObjects[pos.y][pos.x];
         if (target === undefined) {
             /* No direct target, check for occupied mapping */
-            const occupiedPoint = state.occupied[pos.y][pos.x];
+            const occupiedPoint = this.occupied[pos.y][pos.x];
             if (occupiedPoint && occupiedPoint !== true) {
                 return occupiedPoint;
             }
