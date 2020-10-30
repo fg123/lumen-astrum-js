@@ -689,12 +689,6 @@ module.exports = class MapCanvas {
             }
         }
             
-        // Since we have limited movement range, let's draw points towards
-        //   where we want to go based on movement range
-        for (let j = 0; j < desiredPathsToDraw.length; j++) {
-            const obj = desiredPathsToDraw[j];
-            this.drawArrow(obj.from, obj.to, 15, 3, 'green');
-        }
         this.drawGlobalAnimations();
 
         this.state.cursorMessage = '';
@@ -727,25 +721,38 @@ module.exports = class MapCanvas {
                     /* Since most times this path is taken, it will be when the
                     * player clicks a unit, we shortcircuit so we don't have to run
                     * the expensive pathfinding algorithm */
-                    if (!this.inputManager.mouseState.tile.equals(
-                        this.state.selectedObject.position
-                    ) && isMouseOverOnUnitMoveRange) {
-                        const path = PathFinder.findPath(this.state.gameState,
-                            this.state.selectedObject.position, this.inputManager.mouseState.tile);
-                        path.forEach(node => {
-                            const drawn = toDrawCoord(node);
-                            this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
-                                drawn.x, drawn.y);
-                        });
-                        this.state.canCurrentUnitMoveToPosition = true;
-                        this.state.cursorMessage = 'Move Here';
-                    } else {
-                        this.state.cursorMessage = 'Set Target Here';
+                    // if (!this.inputManager.mouseState.tile.equals(
+                    //     this.state.selectedObject.position
+                    // ) && isMouseOverOnUnitMoveRange) {
+                    //     // const path = PathFinder.findPath(this.state.gameState,
+                    //     //     this.state.selectedObject.position, this.inputManager.mouseState.tile);
+                    //     // path.forEach(node => {
+                    //     //     const drawn = toDrawCoord(node);
+                    //     //     this.drawImage(this.resourceManager.get(Resource.YELLOW_OVERLAY),
+                    //     //         drawn.x, drawn.y);
+                    //     // });
+                    //     this.state.canCurrentUnitMoveToPosition = true;
+                    //     this.state.cursorMessage = 'Move Here';
+                    // } else {
+                    const targetPoints = this.state.selectedObject.targetPoints;
+                    let lastTarget = this.state.selectedObject.position;
+                    if (targetPoints.length > 0 && !this.state.justEnteredMovementMode) {
+                        lastTarget = targetPoints[targetPoints.length - 1];
                     }
+                    const mousePoint = toDrawCoord(this.inputManager.mouseState.tile);
+                    this.drawArrow(toDrawCoord(lastTarget), mousePoint, 15, 3, 'green')
+                    this.state.cursorMessage = 'Set Target Here';
+                    // }
                 }
             }
         }
-
+        // Since we have limited movement range, let's draw points towards
+        //   where we want to go based on movement range
+        for (let j = 0; j < desiredPathsToDraw.length; j++) {
+            const obj = desiredPathsToDraw[j];
+            this.drawArrow(obj.from, obj.to, 15, 3, 'green');
+        }
+        
         healthbarsToDraw.forEach(healthbar => {
             this.drawHealthAndShieldBar(
                 healthbar.x,

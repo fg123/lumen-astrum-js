@@ -362,7 +362,10 @@ module.exports = class GameState {
 
     purgeDeadObjects() {
         for (let i = 0; i < this.deadObjects.length; i++) {
-            this.removeMapObject(this.deadObjects[i]);
+            const mapObject = this.mapObjects[this.deadObjects[i].y][this.deadObjects[i].x];
+            if (mapObject && mapObject.currentHealth <= 0) {
+                this.removeMapObject(this.deadObjects[i]);
+            }
         }
         this.deadObjects = [];
     }

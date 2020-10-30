@@ -250,6 +250,13 @@ class SetUnitTargetStateChange extends StateChange {
             this.data.targets.splice(0, 1);
             return;
         }
+        for (let i = 1; i < this.data.targets.length; i++) {
+            if (this.data.targets[i].x === this.data.targets[i - 1].x &&
+                this.data.targets[i].y === this.data.targets[i - 1].y) {
+                this.data.targets.splice(i, 1);
+                i -= 1;
+            }
+        }
         if (this.data.targets.length === 0) {
             unit.targetPoints = [];
         }
