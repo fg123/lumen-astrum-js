@@ -5,14 +5,12 @@ const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
 const crypto = require('crypto');
 const Game = require('./game');
-const path = require('path');
 const axios = require('axios');
 const Constants = require('../shared/constants');
 const { StateChange } = require('../shared/state-change');
 const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
 const { OAuth2Client } = require('google-auth-library');
 const oauthClient = new OAuth2Client(clientId);
-const { exec } = require("child_process");
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
@@ -21,8 +19,6 @@ const url = process.env.MONGO_URL || 'mongodb://localhost:27017';
 const dbName = 'lumen';
 const client = new MongoClient(url);
 let db;
-
-const { maps } = require('../shared/map');
 
 let gitChangeLog;
 
