@@ -5,6 +5,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
 const crypto = require('crypto');
 const Game = require('./game');
+const path = require('path');
 const Constants = require('../shared/constants');
 const { StateChange } = require('../shared/state-change');
 const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
@@ -30,8 +31,10 @@ client.connect(function(err) {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
     
-    console.log('Getting Git Information')
-    exec(`git log --format="%C(auto) %h %s" -20  --no-color`, (error, stdout, stderr) => {
+    console.log('Getting Git Information', path.join(__dirname, '../'));
+    // git log --no-color --format="%C(auto) %h %s" -20 
+    exec(`cd "${path.join(__dirname, '../')}" && git status`,
+        (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
@@ -40,6 +43,7 @@ client.connect(function(err) {
             console.log(`stderr: ${stderr}`);
             return;
         }
+        console.log(stdout);
         gitChangeLog = stdout.split("\n");
         console.log("Got Git Information");
         const port = process.env.PORT || 5000;
