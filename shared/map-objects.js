@@ -154,7 +154,7 @@ module.exports.Unit = class extends ModifierHolder {
 
         /* These are client specific usage */
         this.desiredPath = [];
-        this.targetPoint = undefined;
+        this.targetPoints = [];
 
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;

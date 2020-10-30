@@ -21,7 +21,7 @@ const {
 } = require('./pending-actions');
 
 const GameState = require('../shared/game-state');
-const { Tuple, getSurrounding } = require('../shared/coordinates');
+const { getSurrounding } = require('../shared/coordinates');
 const PathFinder = require('../shared/path-finder');
 const {
     InPlaceSpriteAnimation,
@@ -79,6 +79,7 @@ module.exports = class ClientState {
         this.topProgressBar = 0;
         this.cursorMessage = '';
         this.movementMode = false;
+        this.justEnteredMovementMode = false;
 
         this.enemyOverlayMap = {};
 
@@ -124,6 +125,10 @@ module.exports = class ClientState {
             }
             this.movementMode = keyState[KEY_G] && this.selectedObject && 
                 this.objectIsMine(this.selectedObject);
+            if (this.movementMode && !prevKeyState[KEY_G]) {
+                // Just entering movement mode
+                this.justEnteredMovementMode = true;
+            }
         });
 
         inputManager.attachMouseDownObserver((button) => {
@@ -531,25 +536,6 @@ module.exports = class ClientState {
         return;
     }
 
-    potentialMoveUnitEvent() {
-        // Check if is unit:
-        if (this.selectedObject && this.selectedObject.isUnit &&
-            this.objectIsMind(this.selectedObject) &&
-            this.selectedObject.turnsUntilBuilt === 0) {
-            if (this.canCurrentUnitMoveToPosition) {
-                this.sendStateChange(
-                    MoveUnitStateChange.create(
-                        this.player,
-                        this.selectedObject.position,
-                        this.inputManager.mouseState.tile));
-                this.selectedObject.desiredPath = 
-                    PathFinder.findPath(this.gameState, this.selectedObject.position,
-                        this.inputManager.mouseState.tile);
-                // TODO: add pathfinding here
-            }
-        }
-    }
-
     potentialDesiredMoveEvent() {
         if (this.selectedObject && this.selectedObject.isUnit &&
             this.objectIsMine(this.selectedObject) &&
@@ -557,10 +543,17 @@ module.exports = class ClientState {
             
             if (this.inputManager.mouseState.tile &&
                 this.getMap().withinMap(this.inputManager.mouseState.tile)) {
+                let points = this.selectedObject.targetPoints.slice();
+                if (this.justEnteredMovementMode) {
+                    points = [];
+                    this.justEnteredMovementMode = false;
+                }
+
+                points.push(this.inputManager.mouseState.tile);
                 this.sendStateChange(SetUnitTargetStateChange.create(
                     this.player,
                     this.selectedObject.position,
-                    this.inputManager.mouseState.tile
+                    points
                 ));
             }
         }

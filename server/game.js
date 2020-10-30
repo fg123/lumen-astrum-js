@@ -11,6 +11,7 @@ const {
 } = require('../shared/state-change');
 const { default: modifier } = require('../shared/modifier');
 const { maps, setupMap } = require('../shared/map');
+const PathFinder = require('../shared/path-finder');
 
 module.exports = class Game {
     static fromJson(json, onGameOver) {
@@ -184,13 +185,17 @@ module.exports = class Game {
                 }
                 let didMove = false;
 
-                if (unit.targetPoint) {
+                if (unit.targetPoints.length > 0) {
                     // Repath first
-                    const repath = SetUnitTargetStateChange.create(unit.owner, unit.position, unit.targetPoint);
-                    this.processStateChange(repath);
+                    this.processStateChange(SetUnitTargetStateChange.create(unit.owner,
+                        unit.position, unit.targetPoints));
+                    if (unit.targetPoints.length > 0) {
+                        unit.desiredPath = PathFinder.findPath(this.state,
+                            unit.position, unit.targetPoints[0]);
+                    }
                 }
 
-                if (unit.targetPoint && unit.desiredPath &&
+                if (unit.targetPoints.length !== 0 && unit.desiredPath &&
                         unit.desiredPath.length !== 0 && actionMap[id].nextMoveTime < currentTime &&
                         unit.currentHealth > 0) {
                     const pendingMove = MoveUnitStateChange.create(
@@ -252,7 +257,7 @@ module.exports = class Game {
                 if (actionMap[unit.id].target !== undefined) {
                     finishedActions = false;
                 }
-                if (unit.targetPoint && unit.moveRange > 0) {
+                if (unit.targetPoints.length > 0 && unit.moveRange > 0) {
                     finishedActions = false;
                 }
             }

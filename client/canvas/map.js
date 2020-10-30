@@ -648,15 +648,13 @@ module.exports = class MapCanvas {
                         
                         if (name in units && mapObject.turnsUntilBuilt === 0) {
                             // Draw Unit desired path
-                            if (mapObject.targetPoint !== undefined) {
+                            let lastDrawn = toDrawCoord(mapObject.position);
+                            for (let i = 0; i < mapObject.targetPoints.length; i++) {
                                 desiredPathsToDraw.push({
-                                    owner: mapObject.owner,
-                                    drawnPos: actualDrawnPosition,
-                                    position: toDrawCoord(mapObject.position),
-                                    path: mapObject.desiredPath,
-                                    target: mapObject.targetPoint,
-                                    range: mapObject.moveRange
+                                    from: lastDrawn,
+                                    to: toDrawCoord(mapObject.targetPoints[i])
                                 });
+                                lastDrawn = toDrawCoord(mapObject.targetPoints[i]);
                             }
                         }
                         // Now we hide any bits of a building that isn't supposed to be
@@ -695,13 +693,7 @@ module.exports = class MapCanvas {
         //   where we want to go based on movement range
         for (let j = 0; j < desiredPathsToDraw.length; j++) {
             const obj = desiredPathsToDraw[j];
-            if (obj.target) {
-                //const wayPoints = [];
-                // let i = 0;
-                // while (obj.desiredPath.length - i > obj. )
-                const targetDrawCoord = toDrawCoord(obj.target);
-                this.drawArrow(obj.drawnPos, targetDrawCoord, 15, 3, 'green');
-            }
+            this.drawArrow(obj.from, obj.to, 15, 3, 'green');
         }
         this.drawGlobalAnimations();
 

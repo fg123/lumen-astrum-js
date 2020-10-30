@@ -374,15 +374,6 @@ module.exports = class GameState {
             return;
         }
 
-        // Could be queued to be removed
-        for (let i = 0; i < this.deadObjects.length; i++) {
-            if (this.deadObjects[i].x === location.x && 
-                this.deadObjects[i].y === location.y) {
-                this.deadObjects.splice(i, 1);
-                i--;
-            }
-        }
-
         this.mapObjects[location.y][location.x] = undefined;
         let surrounding = getSurrounding(location, mapObject.width);
         for (let i = 0; i < surrounding.length; i++) {

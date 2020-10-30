@@ -207,12 +207,12 @@ class SpawnUnitStateChange extends StateChange {
 StateChange.registerSubClass(SpawnUnitStateChange);
 
 class SetUnitTargetStateChange extends StateChange {
-    static create(from, unitPos, posTarget) {
+    static create(from, unitPos, targets) {
         return new SetUnitTargetStateChange(
             StateChange.create(
                 from, 'SetUnitTargetStateChange', {
                     unitPos: unitPos,
-                    posTarget: posTarget
+                    targets: targets
                 }
             )
         );
@@ -221,8 +221,13 @@ class SetUnitTargetStateChange extends StateChange {
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
         if (state.hasPlayerForfeited(this.from)) return false;
-        if (!state.gameMap.withinMap(this.data.unitPos) || !state.gameMap.withinMap(this.data.posTarget)) {
+        if (!state.gameMap.withinMap(this.data.unitPos)) {
             return false;
+        }
+        for (let i = 0; i < this.data.targets.length; i++) {
+            if (!state.gameMap.withinMap(this.data.targets[i])) {
+                return false;
+            }
         }
         /* Is there a unit that belongs to the player? */
         const unit = state.mapObjects[this.data.unitPos.y][this.data.unitPos.x];
@@ -238,15 +243,19 @@ class SetUnitTargetStateChange extends StateChange {
             return;
         }
         if (unit.owner !== this.from) return;
-        if (unit.position.x === this.data.posTarget.x &&
-            unit.position.y === this.data.posTarget.y) {
-            unit.targetPoint = undefined;
-            unit.desiredPath = [];
+
+        while (this.data.targets.length > 0 &&
+               unit.position.x === this.data.targets[0].x &&
+               unit.position.y === this.data.targets[0].y) {
+            this.data.targets.splice(0, 1);
             return;
         }
-        unit.targetPoint = this.data.posTarget;
-        unit.desiredPath = PathFinder.findPath(state,
-            unit.position, unit.targetPoint);
+        if (this.data.targets.length === 0) {
+            unit.targetPoints = [];
+        }
+        else {
+            unit.targetPoints = this.data.targets;
+        }
     }
 };
 
@@ -290,19 +299,6 @@ class MoveUnitStateChange extends StateChange {
         unit.moveRange -= path.length;
 
         state.moveUnit(this.data.posFrom, this.data.posTo);
-
-        if (unit.targetPoint) {
-            if (unit.desiredPath.length > 0) {
-                if (unit.desiredPath[0].y === this.data.posTo.y &&
-                    unit.desiredPath[0].x === this.data.posTo.x) {
-                    unit.desiredPath.shift();
-                    if (unit.desiredPath.length === 0) {
-                        unit.targetPoint = undefined;
-                    }
-                }
-            }
-            // TODO: figure out when to recalculate a path
-        }
     }
 }
 StateChange.registerSubClass(MoveUnitStateChange);
