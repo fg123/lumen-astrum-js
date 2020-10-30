@@ -1,5 +1,11 @@
 <template>
     <dashboard-wrapper v-bind:user="user" v-bind:root="root">
+        <div class="changelog" v-if="!inQueue">
+            <div style="margin-bottom: 5px; font-weight: bold">Changelog</div>
+            <div class="entry" v-for="(entry, index) in changelog" :key="index">
+                {{ entry }}
+            </div>
+        </div>
         <div class="joinGameDialog">
             <div class="notInQueue" v-if="!inQueue">
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Join 2 Player Queue</gradient-button>
@@ -28,7 +34,8 @@ module.exports = {
             inQueue: false,
             queueTimerBegin: undefined,
             queueTimer: undefined,
-            queueTimerText: ''
+            queueTimerText: '',
+            changelog: []
         };
     },
     components: {
@@ -39,6 +46,9 @@ module.exports = {
         if (!this.user) {
             alert('User not logged in!');
         }
+        this.root.socket.emit('changelog', (log) => {
+            this.changelog = log;
+        });
     },
     methods: {
         leaveQueue() {
@@ -86,5 +96,18 @@ div.joinGameDialog {
     right: 0;
     transform: translate(0, -50%);
     text-align: right;
+}
+div.changelog {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
+    color: #FFF;
+    max-width: 50%;
+    overflow: auto;
+}
+div.entry {
+    font-size: 13px;
+    font-family: 'Roboto Mono';
 }
 </style>

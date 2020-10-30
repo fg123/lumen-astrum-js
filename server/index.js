@@ -10,6 +10,7 @@ const { StateChange } = require('../shared/state-change');
 const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
 const { OAuth2Client } = require('google-auth-library');
 const oauthClient = new OAuth2Client(clientId);
+const { exec } = require("child_process");
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
@@ -21,16 +22,31 @@ let db;
 
 const { maps } = require('../shared/map');
 
+let gitChangeLog;
+
+console.log("Connecting to MongoDB");
 client.connect(function(err) {
     assert.equal(null, err);
-    console.log('Connected successfully to server');
+    console.log('Connected to MongoDB');
     db = client.db(dbName);
-
-    const port = process.env.PORT || 5000;
-
-    http.listen(port, function() {
-        console.log('Listening on port ' + port);
-        startServer();
+    
+    console.log('Getting Git Information')
+    exec(`git log --format="%C(auto) %h %s" -20  --no-color`, (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        gitChangeLog = stdout.split("\n");
+        console.log("Got Git Information");
+        const port = process.env.PORT || 5000;
+        http.listen(port, function() {
+            console.log('Listening on port ' + port);
+            startServer();
+        });
     });
 });
 
@@ -130,6 +146,7 @@ function startServer() {
         });
     }
 
+    
     function createNewUser(id, name, email, picture) {
         return {
             username: 'User' + id,
@@ -392,6 +409,9 @@ function startServer() {
                     socket.emit('invalid-state-change');
                 }
             }
+        });
+        socket.on('changelog', function(callback) {
+            callback(gitChangeLog);
         });
         const leaveQueue = () => {
             for (let i = 0; i < twoPlayerQueue.length; i++) {
