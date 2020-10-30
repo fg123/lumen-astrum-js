@@ -31,7 +31,7 @@ client.connect(function(err) {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
     
-    console.log('Getting Git Information', path.join(__dirname, '../'));
+    /*console.log('Getting Git Information', path.join(__dirname, '../'));
     // git log --no-color --format="%C(auto) %h %s" -20 
     exec(`cd "${path.join(__dirname, '../')}" && git status`,
         (error, stdout, stderr) => {
@@ -45,13 +45,13 @@ client.connect(function(err) {
         }
         console.log(stdout);
         gitChangeLog = stdout.split("\n");
-        console.log("Got Git Information");
+        console.log("Got Git Information");*/
         const port = process.env.PORT || 5000;
         http.listen(port, function() {
             console.log('Listening on port ' + port);
             startServer();
         });
-    });
+    //});
 });
 
 function startServer() {
