@@ -43,6 +43,8 @@ function allConstructors(buffBuilding) {
 //   onActionStart
 //   onCreate
 //   onDestroy
+//   onTargetAcquire - passes in a list of targets from acquiry, we can 
+//                     modify as we wish
 //   onActionTick - called every tick of the action phase, return true
 //                  if you want to continue the action phase
 //                  (more stuff happening)
@@ -250,7 +252,21 @@ const triggers = {
                 new StunnedModifier("Newly created unit!"), {
                     duration: Constants.ACTION_MAX_TIME * 500
                 });
-        },
+        }
+    },
+    'Armed Turret': {
+        onTargetAcquire(targets) {
+            // Filter out everything that's not a unit; targets here is:
+            //  { enemy: , inRangeTile: }
+            let j = 0;
+            for (let i = 0; i < targets.length; i++) {
+                if (targets[i].enemy.isUnit) {
+                    targets[j++] = targets[i];
+                }
+            }
+            targets.length = j;
+            console.log(targets);
+        }
     },
     'Reaver': {
         onDestroy(state) {

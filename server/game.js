@@ -209,6 +209,9 @@ module.exports = class Game {
                 }
                 // Try to acquire target and put into action map
                 const potentialEnemies = this.state.getEnemiesInAttackRange(unit.position);
+                if (unit.onTargetAcquire) {
+                    unit.onTargetAcquire(potentialEnemies);
+                }
                 if (potentialEnemies.length > 0) {
                     if (actionMap[id].target !== undefined) {
                         // See if current target still in potential enemies
