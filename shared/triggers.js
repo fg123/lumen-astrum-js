@@ -17,7 +17,8 @@ const {
     VitalityModifier,
     VampiricModifier,
     SilverBulletModifier,
-    BarracksBuffGiver
+    BarracksBuffGiver,
+    StunnedModifier
 } = require('./modifier');
 
 function buffableUnit(u) {
@@ -244,7 +245,11 @@ const triggers = {
             const position = this.position;
             const owner = this.owner;
             state.removeMapObject(position);
-            state.insertMapObject(position, 'Armed Turret', owner);
+            const unit = state.insertMapObject(position, 'Armed Turret', owner);
+            unit.addModifier(state.getCommandBase(unit.owner),
+                new StunnedModifier("Newly created unit!"), {
+                    duration: Constants.ACTION_MAX_TIME * 500
+                });
         },
     },
     'Reaver': {

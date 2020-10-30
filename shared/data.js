@@ -384,8 +384,7 @@ const units = {
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 0,
-        'options': [],
-        'buffable': false
+        'options': []
     },
     'Golem': {
         'attackRange': 1,
