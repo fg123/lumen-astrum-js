@@ -6,6 +6,7 @@ const io = require('socket.io').listen(http);
 const crypto = require('crypto');
 const Game = require('./game');
 const path = require('path');
+const axios = require('axios');
 const Constants = require('../shared/constants');
 const { StateChange } = require('../shared/state-change');
 const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
@@ -31,27 +32,24 @@ client.connect(function(err) {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
     
-    /*console.log('Getting Git Information', path.join(__dirname, '../'));
-    // git log --no-color --format="%C(auto) %h %s" -20 
-    exec(`cd "${path.join(__dirname, '../')}" && git status`,
-        (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(stdout);
-        gitChangeLog = stdout.split("\n");
-        console.log("Got Git Information");*/
+    console.log('Getting Git Information from GitHub');
+    axios.get("https://api.github.com/repos/fg123/lumen-astrum-js/commits")
+      .then(function (response) {
+        // handle success
+        gitChangeLog = response.data.map(commit => {
+            return commit["commit"]["message"];
+        });
+        console.log("Got Git Information");
         const port = process.env.PORT || 5000;
         http.listen(port, function() {
             console.log('Listening on port ' + port);
             startServer();
         });
-    //});
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      });
 });
 
 function startServer() {
