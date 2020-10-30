@@ -93,7 +93,7 @@ const replenishShield = (mapObject) => {
 const maps = {
     '4p': require("./maps/redesign.js"),
     '3p': require('./maps/3player.js'),
-    '2p': require('./maps/redesign.js')
+    '2p': require('./maps/2player.js')
 };
 
 module.exports = {
