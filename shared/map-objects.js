@@ -168,6 +168,22 @@ module.exports.Unit = class extends ModifierHolder {
         });
     }
 
+    onPreMove(state, target, moveTo) {
+        const modifiers = Object.values(this.modifiers);
+        for (let i = 0; i < modifiers.length; i++) {
+            if (modifiers[i].onPreMove(state, this, moveTo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    onPostMove(state, target, moveTo) {
+        Object.values(this.modifiers).forEach(m => {
+            m.onPostMove(state, this, moveTo);
+        });
+    }
+
     getVisionValue() {
         if (this.custom && this.custom.superVision)
             return this.custom.superVision;

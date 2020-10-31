@@ -61,7 +61,9 @@ module.exports = class Game {
 
     verifyStateChange(stateChange) {
         console.log('Verifying State Change');
+    
         console.log(stateChange);
+
         return stateChange &&
             stateChange.verifyStateChange(this.state);
     }

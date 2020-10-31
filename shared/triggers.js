@@ -18,7 +18,9 @@ const {
     VampiricModifier,
     SilverBulletModifier,
     BarracksBuffGiver,
-    StunnedModifier
+    StunnedModifier,
+    FlashPointModifier,
+    ArcticTippedModifier
 } = require('./modifier');
 
 function buffableUnit(u) {
@@ -228,6 +230,46 @@ const triggers = {
             barracks.forEach(b => {
                 b.addModifier(this, new BarracksBuffGiver(() => {
                     return new ThievesModifier(this.custom.attackGoldGen);
+                }), {
+                    onlyOne: true
+                });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
+            });
+        }
+    },
+    "Flash Point": {
+        onActionStart(state) {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new FlashPointModifier();
+                }), {
+                    onlyOne: true
+                });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
+            });
+        }
+    },
+    "Arctic Tower": {
+        onActionStart(state) {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(this, new BarracksBuffGiver(() => {
+                    return new ArcticTippedModifier(this.custom.stunDuration);
                 }), {
                     onlyOne: true
                 });

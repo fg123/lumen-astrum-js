@@ -476,6 +476,7 @@ module.exports = class GameState {
     }
 
     moveUnit(from, to) {
+        if (from.x === to.x && from.y === to.y) return;
         /* Assumes the coordinates are verified. */
         const unit = this.mapObjects[from.y][from.x];
         unit.position = to;

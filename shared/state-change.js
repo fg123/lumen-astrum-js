@@ -305,7 +305,10 @@ class MoveUnitStateChange extends StateChange {
         const path = PathFinder.findPath(state, this.data.posFrom, this.data.posTo);
         unit.moveRange -= path.length;
 
-        state.moveUnit(this.data.posFrom, this.data.posTo);
+        if (!unit.onPreMove(state, unit, this.data.posTo)) {
+            state.moveUnit(this.data.posFrom, this.data.posTo);
+        }
+        unit.onPostMove(state, unit, this.data.posTo);
     }
 }
 StateChange.registerSubClass(MoveUnitStateChange);

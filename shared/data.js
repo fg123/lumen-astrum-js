@@ -127,6 +127,24 @@ const structures = {
                     'description': "{Shauna's Forge}",
                     'icon': "{Shauna's Forge}",
                     'command': "build-Shauna's Forge"
+                },
+                {
+                    'title': "Build Flash Point",
+                    'cost': 1000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': "{Flash Point}",
+                    'icon': "{Flash Point}",
+                    'command': "build-Flash Point"
+                },
+                {
+                    'title': "Build Arctic Tower",
+                    'cost': 1000,
+                    'prereq': [],
+                    'type': 'Structure',
+                    'description': "{Arctic Tower}",
+                    'icon': "{Arctic Tower}",
+                    'command': "build-Arctic Tower"
                 }
             ]
     },
@@ -187,7 +205,7 @@ const structures = {
         }
     },
     'Stim Lab': {
-        'description': 'Takes 2 turns to build. Enhances attack speed of all allies by 25%.',
+        'description': 'Takes 2 turns to build. Enhances attack speed of allies by 25%.',
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -198,7 +216,7 @@ const structures = {
         }
     },
     "Thieves' Cave": {
-        'description': 'Takes 2 turns to build. Ally attacks generate gold equal to 75% of damage dealt.',
+        'description': "Takes 2 turns to build. Produced unit's attacks generate gold equal to 75% of damage dealt.",
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -209,7 +227,7 @@ const structures = {
         }
     },
     "Artillery Bay": {
-        'description': 'Takes 2 turns to build. Enhances attack damage of all allies by 30%.',
+        'description': 'Takes 2 turns to build. Enhances attack damage of allies by 30%.',
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -220,7 +238,7 @@ const structures = {
         }
     },
     "Cloud Gate": {
-        'description': 'Takes 2 turns to build. Enhances movement range of all allies by 3.',
+        'description': 'Takes 2 turns to build. Enhances movement range of allies by 3.',
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -231,7 +249,7 @@ const structures = {
         }
     },
     "Vitality Fountain": {
-        'description': 'Takes 2 turns to build. Enhances health of all allies by 50%.',
+        'description': 'Takes 2 turns to build. Enhances health of allies by 50%.',
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -250,7 +268,7 @@ const structures = {
         'options': []
     },
     "Vampiric Lair": {
-        'description': 'Takes 2 turns to build. Allies heal for 10% of damage dealt.',
+        'description': 'Takes 2 turns to build. Produced units heal for 10% of damage dealt.',
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -261,7 +279,7 @@ const structures = {
         }
     },
     "Shauna's Forge": {
-        'description': "Takes 2 turns to build. Ally attacks deal 2% of enemy's total health as extra damage.",
+        'description': "Takes 2 turns to build. Produced unit's attacks deal 2% of enemy's total health as extra damage.",
         'health': 250,
         'shield': 0,
         'width': 0,
@@ -269,6 +287,25 @@ const structures = {
         'options': [],
         'custom': {
             'healthMultiplier': 0.02
+        }
+    },
+    "Flash Point": {
+        'description': "Takes 2 turns to build. Produced units blink to their target location if within move range.",
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': []
+    },
+    "Arctic Tower": {
+        'description': "Takes 2 turns to build. Produced units stun enemies hit for 0.2s.",
+        'health': 250,
+        'shield': 0,
+        'width': 0,
+        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'options': [],
+        'custom': {
+            'stunDuration': 200
         }
     },
 };

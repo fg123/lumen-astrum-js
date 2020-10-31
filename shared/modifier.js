@@ -2,6 +2,8 @@
 //   also hook into triggers of events.
 const { PopupTextAnimation } = require('../client/animation');
 const Constants = require('./constants');
+const { tupleDistance } = require('./coordinates');
+const { default: PathFinder } = require('./path-finder');
 
 class BaseModifier {
     attackDamage(inAttackDamage) {
@@ -55,6 +57,19 @@ class BaseModifier {
     onLaunchAttack(state, attacker, target, damage) {
         if (this._onLaunchAttack) {
             this._onLaunchAttack(state, attacker, target, damage);
+        }
+    }
+
+    onPreMove(state, unit, location) {
+        if (this._onPreMove) {
+            return this._onPreMove(state, unit, location);
+        }
+        return false;
+    }
+
+    onPostMove(state, unit, location) {
+        if (this._onPostMove) {
+            this._onPostMove(state, unit, location);
         }
     }
 
@@ -353,6 +368,70 @@ class SilverBulletModifier extends BaseModifier {
     }
 };
 
+class ArcticTippedModifier extends BaseModifier {
+    constructor(stunDuration) {
+        super();
+        this.stunDuration = stunDuration;
+    }
+
+    _getName() {
+        return "ArcticTippedModifier";
+    }
+
+    _getDisplayName() {
+        return "Ice Tipped Bullets";
+    }
+
+    _getIconIndex() { return 9; }
+
+    _getDescription(state) {
+        return `Unit attacks stun enemies for ${this.stunDuration}s!`
+    }
+
+    _onLaunchAttack(state, attacker, target, damage) { 
+        if (target.isUnit) {
+            target.addModifier(attacker, new StunnedModifier("Frozen!"), {
+                duration: this.stunDuration,
+                onlyOne: true
+            });
+        }
+    }
+};
+
+class FlashPointModifier extends BaseModifier {
+    constructor() {
+        super();
+    }
+
+    _getName() {
+        return "FlashPointModifier";
+    }
+
+    _getDisplayName() {
+        return "Teleports Behind You";
+    }
+
+    _getIconIndex() { return 8; }
+
+    _getDescription(state) {
+        return `Unit blinks to target location instead of moving!`;
+    }
+
+    _onPreMove(state, unit, location) {
+        if (unit.targetPoints.length > 0) {
+            // Get first target point
+            const target = unit.targetPoints[0];
+            if (tupleDistance(unit.position, target) <= unit.moveRange) {
+                console.log("Flashing from", unit.position, "to", target);
+                state.moveUnit(unit.position, target);
+                return true; // override move
+            }
+        }
+        return false;
+    }
+    
+};
+
 // Applied to buildings, lets the building apply buff to units constructed
 class BarracksBuffGiver extends BaseModifier {
     constructor(buffConstructor) {
@@ -390,5 +469,7 @@ module.exports = {
     VampiricModifier,
     SilverBulletModifier,
     StunnedModifier,
-    BarracksBuffGiver
+    BarracksBuffGiver,
+    ArcticTippedModifier,
+    FlashPointModifier
 };
