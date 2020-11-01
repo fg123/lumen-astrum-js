@@ -6,7 +6,6 @@ module.exports = {
     YELLOW_CHAT_COLOR: '#f0e130',
     STARTING_GOLD: is_production ? 1000 : 100000,
     BUILD_RANGE: 3,
-    BUILDING_VISION_RANGE: 5,
     TIME_IN_SECONDS_BEFORE_GAME_START: is_production ? 10 : 3,
     IS_PRODUCTION: is_production,
     PROBE_RANGE: 1,

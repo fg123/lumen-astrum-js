@@ -7,6 +7,7 @@ const structures = {
         'shield': 0,
         'width': 1,
         'turnsToBuild': 0,
+        'sightRange': 4,
         'options':
             [
                 {
@@ -72,6 +73,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
+        'sightRange': 1,
         'options':
             [
                 {
@@ -154,6 +156,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
+        'sightRange': 1,
         'options': []
     },
     'Tech Lab': {
@@ -162,6 +165,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
+        'sightRange': 1,
         'options': [],
     },
     'Military Academy': {
@@ -170,6 +174,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
+        'sightRange': 1,
         'options': [],
     },
     'Deployment Outpost': {
@@ -178,6 +183,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
+        'sightRange': 4,
         'options': [],
     },
     'Ether Harvester': {
@@ -187,6 +193,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
+        'sightRange': 1,
         'options': [],
         'custom': {
             'value': 100
@@ -199,6 +206,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
+        'sightRange': 1,
         'options': [],
         'custom': {
             'value': 150
@@ -211,6 +219,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'attackSpeedMultiplier': 1.25
         }
@@ -222,6 +231,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'attackGoldGen': 0.75,
         }
@@ -233,6 +243,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'attackDamageMultiplier': 1.3,
         }
@@ -244,6 +255,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'moveRangeDelta': 2,
         }
@@ -255,6 +267,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'healthMultiplier': 1.50,
         }
@@ -265,6 +278,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': 1,
+        'sightRange': 1,
         'options': []
     },
     "Vampiric Lair": {
@@ -274,6 +288,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'healMultiplier': 0.10,
         }
@@ -285,6 +300,7 @@ const structures = {
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
+        'sightRange': 1,
         'custom': {
             'healthMultiplier': 0.02
         }
@@ -295,6 +311,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'sightRange': 1,
         'options': []
     },
     "Arctic Tower": {
@@ -303,6 +320,7 @@ const structures = {
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'sightRange': 1,
         'options': [],
         'custom': {
             'stunDuration': 200
@@ -319,7 +337,7 @@ const units = {
         'health': 15,
         'moveRange': 8,
         'shield': 0,
-        'sightRange': 5,
+        'sightRange': 4,
         'tier': 1,
         'turnsToBuild': 1,
         'options': []
@@ -332,7 +350,7 @@ const units = {
         'health': 40,
         'moveRange': 5,
         'shield': 0,
-        'sightRange': 3,
+        'sightRange': 2,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [],
@@ -351,7 +369,7 @@ const units = {
         'health': 12,
         'moveRange': 3,
         'shield': 0,
-        'sightRange': 3,
+        'sightRange': 2,
         'tier': 1,
         'turnsToBuild': 1,
         'options': [{
@@ -399,7 +417,7 @@ const units = {
         'health': 30,
         'moveRange': 3,
         'shield': 0,
-        'sightRange': 3,
+        'sightRange': 2,
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,
@@ -417,7 +435,7 @@ const units = {
         'health': 100,
         'moveRange': 0,
         'shield': 0,
-        'sightRange': 4,
+        'sightRange': 3,
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 0,
@@ -431,7 +449,7 @@ const units = {
         'health': 120,
         'moveRange': 3,
         'shield': 0,
-        'sightRange': 2,
+        'sightRange': 1,
         'squadsize': 1,
         'tier': 1,
         'turnsToBuild': 1,

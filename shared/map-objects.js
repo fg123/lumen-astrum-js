@@ -73,6 +73,8 @@ module.exports.Structure = class extends ModifierHolder {
         this.maxHealth = Data.structures[name].health;
         this.maxBaseHealth = Data.structures[name].health;
         this.maxShield = Data.structures[name].shield;
+
+        this.sightRange = Data.structures[name].sightRange;
         this.isStructure = true;
         this.isUnit = false;
 
