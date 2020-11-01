@@ -6,6 +6,8 @@ const io = require('socket.io').listen(http);
 const crypto = require('crypto');
 const Game = require('./game');
 const axios = require('axios');
+const mkdirp = require('mkdirp');
+const serveIndex = require('serve-index')
 const Constants = require('../shared/constants');
 const { StateChange } = require('../shared/state-change');
 const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
@@ -82,7 +84,11 @@ function startServer() {
                 }
             });
         }
-        fs.writeFileSync('dump.json', safeStringify(games));
+        if (Constants.IS_PRODUCTION) {
+            mkdirp.sync('dumps');
+        }
+        const dumpName = Constants.IS_PRODUCTION ? `dumps/dump-${Date.now()}.json` : 'dump.json';
+        fs.writeFileSync(dumpName, safeStringify(games));
         process.exit(1);
     });
 
@@ -144,7 +150,9 @@ function startServer() {
         });
     }
 
-    
+    app.use('/dumps', express.static(__dirname + '/../dumps'));
+    app.use('/dumps', serveIndex(__dirname + '/../dumps'));
+
     function createNewUser(id, name, email, picture) {
         return {
             username: 'User' + id,
