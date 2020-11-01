@@ -408,7 +408,7 @@ module.exports = class GameState {
                     }
                 }
 
-                surrounding = this.getVisible(location, mapObject.width + structure.sightRange);
+                surrounding = this.getVisible(location, mapObject.width + mapObject.sightRange);
                 surrounding.forEach(pos => {
                     this.removeVisibility(pos.x, pos.y, mapObject.owner);
                 });
