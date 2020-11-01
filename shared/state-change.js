@@ -592,6 +592,10 @@ class ChatMessageStateChange extends StateChange {
                 content: `${this.from} has forfeited!`
             });
         }
+        else if (this.data.message === '/crash' &&
+                (this.from === 'Arasseo' || this.from === 'test')) {
+            throw "Intentional crash!";
+        }
         else {
             state.chatMessages.push({
                 author: this.from,
