@@ -238,14 +238,14 @@ const structures = {
         }
     },
     "Cloud Gate": {
-        'description': 'Takes 2 turns to build. Enhances movement range of allies by 3.',
+        'description': 'Takes 2 turns to build. Enhances movement range of allies by 2.',
         'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
         'options': [],
         'custom': {
-            'moveRangeDelta': 3,
+            'moveRangeDelta': 2,
         }
     },
     "Vitality Fountain": {
