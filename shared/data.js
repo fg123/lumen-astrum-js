@@ -201,12 +201,12 @@ const structures = {
         'targetable': false
     },
     'Gem Harvester': {
-        'description': 'Upgraded resource harvester. Construct a Deployment Outpost nearby to claim.',
-        'health': 100,
+        'description': 'Upgraded resource harvester. Kill the building to claim it.',
+        'health': 250,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
-        'sightRange': 1,
+        'sightRange': 2,
         'options': [],
         'custom': {
             'value': 150
