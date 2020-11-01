@@ -239,6 +239,7 @@ class SetUnitTargetStateChange extends StateChange {
 
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.unitPos.y][this.data.unitPos.x];
+        if (unit === undefined) return;
         if (unit.maxMoveRange === 0) {
             return;
         }
