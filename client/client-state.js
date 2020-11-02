@@ -191,33 +191,6 @@ module.exports = class ClientState {
                 this.gameState.structures.forEach(animationSpawner);
                 this.gameState.units.forEach(animationSpawner);
             }            
-            else if (change instanceof MoveUnitStateChange) {
-                const unit = this.gameState.mapObjects[
-                    change.data.posFrom.y][change.data.posFrom.x];
-                if (unit) {
-                    const path = PathFinder.findPath(
-                        this.gameState,
-                        change.data.posFrom,
-                        change.data.posTo
-                    );
-                    path.unshift(change.data.posFrom);
-                    // Hide move range indicator for now.
-                    const currentlySelected = this.selectedObject &&
-                        this.selectedObject.position.x === change.data.posFrom.x &&
-                        this.selectedObject.position.y === change.data.posFrom.y;
-                    if (currentlySelected) {
-                        this.unitMoveRange = [];
-                        this.unitAttackRange = [];
-                    }
-                    unit.animationManager.addAnimation(
-                        new MoveUnitAnimation(unit, path, 10, () => {
-                            if (currentlySelected && !this.selectedObject) {
-                                this.selectObject(unit);
-                            }
-                        })
-                    );
-                }
-            }
             else if (change instanceof UnitAttackStateChange) {
                 const unit = this.gameState.mapObjects[
                     change.data.posFrom.y][change.data.posFrom.x];

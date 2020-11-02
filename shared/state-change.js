@@ -47,6 +47,7 @@ const PathFinder = require('./path-finder');
 const Data = require('./data');
 const { default: GameState } = require('./game-state');
 const { StunnedModifier } = require('./modifier');
+const { MoveUnitAnimation } = require('../client/animation');
 
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the
@@ -308,6 +309,20 @@ class MoveUnitStateChange extends StateChange {
 
         if (!unit.onPreMove(state, unit, this.data.posTo)) {
             state.moveUnit(this.data.posFrom, this.data.posTo);
+            if (state.clientState) {
+                // Movement Animation
+                path.unshift(this.data.posFrom);
+                const currentlySelected = state.clientState.selectedObject &&
+                    state.clientState.selectedObject.position.x === this.data.posFrom.x &&
+                    state.clientState.selectedObject.position.y === this.data.posFrom.y;
+                unit.animationManager.addAnimation(
+                    new MoveUnitAnimation(unit, path, 10, () => {
+                        if (currentlySelected && !state.clientState.selectedObject) {
+                            state.clientState.selectObject(unit);
+                        }
+                    })
+                );
+            }
         }
         unit.onPostMove(state, unit, this.data.posTo);
     }

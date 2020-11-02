@@ -71,7 +71,7 @@ const triggers = {
 
             state.players[owner].gold += this.custom.value;
             this.currentHealth -= this.custom.value;
-            if (state.clientState && state.clientState.player === this.owner) {
+            if (state.clientState && state.clientState.player === owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
                         this.position)
