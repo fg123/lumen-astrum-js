@@ -8,10 +8,7 @@ const {
     MoveUnitStateChange,
     ChatMessageStateChange,
     UnitAttackStateChange,
-    ReaverDetonateStateChange,
-    GuardianLockdownStateChange,
     SetUnitTargetStateChange,
-    LaunchProbeStateChange,
     PhaseChangeStateChange
 } = require('../shared/state-change');
 
@@ -193,17 +190,7 @@ module.exports = class ClientState {
                 };
                 this.gameState.structures.forEach(animationSpawner);
                 this.gameState.units.forEach(animationSpawner);
-            }
-            else if (change instanceof LaunchProbeStateChange) {
-                this.globalAnimationManager.addAnimation(
-                    new GenericInPlaceSpriteAnimation(
-                        toDrawCoord(change.data.posTo),
-                        this.resourceManager.get(Resource.PROBE_ANIM),
-                        5,
-                        20
-                    )
-                );
-            }
+            }            
             else if (change instanceof MoveUnitStateChange) {
                 const unit = this.gameState.mapObjects[
                     change.data.posFrom.y][change.data.posFrom.x];
@@ -267,21 +254,6 @@ module.exports = class ClientState {
                     );
                 }
             }
-            else if (change instanceof ReaverDetonateStateChange) {
-                const surrounding = getSurrounding(change.data.posFrom, 1);
-                for (let i = 0; i < surrounding.length; i++) {
-                    if (!surrounding[i].equals(change.data.posFrom)) {
-                        this.globalAnimationManager.addAnimation(
-                            new AttackProjectileAnimation(
-                                this.resourceManager,
-                                unit,
-                                change.data.posFrom,
-                                surrounding[i]
-                            )
-                        );
-                    }
-                }
-            }
             else if (change instanceof ChatMessageStateChange) {
                 /* For some reason, the vue component can't watch a nested property
                  * that's not properly defined as a prop, so we have to manually
@@ -305,10 +277,6 @@ module.exports = class ClientState {
             }
             /* Trust Server */
             change.simulateStateChange(this.gameState);
-            if (change instanceof GuardianLockdownStateChange) {
-                /* Reselect to show updated range */
-                this.selectObject(this.selectedObject);
-            }
             /* Currently Selected Unit might have died */
             if (this.selectedObject) {
                 if (!this.gameState.mapObjects[this.selectedObject.position.y][
@@ -359,7 +327,7 @@ module.exports = class ClientState {
             this.camera.position = toDrawCoord(commandCenterLocation);
         
             const interval = setInterval(() => {
-                const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (Date.now() - this.gameState.gameStartTime) / 1000);
+                const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (this.gameState.getGameTime()) / 1000);
                 if (seconds <= 0) {
                     clearInterval(interval);
                     this.bigMessage = '';
@@ -378,7 +346,7 @@ module.exports = class ClientState {
                     this.phaseText = 'ACTION';
                     const max = (Constants.ACTION_MAX_TIME * 1000);
                     
-                    const current = max - (Date.now() - this.gameState.phaseStartTime);
+                    const current = max - (this.gameState.getGameTime() - this.gameState.phaseStartTime);
 
                     let diff = current;
                     // Diff in Millis
@@ -391,7 +359,7 @@ module.exports = class ClientState {
                     this.phaseText = 'PLANNING';
                     const max = (Constants.PLANNING_TIME * 1000);
                     
-                    const current = max - (Date.now() - this.gameState.phaseStartTime);
+                    const current = max - (this.gameState.getGameTime() - this.gameState.phaseStartTime);
 
                     let diff = current;
                     // Diff in Millis
@@ -518,20 +486,7 @@ module.exports = class ClientState {
 
     customActionDispatch(name, option) {
         switch (name) {
-        case 'detonateReaver': {
-            const change = ReaverDetonateStateChange.create(this.player, this.selectedObject.position);
-            if (change.verifyStateChange(this.gameState)) {
-                this.sendStateChange(change);
-            }
-            break;
-        }
-        case 'guardianLockdown': {
-            const change = GuardianLockdownStateChange.create(this.player, this.selectedObject.position);
-            if (change.verifyStateChange(this.gameState)) {
-                this.sendStateChange(change);
-            }
-            break;
-        }
+
         }
         return;
     }
@@ -551,6 +506,7 @@ module.exports = class ClientState {
 
                 points.push(this.inputManager.mouseState.tile);
                 this.sendStateChange(SetUnitTargetStateChange.create(
+                    this.gameState,
                     this.player,
                     this.selectedObject.position,
                     points

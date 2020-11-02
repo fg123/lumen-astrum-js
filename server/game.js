@@ -28,11 +28,16 @@ module.exports = class Game {
             game.stateChanges.push(stateChange);
         }
         // Don't have any idea what phase we're actually in, so let's just:
-        game.processStateChange(PhaseChangeStateChange.create(undefined));
+        game.processStateChange(PhaseChangeStateChange.create(game.state, undefined));
         return game;
     }
-    constructor(playerSocketMap, gameStartTime, onGameOver, mapName) {
+
+    constructor(playerSocketMap, gameStartTime, onGameOver, mapName, testMode = false) {
+        // TestMode runs no timers.
+
         this.mapName = mapName;
+        this.gameStartTime = gameStartTime;
+        this.testMode = testMode;
         
         this.players = Object.keys(playerSocketMap);
         this.onGameOver = onGameOver;
@@ -50,13 +55,18 @@ module.exports = class Game {
         this.isGameOver = false;
 
         // Initial Phase State Change
-        this.initialTurnPassover = setTimeout(() => {
-            this.processStateChange(
-                PhaseChangeStateChange.create(undefined));
-            this.processStateChange(ChatMessageStateChange.create(undefined, 'WASD: Move the Camera'));
-            this.processStateChange(ChatMessageStateChange.create(undefined, 'Mouse Scroll: Zoom In / Out'));
-            this.processStateChange(ChatMessageStateChange.create(undefined, 'G (hold): To Move Units'));
-        }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
+        if (!testMode) {
+            this.initialTurnPassover = setTimeout(() => {
+                this.processStateChange(
+                    PhaseChangeStateChange.create(this.state, undefined));
+                this.processStateChange(ChatMessageStateChange.create(
+                    this.state, undefined, 'WASD: Move the Camera'));
+                this.processStateChange(ChatMessageStateChange.create(
+                    this.state, undefined, 'Mouse Scroll: Zoom In / Out'));
+                this.processStateChange(ChatMessageStateChange.create(
+                    this.state, undefined, 'G (hold): To Move Units'));
+            }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
+        }
     }
 
     verifyStateChange(stateChange) {
@@ -77,7 +87,7 @@ module.exports = class Game {
         });
 
         stateChange.simulateStateChange(this.state);
-        
+
         if (!Constants.IS_PRODUCTION) {
             this.state.verifyIntegrity();
         }
@@ -89,18 +99,18 @@ module.exports = class Game {
                 if (this.nextPhaseTimer) clearInterval(this.nextPhaseTimer);
                 this.nextPhaseTimer = undefined;
 
-                if (this.nextPhaseTimer === undefined) {
+                if (!this.testMode && this.nextPhaseTimer === undefined) {
                     this.nextPhaseTimer = setTimeout(() => {
                         this.nextPhaseTimer = undefined;
                         this.processStateChange(
-                            PhaseChangeStateChange.create(undefined));
+                            PhaseChangeStateChange.create(this.state, undefined));
                     }, Constants.PLANNING_TIME * 1000);
                 }
                 else {
                     console.error('Next phase timer already set on Action!');
                 }
             }
-            else {
+            else if (!this.testMode) {
                 this.runActionPhase();
             }
         }
@@ -160,15 +170,15 @@ module.exports = class Game {
         const actionMap = {};
         const TICK_TIME = 100;
         const MOVE_COOLDOWN = 400;
-        const actionPhaseStart = Date.now();
+        const actionPhaseStart = this.state.getGameTime();
         
         const actionPhaseTick = setInterval(() => {
             // Before any combat, units and structures tick
             // Each tick is every 100ms, unit tries to acquire target,
             //  given cooldown
-            let currentTime = Date.now();
+            let currentTime = this.state.getGameTime();
             
-            this.processStateChange(ActionTickStateChange.create(undefined, currentTime));
+            this.processStateChange(ActionTickStateChange.create(this.state, undefined, currentTime));
             
             const nonDeadUnits = [];
             for (let j = 0; j < this.state.units.length; j++) {
@@ -193,7 +203,8 @@ module.exports = class Game {
 
                 if (unit.targetPoints.length > 0) {
                     // Repath first
-                    this.processStateChange(SetUnitTargetStateChange.create(unit.owner,
+                    this.processStateChange(SetUnitTargetStateChange.create(this.state, 
+                        unit.owner,
                         unit.position, unit.targetPoints));
                     if (unit.targetPoints.length > 0) {
                         unit.desiredPath = PathFinder.findPath(this.state,
@@ -205,6 +216,7 @@ module.exports = class Game {
                         unit.desiredPath.length !== 0 && actionMap[id].nextMoveTime < currentTime &&
                         unit.currentHealth > 0) {
                     const pendingMove = MoveUnitStateChange.create(
+                        this.state,
                         unit.owner, unit.position,
                         unit.desiredPath[0]);
                     if (this.verifyStateChange(pendingMove)) {
@@ -242,9 +254,10 @@ module.exports = class Game {
                  
                 if (!didMove && actionMap[id].target !== undefined &&
                     actionMap[id].nextAttackTime < currentTime &&
-                    unit.getStunnedTime() === 0) {
+                    unit.getStunnedTime(this.state) === 0) {
                     // Have a target for this tick and attack not cooldown
                     const pendingAttack = UnitAttackStateChange.create(
+                        this.state, 
                         unit.owner, unit.position, actionMap[id].target.inRangeTile
                     );
                     if (this.verifyStateChange(pendingAttack)) {
@@ -278,7 +291,7 @@ module.exports = class Game {
                 if (gameStateOver === undefined) {
                     this.nextPhaseTimer = setTimeout(() => {
                         this.nextPhaseTimer = undefined;
-                        this.processStateChange(PhaseChangeStateChange.create(undefined));
+                        this.processStateChange(PhaseChangeStateChange.create(this.state, undefined));
                     }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
                 }
                 else {

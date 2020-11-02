@@ -108,7 +108,7 @@ const triggers = {
             // Add modifier to all barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new StimModifier(this.custom.attackSpeedMultiplier);
                 }), {
                     onlyOne: true
@@ -128,7 +128,7 @@ const triggers = {
             // Add modifier to all barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new ArtilleryModifier(this.custom.attackDamageMultiplier);
                 }), {
                     onlyOne: true
@@ -148,7 +148,7 @@ const triggers = {
             // Add modifier to all barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new CloudModifier(this.custom.moveRangeDelta);
                 }), {
                     onlyOne: true
@@ -168,7 +168,7 @@ const triggers = {
             // Add modifier to all barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new VitalityModifier(this.custom.healthMultiplier);
                 }), {
                     onlyOne: true
@@ -188,7 +188,7 @@ const triggers = {
             // Add modifier to barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new VampiricModifier(this.custom.healMultiplier);
                 }), {
                     onlyOne: true
@@ -208,7 +208,7 @@ const triggers = {
             // Add modifier to barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new SilverBulletModifier(this.custom.healthMultiplier);
                 }), {
                     onlyOne: true
@@ -228,7 +228,7 @@ const triggers = {
             // Add modifier to barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new ThievesModifier(this.custom.attackGoldGen);
                 }), {
                     onlyOne: true
@@ -248,7 +248,7 @@ const triggers = {
             // Add modifier to barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new FlashPointModifier();
                 }), {
                     onlyOne: true
@@ -268,7 +268,7 @@ const triggers = {
             // Add modifier to barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
-                b.addModifier(this, new BarracksBuffGiver(() => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new ArcticTippedModifier(this.custom.stunDuration);
                 }), {
                     onlyOne: true
@@ -290,7 +290,7 @@ const triggers = {
             const owner = this.owner;
             state.removeMapObject(position);
             const unit = state.insertMapObject(position, 'Armed Turret', owner);
-            unit.addModifier(state.getCommandBase(unit.owner),
+            unit.addModifier(state, state.getCommandBase(unit.owner),
                 new StunnedModifier("Newly created unit!"), {
                     duration: Constants.ACTION_MAX_TIME * 500
                 });

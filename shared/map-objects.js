@@ -9,7 +9,7 @@ class ModifierHolder {
         this.modifiers = {};
     }
 
-    addModifier(adder, modifier, options = {
+    addModifier(state, adder, modifier, options = {
         duration: undefined,
         onlyOne: false
     }) {
@@ -26,7 +26,7 @@ class ModifierHolder {
         const modifierKey = Date.now() + '/' + Object.keys(this.modifiers).length;
         modifier.adder = adder.id;
         modifier.duration = options.duration;
-        modifier.attachTime = Date.now();
+        modifier.attachTime = state.getGameTime();
         this.modifiers[modifierKey] = modifier;
         modifier.onAttach(this);
         return modifierKey;
@@ -99,9 +99,9 @@ module.exports.Structure = class extends ModifierHolder {
     }
 
     // Modifier events that affect both structures and units
-    onSpawnedAnotherUnit(otherUnit) {
+    onSpawnedAnotherUnit(state, otherUnit) {
         Object.values(this.modifiers).forEach(m => {
-            m.onSpawnedAnotherUnit(this, otherUnit);
+            m.onSpawnedAnotherUnit(state, this, otherUnit);
         });
     }
 };
@@ -208,11 +208,11 @@ module.exports.Unit = class extends ModifierHolder {
         return false;
     }
 
-    getStunnedTime() {
+    getStunnedTime(state) {
         let maxTime = 0;
         Object.values(this.modifiers).forEach(m => {
             if (m.stunned()) {                
-                maxTime = Math.max(m.getTimeRemaining(), maxTime);
+                maxTime = Math.max(m.getTimeRemaining(state), maxTime);
             }
         });
         return maxTime;

@@ -8,12 +8,12 @@ class StateChange {
         this.timestamp = stateChange.timestamp;
     }
 
-    static create(from, type, data) {
+    static create(state, from, type, data) {
         return new StateChange({
             type,
             from,
             data,
-            timestamp: Date.now()
+            timestamp: state.getGameTime()
         });
     }
 
@@ -51,10 +51,10 @@ const { StunnedModifier } = require('./modifier');
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the
      * unit that built it */
-    static create(from, structureName, position, builtBy) {
+    static create(state, from, structureName, position, builtBy) {
         return new BuildStructureStateChange(
             StateChange.create(
-                from, 'BuildStructureStateChange', {
+                state, from, 'BuildStructureStateChange', {
                     structureName: structureName,
                     position: position,
                     builtBy: builtBy
@@ -135,10 +135,10 @@ class BuildStructureStateChange extends StateChange {
 StateChange.registerSubClass(BuildStructureStateChange);
 
 class SpawnUnitStateChange extends StateChange {
-    static create(from, unitName, position, fromBuilding) {
+    static create(state, from, unitName, position, fromBuilding) {
         return new SpawnUnitStateChange(
             StateChange.create(
-                from, 'SpawnUnitStateChange', {
+                state, from, 'SpawnUnitStateChange', {
                     unitName: unitName,
                     position: position,
                     fromBuilding: fromBuilding
@@ -200,17 +200,17 @@ class SpawnUnitStateChange extends StateChange {
             this.from);
             
         const fromBuilding = state.mapObjects[this.data.fromBuilding.position.y][this.data.fromBuilding.position.x];
-        fromBuilding.onSpawnedAnotherUnit(spawned);
+        fromBuilding.onSpawnedAnotherUnit(state, spawned);
         state.changeGold(this.from, -(this.getOptionToBuild().cost));
     }
 }
 StateChange.registerSubClass(SpawnUnitStateChange);
 
 class SetUnitTargetStateChange extends StateChange {
-    static create(from, unitPos, targets) {
+    static create(state, from, unitPos, targets) {
         return new SetUnitTargetStateChange(
             StateChange.create(
-                from, 'SetUnitTargetStateChange', {
+                state, from, 'SetUnitTargetStateChange', {
                     unitPos: unitPos,
                     targets: targets
                 }
@@ -270,10 +270,10 @@ class SetUnitTargetStateChange extends StateChange {
 StateChange.registerSubClass(SetUnitTargetStateChange);
 
 class MoveUnitStateChange extends StateChange {
-    static create(from, posFrom, posTo) {
+    static create(state, from, posFrom, posTo) {
         return new MoveUnitStateChange(
             StateChange.create(
-                from, 'MoveUnitStateChange', {
+                state, from, 'MoveUnitStateChange', {
                     posFrom: posFrom,
                     posTo: posTo
                 }
@@ -315,10 +315,10 @@ class MoveUnitStateChange extends StateChange {
 StateChange.registerSubClass(MoveUnitStateChange);
 
 class PhaseChangeStateChange extends StateChange {
-    static create(from) {
+    static create(state, from) {
         return new PhaseChangeStateChange(
             StateChange.create(
-                from, 'PhaseChangeStateChange'
+                state, from, 'PhaseChangeStateChange'
             )
         );
     }
@@ -349,7 +349,7 @@ class PhaseChangeStateChange extends StateChange {
                         if (unit.onCreate) {
                             unit.onCreate(state);
                         }
-                        unit.addModifier(state.getCommandBase(unit.owner),
+                        unit.addModifier(state, state.getCommandBase(unit.owner),
                             new StunnedModifier("Newly created unit!"), {
                                 duration: Constants.ACTION_MAX_TIME * 500
                             });
@@ -421,10 +421,10 @@ StateChange.registerSubClass(PhaseChangeStateChange);
 
 class ActionTickStateChange extends StateChange {
     // TickTime from Server
-    static create(from, tickTime) {
+    static create(state, from, tickTime) {
         return new ActionTickStateChange(
             StateChange.create(
-                from, 'ActionTickStateChange', {
+                state, from, 'ActionTickStateChange', {
                     tickTime: tickTime
                 }
             )
@@ -474,10 +474,10 @@ class ActionTickStateChange extends StateChange {
 StateChange.registerSubClass(ActionTickStateChange);
 
 class UnitAttackStateChange extends StateChange {
-    static create(from, posFrom, posTo, allowFriendlyFire = false) {
+    static create(state, from, posFrom, posTo, allowFriendlyFire = false) {
         return new UnitAttackStateChange(
             StateChange.create(
-                from, 'UnitAttackStateChange', {
+                state, from, 'UnitAttackStateChange', {
                     posFrom: posFrom,
                     posTo: posTo,
                     allowFriendlyFire
@@ -570,10 +570,10 @@ class UnitAttackStateChange extends StateChange {
 StateChange.registerSubClass(UnitAttackStateChange);
 
 class ChatMessageStateChange extends StateChange {
-    static create(from, message) {
+    static create(state, from, message) {
         return new ChatMessageStateChange(
             StateChange.create(
-                from, 'ChatMessageStateChange', {
+                state, from, 'ChatMessageStateChange', {
                     message: message
                 }
             )
@@ -606,296 +606,11 @@ class ChatMessageStateChange extends StateChange {
 }
 StateChange.registerSubClass(ChatMessageStateChange);
 
-class HealUnitStateChange extends StateChange {
-    static create(from, posFrom, posTo) {
-        return new HealUnitStateChange(
-            StateChange.create(
-                from, 'HealUnitStateChange', {
-                    posFrom,
-                    posTo
-                }
-            )
-        );
-    }
-
-    _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
-        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
-            return false;
-        }
-        /* Is there a unit that belongs to the player? */
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        if (unit === undefined || !unit.isUnit) return false;
-        if (unit.owner !== this.from) return false;
-
-        /* Is that a medic? */
-        if (unit.name !== 'Medic') return false;
-
-        /* Does this unit have any attacks left?
-            (We use attack here to track once a turn activity.) */
-        if (unit.attacksThisTurn === 0) {
-            return false;
-        }
-
-        /* Is the attack destination a mapObject that belongs to me? */
-        const target = state.mapObjects[this.data.posTo.y][this.data.posTo.x];
-        if (target === undefined) {
-            return false;
-        }
-        if (!target.isUnit) return false;
-        if (target.owner !== this.from) return false;
-
-        /* No point healing someone with full health! */
-        if (target.currentHealth === target.maxHealth) return false;
-
-        /* Is the target in the range? */
-        if (tupleDistance(this.data.posFrom, this.data.posTo) !== 1) {
-            return false;
-        }
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        const target = state.mapObjects[this.data.posTo.y][this.data.posTo.x];
-
-        unit.attacksThisTurn -= 1;
-        target.currentHealth += unit.custom.healFor;
-        if (target.currentHealth > target.maxHealth) {
-            target.currentHealth = target.maxHealth;
-        }
-    }
-}
-StateChange.registerSubClass(HealUnitStateChange);
-
-
-class RepairStructureStateChange extends StateChange {
-    static create(from, posFrom, posTo) {
-        return new RepairStructureStateChange(
-            StateChange.create(
-                from, 'RepairStructureStateChange', {
-                    posFrom,
-                    posTo
-                }
-            )
-        );
-    }
-
-    _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
-        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
-            return false;
-        }
-        /* Is this from a unit that belongs to the player? */
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        if (unit === undefined || !unit.isUnit) return false;
-        if (unit.owner !== this.from) return false;
-
-        /* Is that a combat engineer? */
-        if (unit.name !== 'Combat Engineer') return false;
-
-        /* Does this unit have any attacks left?
-            (We use attack here to track once a turn activity.) */
-        if (unit.attacksThisTurn === 0) {
-            return false;
-        }
-
-        /* Is the attack destination a structure that belongs to me? */
-        const target = state.findTarget(this.data.posTo);
-        if (target === undefined) {
-            return false;
-        }
-        if (target.isUnit) return false;
-        if (target.owner !== this.from) return false;
-
-        /* No point repairing structure with full health */
-        if (target.currentHealth === target.maxHealth) return false;
-
-        /* Is the target in the range? */
-        if (tupleDistance(this.data.posFrom, this.data.posTo) !== 1) {
-            return false;
-        }
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        const target = state.findTarget(this.data.posTo);
-
-        unit.attacksThisTurn -= 1;
-        target.currentHealth += unit.custom.repairFor;
-        if (target.currentHealth > target.maxHealth) {
-            target.currentHealth = target.maxHealth;
-        }
-    }
-}
-StateChange.registerSubClass(RepairStructureStateChange);
-
-
-class ReaverDetonateStateChange extends StateChange {
-    static create(from, posFrom) {
-        return new ReaverDetonateStateChange(
-            StateChange.create(
-                from, 'ReaverDetonateStateChange', {
-                    posFrom
-                }
-            )
-        );
-    }
-
-    _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
-        if (!state.gameMap.withinMap(this.data.posFrom)) {
-            return false;
-        }
-        /* Is this from a unit that belongs to the player? */
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        if (unit === undefined || !unit.isUnit) return false;
-        if (unit.owner !== this.from) return false;
-
-        /* Is that a reaver? */
-        if (unit.name !== 'Reaver') return false;
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-
-        // Apply damage to surrounding units
-        const surrounding = getSurrounding(this.data.posFrom, 1);
-        for (let i = 0; i < surrounding.length; i++) {
-            const target = state.findTarget(surrounding[i]);
-            if (target !== undefined && target.isUnit && target.owner !== this.from) {
-                state.dealDamageToUnit(unit, target, unit.custom.explodeDamage);
-            }
-        }
-
-        // Kill the reaver
-        state.removeMapObject(this.data.posFrom);
-    }
-}
-StateChange.registerSubClass(ReaverDetonateStateChange);
-
-
-class GuardianLockdownStateChange extends StateChange {
-    static create(from, posFrom) {
-        return new GuardianLockdownStateChange(
-            StateChange.create(
-                from, 'GuardianLockdownStateChange', {
-                    posFrom
-                }
-            )
-        );
-    }
-
-    _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
-        if (!state.gameMap.withinMap(this.data.posFrom)) {
-            return false;
-        }
-        /* Is this from a unit that belongs to the player? */
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        if (unit === undefined || !unit.isUnit) return false;
-        if (unit.owner !== this.from) return false;
-
-        /* Is that a guardian? */
-        if (unit.name !== 'Guardian') return false;
-
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-
-        if (unit.lockedDown) {
-            unit.lockedDown = false;
-            unit.maxMoveRange = Data.units[unit.name].moveRange;
-            unit.moveRange = Math.min(unit.maxMoveRange, unit.moveRange);
-            unit.attackRange = Data.units[unit.name].attackrange;
-        }
-        else {
-            unit.lockedDown = true;
-            unit.maxMoveRange = unit.custom.lockedDownMoveRange;
-            unit.moveRange = Math.min(unit.maxMoveRange, unit.moveRange);
-            unit.attackRange = unit.custom.lockedDownAttackRange;
-        }
-
-        // No more attacking if we lock or unlock.
-        unit.attacksThisTurn = 0;
-    }
-}
-StateChange.registerSubClass(GuardianLockdownStateChange);
-
-class LaunchProbeStateChange extends StateChange {
-    static create(from, posFrom, posTo) {
-        return new LaunchProbeStateChange(
-            StateChange.create(
-                from, 'LaunchProbeStateChange', {
-                    posFrom,
-                    posTo
-                }
-            )
-        );
-    }
-
-    getOptionToLaunch() {
-        let builtBy = getBaseObject('Scouting Tower');
-        if (!builtBy) {
-            return undefined;
-        }
-        return builtBy.options.find(option => {
-            return option.command === 'custom-launchProbe';
-        });
-    }
-
-    _verifyStateChange(state) {
-        if (state.currentTurn !== this.from) {
-            return false;
-        }
-        if (!state.gameMap.withinMap(this.data.posFrom) || !state.gameMap.withinMap(this.data.posTo)) {
-            return false;
-        }
-        /* Is this from a structure that belongs to the player? */
-        const structure = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
-        if (structure === undefined || !structure.isStructure) return false;
-        if (structure.owner !== this.from) return false;
-
-        /* Is that a scouting tower? */
-        if (structure.name !== 'Scouting Tower') return false;
-
-        /* Do you have enough gold? */
-        if (state.getGold(this.from) < this.getOptionToLaunch().cost) {
-            return false;
-        }
-
-        return true;
-    }
-
-    _simulateStateChange(state) {
-        const surrounding = getSurrounding(this.data.posTo, Constants.PROBE_RANGE);
-        for (let i = 0; i < surrounding.length; i++) {
-            if (state.gameMap.withinMap(surrounding[i])) {
-                state.addProbeLocation(surrounding[i].x, surrounding[i].y, this.from);
-            }
-        }
-        state.changeGold(this.from, -(this.getOptionToLaunch().cost));
-    }
-}
-StateChange.registerSubClass(LaunchProbeStateChange);
-
 class DebugCheatStateChange extends StateChange {
-    static create(from, stateChange) {
+    static create(state, from, stateChange) {
         return new DebugCheatStateChange(
             StateChange.create(
-                from, 'DebugCheatStateChange', {
+                state, from, 'DebugCheatStateChange', {
                     stateChange: stateChange
                 }
             )
@@ -914,10 +629,10 @@ class DebugCheatStateChange extends StateChange {
 StateChange.registerSubClass(DebugCheatStateChange);
 
 class DealDamageStateChange extends StateChange {
-    static create(from, posTo, damage) {
+    static create(state, from, posTo, damage) {
         return new DealDamageStateChange(
             StateChange.create(
-                from, 'DealDamageStateChange', {
+                state, from, 'DealDamageStateChange', {
                     posTo,
                     damage
                 }
@@ -945,10 +660,10 @@ class DealDamageStateChange extends StateChange {
 StateChange.registerSubClass(DealDamageStateChange);
 
 class SpawnMapObject extends StateChange {
-    static create(from, posTo, mapObject, owner) {
+    static create(state, from, posTo, mapObject, owner) {
         return new SpawnMapObject(
             StateChange.create(
-                from, 'SpawnMapObject', {
+                state, from, 'SpawnMapObject', {
                     posTo,
                     mapObject,
                     owner
@@ -984,11 +699,6 @@ module.exports = {
     MoveUnitStateChange,
     UnitAttackStateChange,
     ChatMessageStateChange,
-    HealUnitStateChange,
-    RepairStructureStateChange,
-    ReaverDetonateStateChange,
-    GuardianLockdownStateChange,
-    LaunchProbeStateChange,
     ActionTickStateChange,
     DealDamageStateChange,
     SpawnMapObject,

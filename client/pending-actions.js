@@ -33,6 +33,7 @@ class PlaceUnitPendingAction extends PendingAction {
     _onTick(state, mapCanvas) {
         const gameMap = state.getMap();
         this.isValid = SpawnUnitStateChange.create(
+            mapCanvas.state.gameState,
             mapCanvas.state.player,
             this.unitName,
             mapCanvas.state.inputManager.mouseState.tile,
@@ -70,6 +71,7 @@ class PlaceUnitPendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 SpawnUnitStateChange.create(
+                    state.gameState,
                     state.player,
                     this.unitName,
                     state.inputManager.mouseState.tile,
@@ -92,6 +94,7 @@ class PlaceStructurePendingAction extends PendingAction {
     _onTick(state, mapCanvas) {
         const gameMap = state.getMap();
         this.isValid = BuildStructureStateChange.create(
+            mapCanvas.state.gameState,
             mapCanvas.state.player,
             this.structureName,
             mapCanvas.state.inputManager.mouseState.tile,
@@ -161,6 +164,7 @@ class PlaceStructurePendingAction extends PendingAction {
         if (this.isValid) {
             state.sendStateChange(
                 BuildStructureStateChange.create(
+                    state.gameState,
                     state.player,
                     this.structureName,
                     state.inputManager.mouseState.tile,

@@ -114,7 +114,7 @@ module.exports = class MapCanvas {
         
         // Use shield to show how much longer stun is.
         if (mapObject.modifiers && mapObject.isUnit) {
-            const shieldPercent = mapObject.getStunnedTime() / mapObject.getStunnedTotalTime();
+            const shieldPercent = mapObject.getStunnedTime(this.state.gameState) / mapObject.getStunnedTotalTime();
             this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
         }
         
@@ -320,7 +320,7 @@ module.exports = class MapCanvas {
                 const modifierDisplays = Object.keys(modifierWithCount);
                 for (let i = 0; i < modifierDisplays.length; i++) {
                     const modifier = modifierWithCount[modifierDisplays[i]].modifier;
-                    const timeRemaining = modifier.getTimeRemaining();
+                    const timeRemaining = modifier.getTimeRemaining(this.state.gameState);
 
                     const pos = new Tuple(176, screenHeight - 195 + (i * 24));
                     this.context.drawImage(

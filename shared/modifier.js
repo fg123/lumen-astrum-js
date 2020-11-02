@@ -48,9 +48,9 @@ class BaseModifier {
         }
     }
 
-    onSpawnedAnotherUnit(spawner, otherUnit) {
+    onSpawnedAnotherUnit(state, spawner, otherUnit) {
         if (this._onSpawnedAnotherUnit) {
-            this._onSpawnedAnotherUnit(spawner, otherUnit);
+            this._onSpawnedAnotherUnit(state, spawner, otherUnit);
         }
     }
 
@@ -73,9 +73,9 @@ class BaseModifier {
         }
     }
 
-    getTimeRemaining() {
+    getTimeRemaining(state) {
         if (this.duration && this.attachTime) {
-            return ((this.attachTime + this.duration) - Date.now());
+            return ((this.attachTime + this.duration) - state.getGameTime());
         }
         return undefined;
     }
@@ -390,7 +390,7 @@ class ArcticTippedModifier extends BaseModifier {
 
     _onLaunchAttack(state, attacker, target, damage) { 
         if (target.isUnit) {
-            target.addModifier(attacker, new StunnedModifier("Frozen!"), {
+            target.addModifier(state, attacker, new StunnedModifier("Frozen!"), {
                 duration: this.stunDuration,
                 onlyOne: true
             });
@@ -455,8 +455,8 @@ class BarracksBuffGiver extends BaseModifier {
         return `Constructed units will gain ${this.buff.getDisplayName()}!`;
     }
 
-    _onSpawnedAnotherUnit(spawner, otherUnit) {
-        otherUnit.addModifier(spawner, this.buff);
+    _onSpawnedAnotherUnit(state, spawner, otherUnit) {
+        otherUnit.addModifier(state, spawner, this.buff);
     }
 };
 

@@ -32,6 +32,7 @@ module.exports = {
         sendChat(message) {
             this.clientState.sendStateChange(
                 ChatMessageStateChange.create(
+                    this.clientState.gameState,
                     this.clientState.player,
                     message
                 )

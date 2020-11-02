@@ -88,8 +88,10 @@ module.exports = {
         cheatKill() {
             this.clientState.sendStateChange(
                 DebugCheatStateChange.create(
+                    this.clientState.gameState,
                     this.clientState.player,
                     DealDamageStateChange.create(
+                        this.clientState.gameState,
                         this.clientState.player,
                         this.selectedLocation,
                         10000
@@ -105,8 +107,10 @@ module.exports = {
                 }
                 this.clientState.sendStateChange(
                     DebugCheatStateChange.create(
+                        this.clientState.gameState,
                         this.clientState.player,
                         SpawnMapObject.create(
+                            this.clientState.gameState,
                             this.clientState.player,
                             this.selectedLocation,
                             this.selectedMapObject,

@@ -100,22 +100,10 @@ module.exports = class GameState {
         }
 
         /* Pre-constructed buildings */
-        console.log(playerUsernameList);
+        console.log('Creating game state with players:', playerUsernameList);
         for (let i = 0; i < playerUsernameList.length; i++) {
             this.players[playerUsernameList[i]].commandBase =
                 this.insertMapObject(gameMap.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
-            if (!Constants.IS_PRODUCTION && i < 2) {
-                const barracksLocation = new Tuple(0, 0);
-                if (i === 0) {
-                    barracksLocation.x = 5;
-                    barracksLocation.y = 4;
-                }
-                else {
-                    barracksLocation.x = 25;
-                    barracksLocation.y = 14;
-                }
-                this.insertMapObject(barracksLocation, 'Barracks', playerUsernameList[i]);
-            }
         }
 
         /* Setup Harvesters on Minerals */
@@ -130,6 +118,10 @@ module.exports = class GameState {
         if (gameMap.onMapStart) {
             gameMap.onMapStart(this);
         }
+    }
+
+    getGameTime() {
+        return Date.now() - this.gameStartTime;
     }
 
     // Throws an exception if the game-state is not consistent
@@ -324,7 +316,6 @@ module.exports = class GameState {
                         }
                     }
                 }
-
                 surrounding = this.getVisible(location, structure.width + structure.sightRange);
                 surrounding.forEach(pos => {
                     this.addVisibility(pos.x, pos.y, player);
