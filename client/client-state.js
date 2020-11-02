@@ -499,10 +499,10 @@ module.exports = class ClientState {
 
         switch (parts[0]) {
         case 'spawn':
-            this.pendingAction = new PlaceUnitPendingAction(parts[1]);
+            this.pendingAction = new PlaceUnitPendingAction(parts[1], option.cost);
             break;
         case 'build':
-            this.pendingAction = new PlaceStructurePendingAction(parts[1]);
+            this.pendingAction = new PlaceStructurePendingAction(parts[1], option.cost);
             break;
         case 'custom':
             // Dispatch Custom Function Call

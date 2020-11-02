@@ -23,10 +23,11 @@ const {
 const Constants = require('../shared/constants');
 
 class PlaceUnitPendingAction extends PendingAction {
-    constructor(unitName) {
+    constructor(unitName, cost) {
         super();
         this.isValid = false;
         this.unitName = unitName;
+        this.cost = cost;
     }
 
     _onTick(state, mapCanvas) {
@@ -40,7 +41,7 @@ class PlaceUnitPendingAction extends PendingAction {
 
         if (gameMap.withinMap(mapCanvas.inputManager.mouseState.tile)) {
             if (this.isValid) {
-                mapCanvas.state.cursorMessage = 'Spawn ' + this.unitName;
+                mapCanvas.state.cursorMessage = `Spawn ${this.unitName}: Ø${this.cost}`;
             }
             else {
                 mapCanvas.state.cursorMessage = 'Cannot spawn there!';
@@ -81,10 +82,11 @@ class PlaceUnitPendingAction extends PendingAction {
 }
 
 class PlaceStructurePendingAction extends PendingAction {
-    constructor(structureName) {
+    constructor(structureName, cost) {
         super();
         this.isValid = false;
         this.structureName = structureName;
+        this.cost = cost;
     }
 
     _onTick(state, mapCanvas) {
@@ -133,7 +135,7 @@ class PlaceStructurePendingAction extends PendingAction {
         for (let i = 0; i < surrounding.length; i++) {
             if (gameMap.withinMap(surrounding[i])) {
                 if (this.isValid) {
-                    mapCanvas.state.cursorMessage = 'Build ' + this.structureName;
+                    mapCanvas.state.cursorMessage = `Build ${this.structureName}: Ø${this.cost}`;
                 }
                 else {
                     mapCanvas.state.cursorMessage = 'Cannot build there!';
