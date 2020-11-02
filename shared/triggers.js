@@ -307,7 +307,6 @@ const triggers = {
                 }
             }
             targets.length = j;
-            console.log(targets);
         }
     },
     'Reaver': {

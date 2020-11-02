@@ -132,6 +132,24 @@ module.exports = class GameState {
         }
     }
 
+    // Throws an exception if the game-state is not consistent
+    verifyIntegrity() {
+        for (let i = 0; i < this.structures.length; i++) {
+            const position = this.structures[i].position;
+            const at = this.mapObjects[position.y][position.x];
+            if (at !== this.structures[i]) {
+                throw "Structure is not consistent at location";
+            }
+        }
+        for (let i = 0; i < this.units.length; i++) {
+            const position = this.units[i].position;
+            const at = this.mapObjects[position.y][position.x];
+            if (at !== this.units[i]) {
+                throw "Unit is not consistent at location";
+            }
+        }
+    }
+
     forfeit(player) {
         this.players[player].forfeited = true;
         // Remove Fog Of War
@@ -554,6 +572,10 @@ module.exports = class GameState {
             && !pos.equals(unitPos));
     }
 
+    isOccupied(x, y) {
+        return !!this.occupied[y][x];
+    }
+
     // TODO: pass in priority / sorting function
     getEnemiesInAttackRange(unitPos) {
         if (!this.gameMap.withinMap(unitPos)) {
@@ -684,7 +706,7 @@ module.exports = class GameState {
             }
         }
         return pos;
-    };
+    }
     
     findTarget(pos) {
         if (!this.gameMap.withinMap(pos)) {
@@ -693,5 +715,5 @@ module.exports = class GameState {
         const targetPos = this.findTargetPos(pos);
         let target = this.mapObjects[targetPos.y][targetPos.x];
         return target;
-    };
+    }
 };

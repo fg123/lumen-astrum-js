@@ -77,6 +77,10 @@ module.exports = class Game {
         });
 
         stateChange.simulateStateChange(this.state);
+        
+        if (!Constants.IS_PRODUCTION) {
+            this.state.verifyIntegrity();
+        }
 
         if (stateChange instanceof PhaseChangeStateChange) {
             if (this.state.phase === Constants.PHASE_PLANNING) {
