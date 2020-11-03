@@ -10,6 +10,7 @@ const AnsiConvert = new AH({
 });
 
 let currentObject = undefined;
+let resources = [];
 
 const OptionSchema = {
     'title': 'string',
@@ -29,6 +30,8 @@ const StructureSchema = {
     'turnsToBuild': 'number',
     'targetable': 'bool',
     'sightRange': 'number',
+    'icon': 'resource',
+    'texture': 'resource',
     'options': [OptionSchema],
     'custom': 'object'
 };
@@ -42,6 +45,8 @@ const UnitSchema = {
     'moveRange': 'number',
     'shield': 'number',
     'sightRange': 'number',
+    'icon': 'resource',
+    'texture': 'resource',
     'tier': 'number',
     'turnsToBuild': 'number',
     'options': [OptionSchema],
@@ -58,7 +63,7 @@ function makeObject(schema) {
     if (type === 'number') {
         return 0;
     }
-    else if (type === 'string' || type === 'longString') {
+    else if (type === 'string' || type === 'longString' || type === 'resource') {
         return "";
     }
     else if (Array.isArray(type)) {
@@ -136,6 +141,28 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
             updateDiff();
         });
         return input;
+    }
+    else if (type === 'resource') {
+        const wrapper = $('<div></div>');
+        const input = $('<input list="resources" />');
+        const imagePreview = $(`<img src="/resources/${data}" />`);
+
+        input.val(data);
+        input.change(() => {
+            if (input.val() && resources.indexOf(input.val()) === -1) {
+                alert('Not a valid resource!');
+                input.val(data);
+            }
+            else {
+                onChange(input.val());
+                imagePreview.attr('src', `/resources/${input.val()}`)
+                updateDiff();
+            }
+        })
+        wrapper.append(input);
+        wrapper.append(`<br>`);
+        wrapper.append(imagePreview);
+        return wrapper;
     }
     else if (Array.isArray(type)) {
         const wrapper = $(`<div></div>`);
@@ -319,12 +346,15 @@ function loadData(s) {
     }
 }
 
+function loadResource(s) {
+    $('.editor').html(`<img class="resourceDisplay" src="/resources/${s}" />`);
+}
+
 $('#commit').click(() => {
     axios.post('/tools/set-data', {
         structures: Structures,
         units: Units
     }).then(() => {
-        alert("Changes committed, please upload your changes via Git.");
         loadFromServer();
     }).catch((error) => {
         alert(error);
@@ -344,23 +374,67 @@ $('#load').click(() => {
     loadFromServer();
 });
 
+$('.options').change(() => {
+    const opt = $('.options')[0].options[$('.options')[0].selectedIndex];
+    if (opt.dataset['type'] === 'resource') {
+        loadResource(opt.value);
+    }
+    else {
+        loadData(opt.value);
+    }
+});
+
+$('.optionsFilter').keyup(() => {
+    const options = $('.options option');
+    const regex = new RegExp($('.optionsFilter').val(), 'gi');
+
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].value.match(regex)) {
+            $(options[i]).show();
+        }
+        else {
+            $(options[i]).hide();
+        }
+    }
+});
+
 function loadFromServer() {
+    $('.options').html('');
     axios.get('/tools/get-data').then((response) => {
         BaseStructures = response.data.structures;
         BaseUnits = response.data.units;
         revert();
 
-        $('.options').html('');
-        (Object.keys(Structures).concat(Object.keys(Units))).forEach(s => {
-            const obj = $(`<option>${s}</option>`);
-            $('.options').append(obj);
-            obj.click(() => {
-                loadData(s);
-            });
+        const structureGroup = $(`<optgroup label="Structures"></optgroup>`)
+        Object.keys(Structures).forEach(s => {
+            const obj = $(`<option value="${s}" data-type="structure">${s}</option>`);
+            structureGroup.append(obj);
+        });
+
+        const unitGroup = $(`<optgroup label="Units"></optgroup>`);
+        Object.keys(Units).forEach(s => {
+            const obj = $(`<option value="${s}" data-type="unit">${s}</option>`);
+            unitGroup.append(obj);
         });
         
+        $('.options').append(structureGroup);
+        $('.options').append(unitGroup);
         updateDiff();
     }).catch((error) => {
+        alert(error);
+    });
+    axios.get('/tools/list-resources').then((response) => {
+        resources = response.data;
+        const resourcesGroup = $(`<optgroup label="Resources"></optgroup>`);
+        const resourceDataList = $(`<datalist id="resources"></datalist>`);
+        resources.forEach(s => {
+            const obj = $(`<option value="${s}" data-type="resource">${s}</option>`);
+            resourcesGroup.append(obj);
+            resourceDataList.append(obj.clone());
+        });
+        $('.options').append(resourcesGroup);
+        $('.options').append(resourceDataList);
+    }).catch(error => {
         alert(error);
     });
 }

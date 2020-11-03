@@ -89,7 +89,6 @@ table td {
     left: 0;
 }
 
-
 .content {
     flex-grow: 1;
     display: flex;
@@ -98,5 +97,11 @@ table td {
 }
 
 .optionWrapper {
-    min-width: 200px;
+    width: 300px;
+    display: flex; 
+    flex-direction: column;
+}
+
+img.resourceDisplay {
+    background: #FFF;
 }

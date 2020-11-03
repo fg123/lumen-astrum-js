@@ -63,7 +63,9 @@ module.exports.structures = {
             }
         ],
         "targetable": false,
-        "custom": {}
+        "custom": {},
+        "icon": "icons/commandBaseIcon.png",
+        "texture": "structures/commandbase.png"
     },
     "Barracks": {
         "description": "Unit production building, trains combat units.",
@@ -149,7 +151,9 @@ module.exports.structures = {
                 "command": "build-Arctic Tower"
             }
         ],
-        "custom": {}
+        "custom": {},
+        "icon": "icons/barracksIcon.png",
+        "texture": "structures/barracks.png"
     },
     "Automation Factory": {
         "description": "Support facility, required for building turrets and reavers.",
@@ -160,29 +164,9 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "options": [],
-        "custom": {}
-    },
-    "Tech Lab": {
-        "description": "Support facility, used for accessing tier 3 units.",
-        "health": 100,
-        "shield": 0,
-        "width": 0,
-        "turnsToBuild": 1,
-        "sightRange": 1,
-        "targetable": true,
-        "options": [],
-        "custom": {}
-    },
-    "Military Academy": {
-        "description": "Support facility, used for accessing tier 4 units.",
-        "health": 100,
-        "shield": 0,
-        "width": 0,
-        "turnsToBuild": 1,
-        "sightRange": 1,
-        "targetable": true,
-        "options": [],
-        "custom": {}
+        "custom": {},
+        "icon": "icons/automationFactoryIcon.png",
+        "texture": "structures/automationfactory.png"
     },
     "Deployment Outpost": {
         "description": "Claims territory and allows expansion of buildings away from the command center.",
@@ -192,7 +176,10 @@ module.exports.structures = {
         "turnsToBuild": 1,
         "sightRange": 4,
         "targetable": true,
-        "options": []
+        "options": [],
+        "icon": "icons/deploymentOutpostIcon.png",
+        "texture": "structures/deploymentoutpost.png",
+        "custom": {}
     },
     "Ether Harvester": {
         "description": "Standard resource harvester. Construct a Deployment Outpost nearby to claim.",
@@ -205,7 +192,9 @@ module.exports.structures = {
         "custom": {
             "value": 100
         },
-        "targetable": false
+        "targetable": false,
+        "icon": "icons/harvesterIcon.png",
+        "texture": "structures/etherharvester.png"
     },
     "Gem Harvester": {
         "description": "Upgraded resource harvester. Kill the building to claim it.",
@@ -218,7 +207,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "value": 150
-        }
+        },
+        "icon": "icons/harvesterIcon.png",
+        "texture": "structures/gemharvester.png"
     },
     "Stim Lab": {
         "description": "Takes 2 turns to build. Enhances attack speed of allies by 25%.",
@@ -231,7 +222,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "attackSpeedMultiplier": 1.25
-        }
+        },
+        "icon": "icons/stimLabIcon.png",
+        "texture": "structures/stimlab.png"
     },
     "Thieves' Cave": {
         "description": "Takes 2 turns to build. Produced unit's attacks generate gold equal to 75% of damage dealt.",
@@ -244,7 +237,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "attackGoldGen": 0.75
-        }
+        },
+        "icon": "icons/thievesCaveIcon.png",
+        "texture": "structures/thievescave.png"
     },
     "Artillery Bay": {
         "description": "Takes 2 turns to build. Enhances attack damage of allies by 30%.",
@@ -257,7 +252,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "attackDamageMultiplier": 1.3
-        }
+        },
+        "icon": "icons/artilleryBayIcon.png",
+        "texture": "structures/artillerybay.png"
     },
     "Cloud Gate": {
         "description": "Takes 2 turns to build. Enhances movement range of allies by 2.",
@@ -270,7 +267,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "moveRangeDelta": 2
-        }
+        },
+        "icon": "icons/cloudGateIcon.png",
+        "texture": "structures/cloudgate.png"
     },
     "Vitality Fountain": {
         "description": "Takes 2 turns to build. Enhances health of allies by 50%.",
@@ -283,7 +282,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "healthMultiplier": 1.5
-        }
+        },
+        "icon": "icons/vitalityIcon.png",
+        "texture": "structures/vitalityfountain.png"
     },
     "Turret": {
         "description": "Requires Automation Factory. Stationary, single-target ranged turret.",
@@ -294,7 +295,9 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "options": [],
-        "custom": {}
+        "custom": {},
+        "icon": "icons/turretIcon.png",
+        "texture": "units/armedturret.png"
     },
     "Vampiric Lair": {
         "description": "Takes 2 turns to build. Produced units heal for 10% of damage dealt.",
@@ -307,7 +310,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "healMultiplier": 0.1
-        }
+        },
+        "icon": "icons/vampiricLairIcon.png",
+        "texture": "structures/vampiriclair.png"
     },
     "Shauna's Forge": {
         "description": "Takes 2 turns to build. Produced unit's attacks deal 2% of enemy's total health as extra damage.",
@@ -320,7 +325,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "healthMultiplier": 0.02
-        }
+        },
+        "icon": "icons/shaunaForgeIcon.png",
+        "texture": "structures/shaunasforge.png"
     },
     "Flash Point": {
         "description": "Takes 2 turns to build. Produced units blink to their target location if within move range.",
@@ -330,7 +337,10 @@ module.exports.structures = {
         "turnsToBuild": 2,
         "sightRange": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "icon": "icons/flashPointIcon.png",
+        "texture": "structures/flashpoint.png",
+        "custom": {}
     },
     "Arctic Tower": {
         "description": "Takes 2 turns to build. Produced units stun enemies hit for 0.2s.",
@@ -343,7 +353,9 @@ module.exports.structures = {
         "targetable": true,
         "custom": {
             "stunDuration": 200
-        }
+        },
+        "icon": "icons/arcticTowerIcon.png",
+        "texture": "structures/arctictower.png"
     }
 };
 module.exports.units = {
@@ -359,7 +371,10 @@ module.exports.units = {
         "tier": 1,
         "turnsToBuild": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "icon": "icons/scoutIcon.png",
+        "texture": "units/scout.png",
+        "custom": {}
     },
     "Marine": {
         "attackRange": 2,
@@ -379,7 +394,9 @@ module.exports.units = {
                 "x": 0,
                 "y": -65
             }
-        }
+        },
+        "icon": "icons/marineIcon.png",
+        "texture": "units/marine.png"
     },
     "Engineer": {
         "attackRange": 0,
@@ -433,7 +450,9 @@ module.exports.units = {
                 "command": "build-Turret"
             }
         ],
-        "custom": {}
+        "custom": {},
+        "icon": "icons/combatEngineerIcon.png",
+        "texture": "units/combatengineer.png"
     },
     "Reaver": {
         "attackRange": 0,
@@ -452,7 +471,9 @@ module.exports.units = {
         "custom": {
             "explodeDamage1": 50,
             "explodeDamage2": 25
-        }
+        },
+        "icon": "icons/reaverIcon.png",
+        "texture": "units/reaver.png"
     },
     "Armed Turret": {
         "attackRange": 3,
@@ -468,7 +489,9 @@ module.exports.units = {
         "turnsToBuild": 0,
         "targetable": true,
         "options": [],
-        "custom": {}
+        "custom": {},
+        "icon": "icons/turretIcon.png",
+        "texture": "units/armedturret.png"
     },
     "Golem": {
         "attackRange": 1,
@@ -483,6 +506,9 @@ module.exports.units = {
         "tier": 1,
         "turnsToBuild": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "icon": "icons/golemIcon.png",
+        "texture": "units/golem.png",
+        "custom": {}
     }
 };

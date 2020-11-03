@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
 const crypto = require('crypto');
+const walkSync = require('walk-sync');
 const Game = require('./game');
 const axios = require('axios');
 const mkdirp = require('mkdirp');
@@ -155,6 +156,10 @@ function startServer() {
                 structures: data.structures,
                 units: data.units
             });
+        });
+        app.get('/tools/list-resources', function (req, res) {
+            const resources = walkSync('client/resources', { globs: ['**/*.png'] });
+            res.send(resources);
         });
         app.post('/tools/set-data', function (req, res) {
             const structures = req.body.structures;
