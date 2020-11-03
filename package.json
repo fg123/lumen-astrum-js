@@ -48,7 +48,8 @@
     "vue": "^2.6.12",
     "vue-google-login": "^2.0.5",
     "vue-template-compiler": "^2.6.12",
-    "vueify": "^9.4.1"
+    "vueify": "^9.4.1",
+    "walk-sync": "^2.2.0"
   },
   "homepage": "https://github.com/fg123/lumen-astrum#readme",
   "devDependencies": {
