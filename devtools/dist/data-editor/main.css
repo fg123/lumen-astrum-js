@@ -8,7 +8,8 @@ html, body {
     border-collapse: collapse;
     box-sizing: border-box;
 }
-body, input, button, select {
+
+body, input, button, select, textarea {
     font-family: 'Prompt';
 }
 

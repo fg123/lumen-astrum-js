@@ -2,6 +2,9 @@ const axios = require('axios');
 const $ = require('jquery-browserify');
 const { Unit, Structure } = require('../../shared/map-objects');
 const jsonDiff = require('json-diff');
+
+const storage = window.localStorage;
+
 const AH = require('ansi-to-html');
 const AnsiConvert = new AH({
     fg: '#000',
@@ -55,8 +58,23 @@ const UnitSchema = {
 
 let BaseStructures = {};
 let BaseUnits = {};
-let Structures = {};
-let Units = {};
+let Structures = undefined;
+let Units = undefined;
+
+const localChangesStructures = storage.getItem('localStructures');
+const localChangesUnits = storage.getItem('localUnits');
+
+if (localChangesStructures) {
+    try {
+        Structures = JSON.parse(localChangesStructures);
+    } catch {}
+}
+
+if (localChangesUnits) {
+    try {
+        Units = JSON.parse(localChangesUnits);
+    } catch {}
+}
 
 function makeObject(schema) {
     const type = schema;
@@ -101,9 +119,26 @@ function toReadableString(camelCase) {
 function updateDiff() {
     let structuresDiff = AnsiConvert.toHtml(jsonDiff.diffString(BaseStructures, Structures));
     let unitsDiff = AnsiConvert.toHtml(jsonDiff.diffString(BaseUnits, Units));
-    if (!structuresDiff) structuresDiff = "No Changes Made";
-    if (!unitsDiff) unitsDiff = "No Changes Made";
-    
+    if (!structuresDiff) {
+        structuresDiff = "No Changes Made";
+        console.log('Removing localStructures');
+        storage.removeItem('localStructures');
+    }
+    else {
+        console.log('Setting localStructures');
+        storage.setItem('localStructures', JSON.stringify(Structures));
+    }        
+
+    if (!unitsDiff) {
+        unitsDiff = "No Changes Made";
+        console.log('Removing localUnits');
+        storage.removeItem('localUnits');
+    }
+    else {
+        console.log('Setting localUnits');
+        storage.setItem('localUnits', JSON.stringify(Units));
+    }
+
     $('.structuresDiff').html(structuresDiff);
     $('.unitsDiff').html(unitsDiff);
 }
@@ -201,7 +236,6 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
         return select;
     }
     else if (type === 'bool') {
-        // Dropdown List
         const checkbox = $('<input type="checkbox" />');
         checkbox.prop("checked", data);
         checkbox.change(() => {
@@ -403,7 +437,13 @@ function loadFromServer() {
     axios.get('/tools/get-data').then((response) => {
         BaseStructures = response.data.structures;
         BaseUnits = response.data.units;
-        revert();
+        if (Structures === undefined) {
+            Structures = JSON.parse(JSON.stringify(BaseStructures));
+        }
+
+        if (Units === undefined) {
+            Units = JSON.parse(JSON.stringify(BaseUnits));
+        }
 
         const structureGroup = $(`<optgroup label="Structures"></optgroup>`)
         Object.keys(Structures).forEach(s => {
