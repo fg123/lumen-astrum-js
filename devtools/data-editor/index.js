@@ -110,7 +110,7 @@ function revert() {
 }
 
 const colors = ['#EEE', '#CCC', '#AAA'];
-function buildUIFromData(data, schema, layer = 0, lastRow = undefined, onChange = (val) => {}) {
+function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
     let type = schema;
 
     if (type === 'number') {
@@ -256,16 +256,12 @@ function buildUIFromData(data, schema, layer = 0, lastRow = undefined, onChange 
             if (!data[keys[i]]) {
                 data[keys[i]] = makeObject(schema);
             }
-            entry.append(buildUIFromData(data[keys[i]], schema, layer + 1, lastRow, (val) => {
+            entry.append(buildUIFromData(data[keys[i]], schema, layer + 1, (val) => {
                 data[keys[i]] = val;
             }));
             row.append(entry);
             table.append(row);
         }        
-        
-        if (lastRow) {
-            table.append(lastRow);
-        }
         return table;
     }
     else {
@@ -275,8 +271,7 @@ function buildUIFromData(data, schema, layer = 0, lastRow = undefined, onChange 
 
 function makeArrayList(container, arrayRef, schema, layer, onRegenerate) {
     arrayRef.forEach((elem, index) => {
-        const lastRow = $(`<tr></tr>`);
-        const lastCell = $(`<td colspan=2></td>`);
+        const elementContainer = $(`<div class="arrayElemWrapper"></div>`);
         
         const removeBtn = $(`<button>Remove</button>`);
         const moveUpBtn = $(`<button>Move Up</button>`);
@@ -303,13 +298,12 @@ function makeArrayList(container, arrayRef, schema, layer, onRegenerate) {
                 onRegenerate();
             }
         });
-        lastCell.append(removeBtn);
-        lastCell.append(moveUpBtn);
-        lastCell.append(moveDownBtn);
 
-        lastRow.append(lastCell);
-
-        container.append(buildUIFromData(elem, schema, layer + 1, lastRow));
+        elementContainer.append(buildUIFromData(elem, schema, layer + 1));
+        elementContainer.append(removeBtn);
+        elementContainer.append(moveUpBtn);
+        elementContainer.append(moveDownBtn);
+        container.append(elementContainer);
     });
 }
 

@@ -62,7 +62,8 @@ module.exports.structures = {
                 "command": "build-Vitality Fountain"
             }
         ],
-        "targetable": false
+        "targetable": false,
+        "custom": {}
     },
     "Barracks": {
         "description": "Unit production building, trains combat units.",
@@ -147,7 +148,8 @@ module.exports.structures = {
                 "icon": "{Arctic Tower}",
                 "command": "build-Arctic Tower"
             }
-        ]
+        ],
+        "custom": {}
     },
     "Automation Factory": {
         "description": "Support facility, required for building turrets and reavers.",
@@ -157,7 +159,8 @@ module.exports.structures = {
         "turnsToBuild": 1,
         "sightRange": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "custom": {}
     },
     "Tech Lab": {
         "description": "Support facility, used for accessing tier 3 units.",
@@ -167,7 +170,8 @@ module.exports.structures = {
         "turnsToBuild": 1,
         "sightRange": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "custom": {}
     },
     "Military Academy": {
         "description": "Support facility, used for accessing tier 4 units.",
@@ -177,7 +181,8 @@ module.exports.structures = {
         "turnsToBuild": 1,
         "sightRange": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "custom": {}
     },
     "Deployment Outpost": {
         "description": "Claims territory and allows expansion of buildings away from the command center.",
@@ -288,7 +293,8 @@ module.exports.structures = {
         "turnsToBuild": 1,
         "sightRange": 1,
         "targetable": true,
-        "options": []
+        "options": [],
+        "custom": {}
     },
     "Vampiric Lair": {
         "description": "Takes 2 turns to build. Produced units heal for 10% of damage dealt.",
@@ -426,7 +432,8 @@ module.exports.units = {
                 "icon": "{Turret}",
                 "command": "build-Turret"
             }
-        ]
+        ],
+        "custom": {}
     },
     "Reaver": {
         "attackRange": 0,
@@ -460,7 +467,8 @@ module.exports.units = {
         "tier": 1,
         "turnsToBuild": 0,
         "targetable": true,
-        "options": []
+        "options": [],
+        "custom": {}
     },
     "Golem": {
         "attackRange": 1,

@@ -36,6 +36,12 @@ table td {
     font-size: 14px;
 }
 
+.arrayElemWrapper {
+    border: 1px dotted black;
+    margin: 5px;
+    text-align: center;
+}
+
 .diffWrapper {
     width: 40%;
     height: 100%;
