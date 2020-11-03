@@ -148,6 +148,16 @@ function startServer() {
         app.get('/tools/get-map/:mapFile', function (req, res) {
             res.send(require('../shared/maps/' + req.params.mapFile));
         });
+        app.get('/tools/get-data', function (req, res) {
+            const data = require('../shared/data');
+            res.send({ 
+                structures: data.structures,
+                units: data.units
+            });
+        });
+        app.post('/tools/set-data', function (req, res) {
+            
+        });
     }
 
     app.use('/dumps', express.static(__dirname + '/../dumps'));
