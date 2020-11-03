@@ -185,19 +185,61 @@ function buildUIFromData(data, schema, layer = 0, lastRow = undefined, onChange 
     }
     else if (type === 'object') {
         // Arbitrary Key Value Pair
-        let internalEntry = "<button>Add</button>";
-        internalEntry += '<table class="objectEditor">';
-        if (data) {
-            Object.keys(data).forEach(elem => {
-                internalEntry += '<tr><td>';
-                internalEntry += `<input type="text" style="width: 300px;" value="${elem}"/>`;
-                internalEntry += '</td><td>';
-                internalEntry += `<input type="text" style="width: 300px;" value="${JSON.stringify(data[elem])}"/>`;
-                internalEntry += '</td><td><button>x</button></tr>';
-            });
-        }
-        internalEntry += '</table>';
-        return $(internalEntry);
+        const wrapper = $(`<div></div>`);
+        const addBtn = $(`<button>Add</button>`);
+        const keyValueTable = $('<table class="objectEditor"></table>');
+        const regenerate = () => {
+            keyValueTable.html('');
+            if (data) {
+                Object.keys(data).forEach(elem => {
+                    const row = $(`<tr></tr>`);
+                    const currentKeyClosure = elem;
+                    const keyTextbox = $(`<input type="text" style="width: 150px;" value="${elem}"/>`);
+                    keyTextbox.change(() => {
+                        data[keyTextbox.val()] = data[currentKeyClosure];
+                        delete data[currentKeyClosure];
+                        regenerate();
+                        updateDiff();
+                    });
+
+                    const valueTextbox = $(`<input type="text" style="width: 150px;" value="${data[elem]}"/>`);
+                    valueTextbox.change(() => {
+                        const val = valueTextbox.val();
+                        if (!isNaN(val)) {
+                            data[currentKeyClosure] = Number(val);
+                        }
+                        else {
+                            data[currentKeyClosure] = val;
+                        }
+                        regenerate();
+                        updateDiff();
+                    });
+
+                    row.append($(`<td></td>`).append(keyTextbox));
+                    row.append($(`<td></td>`).append(valueTextbox));
+                    
+                    const remove = $(`<button>Remove</button>`);
+                    remove.click(() => {
+                        delete data[currentKeyClosure];
+                        regenerate();
+                        updateDiff();
+                    });
+                    
+                    row.append($(`<td></td>`).append(remove));
+                    keyValueTable.append(row);
+                });
+            }
+        };
+        regenerate();
+        addBtn.click(() => {
+            data['UntitledKey'] = 'Value';
+            regenerate();
+            updateDiff();
+            keyValueTable.children().last()[0].scrollIntoView({ behavior: 'smooth' });
+        });
+        wrapper.append(addBtn);
+        wrapper.append(keyValueTable);
+        return wrapper;
     }
     else if (typeof type === 'object') {
         let table = $(`<table class="objectEditor" style="background-color: ${colors[layer]}"></table>`);
@@ -211,6 +253,9 @@ function buildUIFromData(data, schema, layer = 0, lastRow = undefined, onChange 
             
             const entry = $(`<td></td>`);
             const schema = type[keys[i]];
+            if (!data[keys[i]]) {
+                data[keys[i]] = makeObject(schema);
+            }
             entry.append(buildUIFromData(data[keys[i]], schema, layer + 1, lastRow, (val) => {
                 data[keys[i]] = val;
             }));
@@ -285,7 +330,8 @@ $('#commit').click(() => {
         structures: Structures,
         units: Units
     }).then(() => {
-        // alert("");
+        alert("Changes committed, please upload your changes via Git.");
+        loadFromServer();
     }).catch((error) => {
         alert(error);
     });
@@ -296,7 +342,15 @@ $('#revert').click(() => {
     updateDiff();
 });
 
+$(document).ready(() => {
+    loadFromServer();
+});
+
 $('#load').click(() => {
+    loadFromServer();
+});
+
+function loadFromServer() {
     axios.get('/tools/get-data').then((response) => {
         BaseStructures = response.data.structures;
         BaseUnits = response.data.units;
@@ -310,7 +364,9 @@ $('#load').click(() => {
                 loadData(s);
             });
         });
+        
+        updateDiff();
     }).catch((error) => {
         alert(error);
     });
-})
+}

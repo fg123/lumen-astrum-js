@@ -25,6 +25,7 @@ table td {
 
 .header {
     margin-bottom: 20px;
+    padding-left: 10px;
 }
 
 .objectEditor {
@@ -48,6 +49,7 @@ table td {
 .structuresDiff, .unitsDiff {
     flex-grow: 1;
     overflow: scroll;
+    padding: 5px;
     border: 1px solid black;
 }
 

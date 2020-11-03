@@ -159,7 +159,9 @@ function startServer() {
         app.post('/tools/set-data', function (req, res) {
             const structures = req.body.structures;
             const units = req.body.units;
-            // fs.writeFileSync('shared/data-raw.js', ``);
+            fs.writeFileSync('shared/data-raw.js',
+`module.exports.structures = ${JSON.stringify(structures, null, "    ")};
+module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             res.send('ok');
         });
     }
