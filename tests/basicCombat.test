@@ -17,3 +17,13 @@ ACTION
 PLAN
 CHECK objAt(7, 6) === undefined
 CHECK objAt(9, 6) === undefined
+
+BUILD A 10 3 'Marine'
+BUILD B 12 2 'Barracks'
+
+ACTION
+# Marine Should Attack Barracks
+
+PLAN
+CHECK objAt(12, 2).currentHealth < objAt(12, 2).maxHealth
+
