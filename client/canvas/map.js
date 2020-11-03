@@ -720,7 +720,9 @@ module.exports = class MapCanvas {
         //   where we want to go based on movement range
         for (let j = 0; j < desiredPathsToDraw.length; j++) {
             const obj = desiredPathsToDraw[j];
-            this.drawArrow(obj.from, obj.to, 15, 3, 'green');
+            if (!(obj.from.x === obj.to.x && obj.from.y === obj.to.y)) {
+                this.drawArrow(obj.from, obj.to, 15, 3, 'green');
+            }
         }
         
         healthbarsToDraw.forEach(healthbar => {

@@ -1,0 +1,19 @@
+TEST Set Target Test
+
+PLAN
+BUILD A 7 6 'Marine'
+TARGET 7 6 10 3
+
+ACTION
+# Marines Should Move All The Way
+
+PLAN
+CHECK objAt(10, 3) !== undefined
+TARGET 10 3 16 6
+
+ACTION
+# Should move only part of the way
+
+PLAN
+CHECK objAt(10, 3) === undefined
+CHECK objAt(15, 5) !== undefined

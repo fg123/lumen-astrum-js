@@ -389,7 +389,9 @@ $('#commit').click(() => {
         structures: Structures,
         units: Units
     }).then(() => {
-        loadFromServer();
+        setTimeout(() => {
+            loadFromServer();
+        }, 100);
     }).catch((error) => {
         alert(error);
     });

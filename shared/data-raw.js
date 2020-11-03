@@ -26,6 +26,15 @@ module.exports.structures = {
                 "command": "spawn-Engineer"
             },
             {
+                "title": "Build Automation Factory",
+                "cost": 200,
+                "prereq": [],
+                "type": "Structure",
+                "description": "{Automation Factory}",
+                "icon": "icons/automationFactoryIcon.png",
+                "command": "build-Automation Factory"
+            },
+            {
                 "title": "Build Stim Lab",
                 "cost": 2000,
                 "prereq": [],
@@ -428,15 +437,6 @@ module.exports.units = {
                 "description": "{Barracks}",
                 "icon": "icons/barracksIcon.png",
                 "command": "build-Barracks"
-            },
-            {
-                "title": "Build Automation Factory",
-                "cost": 100,
-                "prereq": [],
-                "type": "Structure",
-                "description": "{Automation Factory}",
-                "icon": "icons/automationFactoryIcon.png",
-                "command": "build-Automation Factory"
             },
             {
                 "title": "Build Turret",

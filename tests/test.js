@@ -6,7 +6,7 @@ const splitargs = require('splitargs');
 const Constants = require('../shared/constants');
 const Game = require('../server/game');
 const { setupMap } = require('../shared/map');
-const { PhaseChangeStateChange, BuildStructureStateChange } = require('../shared/state-change');
+const { PhaseChangeStateChange, BuildStructureStateChange, SetUnitTargetStateChange } = require('../shared/state-change');
 const { Tuple } = require('../shared/coordinates');
 
 function log(...args) {
@@ -57,7 +57,7 @@ testsToRun.forEach(f => {
     const state = game.state;
 
     // Every line should start with a command:
-    //   TEST, PLAN, BUILD, ACTION, CHECK
+    //   TEST, PLAN, BUILD, ACTION, CHECK, TARGET
     for (let i = 0; i < lines.length; i++) {
         const parts = splitargs(lines[i]);
         const rest = lines[i].slice(parts[0].length).trim();
@@ -82,6 +82,15 @@ testsToRun.forEach(f => {
             const structure = parts[4];
             game.processStateChange(BuildStructureStateChange.create(state,
                 player, structure, new Tuple(x, y), state.getCommandBase(player)));
+        }
+        else if (parts[0] === 'TARGET') {
+            const x = parseInt(parts[1]);
+            const y = parseInt(parts[2]);
+            const toX = parseInt(parts[3]);
+            const toY = parseInt(parts[4]);
+            const mapObject = state.mapObjects[y][x];
+            game.processStateChange(SetUnitTargetStateChange.create(state,
+                mapObject.owner, new Tuple(x, y), [new Tuple(toX, toY)]));
         }
         else if (parts[0] === 'CHECK') {
             const fn = new Function('state', 'objAt', `return ${rest};`);

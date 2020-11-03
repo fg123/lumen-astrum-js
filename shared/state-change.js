@@ -253,7 +253,6 @@ class SetUnitTargetStateChange extends StateChange {
                unit.position.x === this.data.targets[0].x &&
                unit.position.y === this.data.targets[0].y) {
             this.data.targets.splice(0, 1);
-            return;
         }
         for (let i = 1; i < this.data.targets.length; i++) {
             if (this.data.targets[i].x === this.data.targets[i - 1].x &&
