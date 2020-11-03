@@ -1,15 +1,18 @@
 html, body {
     margin: 0px;
-    font-size: 14px;
     height: 100%;
+    font-size: 14px;
 }
-
 * {
-    font-family: 'Prompt';
+    
     border-collapse: collapse;
+    box-sizing: border-box;
+}
+body, input, button, select {
+    font-family: 'Prompt';
 }
 
-table td, table td * {
+table td {
     vertical-align: top;
     border: 1px solid black;
 }
@@ -19,12 +22,33 @@ table td, table td * {
     font-weight: bold;
     font-size: 20px;
 }
+
+.header {
+    margin-bottom: 20px;
+}
+
 .objectEditor {
     border: 1px solid black;
     margin: 5px;
     border-radius: 5px;
     border-spacing: 0;
     font-size: 14px;
+}
+
+.diffWrapper {
+    width: 40%;
+    height: 100%;
+    background-color: #FFF;   
+    display: flex;
+    flex-direction: column;
+    white-space: pre;
+    font-family: 'Roboto Mono'!important;
+}
+
+.structuresDiff, .unitsDiff {
+    flex-grow: 1;
+    overflow: scroll;
+    border: 1px solid black;
 }
 
 .objectEditor td {
@@ -42,13 +66,13 @@ table td, table td * {
 
 .editorWrapper {
     flex-grow: 1;
-    width: 100%;
     height: 100%;
     max-width: 100%;
     max-height: 100%;
     overflow: scroll;
     background-color: #EEE;
     position: relative;
+    border: 1px solid black;
 }
 
 .editor {

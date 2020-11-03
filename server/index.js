@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const app = express();
+const bodyParser = require('body-parser');
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
 const crypto = require('crypto');
@@ -134,7 +135,7 @@ function startServer() {
             }
         }
     }
-
+    app.use(bodyParser.json());
     app.use('/', express.static(__dirname + '/../client/dist'));
     app.use('/resources', express.static(__dirname + '/../client/resources'));
 
@@ -156,7 +157,10 @@ function startServer() {
             });
         });
         app.post('/tools/set-data', function (req, res) {
-            
+            const structures = req.body.structures;
+            const units = req.body.units;
+            // fs.writeFileSync('shared/data-raw.js', ``);
+            res.send('ok');
         });
     }
 

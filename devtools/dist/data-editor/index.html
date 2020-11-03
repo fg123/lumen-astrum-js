@@ -3,13 +3,13 @@
         <title>Lumen Astrum Data Editor</title>
         <link href="main.css" rel="stylesheet" type="text/css"/>
 	    <link href="https://fonts.googleapis.com/css?family=Prompt" rel="stylesheet">
+	    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
     </head>
     <body>
         <div class="pageWrapper">
             <div class="header">
                 <h2>Data Editor</h2>
                 <button id="load">Load Data</button>
-                <button id="save">Save Data</button>
             </div>
             <div class="content">
                 <div class="optionWrapper">
@@ -19,6 +19,14 @@
                 <div class="editorWrapper">
                     <div class="editor">
                     </div>
+                </div>
+                <div class="diffWrapper">
+                    <div style="display: flex;">
+                        <button id="commit" style="margin-right: 10px">Commit Changes</button>
+                        <button id="revert">Revert Changes</button>
+                    </div>
+                    <div class="structuresDiff"></div>
+                    <div class="unitsDiff"></div>
                 </div>
             </div>
         </div>
