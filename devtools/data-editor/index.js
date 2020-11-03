@@ -18,7 +18,7 @@ const OptionSchema = {
     'prereq': ['string'],
     'type': '<Structure|Unit>',
     'description': 'string',
-    'icon': 'string',
+    'icon': 'resource',
     'command': 'string'
 };
 

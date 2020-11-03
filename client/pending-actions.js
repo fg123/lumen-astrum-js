@@ -124,7 +124,8 @@ class PlaceStructurePendingAction extends PendingAction {
         }
 
         const drawn = toDrawCoord(mapCanvas.inputManager.mouseState.tile);
-        mapCanvas.drawImage(baseObj.image, drawn.x, drawn.y);
+        const resourceManager = mapCanvas.resourceManager;
+        mapCanvas.drawImage(resourceManager.get(baseObj.texture), drawn.x, drawn.y);
         mapCanvas.context.globalAlpha = oldOpacity;
         
         let isDeployment = false;

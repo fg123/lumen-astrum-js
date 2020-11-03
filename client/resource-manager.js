@@ -41,19 +41,20 @@ module.exports = class ResourceManager {
             this.loadResource(this.resources, resourcesToLoad[i], '/' + resourcesToLoad[i], deferArr);
         }
 
-        const structureNames = Object.keys(Data.structures);
-        for (let i = 0; i < structureNames.length; i++) {
-            const name = structureNames[i];
-            const url = '/resources/structures/' + name.toLowerCase().replace(/[ ']/g, '') + '.png';
-            this.loadResource(Data.structures[name], 'image', url, deferArr);
-        }
-
-        const unitNames = Object.keys(Data.units);
-        for (let i = 0; i < unitNames.length; i++) {
-            const name = unitNames[i];
-            const url = '/resources/units/' + name.toLowerCase().replace(/[ ']/g, '') + '.png';
-            this.loadResource(Data.units[name], 'image', url, deferArr);
-        }
+        // Load in Icons and Textures for all mapObjects
+        const resources = new Set();
+        Object.values(Data.structures).forEach(s => {
+            if (s.icon) resources.add(s.icon);
+            if (s.texture) resources.add(s.texture);
+        });
+        Object.values(Data.units).forEach(s => {
+            if (s.icon) resources.add(s.icon);
+            if (s.texture) resources.add(s.texture);
+        });
+        
+        resources.forEach(key => {
+            this.loadResource(this.resources, key, '/resources/' + key, deferArr);
+        });
     }
 };
 

@@ -168,16 +168,6 @@ module.exports = class MapCanvas {
         this.context.font = 'bold ' + size + 'px Asap';
     }
 
-    getIconClipStart(name) {
-        if (structureList.includes(name)) {
-            return new Tuple(48 * structureList.indexOf(name), 0);
-        }
-        else if (unitList.includes(name)) {
-            return new Tuple(48 * unitList.indexOf(name), 48);
-        }
-        return Tuple.ZERO;
-    }
-
     objectIsMine(mapObject) {
         return mapObject.owner === this.state.player;
     }
@@ -239,14 +229,10 @@ module.exports = class MapCanvas {
             const bottomLeft = this.resourceManager.get(Resource.UI_BOTTOM_LEFT);
             this.drawImage(bottomLeft, bottomLeft.width / 2,
                 screenHeight - bottomLeft.height / 2);
-            const clip = this.getIconClipStart(selectedObject.name);
             const baseObj = getBaseObject(selectedObject.name);
 
-            this.context.drawImage(this.resourceManager.get(Resource.UI_ICONS),
-                clip.x,
-                clip.y, 48, 48, 64,
-                screenHeight - bottomLeft.height + 61,
-                48, 48);
+            this.context.drawImage(this.resourceManager.get(selectedObject.icon),
+                64, screenHeight - bottomLeft.height + 61);
 
             // Consider: unit vs structure, enemy vs mine, currently building vs not!
             let name = selectedObject.name;
@@ -373,19 +359,11 @@ module.exports = class MapCanvas {
                 this.state.selectedObject.turnsUntilBuilt === 0 &&
                 !this.state.hasForfeited()) {
                 for (let i = 0; i < baseObj.options.length; i++) {
-                    // Set Icon: icon can be {UnitName/StructureName} or {x,y}
-                    const optionIcon = baseObj.options[i].icon.slice(1, -1);
-                    const clipIcon = isNaN(optionIcon[0]) ?
-                        this.getIconClipStart(optionIcon) : (() => {
-                            const split = optionIcon.split(',');
-                            return new Tuple(48 * Number(split[0]), 48 * Number(split[1]));
-                        })();
+                    const optionIcon = baseObj.options[i].icon;
+                   
                     const pos = new Tuple(176 + i * 48, screenHeight - 48);
                     this.context.drawImage(
-                        this.resourceManager.get(Resource.UI_ICONS),
-                        clipIcon.x,
-                        clipIcon.y, 48, 48, pos.x, pos.y,
-                        48, 48);
+                        this.resourceManager.get(optionIcon), pos.x, pos.y);
                     /* Draw Hotkey */
                     const hotkeyPos = new Tuple(176 + i * 48 + 5, screenHeight - 48 - 18);
                     const clip = new Tuple(
@@ -599,17 +577,9 @@ module.exports = class MapCanvas {
                             if (possiblePositionChange) {
                                 /* No animation drew! */
                                 if (anyVisible) {
-                                    if (name in structures) {
-                                        this.drawImage(structures[name].image,
-                                            possiblePositionChange.x, possiblePositionChange.y);
-                                    }
-                                    else if (name in units) {
-                                        this.drawImage(units[name].image,
-                                            possiblePositionChange.x, possiblePositionChange.y,
-                                            units[name].image.width,
-                                            units[name].image.height,
-                                            currentRotation);
-                                    }
+                                    this.drawImage(this.resourceManager.get(mapObject.texture),
+                                        possiblePositionChange.x, possiblePositionChange.y,
+                                        -1, -1, currentRotation);
                                 }
                                 actualDrawnPosition = possiblePositionChange;
                             }
@@ -619,7 +589,7 @@ module.exports = class MapCanvas {
                             if (mapObject.turnsUntilBuilt === 0) {
                                 if (name in structures) {
                                     // Draw Structure
-                                    this.drawImage(structures[name].image, drawCoord.x, drawCoord.y);
+                                    this.drawImage(this.resourceManager.get(mapObject.texture), drawCoord.x, drawCoord.y);
                                 }
                                 else if (name in units) {
                                     // Draw Unit
@@ -629,10 +599,8 @@ module.exports = class MapCanvas {
                                     else {
                                         this.drawImage(this.state.getEnemyOverlay(mapObject.owner), drawCoord.x, drawCoord.y);
                                     }
-                                    this.drawImage(units[name].image, drawCoord.x, drawCoord.y,
-                                        units[name].image.width,
-                                        units[name].image.height,
-                                        currentRotation);
+                                    this.drawImage(this.resourceManager.get(mapObject.texture), drawCoord.x, drawCoord.y,
+                                        -1, -1, currentRotation);
                                 }
                             }
                             else {

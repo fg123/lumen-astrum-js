@@ -13,7 +13,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Unit",
                 "description": "{Scout}",
-                "icon": "{Scout}",
+                "icon": "icons/scoutIcon.png",
                 "command": "spawn-Scout"
             },
             {
@@ -22,7 +22,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Unit",
                 "description": "{Engineer}",
-                "icon": "{Engineer}",
+                "icon": "icons/combatEngineerIcon.png",
                 "command": "spawn-Engineer"
             },
             {
@@ -31,7 +31,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Stim Lab}",
-                "icon": "{Stim Lab}",
+                "icon": "icons/stimLabIcon.png",
                 "command": "build-Stim Lab"
             },
             {
@@ -40,7 +40,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Artillery Bay}",
-                "icon": "{Artillery Bay}",
+                "icon": "icons/artilleryBayIcon.png",
                 "command": "build-Artillery Bay"
             },
             {
@@ -49,7 +49,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Cloud Gate}",
-                "icon": "{Cloud Gate}",
+                "icon": "icons/cloudGateIcon.png",
                 "command": "build-Cloud Gate"
             },
             {
@@ -58,7 +58,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Vitality Fountain}",
-                "icon": "{Vitality Fountain}",
+                "icon": "icons/vitalityIcon.png",
                 "command": "build-Vitality Fountain"
             }
         ],
@@ -82,7 +82,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Unit",
                 "description": "{Marine}",
-                "icon": "{Marine}",
+                "icon": "icons/marineIcon.png",
                 "command": "spawn-Marine"
             },
             {
@@ -91,7 +91,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Unit",
                 "description": "{Golem}",
-                "icon": "{Golem}",
+                "icon": "icons/golemIcon.png",
                 "command": "spawn-Golem"
             },
             {
@@ -102,7 +102,7 @@ module.exports.structures = {
                 ],
                 "type": "Unit",
                 "description": "{Reaver}",
-                "icon": "{Reaver}",
+                "icon": "icons/reaverIcon.png",
                 "command": "spawn-Reaver"
             },
             {
@@ -111,7 +111,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Thieves' Cave}",
-                "icon": "{Thieves' Cave}",
+                "icon": "icons/thievesCaveIcon.png",
                 "command": "build-Thieves' Cave"
             },
             {
@@ -120,7 +120,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Vampiric Lair}",
-                "icon": "{Vampiric Lair}",
+                "icon": "icons/vampiricLairIcon.png",
                 "command": "build-Vampiric Lair"
             },
             {
@@ -129,7 +129,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Shauna's Forge}",
-                "icon": "{Shauna's Forge}",
+                "icon": "icons/shaunaForgeIcon.png",
                 "command": "build-Shauna's Forge"
             },
             {
@@ -138,7 +138,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Flash Point}",
-                "icon": "{Flash Point}",
+                "icon": "icons/flashPointIcon.png",
                 "command": "build-Flash Point"
             },
             {
@@ -147,7 +147,7 @@ module.exports.structures = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Arctic Tower}",
-                "icon": "{Arctic Tower}",
+                "icon": "icons/arcticTowerIcon.png",
                 "command": "build-Arctic Tower"
             }
         ],
@@ -417,7 +417,7 @@ module.exports.units = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Deployment Outpost}",
-                "icon": "{Deployment Outpost}",
+                "icon": "icons/deploymentOutpostIcon.png",
                 "command": "build-Deployment Outpost"
             },
             {
@@ -426,7 +426,7 @@ module.exports.units = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Barracks}",
-                "icon": "{Barracks}",
+                "icon": "icons/barracksIcon.png",
                 "command": "build-Barracks"
             },
             {
@@ -435,7 +435,7 @@ module.exports.units = {
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Automation Factory}",
-                "icon": "{Automation Factory}",
+                "icon": "icons/automationFactoryIcon.png",
                 "command": "build-Automation Factory"
             },
             {
@@ -446,7 +446,7 @@ module.exports.units = {
                 ],
                 "type": "Structure",
                 "description": "{Turret}",
-                "icon": "{Turret}",
+                "icon": "icons/turretIcon.png",
                 "command": "build-Turret"
             }
         ],

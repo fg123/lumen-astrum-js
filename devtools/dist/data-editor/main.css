@@ -52,11 +52,18 @@ table td {
     font-family: 'Roboto Mono'!important;
 }
 
-.structuresDiff, .unitsDiff {
+.structuresDiffWrapper, .unitsDiffWrapper {
     flex-grow: 1;
     overflow: scroll;
     padding: 5px;
     border: 1px solid black;
+    position: relative;
+}
+
+.structuresDiff, .unitsDiff {
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 .objectEditor td {
