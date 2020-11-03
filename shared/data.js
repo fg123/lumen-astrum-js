@@ -202,7 +202,7 @@ const structures = {
     },
     'Gem Harvester': {
         'description': 'Upgraded resource harvester. Kill the building to claim it.',
-        'health': 250,
+        'health': 200,
         'shield': 0,
         'width': 0,
         'turnsToBuild': 0,
