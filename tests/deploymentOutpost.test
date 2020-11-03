@@ -1,0 +1,11 @@
+TEST Deployment Outpost Claiming
+
+PLAN
+BUILD A 8 5 'Deployment Outpost'
+
+ACTION
+# Deployment Outpost Should Claim Here
+
+PLAN
+CHECK state.isAllowedBuilding(11, 3, 'A')
+CHECK !state.isAllowedBuilding(12, 3, 'A')

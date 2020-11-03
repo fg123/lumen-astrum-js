@@ -32,17 +32,20 @@ module.exports = class Game {
         return game;
     }
 
-    constructor(playerSocketMap, gameStartTime, onGameOver, mapName, testMode = false) {
+    constructor(playerSocketMap, gameStartTime, onGameOver, mapName, options = {
+        testMode: false,
+        verboseMode: true
+    }) {
         // TestMode runs no timers.
 
         this.mapName = mapName;
         this.gameStartTime = gameStartTime;
-        this.testMode = testMode;
+        this.testMode = options.testMode;
+        this.verboseMode = options.verboseMode;
         
         this.players = Object.keys(playerSocketMap);
         this.onGameOver = onGameOver;
 
-        console.log("Constructing a new game with players: ", this.players);
         this.sockets = playerSocketMap;
         const gameMap = setupMap(maps[mapName]);
         this.state = new GameState(gameStartTime, this.players, gameMap);
@@ -55,7 +58,7 @@ module.exports = class Game {
         this.isGameOver = false;
 
         // Initial Phase State Change
-        if (!testMode) {
+        if (!this.testMode) {
             this.initialTurnPassover = setTimeout(() => {
                 this.processStateChange(
                     PhaseChangeStateChange.create(this.state, undefined));
@@ -67,20 +70,28 @@ module.exports = class Game {
                     this.state, undefined, 'G (hold): To Move Units'));
             }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
         }
+        else {
+            this.mockGameTime = 0;
+            this.processStateChange(
+                PhaseChangeStateChange.create(this.state, undefined))
+        }
     }
 
     verifyStateChange(stateChange) {
-        console.log('Verifying State Change');
-    
-        console.log(stateChange);
+        if (this.verboseMode) {
+            console.log('Verifying State Change');
+            console.log(stateChange);
+        }
 
         return stateChange &&
             stateChange.verifyStateChange(this.state);
     }
 
     processStateChange(stateChange) {
-        console.log('Processing State Change');
-
+        if (this.verboseMode) {
+            console.log('Processing State Change');
+            console.log(stateChange);
+        }
         const shouldBroadcastMap = {};
         this.players.forEach(p => {
             shouldBroadcastMap[p] = true;
@@ -90,29 +101,6 @@ module.exports = class Game {
 
         if (!Constants.IS_PRODUCTION) {
             this.state.verifyIntegrity();
-        }
-
-        if (stateChange instanceof PhaseChangeStateChange) {
-            if (this.state.phase === Constants.PHASE_PLANNING) {
-                // Starting planning phase now
-                // During a Replay Event, this won't be triggered from nextPhaseTimer
-                if (this.nextPhaseTimer) clearInterval(this.nextPhaseTimer);
-                this.nextPhaseTimer = undefined;
-
-                if (!this.testMode && this.nextPhaseTimer === undefined) {
-                    this.nextPhaseTimer = setTimeout(() => {
-                        this.nextPhaseTimer = undefined;
-                        this.processStateChange(
-                            PhaseChangeStateChange.create(this.state, undefined));
-                    }, Constants.PLANNING_TIME * 1000);
-                }
-                else {
-                    console.error('Next phase timer already set on Action!');
-                }
-            }
-            else if (!this.testMode) {
-                this.runActionPhase();
-            }
         }
 
         if (stateChange instanceof SetUnitTargetStateChange) {
@@ -139,6 +127,32 @@ module.exports = class Game {
             }
             this.onGameOver(this, winner);
         }
+
+        if (stateChange instanceof PhaseChangeStateChange) {
+            if (this.state.phase === Constants.PHASE_PLANNING) {
+                // Starting planning phase now
+                // During a Replay Event, this won't be triggered from nextPhaseTimer
+                if (this.nextPhaseTimer) clearInterval(this.nextPhaseTimer);
+                this.nextPhaseTimer = undefined;
+
+                if (!this.testMode) {
+                    if (this.nextPhaseTimer === undefined) {
+                        this.nextPhaseTimer = setTimeout(() => {
+                            this.nextPhaseTimer = undefined;
+                            this.processStateChange(
+                                PhaseChangeStateChange.create(this.state, undefined));
+                        }, Constants.PLANNING_TIME * 1000);
+                    }
+                    else {
+                        console.error('Next phase timer already set on Action!');
+                    }
+                }
+            }
+            else {
+                this.runActionPhase();
+            }
+        }
+        
         return this.state.getWinner();
     }
 
@@ -172,10 +186,19 @@ module.exports = class Game {
         const MOVE_COOLDOWN = 400;
         const actionPhaseStart = this.state.getGameTime();
         
-        const actionPhaseTick = setInterval(() => {
+        const actionPhaseTickFn = () => {
             // Before any combat, units and structures tick
             // Each tick is every 100ms, unit tries to acquire target,
             //  given cooldown
+            if (this.testMode) {
+                // We're in mock mode, so the actual tick will be 0, but every
+                //   tick the game time increases by 100 as if the tick was 
+                //   every 100.
+                this.mockGameTime += 100;
+                this.state.getGameTime = () => {
+                    return this.mockGameTime;
+                };
+            }
             let currentTime = this.state.getGameTime();
             
             this.processStateChange(ActionTickStateChange.create(this.state, undefined, currentTime));
@@ -286,18 +309,35 @@ module.exports = class Game {
 
             // No one did a move, we can proceed with ending this action phase.
             if (timeUp || finishedActions || this.isGameOver) {
-                clearInterval(actionPhaseTick);
                 const gameStateOver = this.state.getWinner();
                 if (gameStateOver === undefined) {
-                    this.nextPhaseTimer = setTimeout(() => {
-                        this.nextPhaseTimer = undefined;
+                    if (!this.testMode) {
+                        this.nextPhaseTimer = setTimeout(() => {
+                            this.nextPhaseTimer = undefined;
+                            this.processStateChange(PhaseChangeStateChange.create(this.state, undefined));
+                        }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
+                    }
+                    else {
                         this.processStateChange(PhaseChangeStateChange.create(this.state, undefined));
-                    }, Constants.TIME_BEFORE_ACTION_TO_PLANNING * 1000);
+                    }
                 }
                 else {
                     this.onGameOver(this, gameStateOver);
                 }
+                return false;
             }
-        }, TICK_TIME);
+            return true;
+        };
+        if (this.testMode) {
+            while (actionPhaseTickFn()) {
+            }
+        }
+        else {
+            const actionPhaseTick = setInterval(() => {
+                if (!actionPhaseTickFn()) {
+                    clearInterval(actionPhaseTick);
+                }
+            }, TICK_TIME);
+        }
     }
 };

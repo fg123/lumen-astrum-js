@@ -1,0 +1,19 @@
+TEST Marine Combat
+
+PLAN
+BUILD A 7 6 'Marine'
+BUILD B 9 6 'Marine'
+
+ACTION
+# Marines Should Fight...
+
+PLAN
+CHECK objAt(7, 6).currentHealth === 20
+CHECK objAt(9, 6).currentHealth === 20
+
+ACTION
+# Both should kill each other...
+
+PLAN
+CHECK objAt(7, 6) === undefined
+CHECK objAt(9, 6) === undefined

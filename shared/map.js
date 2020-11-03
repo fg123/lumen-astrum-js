@@ -23,7 +23,7 @@ const Tiles = {
 };
 
 const setupMap = (map) => {
-    console.log('Loading map...');
+    console.log('Setting up map...');
     if (typeof map.data[0] === 'string') {
         map.data = map.data.map(row => row.split(' ').map(tile => new Tile(tile)));
         

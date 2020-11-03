@@ -76,10 +76,6 @@ class MoveUnitAnimation extends MapObjectAnimation {
     _getPosition() {
         return this.position;
     }
-
-    _getRotation() {
-        return this.rotation;
-    }
 }
 
 class InPlaceSpriteAnimation extends MapObjectAnimation {

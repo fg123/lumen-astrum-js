@@ -130,7 +130,10 @@ class BuildStructureStateChange extends StateChange {
         state.insertMapObject(this.data.position,
             this.data.structureName,
             this.from);
-        state.changeGold(this.from, -(this.getOptionToBuild().cost));
+        const option = this.getOptionToBuild();
+        // This should really be behind a flag checker for testing mode
+        const cost = option ? option.cost : 0;
+        state.changeGold(this.from, -cost);
     }
 }
 StateChange.registerSubClass(BuildStructureStateChange);
