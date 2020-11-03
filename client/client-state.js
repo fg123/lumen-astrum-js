@@ -164,32 +164,34 @@ module.exports = class ClientState {
 
             if (change instanceof PhaseChangeStateChange) {
                 this.pendingAction = null;
-                /* Spawn Animations for buildings being constructed */
-                const animationSpawner = mapObject => {
-                    if (mapObject.turnsUntilBuilt === 1) {
-                        /* About to turn, let's start an animation. */
-                        if (mapObject.width === 1) {
-                            mapObject.animationManager.addAnimation(
-                                new InPlaceSpriteAnimation(
-                                    this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
-                                    10,
-                                    2
-                                )
-                            );
+                if (this.gameState.phase === Constants.PHASE_PLANNING) {
+                    /* Spawn Animations for buildings being constructed */
+                    const animationSpawner = mapObject => {
+                        if (mapObject.turnsUntilBuilt === 1) {
+                            /* About to turn, let's start an animation. */
+                            if (mapObject.width === 1) {
+                                mapObject.animationManager.addAnimation(
+                                    new InPlaceSpriteAnimation(
+                                        this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
+                                        10,
+                                        2
+                                    )
+                                );
+                            }
+                            else if (mapObject.width === 0) {
+                                mapObject.animationManager.addAnimation(
+                                    new InPlaceSpriteAnimation(
+                                        this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
+                                        6,
+                                        2
+                                    )
+                                );
+                            }
                         }
-                        else if (mapObject.width === 0) {
-                            mapObject.animationManager.addAnimation(
-                                new InPlaceSpriteAnimation(
-                                    this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
-                                    6,
-                                    2
-                                )
-                            );
-                        }
-                    }
-                };
-                this.gameState.structures.forEach(animationSpawner);
-                this.gameState.units.forEach(animationSpawner);
+                    };
+                    this.gameState.structures.forEach(animationSpawner);
+                    this.gameState.units.forEach(animationSpawner);
+                }
             }            
             else if (change instanceof UnitAttackStateChange) {
                 const unit = this.gameState.mapObjects[

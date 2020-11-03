@@ -265,7 +265,7 @@ const structures = {
         'health': 250,
         'shield': 0,
         'width': 0,
-        'turnsToBuild': Constants.IS_PRODUCTION ? 2 : 1,
+        'turnsToBuild': 2,
         'options': [],
         'sightRange': 1,
         'custom': {

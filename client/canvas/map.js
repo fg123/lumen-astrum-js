@@ -638,9 +638,11 @@ module.exports = class MapCanvas {
                             else {
                                 if (mapObject.width === 0) {
                                     this.drawImage(this.resourceManager.get(Resource.WIDTH_0_BUILD), drawCoord.x, drawCoord.y);
+                                    this.drawText(mapObject.turnsUntilBuilt, 'black', 48, drawCoord.x, drawCoord.y + 15, 'center', 'bold');
                                 }
                                 else {
                                     this.drawImage(this.resourceManager.get(Resource.WIDTH_1_BUILD), drawCoord.x, drawCoord.y);
+                                    this.drawText(mapObject.turnsUntilBuilt, 'black', 48, drawCoord.x, drawCoord.y + 15, 'center', 'bold');
                                 }
                             }
                             // this.context.shadowBlur = 0;
