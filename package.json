@@ -10,7 +10,8 @@
     "start-server": "node -r dotenv/config server/index.js",
     "watch-server": "nodemon -r dotenv/config --watch server --watch shared server/index.js",
     "dev": "concurrently --kill-others 'npm:watch-client' 'npm:watch-server' 'npm:watch-devtools-map-editor' 'npm:watch-devtools-data-editor'",
-    "prod": "NODE_ENV=production npm run build-client && NODE_ENV=production npm run start-server"
+    "prod": "NODE_ENV=production npm run build-client && NODE_ENV=production npm run start-server",
+    "test": "node tests/test.js"
   },
   "repository": {
     "type": "git",
