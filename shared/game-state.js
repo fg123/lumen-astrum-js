@@ -386,7 +386,7 @@ module.exports = class GameState {
                     break;
                 }
             }
-            const outpostCache = this.players[player].deploymentOutpostCache;
+            const outpostCache = this.players[mapObject.owner].deploymentOutpostCache;
             for (let i = 0; i < outpostCache.length; i++) {
                 if (outpostCache[i].position.x === location.x &&
                     outpostCache[i].position.y === location.y) {

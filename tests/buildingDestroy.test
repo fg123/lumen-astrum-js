@@ -1,0 +1,18 @@
+TEST Building Destroy Test
+
+PLAN
+BUILD A 7 6 'Barracks'
+BUILD B 7 7 'Marine'
+BUILD B 6 7 'Marine'
+BUILD B 6 6 'Marine'
+
+ACTION
+PLAN
+CHECK objAt(7, 6).currentHealth < objAt(7, 6).maxHealth
+ACTION
+PLAN
+ACTION
+PLAN
+
+CHECK objAt(7, 6) === undefined
+
