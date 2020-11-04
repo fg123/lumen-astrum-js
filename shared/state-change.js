@@ -555,25 +555,12 @@ class UnitAttackStateChange extends StateChange {
     _simulateStateChange(state) {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         const target = state.findTarget(this.data.posTo);
-        // if (unit.custom && unit.custom.attackCooldown) {
-        //     unit.attacksThisTurn -= unit.custom.attackCooldown;
-        // }
-        // else {
-        //     unit.attacksThisTurn -= 1;
-        // }
+
         unit.onLaunchAttack(state, target, unit.attackDamage);
         state.dealDamageToUnit(unit, target, unit.attackDamage);
 
-        if (unit.custom && unit.custom.splashDamage) {
-            // Apply damage to surrounding units
-            const surrounding = getSurrounding(this.data.posTo, unit.custom.splashRange);
-            for (let i = 0; i < surrounding.length; i++) {
-                const target = state.findTarget(surrounding[i]);
-                if (target !== undefined && target.isUnit && target.owner !== this.from) {
-                    state.dealDamageToUnit(unit, target, unit.custom.splashDamage);
-                }
-            }
-        }
+        unit.outOfCombatTime = this.timestamp + (Constants.OUT_OF_COMBAT_TIME * 1000);
+        target.outOfCombatTime = this.timestamp + (Constants.OUT_OF_COMBAT_TIME * 1000);
     }
 
     getSplashRange(state) {

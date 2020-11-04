@@ -178,7 +178,7 @@ module.exports.structures = {
         "texture": "structures/automationfactory.png"
     },
     "Deployment Outpost": {
-        "description": "Claims territory and allows expansion of buildings away from the command center.",
+        "description": "Claims territory and allows expansion of buildings away from the command center. Heals nearby, out of combat ally units.",
         "health": 200,
         "shield": 0,
         "width": 0,
@@ -188,7 +188,9 @@ module.exports.structures = {
         "options": [],
         "icon": "icons/deploymentOutpostIcon.png",
         "texture": "structures/deploymentoutpost.png",
-        "custom": {}
+        "custom": {
+            "healPercentagePerTick": 0.03
+        }
     },
     "Ether Harvester": {
         "description": "Standard resource harvester. Construct a Deployment Outpost nearby to claim.",

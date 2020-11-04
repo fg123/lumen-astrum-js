@@ -112,10 +112,18 @@ module.exports = class MapCanvas {
             ten += smallTickIncrement;
         }
         
-        // Use shield to show how much longer stun is.
+        // Use shield to show how much longer stun is. &and also out of combat
         if (mapObject.modifiers && mapObject.isUnit) {
             const shieldPercent = mapObject.getStunnedTime(this.state.gameState) / mapObject.getStunnedTotalTime();
             this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
+            
+        }
+        if (mapObject.isUnit) {
+            console.log(mapObject.outOfCombatTime, this.state.gameState.getGameTime());
+            if (mapObject.outOfCombatTime > this.state.gameState.getGameTime()) {
+                const shieldPercent = (mapObject.outOfCombatTime - this.state.gameState.getGameTime()) / (Constants.OUT_OF_COMBAT_TIME * 1000);
+                this.drawRectangle('purple', start + 2, y + 9, shieldPercent * 100, 5);
+            }
         }
         
     }

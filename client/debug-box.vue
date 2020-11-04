@@ -5,6 +5,8 @@
                 <td>
                     Selected: ({{ selectedLocation.x }},{{ selectedLocation.y }})
                     <button @click="cheatKill()">Kill</button>
+                    <button @click="cheatDamage(10)">Deal 10</button>
+                    <button @click="cheatDamage(50)">Deal 50</button>
                 </td>
             </tr>
             <tr>
@@ -86,6 +88,9 @@ module.exports = {
             }
         },
         cheatKill() {
+            this.cheatDamage(10000);
+        },
+        cheatDamage(val) {
             this.clientState.sendStateChange(
                 DebugCheatStateChange.create(
                     this.clientState.gameState,
@@ -94,7 +99,7 @@ module.exports = {
                         this.clientState.gameState,
                         this.clientState.player,
                         this.selectedLocation,
-                        10000
+                        val
                     )
                 )
             );

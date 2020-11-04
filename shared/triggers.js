@@ -27,6 +27,12 @@ function buffableUnit(u) {
     return u.buffable;
 }
 
+function rangeOneUnit(deploymentOutpost) {
+    return (unit) => {
+        return tupleDistance(deploymentOutpost.position, unit.position) === 1;
+    };
+}
+
 function rangeOneBarracks(buffBuilding) {
     return (structure) => {
         return structure.name === 'Barracks' &&
@@ -355,17 +361,18 @@ const triggers = {
             this.claimedRange = 0;
             this.claimedHash = new Set();
             this.claimedTiles = [];
-            this.tickCounter = 0;
+            this.tickClaimCounter = 0;
+            this.tickHealCounter = 0;
         },
-        onActionTick(state) {
-            // Every 2 ticks we expand
-            if (this.tickCounter < 2) {
-                this.tickCounter += 1;
+        expandTick(state) {
+            if (this.tickClaimCounter < 2) {
+                this.tickClaimCounter += 1;
                 return true;
             }
-            this.tickCounter = 0;
+            this.tickClaimCounter = 0;
 
             let didWeClaim = false;
+
             const surrounding = getSurrounding(this.position, this.width + this.claimedRange);
             for (let i = 0; i < surrounding.length; i++) {
                 if (state.gameMap.withinMap(surrounding[i])) {
@@ -390,6 +397,47 @@ const triggers = {
                 this.claimedRange += 1;
             }
             return didWeClaim;
+        },
+        healTick(state) {
+            if (this.tickHealCounter < 10) {
+                this.tickHealCounter += 1;
+                return true;
+            }
+            this.tickHealCounter = 0;
+
+            let didWeHeal = false;
+            const units = state.getUnitsOnMyTeam(this.owner, rangeOneUnit(this));
+            for (let i = 0; i < units.length; i++) {
+                const maxHealth = units[i].maxHealth;
+                if (units[i].turnsUntilBuilt === 0 &&
+                    units[i].currentHealth < maxHealth) {
+                    didWeHeal = true;
+                    if (state.getGameTime() > units[i].outOfCombatTime) {
+                        let heal = Math.ceil(this.custom.healPercentagePerTick * maxHealth);
+                        if (units[i].currentHealth + heal > maxHealth) {
+                            heal = maxHealth - units[i].currentHealth;
+                        }
+                        
+                        units[i].currentHealth += heal;
+
+                        if (state.clientState) {
+                            state.clientState.globalAnimationManager.addAnimation(
+                                new PopupTextAnimation(`+${heal}`, "green",
+                                    units[i].position)
+                            );
+                        }
+                    }
+                }
+            }
+            
+            return didWeHeal;
+        },
+        onActionTick(state) {
+            // Every 2 ticks we expand
+            const didWeClaim = this.expandTick(state);
+            const didWeHeal = this.healTick(state);
+            
+            return didWeClaim || didWeHeal;
         },
         onDestroy(state) {
             if (this.claimedTiles) {

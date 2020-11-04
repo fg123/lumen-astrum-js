@@ -16,5 +16,6 @@ module.exports = {
     PHASE_PLANNING: 'phase_planning',
     PLANNING_TIME: is_production ? 20 : 5,
     ACTION_MAX_TIME: 10,
-    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 1 : 0
+    TIME_BEFORE_ACTION_TO_PLANNING: is_production ? 1 : 0,
+    OUT_OF_COMBAT_TIME: 4
 };

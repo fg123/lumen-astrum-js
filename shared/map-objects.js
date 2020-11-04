@@ -126,6 +126,8 @@ module.exports.Unit = class extends ModifierHolder {
         this.attackRange = Data.units[name].attackRange;
         this.baseAttackSpeed = Data.units[name].attackSpeed;
         
+        this.outOfCombatTime = 0;
+
         if (Data.units[name].targetable !== undefined) {
             this.targetable = Data.units[name].targetable;
         }
