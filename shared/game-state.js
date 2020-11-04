@@ -386,18 +386,20 @@ module.exports = class GameState {
                     break;
                 }
             }
-            const outpostCache = this.players[mapObject.owner].deploymentOutpostCache;
-            for (let i = 0; i < outpostCache.length; i++) {
-                if (outpostCache[i].position.x === location.x &&
-                    outpostCache[i].position.y === location.y) {
-                    outpostCache.splice(i, 1);
-                    break;
-                }
-            }
             // Neutral buildings are owned by undefined
             if (mapObject.owner !== undefined) {
                 // Structure.isConstructionBuilding(name), allowed building now
                 //   expands out from deployment outposts
+                if (mapObject.name === 'Deployment Outpost') {
+                    const outpostCache = this.players[mapObject.owner].deploymentOutpostCache;
+                    for (let i = 0; i < outpostCache.length; i++) {
+                        if (outpostCache[i].position.x === location.x &&
+                            outpostCache[i].position.y === location.y) {
+                            outpostCache.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
                 if (mapObject.name === 'Command Base') {
                     const surrounding = getSurrounding(location, mapObject.width + Constants.BUILD_RANGE);
                     for (let i = 0; i < surrounding.length; i++) {

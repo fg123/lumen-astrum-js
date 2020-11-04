@@ -15,4 +15,17 @@ ACTION
 PLAN
 
 CHECK objAt(7, 6) === undefined
+CHECK objAt(12, 7).owner === undefined
 
+BUILD B 12 6 'Marine'
+BUILD B 11 6 'Marine'
+BUILD B 11 7 'Marine'
+BUILD B 12 8 'Marine'
+BUILD B 13 7 'Marine'
+
+ACTION
+PLAN
+ACTION
+PLAN
+
+CHECK objAt(12, 7).owner === 'B'
