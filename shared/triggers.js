@@ -412,7 +412,8 @@ const triggers = {
                 if (units[i].turnsUntilBuilt === 0 &&
                     units[i].currentHealth < maxHealth) {
                     didWeHeal = true;
-                    if (state.getGameTime() > units[i].outOfCombatTime) {
+                    if (state.getGameTime() > units[i].outOfCombatTime && 
+                        state.isAllowedBuilding(units[i].position.x, units[i].position.y, units[i].owner)) {
                         let heal = Math.ceil(this.custom.healPercentagePerTick * maxHealth);
                         if (units[i].currentHealth + heal > maxHealth) {
                             heal = maxHealth - units[i].currentHealth;

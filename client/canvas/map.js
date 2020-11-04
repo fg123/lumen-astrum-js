@@ -118,8 +118,7 @@ module.exports = class MapCanvas {
             this.drawRectangle('blue', start + 2, y + 9, shieldPercent * 100, 5);
             
         }
-        if (mapObject.isUnit) {
-            console.log(mapObject.outOfCombatTime, this.state.gameState.getGameTime());
+        if (!Constants.IS_PRODUCTION && mapObject.isUnit) {
             if (mapObject.outOfCombatTime > this.state.gameState.getGameTime()) {
                 const shieldPercent = (mapObject.outOfCombatTime - this.state.gameState.getGameTime()) / (Constants.OUT_OF_COMBAT_TIME * 1000);
                 this.drawRectangle('purple', start + 2, y + 9, shieldPercent * 100, 5);
@@ -666,7 +665,21 @@ module.exports = class MapCanvas {
                 }
             }
         }
-            
+        
+        if (this.state.gameState) {
+            const outposts = this.state.gameState.players[this.state.player].deploymentOutpostCache;
+            for (let i = 0; i < outposts.length; i++) {
+                const surrounding = getSurrounding(outposts[i].position, 1);
+                for (let j = 0; j < surrounding.length; j++) {
+                    const coord = toDrawCoord(surrounding[j].x, surrounding[j].y);
+                    if (!this.state.gameState.isOccupied(surrounding[j].x, surrounding[j].y) &&
+                        this.state.gameState.isAllowedBuilding(surrounding[j].x, surrounding[j].y, this.state.player)) {
+                        this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
+                            coord.x, coord.y);
+                    }
+                }
+            }
+        }
         this.drawGlobalAnimations();
 
         this.state.cursorMessage = '';

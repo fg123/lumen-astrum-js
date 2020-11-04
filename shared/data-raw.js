@@ -178,7 +178,7 @@ module.exports.structures = {
         "texture": "structures/automationfactory.png"
     },
     "Deployment Outpost": {
-        "description": "Claims territory and allows expansion of buildings away from the command center. Heals nearby, out of combat ally units.",
+        "description": "Claims territory and allows expansion of building area. Heals nearby, out of combat ally units on ally territory.",
         "health": 200,
         "shield": 0,
         "width": 0,

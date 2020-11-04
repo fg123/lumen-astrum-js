@@ -20,8 +20,7 @@ class PlayerState {
         // Caches what tiles we are allowed to build on
         this.allowedBuildingCache = [];
 
-        // Caches what locations we've put a probe on
-        this.probeLocationCache = [];
+        this.deploymentOutpostCache = [];
 
         this.gold = Constants.STARTING_GOLD;
         this.commandBase = undefined;
@@ -269,23 +268,6 @@ module.exports = class GameState {
         arr[y][x] -= value;
     }
 
-    getProbeLocationArr(player) {
-        return this.players[player].probeLocationCache;
-    }
-
-    addProbeLocation(x, y, player) {
-        this.getProbeLocationArr(player).push(new Tuple(x, y));
-        this.addVisibility(x, y, player);
-    }
-
-    removeAllProbeLocations(player) {
-        const arr = this.getProbeLocationArr(player);
-        for (let i = 0; i < arr.length; i++) {
-            this.removeVisibility(arr[i].x, arr[i].y, player);
-        }
-        arr.length = 0;
-    }
-
     insertMapObject(location, name, player) {
         if (name in Data.structures) {
             const structure = new Structure(name, player, location);
@@ -315,6 +297,9 @@ module.exports = class GameState {
                             }
                         }
                     }
+                }
+                if (name === 'Deployment Outpost') {
+                    this.players[player].deploymentOutpostCache.push(structure);
                 }
                 surrounding = this.getVisible(location, structure.width + structure.sightRange);
                 surrounding.forEach(pos => {
@@ -398,6 +383,14 @@ module.exports = class GameState {
                 if (this.structures[i].position.x === location.x &&
                     this.structures[i].position.y === location.y) {
                     this.structures.splice(i, 1);
+                    break;
+                }
+            }
+            const outpostCache = this.players[player].deploymentOutpostCache;
+            for (let i = 0; i < outpostCache.length; i++) {
+                if (outpostCache[i].position.x === location.x &&
+                    outpostCache[i].position.y === location.y) {
+                    outpostCache.splice(i, 1);
                     break;
                 }
             }
