@@ -88,6 +88,10 @@ module.exports = class Game {
     }
 
     processStateChange(stateChange) {
+        if (this.isGameOver) {
+            console.warn("Tried to process a state change after game is over!");
+            return;
+        }
         if (this.verboseMode) {
             console.log('Processing State Change');
             console.log(stateChange);
@@ -121,9 +125,9 @@ module.exports = class Game {
 
         const winner = this.state.getWinner();
         if (winner !== undefined) {
-            if (this.state.nextPhaseTimer) {
-                clearInterval(this.state.nextPhaseTimer);
-                this.state.nextPhaseTimer = undefined;
+            if (this.nextPhaseTimer) {
+                clearInterval(this.nextPhaseTimer);
+                this.nextPhaseTimer = undefined;
             }
             this.onGameOver(this, winner);
         }

@@ -71,6 +71,7 @@ module.exports = class ClientState {
         this.canCurrentUnitAttackPosition = false;
         this.canCurrentUnitMoveToPosition = false;
         this.pendingAction = null;
+        this.gameStartingCountdown = false;
         this.gameTimer = '';
         this.phaseText = '';
         this.topProgressBar = 0;
@@ -152,7 +153,10 @@ module.exports = class ClientState {
         socket.on('login-success', (username) => {
             this.player = username;
         });
-
+        socket.on('changed-username', (newUsername) => {
+            console.log('changed-username');
+            this.player = newUsername;
+        });
         socket.on('disconnect', () => {
 	        alert('Server disconnected.');
             window.location.reload(); 
@@ -160,10 +164,15 @@ module.exports = class ClientState {
 
         socket.on('state-change', (stateChange) => {
             console.log(stateChange);
+            if (!this.gameState) {
+                console.warn('No game-state to apply state-change on!');
+                return;
+            }
             const change = StateChange.deserialize(stateChange);
 
             if (change instanceof PhaseChangeStateChange) {
                 this.pendingAction = null;
+                this.gameStartingCountdown = false;
                 if (this.gameState.phase === Constants.PHASE_PLANNING) {
                     /* Spawn Animations for buildings being constructed */
                     const animationSpawner = mapObject => {
@@ -266,6 +275,7 @@ module.exports = class ClientState {
         });
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
+            this.gameState = undefined;
         });
         socket.on('game-start', (gameStartTime, players, mapName) => {
             console.log(players);
@@ -300,8 +310,13 @@ module.exports = class ClientState {
                 commandCenterLocation.y][
                 commandCenterLocation.x];
             this.camera.position = toDrawCoord(commandCenterLocation);
-        
+            
+            this.gameStartingCountdown = true;
             const interval = setInterval(() => {
+                if (!this.gameState) {
+                    clearInterval(interval);
+                    return;
+                }
                 const seconds = parseInt(Constants.TIME_IN_SECONDS_BEFORE_GAME_START - (this.gameState.getGameTime()) / 1000);
                 if (seconds <= 0) {
                     clearInterval(interval);
@@ -317,7 +332,12 @@ module.exports = class ClientState {
             /* This just sets up some internal checks as the game goes on for
              * UI purposes */
             if (this.gameState) {
-                if (this.gameState.phase === Constants.PHASE_ACTION) {
+                if (this.gameStartingCountdown) {
+                    this.phaseText = 'WAITING';
+                    this.gameTimer = '00';
+                    this.topProgressBar = 1.0;
+                }
+                else if (this.gameState.phase === Constants.PHASE_ACTION) {
                     this.phaseText = 'ACTION';
                     const max = (Constants.ACTION_MAX_TIME * 1000);
                     

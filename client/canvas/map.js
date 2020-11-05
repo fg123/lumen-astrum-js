@@ -536,7 +536,6 @@ module.exports = class MapCanvas {
                         const animationManager =
                             mapObject.animationManager;
 
-                        let name = mapObject.name;
                         let actualDrawnPosition = drawCoord;
 
                         /* Hide whatever portion should not be visible */
@@ -680,8 +679,8 @@ module.exports = class MapCanvas {
                     }
                 }
             }
+            this.drawGlobalAnimations();
         }
-        this.drawGlobalAnimations();
 
         this.state.cursorMessage = '';
         if (this.state.pendingAction) {

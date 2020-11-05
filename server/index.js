@@ -124,6 +124,9 @@ function startServer() {
                 if (game.sockets[p] !== undefined) {
                     connectedUsers[game.sockets[p].id].game = null;
                 }
+                if (disconnectedMidGame[p]) {
+                    delete disconnectedMidGame[p];
+                }
             });
 
             for (let i = 0; i < games.length; i++) {
