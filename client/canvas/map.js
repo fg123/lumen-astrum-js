@@ -594,11 +594,11 @@ module.exports = class MapCanvas {
                         }
                         else if (anyVisible) {
                             if (mapObject.turnsUntilBuilt === 0) {
-                                if (name in structures) {
+                                if (mapObject.isStructure) {
                                     // Draw Structure
                                     this.drawImage(this.resourceManager.get(mapObject.texture), drawCoord.x, drawCoord.y);
                                 }
-                                else if (name in units) {
+                                else if (mapObject.isUnit) {
                                     // Draw Unit
                                     if (this.objectIsMine(mapObject)) {
                                         this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY), drawCoord.x, drawCoord.y);
@@ -623,7 +623,8 @@ module.exports = class MapCanvas {
                             // this.context.shadowBlur = 0;
                         }
                         
-                        if (name in units && mapObject.turnsUntilBuilt === 0) {
+                        if (mapObject.isUnit && mapObject.turnsUntilBuilt === 0 &&
+                            mapObject.owner === this.state.player) {
                             // Draw Unit desired path
                             let lastDrawn = toDrawCoord(mapObject.position);
                             for (let i = 0; i < mapObject.targetPoints.length; i++) {

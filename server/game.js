@@ -103,12 +103,12 @@ module.exports = class Game {
             this.state.verifyIntegrity();
         }
 
-        if (stateChange instanceof SetUnitTargetStateChange) {
-            // Only tell the player it concerns
-            this.players.forEach(p => {
-                shouldBroadcastMap[p] = (p === stateChange.from);
-            });
-        }
+        // if (stateChange instanceof SetUnitTargetStateChange) {
+        //     // Only tell the player it concerns
+        //     this.players.forEach(p => {
+        //         shouldBroadcastMap[p] = (p === stateChange.from);
+        //     });
+        // }
        
         this.stateChanges.push(stateChange);
 
