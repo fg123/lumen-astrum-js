@@ -1,5 +1,8 @@
 <template>
     <dashboard-wrapper v-bind:user="user" v-bind:root="root">
+        <div class="adminBtnWrapper">
+            <gradient-button small style="display: block" v-if="user.isAdmin" @click="root.goToServerAdmin()">Server</gradient-button>
+        </div>
         <div class="changelog" v-if="!inQueue">
             <div style="margin-bottom: 5px; font-weight: bold">Changelog</div>
             <div class="entry" v-for="(entry, index) in changelog" :key="index">
@@ -11,7 +14,6 @@
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Join 2 Player Queue</gradient-button>
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('3p')">Join 3 Player Queue</gradient-button>
                 <gradient-button medium style="display: block" @click="joinQueue('4p')">Join 4 Player Queue</gradient-button>
-                
             </div>
         </div>
         <div class="inQueue" v-if="inQueue">
@@ -78,6 +80,12 @@ module.exports = {
 </script>
 
 <style>
+div.adminBtnWrapper {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+
 div.inQueue {
     position: absolute;
     top: 50%;

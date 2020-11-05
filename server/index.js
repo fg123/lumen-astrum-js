@@ -205,7 +205,8 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             status: 'connected',
             username: null,
             queueID: -1,
-            game: null
+            game: null,
+            isAdmin: false
         };
         socket.on('ping', function (date) {
             connectedUsers[socket.id].ping = (Date.now() - date) * 2;
@@ -217,6 +218,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
 
             connectedUsers[socket.id].username = username;
             connectedUsers[socket.id].elo = elo;
+            connectedUsers[socket.id].isAdmin = userObject.isAdmin || false;
 
             socket.emit('login-success', username);
 
@@ -228,11 +230,15 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 potentialGame.updateSocket(username, socket);
             }
             
-            callback(undefined, {
+            const clientCallback = {
                 username: username,
                 picture: userObject.picture,
                 elo: elo
-            });
+            };
+            if (userObject.isAdmin) {
+                clientCallback.isAdmin = true;
+            }
+            callback(undefined, clientCallback);
 
             if (potentialGame) {
                 socket.emit('game-start',
@@ -291,6 +297,23 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 console.error(err);
                 socket.emit('login-failed');
             });
+        });
+        socket.on('admin/server-status', function(callback) {
+            if (connectedUsers[socket.id].isAdmin) {
+                callback(Object.values(connectedUsers).map(u => {
+                    return {
+                        username: u.username,
+                        isAdmin: u.isAdmin,
+                        socketId: u.socket.id
+                    };
+                }), games.map(g => {
+                    return {
+                        players: g.players,
+                        mapName: g.mapName,
+                        gameStartTime: g.gameStartTime
+                    };
+                }));
+            }
         });
         socket.on('login', function (username, password, callback) {
             db.collection('users').find({ username, password: generateHash(password) }).toArray(function(err, res) {

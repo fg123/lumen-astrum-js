@@ -16,7 +16,8 @@ const Screen = {
     LOGIN: 'login',
     GAME: 'game',
     CLIENT_MAIN: 'clientMain',
-    POST_GAME: 'postGame'
+    POST_GAME: 'postGame',
+    SERVER_ADMIN: 'serverAdmin'
 };
 
 module.exports = {
@@ -52,6 +53,13 @@ module.exports = {
             this.currentScreen = Screen.CLIENT_MAIN;
             this.lastGameOver = undefined;
         },
+        goToServerAdmin() {
+            console.log('2');
+            if (this.user.isAdmin) {
+                console.log('1');
+                this.currentScreen = Screen.SERVER_ADMIN;
+            }
+        },
         login(username, password, callback) {
             this.socket.emit('login', username, password, callback);
         },
@@ -74,7 +82,8 @@ module.exports = {
         welcome: require('./welcome.vue'),
         login: require('./login.vue'),
         clientMain: require('./client-main.vue'),
-        postGame: require('./post-game.vue')
+        postGame: require('./post-game.vue'),
+        serverAdmin: require('./server-admin.vue')
     }
 };
 </script>
