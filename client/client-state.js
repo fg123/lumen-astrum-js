@@ -60,24 +60,8 @@ module.exports = class ClientState {
         this.defaultMap = setupMap(require('../shared/maps/redesign.js'));
 
         this.player = undefined;
-        this.gameState = undefined;
-        this.selectedObject = null;
-        this.hoveredOption = null;
-        this.bigMessage = '';
-        this.smallAlert = { current: null, queue: [], lastShownTime: 0 };
-        this.commandCenter = null;
-        this.unitMoveRange = [];
-        this.unitAttackRange = [];
-        this.canCurrentUnitAttackPosition = false;
-        this.canCurrentUnitMoveToPosition = false;
-        this.pendingAction = null;
-        this.gameStartingCountdown = false;
-        this.gameTimer = '';
-        this.phaseText = '';
-        this.topProgressBar = 0;
-        this.cursorMessage = '';
-        this.movementMode = false;
-        this.justEnteredMovementMode = false;
+
+        this.resetGameState();
 
         this.enemyOverlayMap = {};
 
@@ -275,7 +259,7 @@ module.exports = class ClientState {
         });
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
-            this.gameState = undefined;
+            this.resetGameState();
         });
         socket.on('game-start', (gameStartTime, players, mapName) => {
             console.log(players);
@@ -375,6 +359,27 @@ module.exports = class ClientState {
                 this.topProgressBar = 1.0;
             }
         }, INTERNAL_TICK_INTERVAL);
+    }
+
+    resetGameState() {
+        this.gameState = undefined;
+        this.selectedObject = undefined;
+        this.hoveredOption = null;
+        this.bigMessage = '';
+        this.smallAlert = { current: null, queue: [], lastShownTime: 0 };
+        this.commandCenter = null;
+        this.unitMoveRange = [];
+        this.unitAttackRange = [];
+        this.canCurrentUnitAttackPosition = false;
+        this.canCurrentUnitMoveToPosition = false;
+        this.pendingAction = null;
+        this.gameStartingCountdown = false;
+        this.gameTimer = '';
+        this.phaseText = '';
+        this.topProgressBar = 0;
+        this.cursorMessage = '';
+        this.movementMode = false;
+        this.justEnteredMovementMode = false;
     }
 
     getMap() {

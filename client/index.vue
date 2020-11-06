@@ -54,9 +54,7 @@ module.exports = {
             this.lastGameOver = undefined;
         },
         goToServerAdmin() {
-            console.log('2');
             if (this.user.isAdmin) {
-                console.log('1');
                 this.currentScreen = Screen.SERVER_ADMIN;
             }
         },
