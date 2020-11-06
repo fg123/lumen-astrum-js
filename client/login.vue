@@ -28,12 +28,43 @@
                     </td>
                 </tr>
             </table>
+            <table style="width: 100%;" v-if="!isProduction">
+                <tr>
+                    <td>
+                        <gradient-button
+                            ref="button"
+                            style="width: 100%"
+                            @click="login('test','test')">test</gradient-button>
+                    </td>
+                    <td>
+                        <gradient-button
+                            ref="button"
+                            style="width: 100%"
+                            @click="login('test2','test')">test2</gradient-button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <gradient-button
+                            ref="button"
+                            style="width: 100%"
+                            @click="login('test3','test')">test3</gradient-button>
+                    </td>
+                    <td>
+                        <gradient-button
+                            ref="button"
+                            style="width: 100%"
+                            @click="login('test4','test')">test4</gradient-button>
+                    </td>
+                </tr>
+            </table>
         </div>
 	</div>
 </template>
 
 <script>
 const { GoogleLogin } = require('vue-google-login');
+const Constants = require('../shared/constants');
 
 module.exports = {
     data() {
@@ -44,7 +75,8 @@ module.exports = {
             },
             renderParams: {
 
-            }
+            },
+            isProduction: Constants.IS_PRODUCTION
         };
     },
     methods: {
@@ -64,9 +96,7 @@ module.exports = {
                 this.root.loginSuccess(data);
             });
         },
-        submit() {
-            const username = this.$refs.username.value;
-            const password = this.$refs.password.value;
+        login(username, password) {
             this.root.login(username, password, (err, data) => {
                 if (err) {
                     this.hasError = true;
@@ -74,6 +104,11 @@ module.exports = {
                 }
                 this.root.loginSuccess(data);
             });
+        },
+        submit() {
+            const username = this.$refs.username.value;
+            const password = this.$refs.password.value;
+            this.login(username, password);
         }
     },
     components: {

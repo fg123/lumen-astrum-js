@@ -8,7 +8,6 @@ class Tile {
     }
 }
 
-const Constants = require('./constants');
 const { Tuple, getSurrounding } = require('./coordinates');
 
 const Tiles = {
@@ -45,8 +44,12 @@ const setupMap = (map) => {
                     applyHighGroundGroup(map, new Tuple(x, y), nextGroup);
                     nextGroup += 1;
                 }
+                // Unclaimable Tiles
                 if (type !== Tiles.BRUSH &&
-                    type !== Tiles.ROCK) {
+                    type !== Tiles.ROCK &&
+                    type !== Tiles.NONE &&
+                    type !== Tiles.BIG_MINERAL &&
+                    type !== Tiles.HIGH) {
                     map.territorialTiles += 1;
                 }
                 if (type === Tiles.BIG_MINERAL) {
