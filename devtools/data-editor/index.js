@@ -156,7 +156,7 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
     if (type === 'number') {
         const input = $(`<input type="number" value="${data}" />`);
         input.change(() => {
-            onChange(parseInt(input.val()));
+            onChange(parseFloat(input.val()));
             updateDiff();
         });
         return input;

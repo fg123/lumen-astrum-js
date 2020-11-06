@@ -36,7 +36,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Stim Lab",
-                "cost": 2000,
+                "cost": 1500,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Stim Lab}",
@@ -45,7 +45,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Artillery Bay",
-                "cost": 2000,
+                "cost": 1500,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Artillery Bay}",
@@ -54,7 +54,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Cloud Gate",
-                "cost": 2000,
+                "cost": 1500,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Cloud Gate}",
@@ -63,7 +63,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Vitality Fountain",
-                "cost": 2000,
+                "cost": 1500,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Vitality Fountain}",
@@ -299,7 +299,7 @@ module.exports.structures = {
     },
     "Turret": {
         "description": "Requires Automation Factory. Stationary, single-target ranged turret.",
-        "health": 100,
+        "health": 150,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 1,
@@ -311,7 +311,7 @@ module.exports.structures = {
         "texture": "units/armedturret.png"
     },
     "Vampiric Lair": {
-        "description": "Takes 2 turns to build. Produced units heal for 10% of damage dealt.",
+        "description": "Takes 2 turns to build. Produced units heal for 5% of damage dealt.",
         "health": 250,
         "shield": 0,
         "width": 0,
@@ -320,13 +320,13 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "healMultiplier": 0.1
+            "healMultiplier": 0.05
         },
         "icon": "icons/vampiricLairIcon.png",
         "texture": "structures/vampiriclair.png"
     },
     "Shauna's Forge": {
-        "description": "Takes 2 turns to build. Produced unit's attacks deal 2% of enemy's total health as extra damage.",
+        "description": "Takes 2 turns to build. Produced unit's attacks deal 1% of enemy's total health as extra damage.",
         "health": 250,
         "shield": 0,
         "width": 0,
@@ -335,7 +335,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "healthMultiplier": 0.02
+            "healthMultiplier": 0.01
         },
         "icon": "icons/shaunaForgeIcon.png",
         "texture": "structures/shaunasforge.png"
@@ -479,10 +479,10 @@ module.exports.units = {
     },
     "Armed Turret": {
         "attackRange": 3,
-        "attackSpeed": 1.5,
-        "damage": 5,
+        "attackSpeed": 2.5,
+        "damage": 2,
         "description": "This is constructed by the Turret building.",
-        "health": 100,
+        "health": 150,
         "moveRange": 0,
         "shield": 0,
         "sightRange": 3,

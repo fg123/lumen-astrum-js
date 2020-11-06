@@ -376,7 +376,8 @@ const triggers = {
             const surrounding = getSurrounding(this.position, this.width + this.claimedRange);
             for (let i = 0; i < surrounding.length; i++) {
                 if (state.gameMap.withinMap(surrounding[i])) {
-                    if (state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
+                    if (state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.NONE &&
+                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
                         state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
                         state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.HIGH) {
                         // Check no one else has this tile
