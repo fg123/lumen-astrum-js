@@ -24,6 +24,13 @@
                     <button @click="cheatSpawn()">Spawn</button>
                 </td>
             </tr>
+            <tr v-if="clientState && clientState.replayManager">
+                <td>
+                    <button @click="togglePause()">{{ this.clientState.replayManager.isPaused ? "PLAY" : "PAUSE" }}</button>
+                    <button @click="progressStateChange(1)">Next State Change</button>
+                    <button @click="progressStateChange(5)">Skip 5</button>
+                </td>
+            </tr>
         </table>
     </div>
 </template>
@@ -86,6 +93,16 @@ module.exports = {
                         drawCoord.x, drawCoord.y);
                 });
             }
+        },
+        progressStateChange(value) {
+            for (let i = 0; i < value; i++) {
+                this.clientState.replayManager.applyNextChange();
+            }
+        },
+        togglePause() {
+            this.clientState.replayManager.setPause(
+                !this.clientState.replayManager.isPaused
+            );
         },
         cheatKill() {
             this.cheatDamage(10000);

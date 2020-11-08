@@ -3,7 +3,7 @@
         <div class="overlay" v-if="currentScreen !== Screen.GAME">
             <component v-bind:is="currentScreen" v-bind:root="this"></component>
         </div>
-        <game v-bind:root="this"/>
+        <game v-bind:root="this" ref="game"/>
     </div>
 </template>
 
@@ -39,6 +39,9 @@ module.exports = {
         });
     },
     methods: {
+        getClientState() {
+            return this.$refs.game.clientState;
+        },
         goToLogin() {
             this.currentScreen = Screen.LOGIN;
         },

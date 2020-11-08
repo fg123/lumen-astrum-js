@@ -14,6 +14,15 @@ const { maps, setupMap } = require('../shared/map');
 const PathFinder = require('../shared/path-finder');
 
 module.exports = class Game {
+    toJson() {
+        return {
+            gameStartTime: this.gameStartTime,
+            mapName: this.mapName,
+            players: this.players,
+            stateChanges: this.stateChanges
+        };
+    }
+
     static fromJson(json, onGameOver) {
         const map = {};
         json.players.forEach(p => {

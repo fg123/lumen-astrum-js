@@ -10,3 +10,4 @@ devtools/dist/data-editor/main.js
 devtools/dist/map-editor/main.js
 dump.json
 dumps/
+game-*.json

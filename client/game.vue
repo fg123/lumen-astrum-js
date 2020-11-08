@@ -29,7 +29,7 @@ module.exports = {
         debugBox: require('./debug-box.vue')
     },
     methods: {
-        sendChat(message) {
+        sendChat(message) {            
             this.clientState.sendStateChange(
                 ChatMessageStateChange.create(
                     this.clientState.gameState,
@@ -75,6 +75,7 @@ module.exports = {
             const animationManager = new AnimationManager(false);
 
             const clientState = new ClientState(this.root.socket, chatbox, camera, inputManager, ui, resourceManager, animationManager);
+            this.clientState = clientState;
             camera.initializeClientState(clientState);
             this.clientState = clientState;
             const mapCanvasObj = new MapCanvas(

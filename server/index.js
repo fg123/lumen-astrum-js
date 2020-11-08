@@ -8,10 +8,11 @@ const crypto = require('crypto');
 const walkSync = require('walk-sync');
 const Game = require('./game');
 const axios = require('axios');
+const path = require('path');
 const mkdirp = require('mkdirp');
 const serveIndex = require('serve-index')
 const Constants = require('../shared/constants');
-const { StateChange } = require('../shared/state-change');
+const { StateChange, ChatMessageStateChange } = require('../shared/state-change');
 const clientId = '931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com';
 const { OAuth2Client } = require('google-auth-library');
 const oauthClient = new OAuth2Client(clientId);
@@ -90,7 +91,7 @@ function startServer() {
             mkdirp.sync('dumps');
         }
         const dumpName = Constants.IS_PRODUCTION ? `dumps/dump-${Date.now()}.json` : 'dump.json';
-        fs.writeFileSync(dumpName, safeStringify(games));
+        fs.writeFileSync(dumpName, safeStringify(games.map(g => g.toJson())));
         process.exit(1);
     });
 
@@ -172,6 +173,11 @@ function startServer() {
 module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             res.send('ok');
         });
+        app.get('/tools/list-replays', function (req, res) {
+            const resources = walkSync('./', { globs: ['game-*.json'] });
+            res.send(resources);
+        });
+        app.use('/root', express.static(__dirname + '/..'));
     }
 
     app.use('/dumps', express.static(__dirname + '/../dumps'));
@@ -208,10 +214,12 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             game: null,
             isAdmin: false
         };
+
         socket.on('ping', function (date) {
             connectedUsers[socket.id].ping = (Date.now() - date) * 2;
             socket.emit('ping', Date.now());
         });
+
         let authSuccessProcedure = (userObject, callback) => {
             const username = userObject.username;
             const elo = userObject.elo;
@@ -250,6 +258,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 }
             }
         };
+
         socket.on('glogin', function (oauthKey, callback) {
             verifyAndGetPayload(oauthKey).then(payload => {
                 db.collection('users').find({ id: payload.sub }).toArray(function(err, user) {
@@ -298,6 +307,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 socket.emit('login-failed');
             });
         });
+
         socket.on('admin/server-status', function(callback) {
             if (connectedUsers[socket.id].isAdmin) {
                 callback(Object.values(connectedUsers).map(u => {
@@ -315,6 +325,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 }));
             }
         });
+
         socket.on('login', function (username, password, callback) {
             db.collection('users').find({ username, password: generateHash(password) }).toArray(function(err, res) {
                 if (err) {
@@ -457,6 +468,13 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 if (game.verifyStateChange(change)) {
                     // Process will call simulate and foward as necessary
                     game.processStateChange(change);
+                    if (change instanceof ChatMessageStateChange) {
+                        if (change.data.message === '/dump') {
+                            console.log('Creating dump of game!');
+                            fs.writeFileSync(`game-${game.gameStartTime}.json`,
+                                safeStringify(game.toJson()));
+                        }
+                    }
                 }
                 else {
                     socket.emit('invalid-state-change');
@@ -494,6 +512,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             leaveQueue();
             callback();
         });
+
         socket.on('disconnect', function() {
             console.log('Got disconnect!');
             leaveQueue();

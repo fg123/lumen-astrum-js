@@ -9,6 +9,12 @@
                 {{ entry }}
             </div>
         </div>
+        <div class="replays" v-if="!inQueue && !isProduction">
+            <div style="margin-bottom: 5px; font-weight: bold">Dbg Replays</div>
+            <div class="entry" v-for="(replay, index) in replayGames" :key="index">
+                <button @click="loadReplay(replay)">{{ replay }}</button>
+            </div>
+        </div>
         <div class="joinGameDialog">
             <div class="notInQueue" v-if="!inQueue">
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Join 2 Player Queue</gradient-button>
@@ -25,6 +31,9 @@
 </template>
 
 <script>
+const Constants = require('../shared/constants');
+const axios = require('axios');
+
 module.exports = {
     name: 'client-main',
     props: {
@@ -37,7 +46,9 @@ module.exports = {
             queueTimerBegin: undefined,
             queueTimer: undefined,
             queueTimerText: '',
-            changelog: []
+            changelog: [],
+            isProduction: Constants.IS_PRODUCTION,
+            replayGames: [],
         };
     },
     components: {
@@ -51,8 +62,22 @@ module.exports = {
         this.root.socket.emit('changelog', (log) => {
             this.changelog = log;
         });
+        if (!this.isProduction) {
+            axios.get('/tools/list-replays').then((response) => {
+                this.replayGames = response.data;
+            }).catch((error) => {
+                alert(error);
+            });
+        }
     },
     methods: {
+        loadReplay(replay) {
+            axios.get('/root/' + replay).then((response) => {
+                this.root.getClientState().enterReplay(response.data);
+            }).catch((error) => {
+                alert(error);
+            });
+        },
         leaveQueue() {
             this.root.leaveQueue(() => {
                 this.inQueue = false;
@@ -110,6 +135,15 @@ div.changelog {
     top: 50%;
     left: 0;
     transform: translate(0, -50%);
+    color: #FFF;
+    max-width: 50%;
+    overflow: auto;
+}
+div.replays {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 0);
     color: #FFF;
     max-width: 50%;
     overflow: auto;

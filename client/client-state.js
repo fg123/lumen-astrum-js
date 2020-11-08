@@ -29,6 +29,7 @@ const {
 } = require('./animation');
 const { Resource } = require('./resources');
 const { toDrawCoord } = require('./utils');
+const ReplayManager = require('./replay-manager');
 
 const KEY_ENTER = 13;
 const KEY_W = 87;
@@ -55,8 +56,9 @@ module.exports = class ClientState {
         this.inputManager = inputManager;
         this.resourceManager = resourceManager;
         this.globalAnimationManager = animationManager;
+        // If there is a replayManager, we're in a replay
+        this.replayManager = undefined;
 
-        this.gameStartListeners = [];
         this.defaultMap = setupMap(require('../shared/maps/redesign.js'));
 
         this.player = undefined;
@@ -137,10 +139,12 @@ module.exports = class ClientState {
         socket.on('login-success', (username) => {
             this.player = username;
         });
+
         socket.on('changed-username', (newUsername) => {
             console.log('changed-username');
             this.player = newUsername;
         });
+
         socket.on('disconnect', () => {
 	        alert('Server disconnected.');
             window.location.reload(); 
@@ -154,146 +158,26 @@ module.exports = class ClientState {
             }
             const change = StateChange.deserialize(stateChange);
 
-            if (change instanceof PhaseChangeStateChange) {
-                this.pendingAction = null;
-                this.gameStartingCountdown = false;
-                if (this.gameState.phase === Constants.PHASE_PLANNING) {
-                    /* Spawn Animations for buildings being constructed */
-                    const animationSpawner = mapObject => {
-                        if (mapObject.turnsUntilBuilt === 1) {
-                            /* About to turn, let's start an animation. */
-                            if (mapObject.width === 1) {
-                                mapObject.animationManager.addAnimation(
-                                    new InPlaceSpriteAnimation(
-                                        this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
-                                        10,
-                                        2
-                                    )
-                                );
-                            }
-                            else if (mapObject.width === 0) {
-                                mapObject.animationManager.addAnimation(
-                                    new InPlaceSpriteAnimation(
-                                        this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
-                                        6,
-                                        2
-                                    )
-                                );
-                            }
-                        }
-                    };
-                    this.gameState.structures.forEach(animationSpawner);
-                    this.gameState.units.forEach(animationSpawner);
-                }
-            }            
-            else if (change instanceof UnitAttackStateChange) {
-                const unit = this.gameState.mapObjects[
-                    change.data.posFrom.y][change.data.posFrom.x];
-                this.globalAnimationManager.addAnimation(
-                    new AttackProjectileAnimation(
-                        this.resourceManager,
-                        unit,
-                        change.data.posFrom,
-                        change.data.posTo
-                    )
-                );
-                const splashRange = change.getSplashRange(this.gameState);
-                const surrounding = getSurrounding(change.data.posTo, splashRange);
-                for (let i = 0; i < surrounding.length; i++) {
-                    if (!surrounding[i].equals(change.data.posTo)) {
-                        this.globalAnimationManager.addAnimation(
-                            new AttackProjectileAnimation(
-                                this.resourceManager,
-                                unit,
-                                change.data.posTo,
-                                surrounding[i]
-                            )
-                        );
-                    }
-                }
-
-                const attacker = this.gameState.mapObjects[change.data.posFrom.y][change.data.posFrom.x];
-                if (attacker && attacker.isUnit && attacker.custom && attacker.custom.muzzle) {
-                    this.globalAnimationManager.addAnimation(
-                        new MuzzleFlashAnimation(
-                            this.resourceManager,
-                            attacker
-                        )
-                    );
-                }
-            }
-            else if (change instanceof ChatMessageStateChange) {
-                /* For some reason, the vue component can't watch a nested property
-                 * that's not properly defined as a prop, so we have to manually
-                 * push changes over. */
-                const fakeState = {
-                    chatMessages: [],
-                    forfeit(player) {}
-                };
-                change._simulateStateChange(fakeState);
-                const message = fakeState.chatMessages[0];
-                if (this.player === message.author) {
-                    message.color = Constants.BLUE_CHAT_COLOR;
-                }
-                else if (message.author === undefined) {
-                    message.color = Constants.YELLOW_CHAT_COLOR;
-                }
-                else {
-                    message.color = Constants.RED_CHAT_COLOR;
-                }
-                chatbox.addMessage(message);
-            }
-            /* Trust Server */
-            change.simulateStateChange(this.gameState);
-            /* Currently Selected Unit might have died */
-            if (this.selectedObject) {
-                if (!this.gameState.mapObjects[this.selectedObject.position.y][
-                    this.selectedObject.position.x]) {
-                    this.selectObject(null);
-                }
-            }
+            this.processStateChange(change);
         });
+
         socket.on('invalid-state-change', () => {
             // Should never happen since UI should prevent it, but if so...
             this.pushAlertMessage('Invalid action!');
         });
+
         socket.on('game-over', (gameOver) => {
             this.ui.goToGameOver(gameOver);
             this.resetGameState();
         });
+
         socket.on('game-start', (gameStartTime, players, mapName) => {
             console.log(players);
             this.ui.goToGame();
             this.chatbox.clearChat();
-            const player = this.player;
-            const index = players.indexOf(player);
-            if (index === -1) {
-                console.error(`Cannot start game, can't find ${player} in ${players}`);
-                return;
-            }
-            // TODO: CHANGE IF MORE THAN 4 PEOPLE
-            const overlays = [Resource.RED_OVERLAY, Resource.PINK_OVERLAY, Resource.PURPLE_OVERLAY];
-            this.enemyOverlayMap[player] = this.resourceManager.get(Resource.GREEN_OVERLAY);
-            let j = 0;
-            for (let i = 0; i < players.length; i++) {
-                if (players[i] !== player) {
-                    console.log(players[i], j, overlays[j]);
-                    this.enemyOverlayMap[players[i]] = this.resourceManager.get(overlays[j++]);
-                }
-            }
-            
-            const gameMap = setupMap(maps[mapName]);
-            const commandCenterLocation = gameMap.commandCenterLocations[index];
-            this.gameState = new GameState(gameStartTime, players, gameMap);
-            this.gameState.clientState = this;
+            this.replayManager = undefined;
 
-            // New Map
-            this.camera.updateMinimapCache();
-
-            this.commandCenter = this.gameState.mapObjects[
-                commandCenterLocation.y][
-                commandCenterLocation.x];
-            this.camera.position = toDrawCoord(commandCenterLocation);
+            this.setupMapAndGameState(gameStartTime, players, mapName);
             
             this.gameStartingCountdown = true;
             const interval = setInterval(() => {
@@ -309,7 +193,6 @@ module.exports = class ClientState {
                 }
                 this.bigMessage = 'Game starting in ' + seconds + ' seconds';
             }, 1000);
-            this.gameStartListeners.forEach(x => x());
         });
 
         this.internalTick = setInterval(() => {
@@ -361,6 +244,144 @@ module.exports = class ClientState {
         }, INTERNAL_TICK_INTERVAL);
     }
 
+    enterReplay(replayState) {
+        this.ui.goToGame();
+        this.chatbox.clearChat();
+        this.setupMapAndGameState(replayState.gameStartTime,
+            replayState.players, replayState.mapName);
+        this.replayManager = new ReplayManager(this, this.gameState, replayState.stateChanges);
+    }
+
+    setupMapAndGameState(gameStartTime, players, mapName) {
+        const player = this.player;
+        const index = players.indexOf(player);
+        if (index === -1) {
+            console.error(`Cannot start game, can't find ${player} in ${players}`);
+            return;
+        }
+        // TODO: CHANGE IF MORE THAN 4 PEOPLE
+        const overlays = [Resource.RED_OVERLAY, Resource.PINK_OVERLAY, Resource.PURPLE_OVERLAY];
+        this.enemyOverlayMap[player] = this.resourceManager.get(Resource.GREEN_OVERLAY);
+        let j = 0;
+        for (let i = 0; i < players.length; i++) {
+            if (players[i] !== player) {
+                console.log(players[i], j, overlays[j]);
+                this.enemyOverlayMap[players[i]] = this.resourceManager.get(overlays[j++]);
+            }
+        }
+        
+        const gameMap = setupMap(maps[mapName]);
+        const commandCenterLocation = gameMap.commandCenterLocations[index];
+        this.gameState = new GameState(gameStartTime, players, gameMap);
+        this.gameState.clientState = this;
+        this.commandCenter = this.gameState.mapObjects[
+            commandCenterLocation.y][
+            commandCenterLocation.x];
+        this.camera.position = toDrawCoord(commandCenterLocation);
+        
+        this.camera.updateMinimapCache();
+    }
+    
+    processStateChange(change) {
+        if (change instanceof PhaseChangeStateChange) {
+            this.pendingAction = null;
+            this.gameStartingCountdown = false;
+            if (this.gameState.phase === Constants.PHASE_PLANNING) {
+                /* Spawn Animations for buildings being constructed */
+                const animationSpawner = mapObject => {
+                    if (mapObject.turnsUntilBuilt === 1) {
+                        /* About to turn, let's start an animation. */
+                        if (mapObject.width === 1) {
+                            mapObject.animationManager.addAnimation(
+                                new InPlaceSpriteAnimation(
+                                    this.resourceManager.get(Resource.WIDTH_1_BUILD_ANIM),
+                                    10,
+                                    2
+                                )
+                            );
+                        }
+                        else if (mapObject.width === 0) {
+                            mapObject.animationManager.addAnimation(
+                                new InPlaceSpriteAnimation(
+                                    this.resourceManager.get(Resource.WIDTH_0_BUILD_ANIM),
+                                    6,
+                                    2
+                                )
+                            );
+                        }
+                    }
+                };
+                this.gameState.structures.forEach(animationSpawner);
+                this.gameState.units.forEach(animationSpawner);
+            }
+        }            
+        else if (change instanceof UnitAttackStateChange) {
+            const unit = this.gameState.mapObjects[
+                change.data.posFrom.y][change.data.posFrom.x];
+            this.globalAnimationManager.addAnimation(
+                new AttackProjectileAnimation(
+                    this.resourceManager,
+                    unit,
+                    change.data.posFrom,
+                    change.data.posTo
+                )
+            );
+            const splashRange = change.getSplashRange(this.gameState);
+            const surrounding = getSurrounding(change.data.posTo, splashRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                if (!surrounding[i].equals(change.data.posTo)) {
+                    this.globalAnimationManager.addAnimation(
+                        new AttackProjectileAnimation(
+                            this.resourceManager,
+                            unit,
+                            change.data.posTo,
+                            surrounding[i]
+                        )
+                    );
+                }
+            }
+
+            const attacker = this.gameState.mapObjects[change.data.posFrom.y][change.data.posFrom.x];
+            if (attacker && attacker.isUnit && attacker.custom && attacker.custom.muzzle) {
+                this.globalAnimationManager.addAnimation(
+                    new MuzzleFlashAnimation(
+                        this.resourceManager,
+                        attacker
+                    )
+                );
+            }
+        }
+        else if (change instanceof ChatMessageStateChange) {
+            /* For some reason, the vue component can't watch a nested property
+             * that's not properly defined as a prop, so we have to manually
+             * push changes over. */
+            const fakeState = {
+                chatMessages: [],
+                forfeit(player) {}
+            };
+            change._simulateStateChange(fakeState);
+            const message = fakeState.chatMessages[0];
+            if (this.player === message.author) {
+                message.color = Constants.BLUE_CHAT_COLOR;
+            }
+            else if (message.author === undefined) {
+                message.color = Constants.YELLOW_CHAT_COLOR;
+            }
+            else {
+                message.color = Constants.RED_CHAT_COLOR;
+            }
+            this.chatbox.addMessage(message);
+        }
+        /* Trust Server */
+        change.simulateStateChange(this.gameState);
+        /* Currently Selected Unit might have died */
+        if (this.selectedObject) {
+            if (!this.gameState.mapObjects[this.selectedObject.position.y][
+                this.selectedObject.position.x]) {
+                this.selectObject(null);
+            }
+        }
+    }
     resetGameState() {
         this.gameState = undefined;
         this.selectedObject = undefined;
@@ -428,10 +449,6 @@ module.exports = class ClientState {
             content: message,
             color: 'yellow'
         });
-    }
-
-    addGameStartListener(fn) {
-        this.gameStartListeners.push(fn);
     }
 
     sendStateChange(stateChange) {
