@@ -95,8 +95,8 @@ module.exports = class MapCanvas {
         const maxHealth = mapObject.maxHealth;
         const healthPercent = currentHealth / maxHealth;
         let healthColor = 'red';
-        if (this.objectIsMine(mapObject)) {
-            healthColor = 'green';
+        if (this.objectIsMyTeam(mapObject)) {
+            healthColor = this.objectIsMine(mapObject) ? 'green' : 'green';
         }
         else if (this.objectIsNeutral(mapObject)) {
             healthColor = 'dodgerblue';
@@ -177,6 +177,10 @@ module.exports = class MapCanvas {
 
     objectIsMine(mapObject) {
         return mapObject.owner === this.state.player;
+    }
+
+    objectIsMyTeam(mapObject) {
+        return this.state.gameState.isTeammate(mapObject.owner, this.state.player);
     }
 
     objectIsNeutral(mapObject) {
@@ -623,13 +627,14 @@ module.exports = class MapCanvas {
                         }
                         
                         if (mapObject.isUnit && mapObject.turnsUntilBuilt === 0 &&
-                            mapObject.owner === this.state.player) {
+                            this.state.gameState.isTeammate(mapObject.owner, this.state.player)) {
                             // Draw Unit desired path
                             let lastDrawn = toDrawCoord(mapObject.position);
                             for (let i = 0; i < mapObject.targetPoints.length; i++) {
                                 desiredPathsToDraw.push({
                                     from: lastDrawn,
-                                    to: toDrawCoord(mapObject.targetPoints[i])
+                                    to: toDrawCoord(mapObject.targetPoints[i]),
+                                    color: mapObject.owner === this.state.player ? 'green' : 'green'
                                 });
                                 lastDrawn = toDrawCoord(mapObject.targetPoints[i]);
                             }
@@ -742,7 +747,7 @@ module.exports = class MapCanvas {
         for (let j = 0; j < desiredPathsToDraw.length; j++) {
             const obj = desiredPathsToDraw[j];
             if (!(obj.from.x === obj.to.x && obj.from.y === obj.to.y)) {
-                this.drawArrow(obj.from, obj.to, 15, 3, 'green');
+                this.drawArrow(obj.from, obj.to, 15, 3, obj.color);
             }
         }
         

@@ -97,6 +97,7 @@ const maps = {
     '4p': require('./maps/redesign.js'),
     '3p': require('./maps/3player.js'),
     '2p': require('./maps/2player.js'),
+    '2v2': require('./maps/2v2.js'),
     'testMap': require('./maps/testMap.js')
 };
 

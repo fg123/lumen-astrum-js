@@ -30,5 +30,6 @@ module.exports = {
     commandCenterLocations: [new Tuple(3, 3), new Tuple(27, 19), new Tuple(27, 3), new Tuple(3, 19)],
     movement: [new Tuple(500, 500), new Tuple(2500, 1700), new Tuple(500, 1700), new Tuple(2500, 500)],
     movementIndex: 0,
-    percentageClaimToWin: 0.35
+    percentageClaimToWin: 0.35,
+    teams: [1, 2, 3, 4]
 };

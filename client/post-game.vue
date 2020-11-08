@@ -2,7 +2,7 @@
    <dashboard-wrapper v-bind:user="user">
        <div class="centered">
             <div class="bigText">
-                {{ gameOver.winner === user.username ? "VICTORY" : "DEFEAT" }}
+                {{ gameOver.winners.indexOf(user.username) >= 0 ? "VICTORY" : "DEFEAT" }}
             </div>
             <gradient-button medium @click="backToLobby">Back to Menu</gradient-button>
        </div>

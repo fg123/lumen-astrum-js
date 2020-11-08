@@ -9,9 +9,10 @@ const Data = require('./data');
 const { distance } = require('../client/utils');
 
 class PlayerState {
-    constructor(playerName, gameMap) {
+    constructor(playerName, team, gameMap) {
         this.playerName = playerName;
-        
+        this.team = team;
+
         this.forfeited = false;
 
         // Caches what tiles we have visibility of
@@ -54,14 +55,24 @@ module.exports = class GameState {
     // All functions that take "player" is the designated player identifier,
     //   right now it is the username of the player, it's whatever keys into
     //   this.players.
+
+    // Teams is a list of team-assignments
     constructor(gameStartTime, playerUsernameList, gameMap) {
         this.gameMap = gameMap;
         this.nextObjectId = 0;
 
         this.players = {};
+        this.teamMap = {};
+
         for (let i = 0; i < playerUsernameList.length; i++) {
             const username = playerUsernameList[i];
-            this.players[username] = new PlayerState(username, gameMap);
+            const team = gameMap.teams[i];
+            this.players[username] = new PlayerState(username,
+                team, gameMap);
+            if (!this.teamMap[team]) {
+                this.teamMap[team] = [];
+            }
+            this.teamMap[team].push(username);            
         }
         
         this.mapObjects = [];
@@ -245,13 +256,23 @@ module.exports = class GameState {
         return this.players[player].visibilityCache;
     }
 
-    isVisible(x, y, player) {
-        const arr = this.getVisibilityMap(player);
-        if (arr[y][x]) {
-            return arr[y][x] !== 0;
-        } else {
+    isTeammate(a, b) {
+        if (a && b) {
+            return this.players[a].team === this.players[b].team;
+        }
+        else {
             return false;
         }
+    }
+
+    isVisible(x, y, player) {
+        // Visibility is shared among teammates.
+        const teammates = this.teamMap[this.players[player].team];
+        for (let i = 0; i < teammates.length; i++) {
+            const arr = this.getVisibilityMap(teammates[i]);
+            if (arr[y][x] && arr[y][x] !== 0) return true;
+        }
+        return false;
     }
 
     addVisibility(x, y, player, value = 1) {
@@ -581,7 +602,7 @@ module.exports = class GameState {
             const occupied = this.occupied[tile.y][tile.x];
             if (occupied && occupied.x && occupied.y) {
                 const obj = this.mapObjects[occupied.y][occupied.x];
-                if (obj.owner !== object.owner && obj.currentHealth > 0 && obj.targetable) {
+                if (!this.isTeammate(obj.owner, object.owner) && obj.currentHealth > 0 && obj.targetable) {
                     // The obj might be out of attack range, but the tile is not
                     result.push({
                         enemy: obj, 
@@ -602,25 +623,61 @@ module.exports = class GameState {
         return result;
     }
 
-    getWinner() {
-        const playerNames = Object.keys(this.players);
-        const nonForfeitedPlayers = [];
-        for (let i = 0; i < playerNames.length; i++) {
-            if (this.hasPlayerForfeited(playerNames[i])) {
-                // Cannot be a winner if you've forfeited
-                continue;
+    getNonForfeitedPlayersFromTeam(team) {
+        let nonForfeited = [];
+        const teammates = this.teamMap[team];
+        for (let i = 0; i < teammates.length; i++) {
+            if (!this.hasPlayerForfeited(teammates[i])) {
+                nonForfeited.push(teammates[i]);
             }
-            nonForfeitedPlayers.push(playerNames[i]);
+        }
+        return nonForfeited;
+    }
 
-            const size = this.players[playerNames[i]].calculateTerritorySize();
-            if ((size / this.gameMap.territorialTiles) > this.gameMap.percentageClaimToWin) {
-                return playerNames[i];
+    getWinner() {
+        // Team based, calculate territory for the team
+        // If a team has all forfeited players, then they are out
+        //   of contention. If a team has a forfeited player, the 
+        //   forfeited player does not get to win. 
+        // console.log('GetWinner');
+        const teams = Object.keys(this.teamMap);
+        const nonFullyForfeitedTeams = [];
+        let winningTeam = undefined;
+        // console.log(this.teamMap);
+        for (let i = 0; i < teams.length; i++) {
+            // Calculate territory claimed for each team
+            const teammates = this.teamMap[teams[i]];
+            let allForfeited = true;
+            let territoryCount = 0;
+            for (let j = 0; j < teammates.length; j++) {
+                if (!this.hasPlayerForfeited(teammates[j])) {
+                    // At least one not forfeited
+                    allForfeited = false;
+                }
+                territoryCount += this.players[teammates[j]].calculateTerritorySize();
+            }
+            if (!allForfeited) {
+                // console.log('Team', teams[i], 'not fully forfeited');
+                nonFullyForfeitedTeams.push(teams[i]);
+            }
+            // console.log('Team', teams[i], 'has', territoryCount);
+            if ((territoryCount / this.gameMap.territorialTiles) > this.gameMap.percentageClaimToWin) {
+                winningTeam = teams[i];
+                break;
             }
         }
-        if (nonForfeitedPlayers.length === 1) {
-            // One player left 
-            return nonForfeitedPlayers[0];
+        if (winningTeam !== undefined) {
+            // console.log('Winning team', winningTeam, this.getNonForfeitedPlayersFromTeam(winningTeam));
+            // We have a winning team, but only award wins to non-forfeited players
+            return this.getNonForfeitedPlayersFromTeam(winningTeam);
         }
+
+        // console.log(nonFullyForfeitedTeams);
+        if (nonFullyForfeitedTeams.length === 1) {
+            // Only one non-fully forfeited teams left
+            return this.getNonForfeitedPlayersFromTeam(nonFullyForfeitedTeams[0]);
+        }
+
         return undefined;
     }
     

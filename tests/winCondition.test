@@ -1,0 +1,14 @@
+TEST Win Condition
+
+PLAN
+BUILD A 8 5 'Deployment Outpost'
+BUILD A 8 9 'Deployment Outpost'
+BUILD A 11 3 'Deployment Outpost'
+BUILD A 11 10 'Deployment Outpost'
+BUILD A 11 6 'Deployment Outpost'
+
+ACTION
+# Deployment Outposts should expand and win the game
+
+PLAN
+CHECK game.isGameOver

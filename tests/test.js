@@ -49,7 +49,9 @@ testsToRun.forEach(f => {
     const game = new Game({
         'A': undefined,
         'B': undefined
-    }, Date.now(), () => {}, 'testMap', {
+    }, Date.now(), () => {
+        game.isGameOver = true;
+    }, 'testMap', {
         testMode: true,
         verboseMode: verboseMode
     });
@@ -93,8 +95,8 @@ testsToRun.forEach(f => {
                 mapObject.owner, new Tuple(x, y), [new Tuple(toX, toY)]));
         }
         else if (parts[0] === 'CHECK') {
-            const fn = new Function('state', 'objAt', `return ${rest};`);
-            if (!fn(state, (x, y) => { return state.mapObjects[y][x]; })) {
+            const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
+            if (!fn(game, state, (x, y) => { return state.mapObjects[y][x]; })) {
                 error('Condition failed:', rest);
                 break;
             }
@@ -103,8 +105,8 @@ testsToRun.forEach(f => {
             }
         }
         else if (parts[0] === 'PRINT') {
-            const fn = new Function('state', 'objAt', `return ${rest};`);
-            log(fn(state, (x, y) => { return state.mapObjects[y][x]; }));
+            const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
+            log(fn(game, state, (x, y) => { return state.mapObjects[y][x]; }));
         }
     }
 });

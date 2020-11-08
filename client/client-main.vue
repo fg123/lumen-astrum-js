@@ -19,7 +19,8 @@
             <div class="notInQueue" v-if="!inQueue">
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Join 2 Player Queue</gradient-button>
                 <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('3p')">Join 3 Player Queue</gradient-button>
-                <gradient-button medium style="display: block" @click="joinQueue('4p')">Join 4 Player Queue</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('4p')">Join 4 Player Queue</gradient-button>
+                <gradient-button medium style="display: block" @click="joinQueue('2v2')">Join 2v2 Queue</gradient-button>
             </div>
         </div>
         <div class="inQueue" v-if="inQueue">

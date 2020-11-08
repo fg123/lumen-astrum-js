@@ -56,6 +56,7 @@ client.connect(function(err) {
 function startServer() {
     const connectedUsers = {};
     const disconnectedMidGame = {};
+    const fourPlayerCoopQueue = [];
     const twoPlayerQueue = [];
     const threePlayerQueue = [];
     const fourPlayerQueue = [];
@@ -101,19 +102,21 @@ function startServer() {
         const dumpedGames = JSON.parse(fs.readFileSync('dump.json'));
         for (let i = 0; i < dumpedGames.length; i++) {
             const game = Game.fromJson(dumpedGames[i], handleGameOver);
-            game.players.forEach(p => {
-                disconnectedMidGame[p] = game;
-            })
-            games.push(game);
+            if (!game.isGameOver) {
+                game.players.forEach(p => {
+                    disconnectedMidGame[p] = game;
+                });
+                games.push(game);
+            }
         }
     }
 
-    function handleGameOver(game, winner) {
+    function handleGameOver(game, winners) {
         if (!game.isGameOver) {
             console.log('Game Over!');
 
             const gameOver = {
-                winner: winner
+                winners: winners
             };
             Object.values(game.sockets).forEach(s => {
                 if (s !== undefined) {
@@ -422,6 +425,18 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                     
                     callback();
                 }
+                else if (type === '2v2') {
+                    console.log('Joining 4p queue for: ' + connectedUsers[socket.id].username);
+                    connectedUsers[socket.id].queueID = fourPlayerCoopQueue.length;
+                    fourPlayerCoopQueue.push({
+                        type: type,
+                        requester: connectedUsers[socket.id].username,
+                        socket: socket,
+                        elo: connectedUsers[socket.id].elo
+                    });
+                    
+                    callback();
+                }
                 let startGame = (queuedPlayers) => {
                     const socketMap = {};
                     const gameStartTime = Date.now();
@@ -459,6 +474,11 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                         fourPlayerQueue[2], fourPlayerQueue[3]]);
                     fourPlayerQueue.splice(0, 4);
                 }
+                if (fourPlayerCoopQueue.length >= 4) {
+                    startGame([fourPlayerCoopQueue[0], fourPlayerCoopQueue[1],
+                        fourPlayerCoopQueue[2], fourPlayerCoopQueue[3]]);
+                        fourPlayerCoopQueue.splice(0, 4);
+                }
             }
         });
         socket.on('state-change', function (stateChange) {
@@ -495,6 +515,13 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             for (let i = 0; i < fourPlayerQueue.length; i++) {
                 if (fourPlayerQueue[i].requester === connectedUsers[socket.id].username) {
                     fourPlayerQueue.splice(i, 1);
+                    connectedUsers[socket.id].queueID = -1;
+                    break;
+                }
+            }
+            for (let i = 0; i < fourPlayerCoopQueue.length; i++) {
+                if (fourPlayerCoopQueue[i].requester === connectedUsers[socket.id].username) {
+                    fourPlayerCoopQueue.splice(i, 1);
                     connectedUsers[socket.id].queueID = -1;
                     break;
                 }

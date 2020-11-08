@@ -361,7 +361,7 @@ module.exports = class ClientState {
             };
             change._simulateStateChange(fakeState);
             const message = fakeState.chatMessages[0];
-            if (this.player === message.author) {
+            if (this.gameState.isTeammate(this.player, message.author)) {
                 message.color = Constants.BLUE_CHAT_COLOR;
             }
             else if (message.author === undefined) {
