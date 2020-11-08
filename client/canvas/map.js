@@ -50,6 +50,7 @@ module.exports = class MapCanvas {
             const thisFrameTime = (this.fps.thisLoop = Date.now()) - this.fps.lastLoop;
             this.fps.frameTime += (thisFrameTime - this.fps.frameTime) / FPS_FILTER_STRENGTH;
             this.fps.lastLoop = this.fps.thisLoop;
+            this.state.cursorMessage = '';
             this.draw();
             window.requestAnimationFrame(tick);
         };
@@ -687,7 +688,6 @@ module.exports = class MapCanvas {
             this.drawGlobalAnimations();
         }
 
-        this.state.cursorMessage = '';
         if (this.state.pendingAction) {
             this.state.pendingAction.onTick(this.state, this);
         }

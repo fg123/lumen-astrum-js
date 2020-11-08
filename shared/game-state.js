@@ -66,7 +66,8 @@ module.exports = class GameState {
 
         for (let i = 0; i < playerUsernameList.length; i++) {
             const username = playerUsernameList[i];
-            const team = gameMap.teams[i];
+            // Maps have string keys anyway
+            const team = gameMap.teams[i].toString();
             this.players[username] = new PlayerState(username,
                 team, gameMap);
             if (!this.teamMap[team]) {
@@ -621,6 +622,15 @@ module.exports = class GameState {
             return difference;
         });
         return result;
+    }
+
+    getTeamTerritorySize(team) {
+        const teammates = this.teamMap[team];
+        let territoryCount = 0;
+        for (let j = 0; j < teammates.length; j++) {
+            territoryCount += this.players[teammates[j]].calculateTerritorySize();
+        }
+        return territoryCount;
     }
 
     getNonForfeitedPlayersFromTeam(team) {

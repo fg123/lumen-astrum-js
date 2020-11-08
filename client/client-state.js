@@ -66,6 +66,7 @@ module.exports = class ClientState {
         this.resetGameState();
 
         this.enemyOverlayMap = {};
+        this.enemyColorMap = {};
 
         inputManager.attachInputPollingListener((keyState, prevKeyState) => {
             if (keyState[KEY_A]) {
@@ -261,11 +262,14 @@ module.exports = class ClientState {
         }
         // TODO: CHANGE IF MORE THAN 4 PEOPLE
         const overlays = [Resource.RED_OVERLAY, Resource.PINK_OVERLAY, Resource.PURPLE_OVERLAY];
+        const colors = ['#f00000', '#CE1DF0', '#3D25D9'];
         this.enemyOverlayMap[player] = this.resourceManager.get(Resource.GREEN_OVERLAY);
+        this.enemyColorMap[player] = 'green';
         let j = 0;
         for (let i = 0; i < players.length; i++) {
             if (players[i] !== player) {
                 console.log(players[i], j, overlays[j]);
+                this.enemyColorMap[players[i]] = colors[j];
                 this.enemyOverlayMap[players[i]] = this.resourceManager.get(overlays[j++]);
             }
         }
@@ -441,6 +445,14 @@ module.exports = class ClientState {
             return this.resourceManager.get(Resource.BLUE_OVERLAY);
         }
         return this.enemyOverlayMap[player];
+    }
+
+    getEnemyColor(player) {
+        if (player === undefined) {
+            // Neutral
+            return 'dodgerblue';
+        }
+        return this.enemyColorMap[player];
     }
 
     addNeutralChat(message) {

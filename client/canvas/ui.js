@@ -73,6 +73,12 @@ module.exports = class UICanvas {
             this.canvas.width = screenWidth;
             this.canvas.height = screenHeight;
 
+            this.drawGoldAndTurnControls(screenWidth, screenHeight);
+            this.drawMinimap(screenWidth, screenHeight);
+            this.drawTerritoryClaims(screenWidth, screenHeight);
+            this.context.drawImage(this.cursorResource, this.inputManager.mouseState.position.x - this.cursorResource.width / 2,
+                this.inputManager.mouseState.position.y - this.cursorResource.height / 2);
+
             if (this.state.cursorMessage) {
                 if (this.state.cursorMessage !== this.lastCursorMessage) {
                     // Not Cached
@@ -82,40 +88,104 @@ module.exports = class UICanvas {
                     this.inputManager.mouseState.position.x,
                     this.inputManager.mouseState.position.y - 30);
             }
-            this.drawGoldAndTurnControls(screenWidth, screenHeight);
-            this.drawMinimap(screenWidth, screenHeight);
-            this.drawTerritoryClaims(screenWidth, screenHeight);
-            this.context.drawImage(this.cursorResource, this.inputManager.mouseState.position.x - this.cursorResource.width / 2,
-                this.inputManager.mouseState.position.y - this.cursorResource.height / 2);
         }
-    }
-
-    drawOneClaim(num, den, username, x, y) {
-        this.context.fillText(`${username}: ${num} / ${den} [${((num / den) * 100).toFixed(2)}%]`, x, y);
     }
 
     drawTerritoryClaims(screenWidth, screenHeight) {
-        this.context.textBaseline = 'left';
-        this.context.fillStyle = 'black';
-        this.context.font = 'bold 14px Prompt';
+        this.context.textBaseline = 'alphabetic';
+        this.context.font = 'bold 13px Prompt'
 
-        this.context.fillText(`${this.state.getMap().percentageClaimToWin * 100}% Territory To Win`, screenWidth - 230, 15);
+        this.context.fillStyle = 'white';
+        
+        this.context.textAlign = 'left';
+        this.context.fillText(`${this.state.player}`, screenWidth - 262, 125);
 
-        const total = this.state.getMap().territorialTiles;
+        this.context.textAlign = 'right';
+        this.context.fillText(`Territory to Win: ${this.state.getMap().percentageClaimToWin * 100}%`, screenWidth - 12, 125);
+
+        // Draw Bar Graphs
+        const startX = screenWidth - 266;
+        const startY = 10;
+        const endX = startX + 215;
+        const endY = startY + 100;
+        this.context.fillRect(endX, startY, 1, endY - startY);
+        
         const playerStateMap = this.state.gameState.players;
-        const myOwn = playerStateMap[this.state.player].calculateTerritorySize();
-        this.drawOneClaim(myOwn, total, this.state.player, screenWidth - 230, 32);
-
-        const players = Object.keys(playerStateMap);
-
-        let j = 1;
-        for (let i = 0; i < players.length; i++) {
-            if (players[i] !== this.state.player) {
-                this.drawOneClaim(playerStateMap[players[i]].calculateTerritorySize(),
-                    total, players[i], screenWidth - 230, 32 + (j) * 17);
-                j++;
+        const teams = Object.keys(this.state.gameState.teamMap);
+        // Move my own team to the front
+        for (let i = 0; i < teams.length; i++) {
+            const team = teams[i];
+            if (team === playerStateMap[this.state.player].team) {
+                teams.splice(i, 1);
+                teams.unshift(team);
+                break;
             }
         }
+        const spacingHeight = (endY - startY) / (teams.length * 4 + 1);
+        const barHeight = spacingHeight * 3;
+
+        let y = startY + spacingHeight;
+        
+        const totalTiles = this.state.getMap().territorialTiles;
+        const mousePos = this.state.inputManager.mouseState.position;
+
+        for (let i = 0; i < teams.length; i++) {
+            const teammates = this.state.gameState.teamMap[teams[i]];
+            let x = startX;
+            for (let j = 0; j < teammates.length; j++) {
+                const territory = playerStateMap[teammates[j]].calculateTerritorySize();
+                const percentage = territory / totalTiles;
+                const barWidth = Math.round((percentage / this.state.getMap().percentageClaimToWin)
+                    * (endX - startX));
+
+                if (teammates[j] === this.state.player) {
+                    this.context.fillStyle = '#1D91F0';
+                }
+                else {
+                    this.context.fillStyle = this.state.getEnemyColor(teammates[j]);
+                }
+                this.context.fillRect(x, y, barWidth, barHeight);
+
+                // Mouse Position
+                
+                if (mousePos.x >= x && mousePos.x <= x + barWidth &&
+                    mousePos.y >= y && mousePos.y <= y + barHeight) {
+                    this.state.cursorMessage = `${teammates[j]}: ${territory} / ${totalTiles} [${(percentage * 100).toFixed(2)}%]`;
+                }
+                x += barWidth;
+            }
+            this.context.fillStyle = 'white';
+            this.context.textBaseline = 'middle';
+            this.context.fillText(`${((this.state.gameState.getTeamTerritorySize(teams[i]) / totalTiles) * 100).toFixed(0)}%`, screenWidth - 12, y + barHeight / 2);
+
+            y += barHeight + spacingHeight;
+        }
+
+        this.context.textBaseline = 'left';
+        this.context.textAlign = 'left';
+        
+
+        // const myTeam = playerStateMap[this.state.player].team;
+
+        
+        // this.context.fillRect(screenWidth - 266, 10, 220, 100);
+
+        
+
+        // const playerStateMap = this.state.gameState.players;
+        // const myOwn = playerStateMap[this.state.player].calculateTerritorySize();
+        // this.drawOneClaim(myOwn, total, this.state.player, screenWidth - 230, 32);
+
+        // const players = Object.keys(playerStateMap);
+
+        // let j = 1;
+        // for (let i = 0; i < players.length; i++) {
+        //     if (players[i] !== this.state.player) {
+        //         this.drawOneClaim(playerStateMap[players[i]].calculateTerritorySize(),
+        //             total, players[i], screenWidth - 230, 32 + (j) * 17);
+        //         j++;
+        //     }
+        // }
     }
 
     drawGoldAndTurnControls(screenWidth, screenHeight) {

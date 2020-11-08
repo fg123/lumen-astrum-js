@@ -14,7 +14,7 @@ module.exports.Resource = {
     ROCK: 'resources/groundTexture/rock.png',
     HIGH_TILE: 'resources/groundTexture/highTile.png',
     LOW_TILE: 'resources/groundTexture/lowTile.png',
-    UI_TOP_RIGHT: 'resources/gui/topRight.png',
+    UI_TOP_RIGHT: 'resources/gui/topRightUpdated2.png',
     UI_BOTTOM_LEFT: 'resources/gui/bottomLeft.png',
     UI_BOTTOM_RIGHT: 'resources/gui/bottomRight.png',
     UI_TOP: 'resources/gui/top.png',
