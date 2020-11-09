@@ -83,7 +83,7 @@ testsToRun.forEach(f => {
             const y = parseInt(parts[3]);
             const structure = parts[4];
             game.processStateChange(BuildStructureStateChange.create(state,
-                player, structure, new Tuple(x, y), state.getCommandBase(player)));
+                player, structure, new Tuple(x, y), state.getCommandBase(player).position));
         }
         else if (parts[0] === 'TARGET') {
             const x = parseInt(parts[1]);

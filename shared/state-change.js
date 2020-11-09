@@ -64,8 +64,8 @@ class BuildStructureStateChange extends StateChange {
         );
     }
 
-    getOptionToBuild() {
-        let builtBy = getBaseObject(this.data.builtBy.name);
+    getOptionToBuild(builtByObj) {
+        let builtBy = getBaseObject(builtByObj.name);
         if (!builtBy) {
             return undefined;
         }
@@ -77,7 +77,10 @@ class BuildStructureStateChange extends StateChange {
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
         if (state.hasPlayerForfeited(this.from)) return false;
-        const option = this.getOptionToBuild();
+        const builtBy = state.mapObjects[this.data.builtBy.y][this.data.builtBy.x];
+        if (!builtBy) return false;
+
+        const option = this.getOptionToBuild(builtBy);
         if (!option) {
             return false;
         }
@@ -88,7 +91,7 @@ class BuildStructureStateChange extends StateChange {
             return false;
         }
 
-        if (this.data.builtBy.turnsUntilBuilt !== 0) {
+        if (builtBy.turnsUntilBuilt !== 0) {
             return false;
         }
 
@@ -113,13 +116,11 @@ class BuildStructureStateChange extends StateChange {
                 }
             }
         }
-
-        const builder = state.mapObjects[this.data.builtBy.position.y][
-            this.data.builtBy.position.x];
-        if (!builder) {
+        
+        if (!builtBy) {
             return false;
         }
-        if (tupleDistance(builder.position, this.data.position) !== 1 + builder.width) {
+        if (tupleDistance(builtBy.position, this.data.position) !== 1 + builtBy.width) {
             return false;
         }
 
@@ -127,10 +128,11 @@ class BuildStructureStateChange extends StateChange {
     }
 
     _simulateStateChange(state) {
+        const builtBy = state.mapObjects[this.data.builtBy.y][this.data.builtBy.x];
         state.insertMapObject(this.data.position,
             this.data.structureName,
             this.from);
-        const option = this.getOptionToBuild();
+        const option = this.getOptionToBuild(builtBy);
         // This should really be behind a flag checker for testing mode
         const cost = option ? option.cost : 0;
         state.changeGold(this.from, -cost);

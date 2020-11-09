@@ -98,7 +98,7 @@ class PlaceStructurePendingAction extends PendingAction {
             mapCanvas.state.player,
             this.structureName,
             mapCanvas.state.inputManager.mouseState.tile,
-            mapCanvas.state.selectedObject
+            mapCanvas.state.selectedObject.position
         ).verifyStateChange(mapCanvas.state.gameState);
 
         // Draw Building Range
@@ -169,7 +169,7 @@ class PlaceStructurePendingAction extends PendingAction {
                     state.player,
                     this.structureName,
                     state.inputManager.mouseState.tile,
-                    state.selectedObject
+                    state.selectedObject.position
                 )
             );
         }
