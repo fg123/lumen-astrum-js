@@ -421,10 +421,12 @@ class FlashPointModifier extends BaseModifier {
         if (unit.targetPoints.length > 0) {
             // Get first target point
             const target = unit.targetPoints[0];
-            if (tupleDistance(unit.position, target) <= unit.moveRange) {
+            const distance = tupleDistance(unit.position, target);
+            if (distance <= unit.moveRange) {
                 console.log("Flashing from", unit.position, "to", target);
                 if (!state.isOccupied(target.x, target.y)) {
                     state.moveUnit(unit.position, target);
+                    unit.moveRange -= distance;
                     return true; // override move
                 }
                 else {

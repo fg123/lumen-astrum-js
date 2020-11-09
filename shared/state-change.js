@@ -307,9 +307,9 @@ class MoveUnitStateChange extends StateChange {
         const unit = state.mapObjects[this.data.posFrom.y][this.data.posFrom.x];
         /* This can probably be cached between verify and simulate */
         const path = PathFinder.findPath(state, this.data.posFrom, this.data.posTo);
-        unit.moveRange -= path.length;
-
+        
         if (!unit.onPreMove(state, unit, this.data.posTo)) {
+            unit.moveRange -= path.length;
             state.moveUnit(this.data.posFrom, this.data.posTo);
             if (state.clientState) {
                 // Movement Animation
