@@ -175,11 +175,7 @@ module.exports.structures = {
         "options": [],
         "custom": {},
         "icon": "icons/automationFactoryIcon.png",
-        "texture": "structures/automationfactory.png",
-        "triggers": [{
-            name: 'onCreate',
-            content: 'return xxx;'
-        }]
+        "texture": "structures/automationfactory.png"
     },
     "Deployment Outpost": {
         "description": "Claims territory and allows expansion of building area. Heals nearby, out of combat ally units on ally territory.",
