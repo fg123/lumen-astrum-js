@@ -13,6 +13,7 @@ const AnsiConvert = new AH({
 });
 
 let currentObject = undefined;
+let currentType = "";
 let resources = [];
 
 const OptionSchema = {
@@ -146,7 +147,7 @@ function updateDiff() {
 function revert() {
     Structures = JSON.parse(JSON.stringify(BaseStructures));
     Units = JSON.parse(JSON.stringify(BaseUnits));
-    loadData(currentObject);
+    loadData(currentObject, currentType);
 }
 
 const colors = ['#EEE', '#CCC', '#AAA'];
@@ -368,16 +369,67 @@ function makeArrayList(container, arrayRef, schema, layer, onRegenerate) {
     });
 }
 
-function loadData(s) {
+function loadData(s, type) {
+    $('.editor').html('');
     currentObject = s;
-    if (s in Structures) {
-        $('.editor').html(`<div class="name">${s}</div>`);
-        $('.editor').append(buildUIFromData(Structures[s], StructureSchema));
+    currentType = type;
+    if (!currentObject) return;
+    let baseList;
+    let schema;
+    if (type === 'structure') {
+        baseList = Structures;
+        schema = StructureSchema;
     }
-    else if (s in Units) {
-        $('.editor').html(`<div class="name">${s}</div>`);
-        $('.editor').append(buildUIFromData(Units[s], UnitSchema));
+    else if (type === 'unit') {
+        baseList = Units;
+        schema = UnitSchema;
     }
+
+    const input = $(`<input type="text" value="${s}" class="name"/>`);
+    const oldName = s;
+    input.change(() => {
+        const newName = input.val();
+        if (!newName) {
+            input.val(oldName);
+            return;
+        }
+        if (baseList[newName]) {
+            alert('Name already in use!');
+            input.val(oldName);
+            return;
+        }
+        baseList[newName] = baseList[oldName];
+        delete baseList[oldName];
+        updateDiff();
+        updateOptions();
+        loadData(newName, type);
+    });
+
+    //const name = $(`<div class="name">${s}</div>`);
+    const dupBtn = $(`<button>Duplicate</button>`);
+    const deleteBtn = $(`<button>Delete</button>`);
+
+    dupBtn.click(() => {
+        let i = 1;
+        while (baseList[`${s}-${i}`]) {
+            i++;
+        }
+        baseList[`${s}-${i}`] = JSON.parse(JSON.stringify(baseList[s]));
+        updateDiff();
+        updateOptions();
+    });
+
+    deleteBtn.click(() => {
+        delete baseList[s];
+        updateDiff();
+        updateOptions();
+        loadData(undefined, undefined);
+    });
+
+    $('.editor').append(input);
+    $('.editor').append(dupBtn);
+    $('.editor').append(deleteBtn);
+    $('.editor').append(buildUIFromData(baseList[s], schema));
 }
 
 function loadResource(s) {
@@ -416,7 +468,7 @@ $('.options').change(() => {
         loadResource(opt.value);
     }
     else {
-        loadData(opt.value);
+        loadData(opt.value, opt.dataset['type']);
     }
 });
 
@@ -434,6 +486,34 @@ $('.optionsFilter').keyup(() => {
     }
 });
 
+function updateOptions() {
+    $('.options').html('');
+    if (Structures) {
+        const structureGroup = $(`<optgroup label="Structures"></optgroup>`);
+        Object.keys(Structures).forEach(s => {
+            const obj = $(`<option value="${s}" data-type="structure">${s}</option>`);
+            structureGroup.append(obj);
+        });
+        $('.options').append(structureGroup);
+    }
+    if (Units) {
+        const unitGroup = $(`<optgroup label="Units"></optgroup>`);
+        Object.keys(Units).forEach(s => {
+            const obj = $(`<option value="${s}" data-type="unit">${s}</option>`);
+            unitGroup.append(obj);
+        });
+        $('.options').append(unitGroup);
+    }
+    const resourcesGroup = $(`<optgroup label="Resources"></optgroup>`);
+    const resourceDataList = $(`<datalist id="resources"></datalist>`);
+    resources.forEach(s => {
+        const obj = $(`<option value="${s}" data-type="resource">${s}</option>`);
+        resourcesGroup.append(obj);
+        resourceDataList.append(obj.clone());
+    });
+    $('.options').append(resourcesGroup);
+    $('.options').append(resourceDataList);
+}
 function loadFromServer() {
     $('.options').html('');
     axios.get('/tools/get-data').then((response) => {
@@ -447,36 +527,18 @@ function loadFromServer() {
             Units = JSON.parse(JSON.stringify(BaseUnits));
         }
 
-        const structureGroup = $(`<optgroup label="Structures"></optgroup>`)
-        Object.keys(Structures).forEach(s => {
-            const obj = $(`<option value="${s}" data-type="structure">${s}</option>`);
-            structureGroup.append(obj);
-        });
-
-        const unitGroup = $(`<optgroup label="Units"></optgroup>`);
-        Object.keys(Units).forEach(s => {
-            const obj = $(`<option value="${s}" data-type="unit">${s}</option>`);
-            unitGroup.append(obj);
-        });
-        
-        $('.options').append(structureGroup);
-        $('.options').append(unitGroup);
+        updateOptions();
         updateDiff();
     }).catch((error) => {
+        console.error(error);
         alert(error);
     });
+
     axios.get('/tools/list-resources').then((response) => {
         resources = response.data;
-        const resourcesGroup = $(`<optgroup label="Resources"></optgroup>`);
-        const resourceDataList = $(`<datalist id="resources"></datalist>`);
-        resources.forEach(s => {
-            const obj = $(`<option value="${s}" data-type="resource">${s}</option>`);
-            resourcesGroup.append(obj);
-            resourceDataList.append(obj.clone());
-        });
-        $('.options').append(resourcesGroup);
-        $('.options').append(resourceDataList);
+        updateOptions();
     }).catch(error => {
+        console.error(error);
         alert(error);
     });
 }
