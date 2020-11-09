@@ -40,6 +40,20 @@ const StructureSchema = {
     'custom': 'object'
 };
 
+const TupleSchema = {
+    'x': 'number',
+    'y': 'number'
+};
+
+const MapSchema = {
+    // 'data': 'map',
+    'commandCenterLocations': [TupleSchema],
+    'movement': [TupleSchema],
+    'movementIndex': 'number',
+    'percentageClaimToWin': 'number',
+    'teams': ['number']
+};
+
 const UnitSchema = {
     'attackRange': 'number',
     'attackSpeed': 'number',
@@ -59,11 +73,14 @@ const UnitSchema = {
 
 let BaseStructures = {};
 let BaseUnits = {};
+let BaseMaps = {};
 let Structures = undefined;
 let Units = undefined;
+let Maps = undefined;
 
 const localChangesStructures = storage.getItem('localStructures');
 const localChangesUnits = storage.getItem('localUnits');
+const localChangesMaps = storage.getItem('localMaps');
 
 if (localChangesStructures) {
     try {
@@ -74,6 +91,12 @@ if (localChangesStructures) {
 if (localChangesUnits) {
     try {
         Units = JSON.parse(localChangesUnits);
+    } catch {}
+}
+
+if (localChangesMaps) {
+    try {
+        Maps = JSON.parse(localChangesMaps);
     } catch {}
 }
 
@@ -120,6 +143,8 @@ function toReadableString(camelCase) {
 function updateDiff() {
     let structuresDiff = AnsiConvert.toHtml(jsonDiff.diffString(BaseStructures, Structures));
     let unitsDiff = AnsiConvert.toHtml(jsonDiff.diffString(BaseUnits, Units));
+    let mapsDiff = AnsiConvert.toHtml(jsonDiff.diffString(BaseMaps, Maps));
+
     if (!structuresDiff) {
         structuresDiff = "No Changes Made";
         console.log('Removing localStructures');
@@ -139,14 +164,27 @@ function updateDiff() {
         console.log('Setting localUnits');
         storage.setItem('localUnits', JSON.stringify(Units));
     }
+    
+    if (!mapsDiff) {
+        mapsDiff = "No Changes Made";
+        console.log('Removing localMaps');
+        storage.removeItem('localMaps');
+    }
+    else {
+        console.log('Setting localMaps');
+        storage.setItem('localMaps', JSON.stringify(Maps));
+    }
+
 
     $('.structuresDiff').html(structuresDiff);
     $('.unitsDiff').html(unitsDiff);
+    $('.mapsDiff').html(mapsDiff);
 }
 
 function revert() {
     Structures = JSON.parse(JSON.stringify(BaseStructures));
     Units = JSON.parse(JSON.stringify(BaseUnits));
+    Maps = JSON.parse(JSON.stringify(BaseMaps));
     loadData(currentObject, currentType);
 }
 
@@ -384,6 +422,10 @@ function loadData(s, type) {
         baseList = Units;
         schema = UnitSchema;
     }
+    else if (type === 'map') {
+        baseList = Maps;
+        schema = MapSchema;
+    }
 
     const input = $(`<input type="text" value="${s}" class="name"/>`);
     const oldName = s;
@@ -504,6 +546,14 @@ function updateOptions() {
         });
         $('.options').append(unitGroup);
     }
+    if (Maps) {
+        const mapsGroup = $(`<optgroup label="Maps"></optgroup>`);
+        Object.keys(Maps).forEach(s => {
+            const obj = $(`<option value="${s}" data-type="map">${s}</option>`);
+            mapsGroup.append(obj);
+        });
+        $('.options').append(mapsGroup);
+    }
     const resourcesGroup = $(`<optgroup label="Resources"></optgroup>`);
     const resourceDataList = $(`<datalist id="resources"></datalist>`);
     resources.forEach(s => {
@@ -514,17 +564,24 @@ function updateOptions() {
     $('.options').append(resourcesGroup);
     $('.options').append(resourceDataList);
 }
+
 function loadFromServer() {
     $('.options').html('');
     axios.get('/tools/get-data').then((response) => {
         BaseStructures = response.data.structures;
         BaseUnits = response.data.units;
+        BaseMaps = response.data.maps;
+
         if (Structures === undefined) {
             Structures = JSON.parse(JSON.stringify(BaseStructures));
         }
 
         if (Units === undefined) {
             Units = JSON.parse(JSON.stringify(BaseUnits));
+        }
+
+        if (Maps === undefined) {
+            Maps = JSON.parse(JSON.stringify(BaseMaps));
         }
 
         updateOptions();

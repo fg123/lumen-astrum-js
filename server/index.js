@@ -159,9 +159,11 @@ function startServer() {
         });
         app.get('/tools/get-data', function (req, res) {
             const data = require('../shared/data');
+            const { maps } = require('../shared/map');
             res.send({ 
                 structures: data.structures,
-                units: data.units
+                units: data.units,
+                maps: maps
             });
         });
         app.get('/tools/list-resources', function (req, res) {
