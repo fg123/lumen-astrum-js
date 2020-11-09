@@ -479,7 +479,7 @@ module.exports.units = {
     },
     "Armed Turret": {
         "attackRange": 3,
-        "attackSpeed": 2.5,
+        "attackSpeed": 2,
         "damage": 2,
         "description": "This is constructed by the Turret building.",
         "health": 150,
