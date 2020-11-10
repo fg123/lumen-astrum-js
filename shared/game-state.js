@@ -601,7 +601,7 @@ module.exports = class GameState {
         for (let i = 0; i < tiles.length; i++) {
             const tile = tiles[i];
             const occupied = this.occupied[tile.y][tile.x];
-            if (occupied && occupied.x && occupied.y) {
+            if (occupied) {
                 const obj = this.mapObjects[occupied.y][occupied.x];
                 if (!this.isTeammate(obj.owner, object.owner) && obj.currentHealth > 0 && obj.targetable) {
                     // The obj might be out of attack range, but the tile is not

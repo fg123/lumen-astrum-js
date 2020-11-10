@@ -1,0 +1,12 @@
+TEST Edge Combat
+
+PLAN
+BUILD A 12 0 'Golem'
+BUILD B 12 2 'Marine'
+
+ACTION
+# Marines Should Fight...
+
+PLAN
+CHECK objAt(12, 0).currentHealth < objAt(12, 0).maxHealth
+
