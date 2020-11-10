@@ -1,7 +1,7 @@
 module.exports.structures = {
     "Command Base": {
         "description": "Main Base. Used to spawn Scouts, Engineers and to construct upgrade modules. Cannot be destroyed.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 1,
         "turnsToBuild": 0,
@@ -78,7 +78,7 @@ module.exports.structures = {
     },
     "Barracks": {
         "description": "Unit production building, trains combat units.",
-        "health": 200,
+        "health": 2000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 1,
@@ -166,7 +166,7 @@ module.exports.structures = {
     },
     "Automation Factory": {
         "description": "Support facility, required for building turrets and reavers.",
-        "health": 75,
+        "health": 750,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 1,
@@ -179,7 +179,7 @@ module.exports.structures = {
     },
     "Deployment Outpost": {
         "description": "Claims territory and allows expansion of building area. Heals nearby, out of combat ally units on ally territory.",
-        "health": 200,
+        "health": 2000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 1,
@@ -209,7 +209,7 @@ module.exports.structures = {
     },
     "Gem Harvester": {
         "description": "Upgraded resource harvester. Kill the building to claim it.",
-        "health": 200,
+        "health": 2000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 0,
@@ -224,7 +224,7 @@ module.exports.structures = {
     },
     "Stim Lab": {
         "description": "Takes 2 turns to build. Enhances attack speed of allies by 25%.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -239,7 +239,7 @@ module.exports.structures = {
     },
     "Thieves' Cave": {
         "description": "Takes 2 turns to build. Produced unit's attacks generate gold equal to 75% of damage dealt.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -254,7 +254,7 @@ module.exports.structures = {
     },
     "Artillery Bay": {
         "description": "Takes 2 turns to build. Enhances attack damage of allies by 30%.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -269,7 +269,7 @@ module.exports.structures = {
     },
     "Cloud Gate": {
         "description": "Takes 2 turns to build. Enhances movement range of allies by 2.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -284,7 +284,7 @@ module.exports.structures = {
     },
     "Vitality Fountain": {
         "description": "Takes 2 turns to build. Enhances health of allies by 50%.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -299,7 +299,7 @@ module.exports.structures = {
     },
     "Turret": {
         "description": "Requires Automation Factory. Stationary, single-target ranged turret.",
-        "health": 150,
+        "health": 1500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 1,
@@ -312,7 +312,7 @@ module.exports.structures = {
     },
     "Vampiric Lair": {
         "description": "Takes 2 turns to build. Produced units heal for 5% of damage dealt.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -327,7 +327,7 @@ module.exports.structures = {
     },
     "Shauna's Forge": {
         "description": "Takes 2 turns to build. Produced unit's attacks deal 1% of enemy's total health as extra damage.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -342,7 +342,7 @@ module.exports.structures = {
     },
     "Flash Point": {
         "description": "Takes 2 turns to build. Produced units blink to their target location if within move range.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -355,7 +355,7 @@ module.exports.structures = {
     },
     "Arctic Tower": {
         "description": "Takes 2 turns to build. Produced units stun enemies hit for 0.2s.",
-        "health": 250,
+        "health": 2500,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -375,7 +375,7 @@ module.exports.units = {
         "attackSpeed": 0,
         "damage": 0,
         "description": "Scouting unit, high movement range, cannot attack.",
-        "health": 20,
+        "health": 200,
         "moveRange": 8,
         "shield": 0,
         "sightRange": 4,
@@ -390,9 +390,9 @@ module.exports.units = {
     "Marine": {
         "attackRange": 2,
         "attackSpeed": 0.8,
-        "damage": 5,
+        "damage": 50,
         "description": "Sturdy and cheap-to-produce infantry unit.",
-        "health": 40,
+        "health": 400,
         "moveRange": 5,
         "shield": 0,
         "sightRange": 2,
@@ -414,7 +414,7 @@ module.exports.units = {
         "attackSpeed": 0,
         "damage": 0,
         "description": "Constructs buildings during the planning phase.",
-        "health": 15,
+        "health": 150,
         "moveRange": 3,
         "shield": 0,
         "sightRange": 2,
@@ -461,7 +461,7 @@ module.exports.units = {
         "attackSpeed": 0,
         "damage": 0,
         "description": "Requires Automation Factory. The Reaver explodes when dying, dealing 50 damage to all units range 1, and 25 range 2.",
-        "health": 30,
+        "health": 300,
         "moveRange": 3,
         "shield": 0,
         "sightRange": 2,
@@ -471,8 +471,8 @@ module.exports.units = {
         "options": [],
         "targetable": true,
         "custom": {
-            "explodeDamage1": 50,
-            "explodeDamage2": 25
+            "explodeDamage1": 500,
+            "explodeDamage2": 250
         },
         "icon": "icons/reaverIcon.png",
         "texture": "units/reaver.png"
@@ -480,9 +480,9 @@ module.exports.units = {
     "Armed Turret": {
         "attackRange": 3,
         "attackSpeed": 2,
-        "damage": 2,
+        "damage": 20,
         "description": "This is constructed by the Turret building.",
-        "health": 150,
+        "health": 1500,
         "moveRange": 0,
         "shield": 0,
         "sightRange": 3,
@@ -498,9 +498,9 @@ module.exports.units = {
     "Golem": {
         "attackRange": 1,
         "attackSpeed": 0.5,
-        "damage": 10,
+        "damage": 100,
         "description": "Slow-moving melee unit.",
-        "health": 120,
+        "health": 1200,
         "moveRange": 3,
         "shield": 0,
         "sightRange": 1,
