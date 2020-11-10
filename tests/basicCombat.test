@@ -8,8 +8,8 @@ ACTION
 # Marines Should Fight...
 
 PLAN
-CHECK objAt(7, 6).currentHealth === 20
-CHECK objAt(9, 6).currentHealth === 20
+CHECK objAt(7, 6).currentHealth === 200
+CHECK objAt(9, 6).currentHealth === 200
 
 ACTION
 # Both should kill each other...
