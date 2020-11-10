@@ -268,40 +268,57 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
 
 // Floating text popup 
 class PopupTextAnimation extends MapObjectAnimation {
-    constructor(text, color, location, onDone = () => {}) {
+    constructor(text, color, location, delay = 0, onDone = () => {}) {
         super(onDone);
+        this.delay = 0;
         this.mapCoordLoc = location;
         this.location = toDrawCoord(location);
         this.text = text;
         this.color = color;
 
         this.popupDuration = 600;
-        this.start = Date.now();
+        this.start = Date.now() + delay;
+
+        this.xDelta = (Math.random() - 0.5) * 5;
+        this.yDelta = -2;
+        
+        this.started = false;
     }
 
     _tick(tickTime) {
+        if (tickTime < this.start) {
+            return true;
+        }
+        this.started = true;
         if (tickTime - this.start > this.popupDuration) {
             return false;
         }
+        this.yDelta += 0.1;
+        this.xDelta *= 0.99;
         return true;
     }
 
     _draw(graphicsManager, position) {
+        if (!this.started) return true;
         const duration = (this.lastTick - this.start);
-        const yDelta = (duration / this.popupDuration) * 50;
-
+        // const yDelta = (duration / this.popupDuration) * 50;
+        
         const oldOpacity = graphicsManager.context.globalAlpha;
-        graphicsManager.context.globalAlpha = (1 - Math.max(0, (duration - 100) / (this.popupDuration - 100)));
+        graphicsManager.context.globalAlpha = (1 - Math.max(0, (duration - 300) / (this.popupDuration - 300)));
         graphicsManager.context.textAlign = 'center';
         graphicsManager.context.textBaseline = 'middle';
         
         graphicsManager.context.font = 'bold 25px Prompt';
         graphicsManager.context.fillStyle = "#000";
-        graphicsManager.context.fillText(this.text, position.x + 2, position.y - yDelta + 2);
+        graphicsManager.context.fillText(this.text, this.location.x + 2, this.location.y + 2);
         graphicsManager.context.fillStyle = this.color;
-        graphicsManager.context.fillText(this.text, position.x, position.y - yDelta);
+        graphicsManager.context.fillText(this.text, this.location.x, this.location.y);
 
         graphicsManager.context.globalAlpha = oldOpacity;
+
+        this.location.x += this.xDelta;
+        this.location.y += this.yDelta;
+
         return true;
     }
 

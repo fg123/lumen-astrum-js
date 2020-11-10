@@ -195,7 +195,7 @@ class ThievesModifier extends BaseModifier {
         if (state.clientState) {
             state.clientState.globalAnimationManager.addAnimation(
                 new PopupTextAnimation(`+${goldGain}`, Constants.YELLOW_CHAT_COLOR,
-                    target.position)
+                    target.position, 320)
             );
         }
     }
@@ -326,10 +326,10 @@ class VampiricModifier extends BaseModifier {
         }
         attacker.currentHealth += heal;
         state.getPlayerStats(attacker.owner)["VampiricHeal"] += heal;
-        if (state.clientState) {
+        if (state.clientState && heal > 0) {
             state.clientState.globalAnimationManager.addAnimation(
                 new PopupTextAnimation(`+${heal}`, "green",
-                    attacker.position)
+                    attacker.position, 320)
             );
         }
     }
@@ -362,7 +362,7 @@ class SilverBulletModifier extends BaseModifier {
         if (state.clientState) {
             state.clientState.globalAnimationManager.addAnimation(
                 new PopupTextAnimation(`-${extraDamage}`, "white",
-                target.position)
+                target.position, 320)
             );
         }
     }

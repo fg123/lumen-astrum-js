@@ -425,7 +425,7 @@ const triggers = {
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
                                 new PopupTextAnimation(`+${heal}`, "green",
-                                    units[i].position)
+                                    units[i].position, 320)
                             );
                         }
                     }
