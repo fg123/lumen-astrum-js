@@ -1,6 +1,7 @@
 // Modifiers are applied to game objects that can modify their behaviours and
 //   also hook into triggers of events.
-const { PopupTextAnimation } = require('../client/animation');
+const { PopupTextAnimation, AttackProjectileAnimation } = require('../client/animation');
+const { Resource } = require('../client/resources');
 const Constants = require('./constants');
 const { tupleDistance } = require('./coordinates');
 const { default: PathFinder } = require('./path-finder');
@@ -471,10 +472,22 @@ class HurricaneModifier extends BaseModifier {
         state.dealDamageToUnit(attacker, potential[0], extraDamage);
         
         if (state.clientState) {
-            state.clientState.globalAnimationManager.addAnimation(
-                new PopupTextAnimation(`-${extraDamage}`, "dodgerblue",
-                potential[0].position)
-            );
+            // DELAYEXECUTE NOT LIKE THIS
+            setTimeout(() => {
+                state.clientState.globalAnimationManager.addAnimation(
+                    new PopupTextAnimation(`-${extraDamage}`, "dodgerblue",
+                    potential[0].position, 320)
+                );
+                state.clientState.globalAnimationManager.addAnimation(
+                    new AttackProjectileAnimation(
+                        state.clientState.resourceManager,
+                        undefined,
+                        target.position,
+                        potential[0].position,
+                        Resource.LIGHTNING_PROJECTILE
+                    )
+                );
+            }, 320);
         }
     }
 };

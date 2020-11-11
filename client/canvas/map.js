@@ -55,6 +55,25 @@ module.exports = class MapCanvas {
             window.requestAnimationFrame(tick);
         };
         tick();
+
+        /* Start Animation Tick Loop */
+        window.setInterval(() => {
+            if (this.state.gameState) {
+                if (this.animationManager) {
+                    this.animationManager.tick();
+                }
+                this.state.gameState.units.forEach(u => {
+                    if (u.animationManager.hasAnimation()) {
+                        u.animationManager.tick();
+                    }
+                });
+                this.state.gameState.structures.forEach(s => {
+                    if (s.animationManager.hasAnimation()) {
+                        s.animationManager.tick();
+                    }
+                });
+            }
+        }, 1000 / 60);
     }
 
     draw() {
@@ -467,7 +486,6 @@ module.exports = class MapCanvas {
         /* Global Animations don't have a default position, it is assumed they
          * will handle their own positions */
         this.animationManager.draw(this, this.state, Tuple.ZERO);
-        this.animationManager.tick();
     }
 
     calculateRotation(position) {
@@ -594,7 +612,6 @@ module.exports = class MapCanvas {
                                 }
                                 actualDrawnPosition = possiblePositionChange;
                             }
-                            animationManager.tick();
                         }
                         else if (anyVisible) {
                             if (mapObject.turnsUntilBuilt === 0) {

@@ -28,6 +28,7 @@ module.exports.Resource = {
     WIDTH_0_BUILD_ANIM: 'resources/structures/width0BuildAnimation.png',
     PROBE_ANIM: 'resources/structures/probeAnimation.png',
     ATTACK_PROJECTILE: 'resources/attack/attack.png',
+    LIGHTNING_PROJECTILE: 'resources/attack/lightning.png',
     ATTACK_EXPLODING: 'resources/attack/exploding.png',
     MUZZLE_1: 'resources/muzzle/muzzle1.png',
     MUZZLE_2: 'resources/muzzle/muzzle2.png',

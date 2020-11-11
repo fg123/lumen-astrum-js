@@ -340,7 +340,8 @@ module.exports = class ClientState {
                     this.resourceManager,
                     unit,
                     change.data.posFrom,
-                    change.data.posTo
+                    change.data.posTo,
+                    Resource.ATTACK_PROJECTILE
                 )
             );
             const splashRange = change.getSplashRange(this.gameState);
@@ -352,7 +353,8 @@ module.exports = class ClientState {
                             this.resourceManager,
                             unit,
                             change.data.posTo,
-                            surrounding[i]
+                            surrounding[i],
+                            Resource.ATTACK_PROJECTILE
                         )
                     );
                 }

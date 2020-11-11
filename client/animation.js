@@ -137,7 +137,8 @@ class GenericInPlaceSpriteAnimation extends InPlaceSpriteAnimation {
 const { Resource } = require('./resources');
 
 class AttackProjectileAnimation extends MapObjectAnimation {
-    constructor(resourceManager, unit, from, to, onDone = () => {}) {
+    constructor(resourceManager, unit, from, to, attackProjectile,
+            onDone = () => {}) {
         super(onDone);
         this.resourceManager = resourceManager;
 
@@ -157,11 +158,13 @@ class AttackProjectileAnimation extends MapObjectAnimation {
         this.explodeAnimation = new InPlaceSpriteAnimation(
             resourceManager.get(Resource.ATTACK_EXPLODING), 25, 1
         );
-        this.attackProjectile = resourceManager.get(Resource.ATTACK_PROJECTILE);
+        this.attackProjectile = resourceManager.get(attackProjectile);
 
         this.popupTextAnimation = undefined;
 
-        unit.rotation = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+        if (unit !== undefined) {
+            unit.rotation = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+        }
     }
 
     _isVisible(clientState) {
@@ -184,7 +187,7 @@ class AttackProjectileAnimation extends MapObjectAnimation {
             return true;
         }
         const explode = this.explodeAnimation.tick();
-        const text = this.popupTextAnimation && this.popupTextAnimation.tick();
+        const text = this.unit && this.popupTextAnimation && this.popupTextAnimation.tick();
         
         return explode || text;
     }
@@ -193,10 +196,13 @@ class AttackProjectileAnimation extends MapObjectAnimation {
         if (this.hasFlown) {
             this.explodeAnimation.draw(graphicsManager, this.getPosition());
             if (this.popupTextAnimation === undefined) {
-                this.popupTextAnimation = new PopupTextAnimation(`-${this.unit.attackDamage}`, 'red', this.mapCoordTo);
+                if (this.unit !== undefined) {
+                    this.popupTextAnimation = new PopupTextAnimation(`-${this.unit.attackDamage}`, 'red', this.mapCoordTo);
+                }
             }
-
-            this.popupTextAnimation.draw(graphicsManager, this.getPosition());
+            else {
+                this.popupTextAnimation.draw(graphicsManager, this.getPosition());
+            }
         }
         else {
             graphicsManager.drawImage(
