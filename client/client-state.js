@@ -47,6 +47,8 @@ const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 const INTERNAL_TICK_INTERVAL = 16;
 const CAMERA_SPEED = 60;
 
+const PHASE_CHANGE_ANNOUNCEMENT_TIME = 2500;
+
 module.exports = class ClientState {
     constructor(socket, chatbox, camera, inputManager, ui, resourceManager, animationManager) {
         this.ui = ui;
@@ -291,6 +293,11 @@ module.exports = class ClientState {
             this.pendingAction = null;
             this.gameStartingCountdown = false;
             if (this.gameState.phase === Constants.PHASE_PLANNING) {
+                this.bigMessage = "Action Phase";
+                setTimeout(() => { 
+                    this.bigMessage = "";
+                }, PHASE_CHANGE_ANNOUNCEMENT_TIME);
+
                 /* Spawn Animations for buildings being constructed */
                 const animationSpawner = mapObject => {
                     if (mapObject.turnsUntilBuilt === 1) {
@@ -317,6 +324,12 @@ module.exports = class ClientState {
                 };
                 this.gameState.structures.forEach(animationSpawner);
                 this.gameState.units.forEach(animationSpawner);
+            }
+            else {
+                this.bigMessage = "Planning Phase";
+                setTimeout(() => {
+                    this.bigMessage = "";
+                }, PHASE_CHANGE_ANNOUNCEMENT_TIME);
             }
         }            
         else if (change instanceof UnitAttackStateChange) {
