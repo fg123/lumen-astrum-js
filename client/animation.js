@@ -274,7 +274,7 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
 
 // Floating text popup 
 class PopupTextAnimation extends MapObjectAnimation {
-    constructor(text, color, location, delay = 0, onDone = () => {}) {
+    constructor(text, color, location, delay = 0, shouldBounceX = true, onDone = () => {}) {
         super(onDone);
         this.delay = 0;
         this.mapCoordLoc = location;
@@ -285,7 +285,7 @@ class PopupTextAnimation extends MapObjectAnimation {
         this.popupDuration = 600;
         this.start = Date.now() + delay;
 
-        this.xDelta = (Math.random() - 0.5) * 5;
+        this.xDelta = shouldBounceX ? (Math.random() - 0.5) * 5 : 0;
         this.yDelta = -2;
         
         this.started = false;
@@ -299,6 +299,10 @@ class PopupTextAnimation extends MapObjectAnimation {
         if (tickTime - this.start > this.popupDuration) {
             return false;
         }
+        
+        this.location.x += this.xDelta;
+        this.location.y += this.yDelta;
+
         this.yDelta += 0.1;
         this.xDelta *= 0.99;
         return true;
@@ -321,9 +325,6 @@ class PopupTextAnimation extends MapObjectAnimation {
         graphicsManager.context.fillText(this.text, this.location.x, this.location.y);
 
         graphicsManager.context.globalAlpha = oldOpacity;
-
-        this.location.x += this.xDelta;
-        this.location.y += this.yDelta;
 
         return true;
     }

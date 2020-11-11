@@ -65,7 +65,7 @@ const triggers = {
             if (state.clientState && state.clientState.player === this.owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation("+200", Constants.YELLOW_CHAT_COLOR,
-                        this.position)
+                        this.position, 0, false)
                 );
             }
         }
@@ -81,7 +81,7 @@ const triggers = {
             if (state.clientState && state.clientState.player === owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
-                        this.position)
+                        this.position, 0, false)
                 );
             }
             if (this.currentHealth <= 0) {
@@ -105,7 +105,7 @@ const triggers = {
             if (state.clientState && state.clientState.player === this.owner) {
                 state.clientState.globalAnimationManager.addAnimation(
                     new PopupTextAnimation(`+${this.custom.value}`, Constants.YELLOW_CHAT_COLOR,
-                        this.position)
+                        this.position, 0, false)
                 );
             }
         }
@@ -446,7 +446,7 @@ const triggers = {
                         if (state.clientState) {
                             state.clientState.globalAnimationManager.addAnimation(
                                 new PopupTextAnimation(`+${heal}`, "green",
-                                    units[i].position, 320)
+                                    units[i].position, 0, false)
                             );
                         }
                     }
