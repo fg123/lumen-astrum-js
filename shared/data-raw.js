@@ -238,7 +238,7 @@ module.exports.structures = {
         "texture": "structures/stimlab.png"
     },
     "Thieves' Cave": {
-        "description": "Takes 2 turns to build. Produced unit's attacks generate gold equal to 75% of damage dealt.",
+        "description": "Takes 2 turns to build. Produced unit's attacks generate gold equal to 10% of damage dealt.",
         "health": 2500,
         "shield": 0,
         "width": 0,
@@ -247,7 +247,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "attackGoldGen": 0.75
+            "attackGoldGen": 0.1
         },
         "icon": "icons/thievesCaveIcon.png",
         "texture": "structures/thievescave.png"
