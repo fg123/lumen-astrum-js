@@ -20,7 +20,8 @@ const {
     BarracksBuffGiver,
     StunnedModifier,
     FlashPointModifier,
-    ArcticTippedModifier
+    ArcticTippedModifier,
+    HurricaneModifier
 } = require('./modifier');
 
 function buffableUnit(u) {
@@ -196,6 +197,26 @@ const triggers = {
             barracks.forEach(b => {
                 b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new VampiricModifier(this.custom.healMultiplier);
+                }), {
+                    onlyOne: true
+                });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
+            });
+        }
+    },
+    "Static Amplifier": {
+        onActionStart(state) {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
+                    return new HurricaneModifier(this.custom.bonusDamageModifier);
                 }), {
                     onlyOne: true
                 });

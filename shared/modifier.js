@@ -439,6 +439,46 @@ class FlashPointModifier extends BaseModifier {
     
 };
 
+class HurricaneModifier extends BaseModifier {
+    constructor(bonusDamageModifier) {
+        super();
+        this.bonusDamageModifier = bonusDamageModifier;
+    }
+
+    _getName() {
+        return "HurricaneModifier";
+    }
+
+    _getDisplayName() {
+        return "Electric Bullets";
+    }
+
+    _getIconIndex() { return 10; }
+
+    _getDescription(state) {
+        return `Unit fires an additional shot for ${this.bonusDamageModifier}x damage!`
+    }
+
+    _onLaunchAttack(state, attacker, target, damage) {
+        let extraDamage = Math.ceil(damage * this.bonusDamageModifier);
+        
+        const potential = state.getUnitsOnMyTeam(target.owner, (unit) => {
+            return tupleDistance(target.position, unit.position) === 1 &&
+                tupleDistance(attacker.position, unit.position) <= attacker.attackRange;
+        });
+        if (potential.length === 0) return; 
+
+        state.dealDamageToUnit(attacker, potential[0], extraDamage);
+        
+        if (state.clientState) {
+            state.clientState.globalAnimationManager.addAnimation(
+                new PopupTextAnimation(`-${extraDamage}`, "dodgerblue",
+                potential[0].position)
+            );
+        }
+    }
+};
+
 // Applied to buildings, lets the building apply buff to units constructed
 class BarracksBuffGiver extends BaseModifier {
     constructor(buffConstructor) {
@@ -478,5 +518,6 @@ module.exports = {
     StunnedModifier,
     BarracksBuffGiver,
     ArcticTippedModifier,
-    FlashPointModifier
+    FlashPointModifier,
+    HurricaneModifier
 };
