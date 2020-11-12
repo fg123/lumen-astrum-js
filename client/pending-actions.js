@@ -40,19 +40,6 @@ class PlaceUnitPendingAction extends PendingAction {
             mapCanvas.state.selectedObject
         ).verifyStateChange(mapCanvas.state.gameState);
 
-        if (gameMap.withinMap(mapCanvas.inputManager.mouseState.tile)) {
-            if (this.isValid) {
-                mapCanvas.state.cursorMessage = `Spawn ${this.unitName}: Ø${this.cost}`;
-            }
-            else {
-                mapCanvas.state.cursorMessage = 'Cannot spawn there!';
-            }
-            const drawn = toDrawCoord(mapCanvas.inputManager.mouseState.tile);
-            mapCanvas.drawImage(mapCanvas.resourceManager.get(
-                this.isValid ? Resource.GREEN_OVERLAY : Resource.RED_OVERLAY),
-                drawn.x, drawn.y);
-        }
-
         let baseObj = getBaseObject(mapCanvas.state.selectedObject.name);
         let surrounding = getSurrounding(mapCanvas.state.selectedObject.position,
             baseObj.width + 1);
@@ -62,6 +49,36 @@ class PlaceUnitPendingAction extends PendingAction {
                 gameMap.data[surrounding[i].y][surrounding[i].x].displayType != 2) {
                 const drawn = toDrawCoord(surrounding[i]);
                 mapCanvas.drawImage(mapCanvas.resourceManager.get(Resource.YELLOW_OVERLAY),
+                    drawn.x, drawn.y);
+            }
+        }
+        
+        if (gameMap.withinMap(mapCanvas.inputManager.mouseState.tile)) {
+            if (this.isValid) {
+                mapCanvas.state.cursorMessage = `Spawn ${this.unitName}: Ø${this.cost}`;
+            }
+            else {
+                mapCanvas.state.cursorMessage = 'Cannot spawn there!';
+            }
+            const drawn = toDrawCoord(mapCanvas.inputManager.mouseState.tile);
+            
+            let baseObj = getBaseObject(this.unitName);
+            const oldOpacity = mapCanvas.context.globalAlpha;
+            if (!this.isValid) {
+                mapCanvas.context.globalAlpha = 0.5;
+            }
+            else {
+                mapCanvas.context.globalAlpha = 0.9;
+            }
+    
+            const drawn2 = toDrawCoord(mapCanvas.inputManager.mouseState.tile);
+            const resourceManager = mapCanvas.resourceManager;
+            mapCanvas.drawImage(resourceManager.get(baseObj.texture), drawn2.x, drawn2.y);
+            mapCanvas.context.globalAlpha = oldOpacity;
+
+            if (!this.isValid) {
+                mapCanvas.drawImage(mapCanvas.resourceManager.get(
+                    Resource.RED_OVERLAY),
                     drawn.x, drawn.y);
             }
         }
