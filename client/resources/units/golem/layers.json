@@ -1,0 +1,34 @@
+{
+    "leftFist": {
+        "resource": "golemLeftArmFist.png",
+        "z": 7,
+        "ax": 38,
+        "ay": 45,
+        "x": -25,
+        "y": -5
+    },
+    "rightFist": {
+        "resource": "golemRightArmFist.png",
+        "z": 7,
+        "ax": 90,
+        "ay": 45,
+        "x": 25,
+        "y": -5
+    },
+    "leftUpperArm": {
+        "resource": "golemUpperArmLeft.png",
+        "z": 8
+    },
+    "rightUpperArm": {
+        "resource": "golemUpperArmRight.png",
+        "z": 8
+    },
+    "head": {
+        "resource": "golemHead.png",
+        "z": 10
+    },
+    "chest": {
+        "resource": "golemChest.png",
+        "z": 9
+    }
+}

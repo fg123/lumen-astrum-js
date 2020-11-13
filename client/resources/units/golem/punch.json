@@ -1,0 +1,47 @@
+{
+    "duration": 15,
+    "frames": [
+        {
+            "time": 3,
+            "delta": {
+                "rightFist": {
+                    "rotation": 30,
+                    "x": 25,
+                    "y": 0
+                },
+                "rightUpperArm": {
+                    "x": 0,
+                    "y": 5
+                }
+            }
+        },
+        {
+            "time": 12,
+            "delta": {
+                "rightFist": {
+                    "rotation": -20,
+                    "x": 25,
+                    "y": -15
+                },
+                "rightUpperArm": {
+                    "x": 0,
+                    "y": -5
+                }
+            }
+        },
+        {
+            "time": 15,
+            "delta": {
+                "rightFist": {
+                    "rotation": 0,
+                    "x": 25,
+                    "y": -5
+                },
+                "rightUpperArm": {
+                    "x": 0,
+                    "y": 0
+                }
+            }
+        }
+    ]
+}
