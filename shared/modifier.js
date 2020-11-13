@@ -61,6 +61,13 @@ class BaseModifier {
         }
     }
 
+    onTakingDamage(state, attacker, target, damage) {
+        if (this._onTakeDamage) {
+            return this._onTakeDamage(state, attacker, target, damage);
+        }
+        return damage;
+    }
+
     onPreMove(state, unit, location) {
         if (this._onPreMove) {
             return this._onPreMove(state, unit, location);

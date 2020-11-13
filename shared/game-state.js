@@ -156,7 +156,6 @@ module.exports = class GameState {
     forfeit(player) {
         this.players[player].forfeited = true;
         // Remove Fog Of War
-
         for (let i = 0; i < this.gameMap.data.length; i++) {
             for (let j = 0; j < this.gameMap.data[i].length; j++) {
                 this.addVisibility(j, i, player);
@@ -359,7 +358,9 @@ module.exports = class GameState {
                 target.currentShield = 0;
             }
         }
-        const damageToDeal = Math.min(damage, target.currentHealth);
+        const damagePostModifiers = target.onTakingDamage(this, attacker, target, damage);
+
+        const damageToDeal = Math.min(damagePostModifiers, target.currentHealth);
         target.currentHealth -= damageToDeal;
 
         if (target.currentHealth <= 0) {

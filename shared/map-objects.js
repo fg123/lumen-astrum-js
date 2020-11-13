@@ -57,6 +57,14 @@ class ModifierHolder {
             mod.onDetach(this);
         }
     }
+
+    onTakingDamage(state, attacker, damage) {
+        let actualDamage = damage;
+        Object.values(this.modifiers).forEach(m => {
+            actualDamage = m.onTakingDamage(state, attacker, this, actualDamage);
+        });
+        return actualDamage;
+    }
 };
 
 module.exports.Structure = class extends ModifierHolder {
