@@ -14,14 +14,16 @@
                     "y": 5
                 },
                 "leftFist": {
-                    "rotation": 60,
+                    "rotation": 40,
                     "y": -10,
                     "x": -25
                 },
                 "leftUpperArm": {
                     "y": -5
                 },
-                "head": {},
+                "head": {
+                    "rotation": 10
+                },
                 "chest": {
                     "rotation": 15
                 }
@@ -31,7 +33,7 @@
             "time": 12,
             "delta": {
                 "rightFist": {
-                    "rotation": -15,
+                    "rotation": 4,
                     "x": 15,
                     "y": -18
                 },
@@ -48,7 +50,9 @@
                     "y": 10,
                     "x": 4
                 },
-                "head": {},
+                "head": {
+                    "rotation": -10
+                },
                 "chest": {
                     "rotation": -33
                 }
@@ -75,7 +79,9 @@
                     "x": 0,
                     "y": 0
                 },
-                "head": {},
+                "head": {
+                    "rotation": 0
+                },
                 "chest": {
                     "rotation": 0
                 }
