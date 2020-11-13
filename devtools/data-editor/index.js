@@ -1,7 +1,7 @@
 const axios = require('axios');
 const $ = require('jquery-browserify');
-const { Unit, Structure } = require('../../shared/map-objects');
 const jsonDiff = require('json-diff');
+const { loadLayers, makeFrame, simulateFrames } = require('../../animation/utils');
 
 const storage = window.localStorage;
 
@@ -15,6 +15,7 @@ const AnsiConvert = new AH({
 let currentObject = undefined;
 let currentType = "";
 let resources = [];
+let animations = [];
 
 const OptionSchema = {
     'title': 'string',
@@ -45,6 +46,14 @@ const TupleSchema = {
     'y': 'number'
 };
 
+const AnimationLayerSchema = {
+    'x': 'number?',
+    'y': 'number?',
+    'z': 'number?',
+    'ax': 'number?',
+    'ay': 'number?',
+    'rotation': 'number?'
+};
 const MapSchema = {
     // 'data': 'map',
     'commandCenterLocations': [TupleSchema],
@@ -104,6 +113,9 @@ function makeObject(schema) {
     const type = schema;
     if (type === 'number') {
         return 0;
+    }
+    else if (type === 'number?') {
+        return undefined;
     }
     else if (type === 'string' || type === 'longString' || type === 'resource') {
         return "";
@@ -199,6 +211,30 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
             updateDiff();
         });
         return input;
+    }
+    else if (type === 'number?') {
+        const input = $(`<input type="number" />`);
+        if (data !== undefined) {
+            input.val(data);
+        }
+        const button = $(`<button>Unset</button>`);
+        button.click(() => {
+            input.val("");
+            onChange(undefined);
+            updateDiff();
+        });
+
+        input.change(() => {
+            if (input.val() !== "") {
+                onChange(parseFloat(input.val()));
+                updateDiff();
+            }
+        });
+
+        const wrapper = $(`<div></div>`);
+        wrapper.append(input);
+        wrapper.append(button);
+        return wrapper;
     }
     else if (type === 'string') {
         const input = $(`<input type="text" style="width: 300px;" value="${data}"/>`);
@@ -353,11 +389,17 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
             
             const entry = $(`<td></td>`);
             const schema = type[keys[i]];
-            if (!data[keys[i]]) {
+            if (data[keys[i]] === undefined && !(typeof schema === 'string' && schema.endsWith('?'))) {
                 data[keys[i]] = makeObject(schema);
             }
             entry.append(buildUIFromData(data[keys[i]], schema, layer + 1, (val) => {
-                data[keys[i]] = val;
+                if (val === undefined) {
+                    delete data[keys[i]];
+                }
+                else {
+                    data[keys[i]] = val;
+                }
+                onChange();
             }));
             row.append(entry);
             table.append(row);
@@ -478,6 +520,170 @@ function loadResource(s) {
     $('.editor').html(`<img class="resourceDisplay" src="/resources/${s}" />`);
 }
 
+async function loadImage(url) {
+    const image = new Image();
+    return new Promise((resolve, reject) => {
+        image.onload = () => {
+            console.log('Resource loaded: ' + url);
+            resolve(image);
+        };
+        image.onerror = () => {
+            reject('Couldn\'t load resource: ' + url);
+        };
+        
+        image.src = url;
+    });
+}
+function loadAnimation(s) {
+    const dirName = ('/resources/' + s).match(/.*\//);
+    
+    axios.get(dirName + '/layers.json').then((response) => {
+        const layers = response.data;
+        axios.get('/resources/' + s).then((response) => {
+            const animationState = {};
+            const animationBase = response.data;
+            const animation = JSON.parse(JSON.stringify(animationBase));
+            const duration = response.data.duration;
+
+            loadLayers(layers, animationState, dirName, loadImage).then((obj) => {
+                console.log(obj);
+                console.log(animationState);
+
+                // Simulate all the frames first
+                let frames = simulateFrames(animationState, animation);
+                const keyFrameIndexLookup = {};
+                for (let i = 0; i < animation.frames.length; i++) {
+                    keyFrameIndexLookup[animation.frames[i].time] = i;
+                }
+
+                // Canvas 
+                const canvas = $(`<canvas></canvas>`);
+                const context = canvas[0].getContext('2d');
+                canvas[0].width = obj.width;
+                canvas[0].height = obj.height;
+                canvas[0].style.width = obj.width + 'px';
+                canvas[0].style.height = obj.height + 'px';
+                
+                const frameSlider = $(`<input type="range" style="width: 100%" min="0" max="${duration}" value="0" step="1" />`);
+                const frameText = $(`<span style="padding: 3px; border: 1px solid black"></span>`);
+                const diffWrapper = $(`<div class="animationDiffWrapper"></div>`);
+                const commitChangesButton = $(`<button>Commit</button>`);
+
+                const frameInfoTable = $(`<table></table>`);
+                const playBtn = $(`<button>Play</button>`);
+
+                function redraw(updateFrameInfos) {
+                    context.fillStyle = "white";
+                    context.fillRect(0, 0, obj.width, obj.height);
+                    const index = parseInt(frameSlider.val());
+                    makeFrame({
+                        layerImages: animationState.layerImages,
+                        layerProperties: frames[index]
+                    }, context, obj.width, obj.height, false);
+
+                    frameText.html(parseInt(frameSlider.val()));
+                    let animationDiff = AnsiConvert.toHtml(jsonDiff.diffString(animationBase, animation));
+
+                    if (!animationDiff) {
+                        animationDiff = "No Changes Made";
+                    }
+                    diffWrapper.html(animationDiff);
+
+                    if (updateFrameInfos) {
+                        frameInfoTable.html('');
+                        const layerNames = Object.keys(animationState.layerProperties);
+                        const isKeyframe = keyFrameIndexLookup[index] !== undefined;
+
+                        for (let i = 0; i < layerNames.length; i++) {
+                            const row = $(`<tr><td>${layerNames[i]}</td></tr>`);
+                            const cell = $(`<td></td>`);
+                            let data = isKeyframe ? animation.frames[keyFrameIndexLookup[index]].delta[layerNames[i]] : frames[index][layerNames[i]];
+                            if (data === undefined) {
+                                // No Layer Data on the keyframe 
+                                data = {};
+                                animation.frames[keyFrameIndexLookup[index]].delta[layerNames[i]] = data;
+                            }
+                            cell.append(buildUIFromData(data, AnimationLayerSchema, 0, () => {
+                                // Resimulate and redraw when keyframe changes
+                                //animation.frames[keyFrameIndexLookup[index]].delta = JSON.parse(JSON.stringify(frames[index]));
+                                frames = simulateFrames(animationState, animation);
+                                console.log(animation);
+                                redraw(false);
+                            }));
+                            row.append(cell);
+                            frameInfoTable.append(row);
+                        }
+                        if (!isKeyframe) {
+                            frameInfoTable.find("input").prop('disabled', true);
+                            frameInfoTable.find("button").prop('disabled', true);
+                        }
+                    }   
+                }
+    
+                redraw(true);
+                
+                let playBackInterval = undefined;
+                playBtn.click(() => {
+                    if (playBackInterval) {
+                        clearInterval(playBackInterval);
+                        playBackInterval = undefined;
+                        playBtn.html('Play');
+                    }
+                    else {
+                        playBackInterval = setInterval(() => {
+                            const currValue = parseInt(frameSlider.val());
+                            if (currValue >= duration) {      
+                                clearInterval(playBackInterval);
+                                playBackInterval = undefined;
+                                playBtn.html('Play');
+                                frameSlider.val(0);
+                            }
+                            else {
+                                frameSlider.val(currValue + 1);
+                            }
+                            redraw(true);
+                        }, 1000 / 30);
+                        playBtn.html('Stop');
+                    }
+                    
+                });
+
+                frameSlider.on('input', () => {
+                    redraw(true);
+                });
+                commitChangesButton.click(() => {
+                    axios.post('/tools/update-animation', {
+                        path: s,
+                        animation: animation
+                    }).then(() => {
+                        alert(`Animation written to file: ${s}`);
+                        loadAnimation(s);
+                    }).catch((error) => {
+                        alert(error);
+                    });
+                });
+
+                $('.editor').html('');
+                $('.editor').append(canvas);
+                $('.editor').append(`<br>`);
+                $('.editor').append(frameSlider);
+                $('.editor').append(frameText);
+                $('.editor').append(playBtn);
+                const frameInfoWrapper = $(`<div style="height: 500px; overflow: scroll; border: 1px solid black"></div>`);
+                frameInfoWrapper.append(frameInfoTable);
+                $('.editor').append(frameInfoWrapper);
+                $('.editor').append(commitChangesButton);
+                $('.editor').append(diffWrapper);
+                
+
+            }).catch(error => {
+                console.error(error);
+            });
+        });
+    }).catch(error => console.error(error));
+    //loadLayers(layers, destination, baseDirectory)
+}
+
 $('#commit').click(() => {
     axios.post('/tools/set-data', {
         structures: Structures,
@@ -508,6 +714,9 @@ $('.options').change(() => {
     const opt = $('.options')[0].options[$('.options')[0].selectedIndex];
     if (opt.dataset['type'] === 'resource') {
         loadResource(opt.value);
+    }
+    else if (opt.dataset['type'] === 'animationLayer') {
+        loadAnimation(opt.value);
     }
     else {
         loadData(opt.value, opt.dataset['type']);
@@ -554,6 +763,17 @@ function updateOptions() {
         });
         $('.options').append(mapsGroup);
     }
+    
+    const animationsGroup = $(`<optgroup label="Animations"></optgroup>`);
+    const animationsDataList = $(`<datalist id="animations"></datalist>`);
+    animations.forEach(s => {
+        const obj = $(`<option value="${s}" data-type="animationLayer">${s}</option>`);
+        animationsGroup.append(obj);
+        animationsDataList.append(obj.clone());
+    });
+    $('.options').append(animationsGroup);
+    $('.options').append(animationsDataList);
+
     const resourcesGroup = $(`<optgroup label="Resources"></optgroup>`);
     const resourceDataList = $(`<datalist id="resources"></datalist>`);
     resources.forEach(s => {
@@ -563,6 +783,7 @@ function updateOptions() {
     });
     $('.options').append(resourcesGroup);
     $('.options').append(resourceDataList);
+
 }
 
 function loadFromServer() {
@@ -593,6 +814,14 @@ function loadFromServer() {
 
     axios.get('/tools/list-resources').then((response) => {
         resources = response.data;
+        updateOptions();
+    }).catch(error => {
+        console.error(error);
+        alert(error);
+    });
+
+    axios.get('/tools/list-animations').then((response) => {
+        animations = response.data;
         updateOptions();
     }).catch(error => {
         console.error(error);

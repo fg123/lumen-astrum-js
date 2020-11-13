@@ -170,6 +170,18 @@ function startServer() {
             const resources = walkSync('client/resources', { globs: ['**/*.png'] });
             res.send(resources);
         });
+        app.get('/tools/list-animations', function (req, res) {
+            const resources = walkSync('client/resources', { globs: ['**/*.json'] });
+
+            res.send(resources.filter((n) => n.indexOf('layers.json') === -1));
+        });
+        app.post('/tools/update-animation', function (req, res) {
+            const path = req.body.path;
+            const animation = req.body.animation;
+            fs.writeFileSync('client/resources/' + path,
+                JSON.stringify(animation, null, 4));
+            res.send('ok');
+        });
         app.post('/tools/set-data', function (req, res) {
             const structures = req.body.structures;
             const units = req.body.units;

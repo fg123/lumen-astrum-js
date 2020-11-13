@@ -61,6 +61,15 @@ table td {
     position: relative;
 }
 
+.animationDiffWrapper {
+    width: 100%;
+    padding: 5px;
+    white-space: pre;
+    background-color: #FFF;   
+    font-family: 'Roboto Mono'!important;
+    border: 1px solid black;
+}
+
 .structuresDiff, .unitsDiff, .mapsDiff {
     position: absolute;
     left: 0;
@@ -95,6 +104,7 @@ table td {
     position: absolute;
     top: 0;
     left: 0;
+    min-width: 100%;
 }
 
 .content {

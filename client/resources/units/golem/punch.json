@@ -2,7 +2,7 @@
     "duration": 15,
     "frames": [
         {
-            "time": 3,
+            "time": 6,
             "delta": {
                 "rightFist": {
                     "rotation": 30,
@@ -12,6 +12,18 @@
                 "rightUpperArm": {
                     "x": 0,
                     "y": 5
+                },
+                "leftFist": {
+                    "rotation": 60,
+                    "y": -10,
+                    "x": -25
+                },
+                "leftUpperArm": {
+                    "y": -5
+                },
+                "head": {},
+                "chest": {
+                    "rotation": 15
                 }
             }
         },
@@ -19,13 +31,26 @@
             "time": 12,
             "delta": {
                 "rightFist": {
-                    "rotation": -20,
-                    "x": 25,
-                    "y": -15
+                    "rotation": -15,
+                    "x": 15,
+                    "y": -18
                 },
                 "rightUpperArm": {
-                    "x": 0,
-                    "y": -5
+                    "x": -9,
+                    "y": -13
+                },
+                "leftFist": {
+                    "rotation": 0,
+                    "x": -22,
+                    "y": 5
+                },
+                "leftUpperArm": {
+                    "y": 10,
+                    "x": 4
+                },
+                "head": {},
+                "chest": {
+                    "rotation": -33
                 }
             }
         },
@@ -40,6 +65,19 @@
                 "rightUpperArm": {
                     "x": 0,
                     "y": 0
+                },
+                "leftFist": {
+                    "rotation": 0,
+                    "x": -25,
+                    "y": -5
+                },
+                "leftUpperArm": {
+                    "x": 0,
+                    "y": 0
+                },
+                "head": {},
+                "chest": {
+                    "rotation": 0
                 }
             }
         }
