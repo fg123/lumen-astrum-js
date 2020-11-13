@@ -154,11 +154,15 @@ module.exports = class GameState {
     }
 
     forfeit(player) {
-        this.players[player].forfeited = true;
-        // Remove Fog Of War
-        for (let i = 0; i < this.gameMap.data.length; i++) {
-            for (let j = 0; j < this.gameMap.data[i].length; j++) {
-                this.addVisibility(j, i, player);
+        const currentPlayer = this.players[player];
+        currentPlayer.forfeited = true;
+        // Remove Fog Of War if all teamates surrendered
+        const teammatesInGame = this.getNonForfeitedPlayersFromTeam(currentPlayer.team);
+        if (teammatesInGame.length === 0) {
+            for (let i = 0; i < this.gameMap.data.length; i++) {
+                for (let j = 0; j < this.gameMap.data[i].length; j++) {
+                    this.addVisibility(j, i, player);
+                }
             }
         }
     }
