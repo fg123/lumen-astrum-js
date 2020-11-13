@@ -54,6 +54,7 @@ const AnimationLayerSchema = {
     'ay': 'number?',
     'rotation': 'number?'
 };
+
 const MapSchema = {
     // 'data': 'map',
     'commandCenterLocations': [TupleSchema],
@@ -61,6 +62,11 @@ const MapSchema = {
     'movementIndex': 'number',
     'percentageClaimToWin': 'number',
     'teams': ['number']
+};
+
+const AnimationSchema = {
+    'baseLayer': 'animation',
+    'attackAnimation': 'animation'
 };
 
 const UnitSchema = {
@@ -74,6 +80,7 @@ const UnitSchema = {
     'sightRange': 'number',
     'icon': 'resource',
     'texture': 'resource',
+    'animation': AnimationSchema,
     'tier': 'number',
     'turnsToBuild': 'number',
     'options': [OptionSchema],
@@ -117,7 +124,7 @@ function makeObject(schema) {
     else if (type === 'number?') {
         return undefined;
     }
-    else if (type === 'string' || type === 'longString' || type === 'resource') {
+    else if (type === 'string' || type === 'longString' || type === 'resource' || type === 'animation') {
         return "";
     }
     else if (Array.isArray(type)) {
@@ -251,6 +258,23 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
             updateDiff();
         });
         return input;
+    }
+    else if (type === 'animation') {
+        const wrapper = $('<div></div>');
+        const input = $('<input list="animations" />');
+        input.val(data);
+        input.change(() => {
+            if (input.val() && animations.indexOf(input.val()) === -1) {
+                alert('Not a valid animations!');
+                input.val(data);
+            }
+            else {
+                onChange(input.val());
+                updateDiff();
+            }
+        })
+        wrapper.append(input);
+        return wrapper;
     }
     else if (type === 'resource') {
         const wrapper = $('<div></div>');
@@ -390,16 +414,19 @@ function buildUIFromData(data, schema, layer = 0, onChange = (val) => {}) {
             const entry = $(`<td></td>`);
             const schema = type[keys[i]];
             if (data[keys[i]] === undefined && !(typeof schema === 'string' && schema.endsWith('?'))) {
+                console.log('Making object', schema);
                 data[keys[i]] = makeObject(schema);
+                updateDiff();
             }
             entry.append(buildUIFromData(data[keys[i]], schema, layer + 1, (val) => {
+                console.log(val);
                 if (val === undefined) {
                     delete data[keys[i]];
                 }
                 else {
                     data[keys[i]] = val;
                 }
-                onChange();
+                onChange(data);
             }));
             row.append(entry);
             table.append(row);
@@ -536,152 +563,172 @@ async function loadImage(url) {
 }
 function loadAnimation(s) {
     const dirName = ('/resources/' + s).match(/.*\//);
-    
-    axios.get(dirName + '/layers.json').then((response) => {
-        const layers = response.data;
+    if (s.endsWith('layers.json')) {
         axios.get('/resources/' + s).then((response) => {
+            const layers = response.data;
             const animationState = {};
-            const animationBase = response.data;
-            const animation = JSON.parse(JSON.stringify(animationBase));
-            const duration = response.data.duration;
-
+    
             loadLayers(layers, animationState, dirName, loadImage).then((obj) => {
-                console.log(obj);
-                console.log(animationState);
-
-                // Simulate all the frames first
-                let frames = simulateFrames(animationState, animation);
-                const keyFrameIndexLookup = {};
-                for (let i = 0; i < animation.frames.length; i++) {
-                    keyFrameIndexLookup[animation.frames[i].time] = i;
-                }
-
-                // Canvas 
                 const canvas = $(`<canvas></canvas>`);
                 const context = canvas[0].getContext('2d');
                 canvas[0].width = obj.width;
                 canvas[0].height = obj.height;
                 canvas[0].style.width = obj.width + 'px';
                 canvas[0].style.height = obj.height + 'px';
-                
-                const frameSlider = $(`<input type="range" style="width: 100%" min="0" max="${duration}" value="0" step="1" />`);
-                const frameText = $(`<span style="padding: 3px; border: 1px solid black"></span>`);
-                const diffWrapper = $(`<div class="animationDiffWrapper"></div>`);
-                const commitChangesButton = $(`<button>Commit</button>`);
 
-                const frameInfoTable = $(`<table></table>`);
-                const playBtn = $(`<button>Play</button>`);
-
-                function redraw(updateFrameInfos) {
-                    context.fillStyle = "white";
-                    context.fillRect(0, 0, obj.width, obj.height);
-                    const index = parseInt(frameSlider.val());
-                    makeFrame({
-                        layerImages: animationState.layerImages,
-                        layerProperties: frames[index]
-                    }, context, obj.width, obj.height, false);
-
-                    frameText.html(parseInt(frameSlider.val()));
-                    let animationDiff = AnsiConvert.toHtml(jsonDiff.diffString(animationBase, animation));
-
-                    if (!animationDiff) {
-                        animationDiff = "No Changes Made";
-                    }
-                    diffWrapper.html(animationDiff);
-
-                    if (updateFrameInfos) {
-                        frameInfoTable.html('');
-                        const layerNames = Object.keys(animationState.layerProperties);
-                        const isKeyframe = keyFrameIndexLookup[index] !== undefined;
-
-                        for (let i = 0; i < layerNames.length; i++) {
-                            const row = $(`<tr><td>${layerNames[i]}</td></tr>`);
-                            const cell = $(`<td></td>`);
-                            let data = isKeyframe ? animation.frames[keyFrameIndexLookup[index]].delta[layerNames[i]] : frames[index][layerNames[i]];
-                            if (data === undefined) {
-                                // No Layer Data on the keyframe 
-                                data = {};
-                                animation.frames[keyFrameIndexLookup[index]].delta[layerNames[i]] = data;
-                            }
-                            cell.append(buildUIFromData(data, AnimationLayerSchema, 0, () => {
-                                // Resimulate and redraw when keyframe changes
-                                //animation.frames[keyFrameIndexLookup[index]].delta = JSON.parse(JSON.stringify(frames[index]));
-                                frames = simulateFrames(animationState, animation);
-                                console.log(animation);
-                                redraw(false);
-                            }));
-                            row.append(cell);
-                            frameInfoTable.append(row);
-                        }
-                        if (!isKeyframe) {
-                            frameInfoTable.find("input").prop('disabled', true);
-                            frameInfoTable.find("button").prop('disabled', true);
-                        }
-                    }   
-                }
-    
-                redraw(true);
-                
-                let playBackInterval = undefined;
-                playBtn.click(() => {
-                    if (playBackInterval) {
-                        clearInterval(playBackInterval);
-                        playBackInterval = undefined;
-                        playBtn.html('Play');
-                    }
-                    else {
-                        playBackInterval = setInterval(() => {
-                            const currValue = parseInt(frameSlider.val());
-                            if (currValue >= duration) {      
-                                clearInterval(playBackInterval);
-                                playBackInterval = undefined;
-                                playBtn.html('Play');
-                                frameSlider.val(0);
-                            }
-                            else {
-                                frameSlider.val(currValue + 1);
-                            }
-                            redraw(true);
-                        }, 1000 / 30);
-                        playBtn.html('Stop');
-                    }
-                    
-                });
-
-                frameSlider.on('input', () => {
-                    redraw(true);
-                });
-                commitChangesButton.click(() => {
-                    axios.post('/tools/update-animation', {
-                        path: s,
-                        animation: animation
-                    }).then(() => {
-                        alert(`Animation written to file: ${s}`);
-                        loadAnimation(s);
-                    }).catch((error) => {
-                        alert(error);
-                    });
-                });
-
+                makeFrame(animationState, context, obj.width, obj.height);
                 $('.editor').html('');
                 $('.editor').append(canvas);
-                $('.editor').append(`<br>`);
-                $('.editor').append(frameSlider);
-                $('.editor').append(frameText);
-                $('.editor').append(playBtn);
-                const frameInfoWrapper = $(`<div style="height: 500px; overflow: scroll; border: 1px solid black"></div>`);
-                frameInfoWrapper.append(frameInfoTable);
-                $('.editor').append(frameInfoWrapper);
-                $('.editor').append(commitChangesButton);
-                $('.editor').append(diffWrapper);
-                
-
-            }).catch(error => {
-                console.error(error);
-            });
+            });     
         });
-    }).catch(error => console.error(error));
-    //loadLayers(layers, destination, baseDirectory)
+    }
+    else {
+        axios.get(dirName + '/layers.json').then((response) => {
+            const layers = response.data;
+            axios.get('/resources/' + s).then((response) => {
+                const animationState = {};
+                const animationBase = response.data;
+                const animation = JSON.parse(JSON.stringify(animationBase));
+                const duration = response.data.duration;
+
+                loadLayers(layers, animationState, dirName, loadImage).then((obj) => {
+                    console.log(obj);
+                    console.log(animationState);
+
+                    // Simulate all the frames first
+                    let frames = simulateFrames(animationState, animation);
+                    const keyFrameIndexLookup = {};
+                    for (let i = 0; i < animation.frames.length; i++) {
+                        keyFrameIndexLookup[animation.frames[i].time] = i;
+                    }
+
+                    // Canvas 
+                    const canvas = $(`<canvas></canvas>`);
+                    const context = canvas[0].getContext('2d');
+                    canvas[0].width = obj.width;
+                    canvas[0].height = obj.height;
+                    canvas[0].style.width = obj.width + 'px';
+                    canvas[0].style.height = obj.height + 'px';
+                    
+                    const frameSlider = $(`<input type="range" style="width: 100%" min="0" max="${duration}" value="0" step="1" />`);
+                    const frameText = $(`<span style="padding: 3px; border: 1px solid black"></span>`);
+                    const diffWrapper = $(`<div class="animationDiffWrapper"></div>`);
+                    const commitChangesButton = $(`<button>Commit</button>`);
+
+                    const frameInfoTable = $(`<table></table>`);
+                    const playBtn = $(`<button>Play</button>`);
+
+                    function redraw(updateFrameInfos) {
+                        context.fillStyle = "white";
+                        context.fillRect(0, 0, obj.width, obj.height);
+                        const index = parseInt(frameSlider.val());
+                        makeFrame({
+                            layerImages: animationState.layerImages,
+                            layerProperties: frames[index]
+                        }, context, obj.width, obj.height, false);
+
+                        frameText.html(parseInt(frameSlider.val()));
+                        let animationDiff = AnsiConvert.toHtml(jsonDiff.diffString(animationBase, animation));
+
+                        if (!animationDiff) {
+                            animationDiff = "No Changes Made";
+                        }
+                        diffWrapper.html(animationDiff);
+
+                        if (updateFrameInfos) {
+                            frameInfoTable.html('');
+                            const layerNames = Object.keys(animationState.layerProperties);
+                            const isKeyframe = keyFrameIndexLookup[index] !== undefined;
+
+                            for (let i = 0; i < layerNames.length; i++) {
+                                const row = $(`<tr><td>${layerNames[i]}</td></tr>`);
+                                const cell = $(`<td></td>`);
+                                let data = isKeyframe ? animation.frames[keyFrameIndexLookup[index]].delta[layerNames[i]] : frames[index][layerNames[i]];
+                                if (data === undefined) {
+                                    // No Layer Data on the keyframe 
+                                    data = {};
+                                    animation.frames[keyFrameIndexLookup[index]].delta[layerNames[i]] = data;
+                                }
+                                cell.append(buildUIFromData(data, AnimationLayerSchema, 0, () => {
+                                    // Resimulate and redraw when keyframe changes
+                                    //animation.frames[keyFrameIndexLookup[index]].delta = JSON.parse(JSON.stringify(frames[index]));
+                                    frames = simulateFrames(animationState, animation);
+                                    console.log(animation);
+                                    redraw(false);
+                                }));
+                                row.append(cell);
+                                frameInfoTable.append(row);
+                            }
+                            if (!isKeyframe) {
+                                frameInfoTable.find("input").prop('disabled', true);
+                                frameInfoTable.find("button").prop('disabled', true);
+                            }
+                        }   
+                    }
+        
+                    redraw(true);
+                    
+                    let playBackInterval = undefined;
+                    playBtn.click(() => {
+                        if (playBackInterval) {
+                            clearInterval(playBackInterval);
+                            playBackInterval = undefined;
+                            playBtn.html('Play');
+                        }
+                        else {
+                            playBackInterval = setInterval(() => {
+                                const currValue = parseInt(frameSlider.val());
+                                if (currValue >= duration) {      
+                                    clearInterval(playBackInterval);
+                                    playBackInterval = undefined;
+                                    playBtn.html('Play');
+                                    frameSlider.val(0);
+                                }
+                                else {
+                                    frameSlider.val(currValue + 1);
+                                }
+                                redraw(true);
+                            }, 1000 / 30);
+                            playBtn.html('Stop');
+                        }
+                        
+                    });
+
+                    frameSlider.on('input', () => {
+                        redraw(true);
+                    });
+                    commitChangesButton.click(() => {
+                        axios.post('/tools/update-animation', {
+                            path: s,
+                            animation: animation
+                        }).then(() => {
+                            alert(`Animation written to file: ${s}`);
+                            loadAnimation(s);
+                        }).catch((error) => {
+                            alert(error);
+                        });
+                    });
+
+                    $('.editor').html('');
+                    $('.editor').append(canvas);
+                    $('.editor').append(`<br>`);
+                    $('.editor').append(frameSlider);
+                    $('.editor').append(frameText);
+                    $('.editor').append(playBtn);
+                    const frameInfoWrapper = $(`<div style="height: 500px; overflow: scroll; border: 1px solid black"></div>`);
+                    frameInfoWrapper.append(frameInfoTable);
+                    $('.editor').append(frameInfoWrapper);
+                    $('.editor').append(commitChangesButton);
+                    $('.editor').append(diffWrapper);
+                    
+
+                }).catch(error => {
+                    console.error(error);
+                });
+            });
+        }).catch(error => console.error(error));
+        //loadLayers(layers, destination, baseDirectory)
+    }
 }
 
 $('#commit').click(() => {

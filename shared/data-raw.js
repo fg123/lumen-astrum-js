@@ -478,7 +478,11 @@ module.exports.units = {
         ],
         "custom": {},
         "icon": "icons/combatEngineerIcon.png",
-        "texture": "units/combatengineer.png"
+        "texture": "units/combatengineer.png",
+        "animation": {
+            "baseLayer": "",
+            "attackAnimation": ""
+        }
     },
     "Reaver": {
         "attackRange": 0,
@@ -517,7 +521,11 @@ module.exports.units = {
         "options": [],
         "custom": {},
         "icon": "icons/turretIcon.png",
-        "texture": "units/armedturret.png"
+        "texture": "units/armedturret.png",
+        "animation": {
+            "baseLayer": " ",
+            "attackAnimation": " "
+        }
     },
     "Golem": {
         "attackRange": 1,
@@ -535,6 +543,10 @@ module.exports.units = {
         "options": [],
         "icon": "icons/golemIcon.png",
         "texture": "units/golem.png",
-        "custom": {}
+        "custom": {},
+        "animation": {
+            "baseLayer": "units/golem/layers.json",
+            "attackAnimation": "units/golem/punch.json"
+        }
     }
 };

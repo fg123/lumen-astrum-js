@@ -173,7 +173,7 @@ function startServer() {
         app.get('/tools/list-animations', function (req, res) {
             const resources = walkSync('client/resources', { globs: ['**/*.json'] });
 
-            res.send(resources.filter((n) => n.indexOf('layers.json') === -1));
+            res.send(resources);
         });
         app.post('/tools/update-animation', function (req, res) {
             const path = req.body.path;
