@@ -61,7 +61,10 @@ class ModifierHolder {
     onTakingDamage(state, attacker, damage) {
         let actualDamage = damage;
         Object.values(this.modifiers).forEach(m => {
-            actualDamage = m.onTakingDamage(state, attacker, this, actualDamage);
+            const newDamage = m.onTakingDamage(state, attacker, this, actualDamage);
+            if (newDamage !== undefined) {
+                actualDamage = newDamage;
+            }
         });
         return actualDamage;
     }
