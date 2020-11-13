@@ -521,11 +521,7 @@ module.exports.units = {
         "options": [],
         "custom": {},
         "icon": "icons/turretIcon.png",
-        "texture": "units/armedturret.png",
-        "animation": {
-            "baseLayer": " ",
-            "attackAnimation": " "
-        }
+        "texture": "units/armedturret.png"
     },
     "Golem": {
         "attackRange": 1,

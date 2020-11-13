@@ -1,8 +1,10 @@
 const $ = require('jquery-browserify');
 const { Resource } = require('./resources');
 
+const axios = require('axios');
 const Data = require('../shared/data.js');
 
+// Manages a single instance of all loaded textures, resources, and animations
 module.exports = class ResourceManager {
     constructor(onDone) {
         this.resources = {};
@@ -35,21 +37,74 @@ module.exports = class ResourceManager {
         deferArr.push(deferred);
     }
 
+    loadAnimations(animationObj, resources, deferArr) {
+        // All resources needed by the animation into resources
+        // Loading animation JSONs into deferArr
+        // We will simulate all the animations on startup so that the game
+        //   doesn't need to runtime do the animation. This won't work for
+        //   future animations if we want to add randomness / particle systems
+        if (animationObj.baseLayer) {
+            const baseLayerPath = animationObj.baseLayer;
+            const animationBaseDir = baseLayerPath.match(/.*\//);
+            const baseLayerDefer = new $.Deferred();
+            axios.get('/resources/' + baseLayerPath).then((response) => {
+                // Load Base Layer JSON
+                const baseLayer = response.data;
+                resources[animationObj.baseLayer] = baseLayer;
+                console.log('Base Layer Loaded: ', baseLayerPath);
+                const layerDefers = [];
+
+                // Now we load the images in the layers
+                Object.values(baseLayer).forEach((o) => {
+                    const imageUrl = animationBaseDir + o.resource;
+                    this.loadResource(resources, imageUrl, '/resources/' + imageUrl, layerDefers);
+                });
+                $.when(...layerDefers).then(() => {
+                    baseLayerDefer.resolve();
+                });
+            }).catch((error) => {
+                console.error('Could not load resource ' + baseLayerPath, error);
+            });
+            deferArr.push(baseLayerDefer);
+        }
+        Object.keys(animationObj).forEach((key) => {
+            if (key === 'baseLayer') {
+                // Already Handled Above
+                return;
+            }
+            if (!animationObj[key]) return;
+            // Otherwise it references a JSON file for an animation
+            const animationDefer = new $.Deferred();
+            axios.get('/resources/' + animationObj[key]).then((response) => {
+                // Load Base Layer JSON
+                resources[animationObj[key]] = response.data;
+                console.log('Animation Loaded: ', animationObj[key]);
+                animationDefer.resolve();
+            }).catch((error) => {
+                console.error('Could not load resource ' + animationObj[key], error);
+            });
+            deferArr.push(animationDefer);
+        });
+    }
+
     loadResources(deferArr) {
         const resourcesToLoad = Object.values(Resource);
         for (let i = 0; i < resourcesToLoad.length; i++) {
             this.loadResource(this.resources, resourcesToLoad[i], '/' + resourcesToLoad[i], deferArr);
         }
 
-        // Load in Icons and Textures for all mapObjects
+        // Load in Icons, Textures and Animations for all mapObjects
         const resources = new Set();
         Object.values(Data.structures).forEach(s => {
             if (s.icon) resources.add(s.icon);
             if (s.texture) resources.add(s.texture);
+            if (s.animation) this.loadAnimations(s.animation, this.resources, deferArr);
         });
+
         Object.values(Data.units).forEach(s => {
             if (s.icon) resources.add(s.icon);
             if (s.texture) resources.add(s.texture);
+            if (s.animation) this.loadAnimations(s.animation, this.resources, deferArr);
         });
         
         resources.forEach(key => {

@@ -18,7 +18,6 @@ const LEFT_MOUSE_BUTTON = 1;
 
 module.exports = class MapCanvas {
     constructor(canvas, targetInterval, ui, camera, state, animationManager, resourceManager, inputManager) {
-        console.log(map);
         this.inputManager = inputManager;
         this.canvas = canvas;
         this.context = canvas.getContext('2d');

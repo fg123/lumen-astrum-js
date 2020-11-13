@@ -1,3 +1,5 @@
+// Contains add-on animations that can be applied to animation managers.
+
 const { Tuple } = require('../shared/coordinates');
 const { toDrawCoord } = require('./utils');
 
