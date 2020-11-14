@@ -254,7 +254,7 @@ module.exports = class MapCanvas {
                 this.drawContext.screenHeight / 4 - height / 2,
                 width, height);
             this.context.textBaseline = 'middle';
-            this.drawText(this.state.bigMessage, 'white', 50, screenWidth / 2, screenHeight / 4, 'center');
+            this.drawText(this.state.bigMessage, 'white', 50, screenWidth / 2, screenHeight / 4 + 2, 'center');
             this.context.textBaseline = 'alphabetic';
         }
         if (this.state.smallAlert.current) {
