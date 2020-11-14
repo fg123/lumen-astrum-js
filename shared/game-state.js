@@ -362,9 +362,10 @@ module.exports = class GameState {
                 target.currentShield = 0;
             }
         }
-        const damagePostModifiers = target.onTakingDamage(this, attacker, target, damage);
+        const damagePostModifiers = target.onTakingDamage(this, attacker, damage);
 
         const damageToDeal = Math.min(damagePostModifiers, target.currentHealth);
+        
         target.currentHealth -= damageToDeal;
 
         if (target.currentHealth <= 0) {
