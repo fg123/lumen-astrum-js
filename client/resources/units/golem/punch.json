@@ -7,54 +7,58 @@
                 "rightFist": {
                     "rotation": 30,
                     "x": 25,
-                    "y": 0
+                    "y": 15
                 },
                 "rightUpperArm": {
                     "x": 0,
-                    "y": 5
+                    "y": 15
                 },
                 "leftFist": {
                     "rotation": 40,
-                    "y": -10,
+                    "y": -5,
                     "x": -25
                 },
                 "leftUpperArm": {
-                    "y": -5
+                    "y": 0
                 },
                 "head": {
-                    "rotation": 10
+                    "rotation": 10,
+                    "y": 5
                 },
                 "chest": {
-                    "rotation": 15
+                    "rotation": 15,
+                    "y": 5
                 }
             }
         },
         {
-            "time": 12,
+            "time": 8,
             "delta": {
                 "rightFist": {
-                    "rotation": 4,
+                    "rotation": 5,
                     "x": 15,
                     "y": -18
                 },
                 "rightUpperArm": {
                     "x": -9,
-                    "y": -13
+                    "y": -6
                 },
                 "leftFist": {
                     "rotation": 0,
                     "x": -22,
-                    "y": 5
+                    "y": -5
                 },
                 "leftUpperArm": {
-                    "y": 10,
+                    "y": 0,
                     "x": 4
                 },
                 "head": {
-                    "rotation": -10
+                    "rotation": -10,
+                    "y": 0
                 },
                 "chest": {
-                    "rotation": -33
+                    "rotation": -20,
+                    "y": -3
                 }
             }
         },
