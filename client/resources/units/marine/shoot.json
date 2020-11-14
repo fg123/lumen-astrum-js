@@ -1,9 +1,59 @@
 {
     "duration": 15,
     "frames": [
-       {
-           "time": 0,
-           "delta": {}
-       }
+        {
+            "time": 0,
+            "delta": {
+                "leftArm": {},
+                "rightArm": {},
+                "head": {},
+                "gun": {}
+            }
+        },
+        {
+            "time": 6,
+            "delta": {
+                "leftArm": {
+                    "y": 4
+                },
+                "rightArm": {
+                    "y": 4
+                },
+                "head": {},
+                "gun": {
+                    "y": 10
+                }
+            }
+        },
+        {
+            "time": 12,
+            "delta": {
+                "leftArm": {
+                    "y": 2
+                },
+                "rightArm": {
+                    "y": 2
+                },
+                "head": {},
+                "gun": {
+                    "y": 5
+                }
+            }
+        },
+        {
+            "time": 15,
+            "delta": {
+                "leftArm": {
+                    "y": 0
+                },
+                "rightArm": {
+                    "y": 0
+                },
+                "head": {},
+                "gun": {
+                    "y": 0
+                }
+            }
+        }
     ]
 }
