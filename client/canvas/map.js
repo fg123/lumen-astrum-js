@@ -73,6 +73,22 @@ module.exports = class MapCanvas {
                 });
             }
         }, 1000 / 60);
+
+        // Base Animatino Tick Loop
+        window.setInterval(() => {
+            if (this.state.gameState) {
+                this.state.gameState.units.forEach(u => {
+                    if (u.baseAnimation) {
+                        u.baseAnimation.tick(this.resourceManager);
+                    }
+                });
+                // this.state.gameState.structures.forEach(s => {
+                //     if (s.baseAnimation) {
+                //         s.baseAnimation.tick();
+                //     }
+                // });
+            }
+        }, 1000 / 30);
     }
 
     draw() {
@@ -626,8 +642,18 @@ module.exports = class MapCanvas {
                                     else {
                                         this.drawImage(this.state.getEnemyOverlay(mapObject.owner), drawCoord.x, drawCoord.y);
                                     }
-                                    this.drawImage(this.resourceManager.get(mapObject.texture), drawCoord.x, drawCoord.y,
-                                        -1, -1, currentRotation);
+                                    if (mapObject.baseAnimation) {
+                                        this.context.translate(drawCoord.x, drawCoord.y);
+                                        this.context.rotate(currentRotation);                                        
+                                        mapObject.baseAnimation.draw(this.resourceManager, this.context);
+                                        this.context.rotate(-currentRotation);
+                                        this.context.translate(-drawCoord.x, -drawCoord.y);
+                                        
+                                    }
+                                    else {
+                                        this.drawImage(this.resourceManager.get(mapObject.texture), drawCoord.x, drawCoord.y,
+                                            -1, -1, currentRotation);
+                                    }
                                 }
                             }
                             else {

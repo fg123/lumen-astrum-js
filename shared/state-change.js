@@ -48,6 +48,7 @@ const Data = require('./data');
 const { default: GameState } = require('./game-state');
 const { StunnedModifier } = require('./modifier');
 const { MoveUnitAnimation } = require('../client/animation');
+const { AnimationKeys } = require('../client/baseAnimation');
 
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the
@@ -563,6 +564,10 @@ class UnitAttackStateChange extends StateChange {
 
         unit.outOfCombatTime = this.timestamp + (Constants.OUT_OF_COMBAT_TIME * 1000);
         target.outOfCombatTime = this.timestamp + (Constants.OUT_OF_COMBAT_TIME * 1000);
+
+        if (state.clientState && unit.baseAnimation) {
+            unit.baseAnimation.startAnimation(AnimationKeys.ATTACK);
+        }
     }
 
     getSplashRange(state) {

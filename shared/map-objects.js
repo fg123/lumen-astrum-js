@@ -1,8 +1,7 @@
 const Data = require('./data');
 const AnimationManager = require('./animation-manager');
 const triggers = require('./triggers');
-const Constants = require('./constants');
-const { default: modifier } = require('./modifier');
+const { BaseAnimation } = require('../client/baseAnimation');
 
 class ModifierHolder {
     constructor() {
@@ -96,7 +95,7 @@ module.exports.Structure = class extends ModifierHolder {
 
         /* true indicates a blocking pipeline, only one animation can play */
         this.animationManager = new AnimationManager(true);
-
+        
         if (Data.structures[name].targetable !== undefined) {
             this.targetable = Data.structures[name].targetable;
         }
@@ -159,12 +158,17 @@ module.exports.Unit = class extends ModifierHolder {
         this.__sightRange__ = Data.units[name].sightRange;
 
         this.baseAttackDamage = Data.units[name].damage;
+        this.animation = Data.units[name].animation;
 
         this.isStructure = false;
         this.isUnit = true;
 
         /* true indicates a blocking pipeline, only one animation can play */
         this.animationManager = new AnimationManager(true);
+   
+        if (this.animation) {
+            this.baseAnimation = new BaseAnimation(this.animation);
+        }
 
         /* This is a local copy that changes based on state */
         this.moveRange = Data.units[name].moveRange;

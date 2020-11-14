@@ -51,8 +51,6 @@ module.exports = class ResourceManager {
             axios.get('/resources/' + baseLayerPath).then((response) => {
                 // Load Base Layer JSON
                 const baseLayer = response.data;
-                resources[animationObj.baseLayer] = baseLayer;
-                console.log('Base Layer Loaded: ', baseLayerPath, baseLayer);
                 const layerDefers = [];
 
                 // Now we load the images in the layers
@@ -68,7 +66,13 @@ module.exports = class ResourceManager {
                     loadLayers(baseLayer, baseAnimationState, animationBaseDir, (resource) => {
                         console.log(resource);
                         return this.resources[resource];
-                    }).then(() => {
+                    }).then((obj) => {
+                        baseAnimationState.width = obj.width;
+                        baseAnimationState.height = obj.height;
+                        // Base Animation State
+                        resources[animationObj.baseLayer] = baseAnimationState;
+                        console.log('Base Layer Loaded: ', baseLayerPath, baseAnimationState);
+
                         // Load the rest of the animations
                         Object.keys(animationObj).forEach((key) => {
                             if (key === 'baseLayer') {
