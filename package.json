@@ -26,6 +26,7 @@
     "@babel/cli": "^7.12.1",
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.1",
     "axios": "^0.20.0",
     "babelify": "^10.0.0",
     "body-parser": "^1.19.0",
@@ -54,7 +55,6 @@
   },
   "homepage": "https://github.com/fg123/lumen-astrum#readme",
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.12.1",
     "ansi-to-html": "^0.6.14",
     "chalk": "^4.1.0",
     "concurrently": "^5.3.0",
