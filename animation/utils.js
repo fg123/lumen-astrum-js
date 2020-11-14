@@ -8,7 +8,10 @@ async function loadLayers(layers, destination, baseDirectory, loadImage) {
 
     for (let i = 0; i < keys.length; i++) {
         const obj = layers[keys[i]];
-        const image = await loadImage(baseDirectory + '/' + obj.resource);
+        if (!baseDirectory.endsWith('/')) {
+            baseDirectory += '/';
+        }
+        const image = await loadImage(baseDirectory + obj.resource);
         if (obj.x === undefined) {
             obj.x = 0;
         }
@@ -98,11 +101,12 @@ function simulateFrames(startingState, animation) {
         if (time >= keyframe.time) {
             nextKeyframe += 1;
             if (nextKeyframe >= keyframes.length) {
-                frames.push(JSON.parse(JSON.stringify(animationState)));
-                break;
+                nextKeyframe = keyframes.length - 1;
             }
         }
     }
+    
+    frames.push(JSON.parse(JSON.stringify(animationState)));
     return frames;
 }
 

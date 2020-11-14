@@ -562,7 +562,7 @@ async function loadImage(url) {
     });
 }
 function loadAnimation(s) {
-    const dirName = ('/resources/' + s).match(/.*\//);
+    const dirName = ('/resources/' + s).match(/.*\//)[0];
     if (s.endsWith('layers.json')) {
         axios.get('/resources/' + s).then((response) => {
             const layers = response.data;
