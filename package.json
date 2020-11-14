@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Top down turn based RTS game",
   "scripts": {
-    "build-client": "browserify client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ] -t [ envify --NODE_ENV production ]",
-    "watch-client": "watchify --debug client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
+    "build-client": "browserify client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] --plugins [ @babel/plugin-transform-runtime ] ] -t [ envify --NODE_ENV production ]",
+    "watch-client": "watchify --debug client/index.js -t vueify -o client/dist/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] --plugins [ @babel/plugin-transform-runtime ] ]",
     "watch-devtools-map-editor": "watchify --debug devtools/map-editor/index.js -o devtools/dist/map-editor/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] ]",
     "watch-devtools-data-editor": "watchify --debug devtools/data-editor/index.js -o devtools/dist/data-editor/main.js -t brfs -t [ babelify --presets [ @babel/preset-env ] --plugins [ @babel/plugin-transform-runtime ] ]",
     "start-server": "node -r dotenv/config server/index.js",
