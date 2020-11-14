@@ -19,13 +19,14 @@ const oauthClient = new OAuth2Client(clientId);
 
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
+const { Queue } = require('./queue');
 
 const url = process.env.MONGO_URL || 'mongodb://localhost:27017';
 const dbName = 'lumen';
 const client = new MongoClient(url);
 let db;
 
-let gitChangeLog;
+let gitChangeLog = [];
 
 console.log("Connecting to MongoDB");
 client.connect(function(err) {
@@ -33,33 +34,46 @@ client.connect(function(err) {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
     
-    console.log('Getting Git Information from GitHub');
-    axios.get("https://api.github.com/repos/fg123/lumen-astrum-js/commits")
-      .then(function (response) {
-        // handle success
-        gitChangeLog = response.data.map(commit => {
-            return commit["commit"]["message"];
+    if (Constants.IS_PRODUCTION) {
+        console.log('Getting Git Information from GitHub');
+        axios.get("https://api.github.com/repos/fg123/lumen-astrum-js/commits")
+        .then(function (response) {
+            // handle success
+            gitChangeLog = response.data.map(commit => {
+                return commit["commit"]["message"];
+            });
+            console.log("Got Git Information");
+            startHttpListener();
+        })
+        .catch(function (error) {
+            // handle error
+            console.log(error);
         });
-        console.log("Got Git Information");
-        const port = process.env.PORT || 5000;
-        http.listen(port, function() {
-            console.log('Listening on port ' + port);
-            startServer();
-        });
-      })
-      .catch(function (error) {
-        // handle error
-        console.log(error);
-      });
+    }
+    else {
+        startHttpListener();
+    }
 });
+
+function startHttpListener() {
+    const port = process.env.PORT || 5000;
+    http.listen(port, function() {
+        console.log('Listening on port ' + port);
+        startServer();
+    });
+}
 
 function startServer() {
     const connectedUsers = {};
     const disconnectedMidGame = {};
-    const fourPlayerCoopQueue = [];
-    const twoPlayerQueue = [];
-    const threePlayerQueue = [];
-    const fourPlayerQueue = [];
+
+    const queues = {
+        '4p': new Queue(4),
+        '2p': new Queue(2),
+        '3p': new Queue(3),
+        '2v2': new Queue(4)
+    };
+
     const games = [];
 
     function generateHash(string) {
@@ -227,7 +241,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             socket: socket,
             status: 'connected',
             username: null,
-            queueID: -1,
+            inQueue: false,
             game: null,
             isAdmin: false
         };
@@ -403,69 +417,23 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
         });
         socket.on('join-queue', function (type, callback) {
             if (connectedUsers[socket.id].username != null &&
-                connectedUsers[socket.id].queueID === -1) {
-                if (type === '2p') {
-                    console.log('Joining 2p queue for: ' + connectedUsers[socket.id].username);
-                    connectedUsers[socket.id].queueID = twoPlayerQueue.length;
-                    twoPlayerQueue.push({
-                        type: type,
-                        requester: connectedUsers[socket.id].username,
-                        socket: socket,
-                        elo: connectedUsers[socket.id].elo
-                    });
-                    callback();
-                }
-                else if (type === '3p') {
-                    console.log('Joining 3p queue for: ' + connectedUsers[socket.id].username);
-                    connectedUsers[socket.id].queueID = threePlayerQueue.length;
-                    threePlayerQueue.push({
-                        type: type,
-                        requester: connectedUsers[socket.id].username,
-                        socket: socket,
-                        elo: connectedUsers[socket.id].elo
-                    });
-                    
-                    callback();
-                }
-                else if (type === '4p') {
-                    console.log('Joining 4p queue for: ' + connectedUsers[socket.id].username);
-                    connectedUsers[socket.id].queueID = fourPlayerQueue.length;
-                    fourPlayerQueue.push({
-                        type: type,
-                        requester: connectedUsers[socket.id].username,
-                        socket: socket,
-                        elo: connectedUsers[socket.id].elo
-                    });
-                    
-                    callback();
-                }
-                else if (type === '2v2') {
-                    console.log('Joining 4p queue for: ' + connectedUsers[socket.id].username);
-                    connectedUsers[socket.id].queueID = fourPlayerCoopQueue.length;
-                    fourPlayerCoopQueue.push({
-                        type: type,
-                        requester: connectedUsers[socket.id].username,
-                        socket: socket,
-                        elo: connectedUsers[socket.id].elo
-                    });
-                    
-                    callback();
-                }
+                !connectedUsers[socket.id].inQueue) {
+                
                 let startGame = (queuedPlayers) => {
                     const socketMap = {};
                     const gameStartTime = Date.now();
                     queuedPlayers.forEach(p => {
-                        socketMap[p.requester] = p.socket;
+                        socketMap[p.username] = p.socket;
                     });
                     const game = new Game(socketMap, gameStartTime, handleGameOver, type);
 
                     queuedPlayers.forEach(p => {
                         connectedUsers[p.socket.id].game = game;
-                        connectedUsers[p.socket.id].queueID = -1;
+                        connectedUsers[p.socket.id].inQueue = false;
                     });
 
                     games.push(game);
-                    const players = queuedPlayers.map(p => p.requester);
+                    const players = queuedPlayers.map(p => p.username);
                     queuedPlayers.forEach(p => {
                         p.socket.emit('game-start',
                             gameStartTime,
@@ -473,25 +441,17 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                             type);
                     });
                 };
-
-                if (twoPlayerQueue.length >= 2) {
-                    startGame([twoPlayerQueue[0], twoPlayerQueue[1]]);
-                    twoPlayerQueue.splice(0, 2);
-                }
-                if (threePlayerQueue.length >= 3) {
-                    startGame([threePlayerQueue[0], threePlayerQueue[1],
-                        threePlayerQueue[2]]);
-                    threePlayerQueue.splice(0, 3);
-                }
-                if (fourPlayerQueue.length >= 4) {
-                    startGame([fourPlayerQueue[0], fourPlayerQueue[1],
-                        fourPlayerQueue[2], fourPlayerQueue[3]]);
-                    fourPlayerQueue.splice(0, 4);
-                }
-                if (fourPlayerCoopQueue.length >= 4) {
-                    startGame([fourPlayerCoopQueue[0], fourPlayerCoopQueue[1],
-                        fourPlayerCoopQueue[2], fourPlayerCoopQueue[3]]);
-                        fourPlayerCoopQueue.splice(0, 4);
+                
+                const queue = queues[type];
+                if (queue !== undefined) {
+                    console.log(`Joining ${type} queue for: ${connectedUsers[socket.id].username}`);
+                    const result = queue.joinQueue(connectedUsers[socket.id].username,
+                        socket, connectedUsers[socket.id].elo);
+                    callback();
+                    if (result !== undefined) {
+                        // Queue returned a set of players
+                        startGame(result);
+                    }
                 }
             }
         });
@@ -519,34 +479,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             callback(gitChangeLog);
         });
         const leaveQueue = () => {
-            for (let i = 0; i < twoPlayerQueue.length; i++) {
-                if (twoPlayerQueue[i].requester === connectedUsers[socket.id].username) {
-                    twoPlayerQueue.splice(i, 1);
-                    connectedUsers[socket.id].queueID = -1;
-                    break;
-                }
-            }
-            for (let i = 0; i < fourPlayerQueue.length; i++) {
-                if (fourPlayerQueue[i].requester === connectedUsers[socket.id].username) {
-                    fourPlayerQueue.splice(i, 1);
-                    connectedUsers[socket.id].queueID = -1;
-                    break;
-                }
-            }
-            for (let i = 0; i < fourPlayerCoopQueue.length; i++) {
-                if (fourPlayerCoopQueue[i].requester === connectedUsers[socket.id].username) {
-                    fourPlayerCoopQueue.splice(i, 1);
-                    connectedUsers[socket.id].queueID = -1;
-                    break;
-                }
-            }
-            for (let i = 0; i < threePlayerQueue.length; i++) {
-                if (threePlayerQueue[i].requester === connectedUsers[socket.id].username) {
-                    threePlayerQueue.splice(i, 1);
-                    connectedUsers[socket.id].queueID = -1;
-                    break;
-                }
-            }
+            Object.values(queues).forEach(q => q.leaveQueue(connectedUsers[socket.id].username));
         };
 
         socket.on('leave-queue', function (callback) {
