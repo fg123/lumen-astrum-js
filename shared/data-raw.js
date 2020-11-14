@@ -482,11 +482,7 @@ module.exports.units = {
         ],
         "custom": {},
         "icon": "icons/combatEngineerIcon.png",
-        "texture": "units/combatengineer.png",
-        "animation": {
-            "baseLayer": "",
-            "attackAnimation": ""
-        }
+        "texture": "units/combatengineer.png"
     },
     "Reaver": {
         "attackRange": 0,
