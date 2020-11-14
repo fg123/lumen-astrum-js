@@ -76,7 +76,7 @@ module.exports = class Game {
                 this.processStateChange(ChatMessageStateChange.create(
                     this.state, undefined, 'Mouse Scroll: Zoom In / Out'));
                 this.processStateChange(ChatMessageStateChange.create(
-                    this.state, undefined, 'G (hold): To Move Units'));
+                    this.state, undefined, 'Right Click or Hold G + Click: To Move Units'));
             }, Constants.TIME_IN_SECONDS_BEFORE_GAME_START * 1000);
         }
         else {

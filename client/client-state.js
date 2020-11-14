@@ -128,6 +128,10 @@ module.exports = class ClientState {
                 this.potentialDesiredMoveEvent();
             }
             else {
+                if (button === RIGHT_MOUSE_BUTTON) {
+                    this.justEnteredMovementMode = true;
+                    if (this.potentialDesiredMoveEvent()) return true;
+                }
                 console.log('Click event');
                 return this.gameObjectClickEvent(button);
             }
@@ -555,8 +559,10 @@ module.exports = class ClientState {
                     this.selectedObject.position,
                     points
                 ));
+                return true;
             }
         }
+        return false;
     }
 
     getGold() {

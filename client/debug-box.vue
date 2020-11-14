@@ -160,7 +160,7 @@ div.debugBox {
     position: absolute;
     top: 100px;
     transform: translateX(-50%);
-    left: 50%;
+    left: 30%;
     font-family: 'Roboto Mono';
     color: #fff;
     border: 2px solid black;
