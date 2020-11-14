@@ -1,0 +1,18 @@
+{
+    "leftArm": {
+        "resource": "marineLeftArm.png",
+        "z": 7
+    },
+    "rightArm": {
+        "resource": "marineRightArm.png",
+        "z": 7
+    },
+    "head": {
+        "resource": "marineHead.png",
+        "z": 10
+    },
+    "gun": {
+        "resource": "marineGun.png",
+        "z": 9
+    }
+}
