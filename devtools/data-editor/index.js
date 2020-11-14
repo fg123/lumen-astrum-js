@@ -688,7 +688,7 @@ function loadAnimation(s) {
                                     frameSlider.val(currValue + 1);
                                 }
                                 redraw(true);
-                            }, 1000 / 30);
+                            }, 1000 / 60);
                             playBtn.html('Stop');
                         }
                         

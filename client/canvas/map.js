@@ -88,7 +88,7 @@ module.exports = class MapCanvas {
                 //     }
                 // });
             }
-        }, 1000 / 30);
+        }, 1000 / 60);
     }
 
     draw() {

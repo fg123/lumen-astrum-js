@@ -431,7 +431,11 @@ module.exports.units = {
             }
         },
         "icon": "icons/marineIcon.png",
-        "texture": "units/marine.png"
+        "texture": "units/marine.png",
+        "animation": {
+            "baseLayer": "units/marine/layers.json",
+            "attackAnimation": "units/marine/shoot.json"
+        }
     },
     "Engineer": {
         "attackRange": 0,
