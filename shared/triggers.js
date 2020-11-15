@@ -28,9 +28,10 @@ function buffableUnit(u) {
     return u.buffable;
 }
 
-function rangeOneUnit(deploymentOutpost) {
+function rangeOneUnitNotTurret(deploymentOutpost) {
     return (unit) => {
-        return tupleDistance(deploymentOutpost.position, unit.position) === 1;
+        return tupleDistance(deploymentOutpost.position, unit.position) === 1 &&
+            unit.name !== 'Armed Turret';
     };
 }
 
@@ -428,7 +429,7 @@ const triggers = {
             this.tickHealCounter = 0;
 
             let didWeHeal = false;
-            const units = state.getUnitsOnMyTeam(this.owner, rangeOneUnit(this));
+            const units = state.getUnitsOnMyTeam(this.owner, rangeOneUnitNotTurret(this));
             for (let i = 0; i < units.length; i++) {
                 const maxHealth = units[i].maxHealth;
                 if (units[i].turnsUntilBuilt === 0 &&
