@@ -720,7 +720,8 @@ module.exports = class MapCanvas {
                 const surrounding = getSurrounding(outposts[i].position, 1);
                 for (let j = 0; j < surrounding.length; j++) {
                     const coord = toDrawCoord(surrounding[j].x, surrounding[j].y);
-                    if (!this.state.gameState.isOccupied(surrounding[j].x, surrounding[j].y) &&
+                    if (this.state.gameState.gameMap.withinMap(surrounding[j]) &&
+                        !this.state.gameState.isOccupied(surrounding[j].x, surrounding[j].y) &&
                         this.state.gameState.isAllowedBuilding(surrounding[j].x, surrounding[j].y, this.state.player)) {
                         this.drawImage(this.resourceManager.get(Resource.GREEN_OVERLAY),
                             coord.x, coord.y);
