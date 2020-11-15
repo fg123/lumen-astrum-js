@@ -132,7 +132,12 @@ module.exports = class GameState {
     }
 
     getGameTime() {
-        return Date.now() - this.gameStartTime;
+        const now = Date.now();
+        const gameTime = now - this.gameStartTime;
+        if (gameTime < 0) {
+            console.error(`Game time is negative! Now: ${now}, GameStart: ${this.gameStartTime}`);
+        }
+        return gameTime;
     }
 
     // Throws an exception if the game-state is not consistent
