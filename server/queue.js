@@ -1,7 +1,5 @@
 // Handles Players Queueing and Matchmaking
 
-const { queue } = require("../node_modules/rxjs/index");
-
 /**
  * Shuffles array in place, FisherYates algorithm
  * @param {Array} a items An array containing the items.
