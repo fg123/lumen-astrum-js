@@ -1,11 +1,10 @@
 # Tutorial
-## Welcome to Lumen Austrum!
+## Welcome to Lumen Astrum!
 
-Lumen Austrum is a turn based strategy game where your goal is to expand your territory and defeat your enemies.
+Lumen Astrum is a turn based strategy game where your goal is to expand your territory and defeat your enemies.
 You win the game by expanding your territory to the point where the bar on the top right wins.
 Your opponents will be trying to do the same.
 
----
 
 ## Phases
 
@@ -30,10 +29,10 @@ To spawn a unit:
 
 At your home base, you can spawn two units: 
 * Engineers
-* Spies
+* Scouts
 
 Engineers can construct buildings.
-Spies can explore. 
+Scouts can explore. 
 
 At the barracks, you can spawn three units:
 * Marines
