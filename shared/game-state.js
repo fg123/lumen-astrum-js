@@ -712,6 +712,9 @@ module.exports = class GameState {
             // Only one non-fully forfeited teams left
             return this.getNonForfeitedPlayersFromTeam(nonFullyForfeitedTeams[0]);
         }
+        if (nonFullyForfeitedTeams.length === 0) {
+            return [];
+        }
 
         return undefined;
     }

@@ -289,6 +289,10 @@ module.exports = class ClientState {
     }
     
     processStateChange(change) {
+        if (!this.gameState) {
+            console.warn("Tried to process a state change with no GameState!");
+            return;
+        }
         if (change instanceof PhaseChangeStateChange) {
             this.pendingAction = null;
             this.gameStartingCountdown = false;
@@ -374,9 +378,13 @@ module.exports = class ClientState {
             /* For some reason, the vue component can't watch a nested property
              * that's not properly defined as a prop, so we have to manually
              * push changes over. */
+            const gameState = this.gameState;
             const fakeState = {
                 chatMessages: [],
-                forfeit(player) {}
+                forfeit(player) {},
+                getUsername(player) {
+                    return gameState.getUsername(player);
+                }
             };
             change._simulateStateChange(fakeState);
             const message = fakeState.chatMessages[0];
