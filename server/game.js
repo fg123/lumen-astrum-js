@@ -12,6 +12,7 @@ const {
 const { default: modifier } = require('../shared/modifier');
 const { maps, setupMap } = require('../shared/map');
 const PathFinder = require('../shared/path-finder');
+const { movementSort } = require('./movement-controller');
 
 module.exports = class Game {
     toJson() {
@@ -216,13 +217,15 @@ module.exports = class Game {
             
             this.processStateChange(ActionTickStateChange.create(this.state, undefined, currentTime));
             
-            const nonDeadUnits = [];
+            let nonDeadUnits = [];
             for (let j = 0; j < this.state.units.length; j++) {
                 const unit = this.state.units[j];
                 if (unit.currentHealth > 0) {
                     nonDeadUnits.push(unit);
                 }
             }
+            nonDeadUnits = movementSort(this, nonDeadUnits);
+            
             for (let j = 0; j < nonDeadUnits.length; j++) {
                 const unit = nonDeadUnits[j];
                 const id = unit.id;
@@ -237,16 +240,17 @@ module.exports = class Game {
                 }
                 let didMove = false;
 
-                if (unit.targetPoints.length > 0) {
-                    // Repath first
-                    this.processStateChange(SetUnitTargetStateChange.create(this.state, 
-                        unit.owner,
-                        unit.position, unit.targetPoints));
-                    if (unit.targetPoints.length > 0) {
-                        unit.desiredPath = PathFinder.findPath(this.state,
-                            unit.position, unit.targetPoints[0]);
-                    }
-                }
+                
+                // if (unit.targetPoints.length > 0) {
+                //     // Repath first
+                //     this.processStateChange(SetUnitTargetStateChange.create(this.state, 
+                //         unit.owner,
+                //         unit.position, unit.targetPoints));
+                //     if (unit.targetPoints.length > 0) {
+                //         unit.desiredPath = PathFinder.findPath(this.state,
+                //             unit.position, unit.targetPoints[0]);
+                //     }
+                // }
 
                 if (unit.targetPoints.length !== 0 && unit.desiredPath &&
                         unit.desiredPath.length !== 0 && actionMap[id].nextMoveTime < currentTime &&
