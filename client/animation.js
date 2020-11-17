@@ -165,7 +165,7 @@ class AttackProjectileAnimation extends MapObjectAnimation {
         this.popupTextAnimation = undefined;
 
         if (unit !== undefined) {
-            unit.rotation = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
+            unit.rotation = Math.atan2(this.to.y - this.from.y, this.to.x - this.from.x) + (Math.PI / 2);
         }
     }
 
