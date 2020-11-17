@@ -258,6 +258,11 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             const username = userObject.username;
             const elo = userObject.elo;
 
+            if (!Object.values(connectedUsers).every(c => c.userID !== userID)) {
+                // Someone else already logged in as me
+                socket.emit('login-failed', 'Already logged in!');
+                return;
+            }
             console.log(`Auth success [${userID}]: ${username}`);
 
             connectedUsers[socket.id].username = username;
@@ -284,7 +289,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             if (userObject.isAdmin) {
                 clientCallback.isAdmin = true;
             }
-            callback(undefined, clientCallback);
+            callback(clientCallback);
 
             if (potentialGame) {
                 socket.emit('game-start',
@@ -302,7 +307,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 db.collection('users').find({ id: payload.sub }).toArray(function(err, user) {
                     if (err) {
                         console.log('DB Error: ' + err);
-                        socket.emit('login-failed');
+                        socket.emit('login-failed', 'DB Error!');
                         return;
                     }
                     if (user.length > 0) {
@@ -321,7 +326,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                             }, function(err, updatedUser) {
                                 if (err) {
                                     console.log('DB Error: ' + err);
-                                    socket.emit('login-failed');
+                                    socket.emit('login-failed', 'DB Error!');
                                     return;
                                 }
                                 authSuccessProcedure(updatedUser.value, callback);
@@ -332,7 +337,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                         db.collection('users').insertOne(newUser, function(err) {
                             if (err) {
                                 console.log('DB Error: ' + err);
-                                socket.emit('login-failed');
+                                socket.emit('login-failed', 'DB Error!');
                                 return;
                             }
                             authSuccessProcedure(newUser, callback);
@@ -342,7 +347,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             })
             .catch(err => {
                 console.error(err);
-                socket.emit('login-failed');
+                socket.emit('login-failed', 'Uncaught Exception!');
             });
         });
 
@@ -368,12 +373,12 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             db.collection('users').find({ username, password: generateHash(password) }).toArray(function(err, res) {
                 if (err) {
                     console.log('DB Error: ' + err);
-                    socket.emit('login-failed');
+                    socket.emit('login-failed', 'DB Error!');
                 }
                 else {
                     if (res.length !== 1) {
                         console.log('Auth failed for: ' + username);
-                        callback('failed', undefined);
+                        socket.emit('login-failed', 'Authentication Failed!');
                     }
                     else {
                         console.log('Auth success for: ' + username);

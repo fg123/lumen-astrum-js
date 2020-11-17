@@ -1,7 +1,7 @@
 <template>
     <div class="content">
         <logo />
-        <div class="errorMessage" v-if="hasError">Username or password was incorrect.</div>
+        <div class="errorMessage" v-if="hasError">{{ hasError }}</div>
         <div class="loginForm">
             <input
                 type="text"
@@ -69,7 +69,7 @@ const Constants = require('../shared/constants');
 module.exports = {
     data() {
         return {
-            hasError: false,
+            hasError: "false",
             params: {
                 client_id: "931239577838-1j1f1jb25jkduhupr3njdqrho1ae85bs.apps.googleusercontent.com"
             },
@@ -78,6 +78,12 @@ module.exports = {
             },
             isProduction: Constants.IS_PRODUCTION
         };
+    },
+    mounted() {
+        this.hasError = undefined;
+        this.root.socket.on('login-failed', (reason) => {
+            this.hasError = reason;
+        });
     },
     methods: {
         checkEnter(e) {
@@ -88,20 +94,12 @@ module.exports = {
         },
         onSuccess(googleUser) {
             const id_token = googleUser.getAuthResponse().id_token;
-            this.root.glogin(id_token, (err, data) => {
-                if (err) {
-                    this.hasError = true;
-                    return;
-                }
+            this.root.glogin(id_token, (data) => {
                 this.root.loginSuccess(data);
             });
         },
         login(username, password) {
-            this.root.login(username, password, (err, data) => {
-                if (err) {
-                    this.hasError = true;
-                    return;
-                }
+            this.root.login(username, password, (data) => {
                 this.root.loginSuccess(data);
             });
         },
