@@ -5,7 +5,7 @@
                 v-bind:key="index"
                 v-bind:style="{ 'color': !message.author ? message.color: '#fff' }">
                 <template v-if="message.author">
-                    <b v-bind:style="{ 'color': message.color }">{{ message.author }}</b>:&nbsp;
+                    <b v-bind:style="{ 'color': message.color }">{{ game.clientState.gameState.getUsername(message.author) }}</b>:&nbsp;
                 </template>
                 {{ message.content }}
             </div>

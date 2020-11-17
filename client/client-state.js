@@ -143,13 +143,8 @@ module.exports = class ClientState {
             // }
         });
 
-        socket.on('login-success', (username) => {
-            this.player = username;
-        });
-
-        socket.on('changed-username', (newUsername) => {
-            console.log('changed-username');
-            this.player = newUsername;
+        socket.on('login-success', (userID) => {
+            this.player = userID;
         });
 
         socket.on('disconnect', () => {
@@ -259,7 +254,8 @@ module.exports = class ClientState {
         this.replayManager = new ReplayManager(this, this.gameState, replayState.stateChanges);
     }
 
-    setupMapAndGameState(gameStartTime, players, mapName) {
+    setupMapAndGameState(gameStartTime, playersMap, mapName) {
+        const players = Object.keys(playersMap);
         const player = this.player;
         const index = players.indexOf(player);
         if (index === -1) {
@@ -282,7 +278,7 @@ module.exports = class ClientState {
         
         const gameMap = setupMap(maps[mapName]);
         const commandCenterLocation = gameMap.commandCenterLocations[index];
-        this.gameState = new GameState(gameStartTime, players, gameMap);
+        this.gameState = new GameState(gameStartTime, playersMap, gameMap);
         this.gameState.clientState = this;
         this.commandCenter = this.gameState.mapObjects[
             commandCenterLocation.y][
@@ -365,7 +361,7 @@ module.exports = class ClientState {
             }
 
             const attacker = this.gameState.mapObjects[change.data.posFrom.y][change.data.posFrom.x];
-            if (attacker && attacker.isUnit && attacker.custom && attacker.custom.muzzle) {
+            if (attacker && attacker.isUnit && attacker.custom && attacker.custom.muzzleX !== undefined && attacker.custom.muzzleY !== undefined) {
                 this.globalAnimationManager.addAnimation(
                     new MuzzleFlashAnimation(
                         this.resourceManager,

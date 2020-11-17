@@ -60,7 +60,7 @@ module.exports = {
         players() {
             if (!this.clientState) return [];
             if (!this.clientState.gameState) return [];
-            return Object.keys(this.clientState.gameState.players);
+            return Object.keys(this.clientState.gameState.players).map(k => this.clientState.gameState.getUsername(k));
         },
         mapObjectNames() {
             return Object.keys(structures).concat(Object.keys(units));

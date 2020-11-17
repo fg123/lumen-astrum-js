@@ -241,6 +241,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             socket: socket,
             status: 'connected',
             username: null,
+            userID: undefined,
             inQueue: false,
             game: null,
             isAdmin: false
@@ -252,27 +253,33 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
         });
 
         let authSuccessProcedure = (userObject, callback) => {
+            // If no GAuth ID, use MongoID
+            const userID = (userObject.id || userObject._id).toString();
             const username = userObject.username;
             const elo = userObject.elo;
 
+            console.log(`Auth success [${userID}]: ${username}`);
+
             connectedUsers[socket.id].username = username;
             connectedUsers[socket.id].elo = elo;
+            connectedUsers[socket.id].userID = userID;
             connectedUsers[socket.id].isAdmin = userObject.isAdmin || false;
 
-            socket.emit('login-success', username);
+            socket.emit('login-success', userID);
 
-            let potentialGame = disconnectedMidGame[username];
+            let potentialGame = disconnectedMidGame[userID];
             if (potentialGame) {
                 console.log('Previously disconnected from a game!');
-                delete disconnectedMidGame[username];
+                delete disconnectedMidGame[userID];
                 connectedUsers[socket.id].game = potentialGame;
-                potentialGame.updateSocket(username, socket);
+                potentialGame.updateSocket(userID, socket);
             }
             
             const clientCallback = {
                 username: username,
                 picture: userObject.picture,
-                elo: elo
+                elo: elo,
+                userID: userID
             };
             if (userObject.isAdmin) {
                 clientCallback.isAdmin = true;
@@ -282,7 +289,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             if (potentialGame) {
                 socket.emit('game-start',
                     potentialGame.state.gameStartTime,
-                    potentialGame.players,
+                    potentialGame.playerUsernames,
                     potentialGame.mapName);
                 for (let i = 0; i < potentialGame.stateChanges.length; i++) {
                     socket.emit('state-change', potentialGame.stateChanges[i]);
@@ -370,7 +377,6 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                     }
                     else {
                         console.log('Auth success for: ' + username);
-                        
                         authSuccessProcedure(res[0], callback);
                     }
                 }
@@ -420,12 +426,15 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 !connectedUsers[socket.id].inQueue) {
                 
                 let startGame = (queuedPlayers) => {
-                    const socketMap = {};
+                    const playerMap = {};
                     const gameStartTime = Date.now();
                     queuedPlayers.forEach(p => {
-                        socketMap[p.username] = p.socket;
+                        playerMap[p.userID] = {
+                            socket: p.socket,
+                            username: connectedUsers[p.socket.id].username
+                        };
                     });
-                    const game = new Game(socketMap, gameStartTime, handleGameOver, type);
+                    const game = new Game(playerMap, gameStartTime, handleGameOver, type);
 
                     queuedPlayers.forEach(p => {
                         connectedUsers[p.socket.id].game = game;
@@ -433,7 +442,10 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                     });
 
                     games.push(game);
-                    const players = queuedPlayers.map(p => p.username);
+                    const players = {};
+                    queuedPlayers.forEach(p => {
+                        players[p.userID] = connectedUsers[p.socket.id].username;
+                    });
                     queuedPlayers.forEach(p => {
                         p.socket.emit('game-start',
                             gameStartTime,
@@ -445,7 +457,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                 const queue = queues[type];
                 if (queue !== undefined) {
                     console.log(`Joining ${type} queue for: ${connectedUsers[socket.id].username}`);
-                    const result = queue.joinQueue(connectedUsers[socket.id].username,
+                    const result = queue.joinQueue(connectedUsers[socket.id].userID,
                         socket, connectedUsers[socket.id].elo);
                     callback();
                     if (result !== undefined) {
@@ -479,7 +491,8 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             callback(gitChangeLog);
         });
         const leaveQueue = () => {
-            Object.values(queues).forEach(q => q.leaveQueue(connectedUsers[socket.id].username));
+            Object.values(queues).forEach(q => q.leaveQueue(connectedUsers[socket.id].userID));
+            console.log('Leaving queue for', connectedUsers[socket.id].username);
         };
 
         socket.on('leave-queue', function (callback) {
@@ -494,7 +507,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             if (potentialGame) {
                 console.log('Disconnected mid game! Storing in list!');
                 potentialGame.removeSocket(socket);
-                disconnectedMidGame[connectedUsers[socket.id].username] = potentialGame;
+                disconnectedMidGame[connectedUsers[socket.id].userID] = potentialGame;
             }
             delete connectedUsers[socket.id];
         });

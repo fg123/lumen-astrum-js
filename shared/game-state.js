@@ -9,7 +9,8 @@ const Data = require('./data');
 const { distance } = require('../client/utils');
 
 class PlayerState {
-    constructor(playerName, team, gameMap) {
+    constructor(playerId, playerName, team, gameMap) {
+        this.playerId = playerId;
         this.playerName = playerName;
         this.team = team;
 
@@ -52,28 +53,26 @@ class PlayerState {
 };
 
 module.exports = class GameState {
-    // All functions that take "player" is the designated player identifier,
-    //   right now it is the username of the player, it's whatever keys into
-    //   this.players.
-
     // Teams is a list of team-assignments
-    constructor(gameStartTime, playerUsernameList, gameMap) {
+    constructor(gameStartTime, playerIdUsernameMap, gameMap) {
         this.gameMap = gameMap;
         this.nextObjectId = 0;
 
         this.players = {};
         this.teamMap = {};
 
-        for (let i = 0; i < playerUsernameList.length; i++) {
-            const username = playerUsernameList[i];
+        const playerIds = Object.keys(playerIdUsernameMap);
+        for (let i = 0; i < playerIds.length; i++) {
+            const id = playerIds[i];
             // Maps have string keys anyway
             const team = gameMap.teams[i].toString();
-            this.players[username] = new PlayerState(username,
+            this.players[id] = new PlayerState(id,
+                playerIdUsernameMap[id],
                 team, gameMap);
             if (!this.teamMap[team]) {
                 this.teamMap[team] = [];
             }
-            this.teamMap[team].push(username);            
+            this.teamMap[team].push(id);            
         }
         
         this.mapObjects = [];
@@ -111,10 +110,10 @@ module.exports = class GameState {
         }
 
         /* Pre-constructed buildings */
-        console.log('Creating game state with players:', playerUsernameList);
-        for (let i = 0; i < playerUsernameList.length; i++) {
-            this.players[playerUsernameList[i]].commandBase =
-                this.insertMapObject(gameMap.commandCenterLocations[i], 'Command Base', playerUsernameList[i]);
+        console.log('Creating game state with players:', playerIds);
+        for (let i = 0; i < playerIds.length; i++) {
+            this.players[playerIds[i]].commandBase =
+                this.insertMapObject(gameMap.commandCenterLocations[i], 'Command Base', playerIds[i]);
         }
 
         /* Setup Harvesters on Minerals */
@@ -129,6 +128,10 @@ module.exports = class GameState {
         if (gameMap.onMapStart) {
             gameMap.onMapStart(this);
         }
+    }
+
+    getUsername(player) {
+        return this.players[player].playerName;
     }
 
     getGameTime() {

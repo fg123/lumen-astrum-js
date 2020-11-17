@@ -229,7 +229,7 @@ class MuzzleFlashAnimation extends MapObjectAnimation {
         this.resourceManager = resourceManager;
         this.attacker = attacker;
         this.location = toDrawCoord(attacker.position);
-        this.muzzleOffset = attacker.custom.muzzle;
+        this.muzzleOffset = new Tuple(attacker.custom.muzzleX, attacker.custom.muzzleY);
         this.totalTicks = 0;
         this.rotation = attacker.rotation;
         this.framesOn = 4;

@@ -92,13 +92,14 @@ module.exports = class UICanvas {
     }
 
     drawTerritoryClaims(screenWidth, screenHeight) {
+        const gameState = this.state.gameState;
         this.context.textBaseline = 'alphabetic';
         this.context.font = 'bold 13px Prompt'
 
         this.context.fillStyle = 'white';
         
         this.context.textAlign = 'left';
-        this.context.fillText(`${this.state.player}`, screenWidth - 262, 125);
+        this.context.fillText(`${gameState.getUsername(this.state.player)}`, screenWidth - 262, 125);
 
         this.context.textAlign = 'right';
         this.context.fillText(`Territory to Win: ${this.state.getMap().percentageClaimToWin * 100}%`, screenWidth - 12, 125);
@@ -130,7 +131,7 @@ module.exports = class UICanvas {
         const mousePos = this.state.inputManager.mouseState.position;
 
         for (let i = 0; i < teams.length; i++) {
-            const teammates = this.state.gameState.teamMap[teams[i]];
+            const teammates = gameState.teamMap[teams[i]];
             let x = startX;
             for (let j = 0; j < teammates.length; j++) {
                 const territory = playerStateMap[teammates[j]].calculateTerritorySize();
@@ -150,13 +151,13 @@ module.exports = class UICanvas {
                 
                 if (mousePos.x >= x && mousePos.x <= x + barWidth &&
                     mousePos.y >= y && mousePos.y <= y + barHeight) {
-                    this.state.cursorMessage = `${teammates[j]}: ${territory} / ${totalTiles} [${(percentage * 100).toFixed(2)}%]`;
+                    this.state.cursorMessage = `${gameState.getUsername(teammates[j])}: ${territory} / ${totalTiles} [${(percentage * 100).toFixed(2)}%]`;
                 }
                 x += barWidth;
             }
             this.context.fillStyle = 'white';
             this.context.textBaseline = 'middle';
-            this.context.fillText(`${((this.state.gameState.getTeamTerritorySize(teams[i]) / totalTiles) * 100).toFixed(0)}%`, screenWidth - 12, y + barHeight / 2);
+            this.context.fillText(`${((gameState.getTeamTerritorySize(teams[i]) / totalTiles) * 100).toFixed(0)}%`, screenWidth - 12, y + barHeight / 2);
 
             y += barHeight + spacingHeight;
         }

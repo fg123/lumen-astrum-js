@@ -425,10 +425,8 @@ module.exports.units = {
         "targetable": true,
         "options": [],
         "custom": {
-            "muzzle": {
-                "x": 0,
-                "y": -65
-            }
+            "muzzleX": 0,
+            "muzzleY": -75
         },
         "icon": "icons/marineIcon.png",
         "texture": "units/marine.png",

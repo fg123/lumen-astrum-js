@@ -18,8 +18,8 @@ module.exports.Queue = class Queue {
         this.partySize = partySize;
     }
 
-    joinQueue(username, socket, elo) {
-        this.queue.push({ username, socket, elo });
+    joinQueue(userID, socket, elo) {
+        this.queue.push({ userID, socket, elo });
         if (this.queue.length >= this.partySize) {
             // Matchmaking Later
             const players = [];
@@ -32,9 +32,9 @@ module.exports.Queue = class Queue {
         return undefined;
     }
 
-    leaveQueue(username) {
+    leaveQueue(userID) {
         for (let i = 0; i < this.queue.length; i++) {
-            if (this.queue[i].username === username) {
+            if (this.queue[i].userID === userID) {
                 this.queue.splice(i, 1);
                 return;
             }

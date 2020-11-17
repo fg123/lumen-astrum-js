@@ -604,7 +604,7 @@ class ChatMessageStateChange extends StateChange {
             });
         }
         else if (this.data.message === '/crash' &&
-                (this.from === 'Arasseo' || this.from === 'test')) {
+                (state.getUsername(this.from) === 'Arasseo' || state.getUsername(this.from) === 'test')) {
             throw "Intentional crash!";
         }
         else {

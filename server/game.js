@@ -6,12 +6,9 @@ const {
     MoveUnitStateChange, 
     ChatMessageStateChange,
     UnitAttackStateChange, 
-    SetUnitTargetStateChange,
     ActionTickStateChange
 } = require('../shared/state-change');
-const { default: modifier } = require('../shared/modifier');
 const { maps, setupMap } = require('../shared/map');
-const PathFinder = require('../shared/path-finder');
 const { movementSort } = require('./movement-controller');
 
 module.exports = class Game {
@@ -19,15 +16,18 @@ module.exports = class Game {
         return {
             gameStartTime: this.gameStartTime,
             mapName: this.mapName,
-            players: this.players,
+            playerUsernames: this.playerUsernames,
             stateChanges: this.stateChanges
         };
     }
 
     static fromJson(json, onGameOver) {
         const map = {};
-        json.players.forEach(p => {
-            map[p] = undefined;
+        Object.keys(json.playerUsernames).forEach(p => {
+            map[p] = {
+                socket: undefined,
+                username: json.playerUsernames[p]
+            };
         });
 
         const game = new Game(map, json.gameStartTime, onGameOver, json.mapName);
@@ -42,23 +42,31 @@ module.exports = class Game {
         return game;
     }
 
-    constructor(playerSocketMap, gameStartTime, onGameOver, mapName, options = {
+    constructor(playersMap, gameStartTime, onGameOver, mapName, options = {
         testMode: false,
+        // TestMode runs no timers.
         verboseMode: true
     }) {
-        // TestMode runs no timers.
+        // Players is a map of id: {socket:, username:}
 
         this.mapName = mapName;
         this.gameStartTime = gameStartTime;
         this.testMode = options.testMode;
         this.verboseMode = options.verboseMode;
         
-        this.players = Object.keys(playerSocketMap);
+        this.players = Object.keys(playersMap);
         this.onGameOver = onGameOver;
+        
+        this.sockets = {};
+        this.playerUsernames = {};
 
-        this.sockets = playerSocketMap;
+        this.players.forEach(k => {
+            this.sockets[k] = playersMap[k].socket;
+            this.playerUsernames[k] = playersMap[k].username;
+        })
+        
         const gameMap = setupMap(maps[mapName]);
-        this.state = new GameState(gameStartTime, this.players, gameMap);
+        this.state = new GameState(gameStartTime, this.playerUsernames, gameMap);
 
         this.stateChanges = [];
 
@@ -170,8 +178,8 @@ module.exports = class Game {
         return this.state.getWinner();
     }
 
-    updateSocket(username, socket) {
-        this.sockets[username] = socket;
+    updateSocket(userID, socket) {
+        this.sockets[userID] = socket;
     }
 
     removeSocket(socket) {

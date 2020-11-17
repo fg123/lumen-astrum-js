@@ -47,8 +47,14 @@ testsToRun.forEach(f => {
         .filter(t => t.length > 0 && !t.startsWith('#'));
 
     const game = new Game({
-        'A': undefined,
-        'B': undefined
+        'A': {
+            socket: undefined,
+            username: 'A'
+        },
+        'B': {
+            socket: undefined,
+            username: 'B'
+        }
     }, Date.now(), () => {
         game.isGameOver = true;
     }, 'testMap', {
