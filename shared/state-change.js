@@ -600,7 +600,7 @@ class ChatMessageStateChange extends StateChange {
             state.forfeit(this.from);
             state.chatMessages.push({
                 author: undefined,
-                content: `${this.from} has forfeited!`
+                content: `${state.getUsername(this.from)} has forfeited!`
             });
         }
         else if (this.data.message === '/crash' &&
