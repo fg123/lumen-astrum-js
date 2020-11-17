@@ -378,7 +378,7 @@ module.exports.structures = {
         "texture": "structures/arctictower.png"
     },
     "Static Amplifier": {
-        "description": "Takes 2 turns to build. Produced unit's attacks hit an additional enemy for 10% of their attack damage.",
+        "description": "Takes 2 turns to build. Produced unit's attacks hit an additional enemy for 15% of their attack damage.",
         "health": 2500,
         "shield": 0,
         "width": 0,
@@ -387,7 +387,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "bonusDamageModifier": 0.1
+            "bonusDamageModifier": 0.15
         },
         "icon": "icons/staticAmplifierIcon.png",
         "texture": "structures/staticAmplifier.png"

@@ -183,21 +183,9 @@ function updateDiff() {
         console.log('Setting localUnits');
         storage.setItem('localUnits', JSON.stringify(Units));
     }
-    
-    if (!mapsDiff) {
-        mapsDiff = "No Changes Made";
-        console.log('Removing localMaps');
-        storage.removeItem('localMaps');
-    }
-    else {
-        console.log('Setting localMaps');
-        storage.setItem('localMaps', JSON.stringify(Maps));
-    }
-
 
     $('.structuresDiff').html(structuresDiff);
     $('.unitsDiff').html(unitsDiff);
-    $('.mapsDiff').html(mapsDiff);
 }
 
 function revert() {
