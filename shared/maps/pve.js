@@ -1,4 +1,5 @@
 const { Tuple } = require('../coordinates');
+const { RetaliationModifier } = require('../modifier');
 
 module.exports = {
     data: [
@@ -73,8 +74,11 @@ module.exports = {
         state.insertMapObject(new Tuple(26, 24), 'Armed Turret', undefined);
 
         
-        state.insertMapObject(new Tuple(12, 32), 'Marine', undefined);
-        state.insertMapObject(new Tuple(14, 32), 'Marine', undefined);
-        state.insertMapObject(new Tuple(13, 32), 'Golem', undefined);
+        this.retaliate(state, state.insertMapObject(new Tuple(12, 32), 'Marine', undefined));
+        this.retaliate(state, state.insertMapObject(new Tuple(14, 32), 'Marine', undefined));
+        this.retaliate(state, state.insertMapObject(new Tuple(13, 32), 'Golem', undefined));
+    },
+    retaliate(state, unit) {
+        unit.addModifier(state, unit, new RetaliationModifier());
     }
 };

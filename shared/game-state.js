@@ -291,6 +291,7 @@ module.exports = class GameState {
     }
 
     addVisibility(x, y, player, value = 1) {
+        if (player === undefined) return;
         const arr = this.getVisibilityMap(player);
         if (arr[y][x]) {
             arr[y][x] += value;
@@ -300,6 +301,7 @@ module.exports = class GameState {
     }
 
     removeVisibility(x, y, player, value = 1) {
+        if (player === undefined) return;
         const arr = this.getVisibilityMap(player);
         arr[y][x] -= value;
     }

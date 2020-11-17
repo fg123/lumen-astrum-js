@@ -4,7 +4,6 @@ const { PopupTextAnimation, AttackProjectileAnimation } = require('../client/ani
 const { Resource } = require('../client/resources');
 const Constants = require('./constants');
 const { tupleDistance } = require('./coordinates');
-const { default: PathFinder } = require('./path-finder');
 
 class BaseModifier {
     attackDamage(inAttackDamage) {
@@ -147,6 +146,57 @@ class StunnedModifier extends BaseModifier {
 
     _stunned() {
         return true;
+    }
+};
+
+class RetaliationModifier extends BaseModifier {
+    constructor() {
+        super();   
+        this.target = undefined;  
+    }
+
+    _getName() {
+        return "RetaliationModifier";
+    }
+
+    _getDisplayName() {
+        return "Retaliation";
+    }
+
+    _getIconIndex() { return 11; }
+
+    _getDescription() {
+        return `Unit will confront their attacker and path towards them!`;
+    }
+
+    _onAttach(unit) {
+        this.me = unit;
+    }
+
+    maybeChangeTarget(target) {
+        if (this.target && this.target.currentHealth <= 0) {
+            this.target = undefined;
+        }
+        if (this.target === undefined) {
+            this.target = target;
+        }
+    }
+
+    pathTowardsTarget() {
+        console.log(this.target);
+        if (this.target && this.me) {
+            this.me.targetPoints = [this.target.position];
+        }
+    }
+
+    _onLaunchAttack(state, attacker, target, damage) {
+        this.maybeChangeTarget(target);
+        this.pathTowardsTarget();
+    }
+
+    _onTakeDamage(state, attacker, target, damage) {
+        this.maybeChangeTarget(attacker);
+        this.pathTowardsTarget();
     }
 };
 
@@ -539,5 +589,6 @@ module.exports = {
     BarracksBuffGiver,
     ArcticTippedModifier,
     FlashPointModifier,
-    HurricaneModifier
+    HurricaneModifier,
+    RetaliationModifier
 };
