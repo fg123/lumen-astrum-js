@@ -48,7 +48,7 @@ module.exports = class PathFinder {
                     if (!occupiedTarget && gameState.occupied[nextOffset.y][nextOffset.x]) {
                         return;
                     }
-                    if (occupiedTarget && !(options.ignoreUnits && occupiedTarget.isUnit)) {
+                    if (occupiedTarget && !(options.ignoreUnits && occupiedTarget.isUnit && occupiedTarget.targetPoints.length !== 0)) {
                         return;
                     }
                 }
