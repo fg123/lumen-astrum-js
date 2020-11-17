@@ -369,7 +369,7 @@ class PhaseChangeStateChange extends StateChange {
                         if (unit.onCreate) {
                             unit.onCreate(state);
                         }
-                        unit.addModifier(state, state.getCommandBase(unit.owner),
+                        unit.addModifier(state, unit,
                             new StunnedModifier("Newly created unit!"), {
                                 duration: Constants.ACTION_MAX_TIME * 500
                             });

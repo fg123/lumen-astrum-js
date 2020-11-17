@@ -176,6 +176,7 @@ module.exports = class GameState {
     }
 
     hasPlayerForfeited(player) {
+        if (player === undefined) return false;
         return this.players[player].forfeited;
     }
 
@@ -269,6 +270,7 @@ module.exports = class GameState {
     }
 
     isTeammate(a, b) {
+        if (a === undefined && b === undefined) return true;
         if (a && b) {
             return this.players[a].team === this.players[b].team;
         }
@@ -279,6 +281,7 @@ module.exports = class GameState {
 
     isVisible(x, y, player) {
         // Visibility is shared among teammates.
+        if (player === undefined) return true;
         const teammates = this.teamMap[this.players[player].team];
         for (let i = 0; i < teammates.length; i++) {
             const arr = this.getVisibilityMap(teammates[i]);
@@ -349,12 +352,14 @@ module.exports = class GameState {
             this.units.push(unit);
             this.occupied[location.y][location.x] = location;
 
-            let surrounding = this.getVisible(location, unit.sightRange);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (this.gameMap.withinMap(surrounding[i])) {
-                    this.addVisibility(
-                        surrounding[i].x, surrounding[i].y, player,
-                        unit.getVisionValue());
+            if (player !== undefined) {
+                let surrounding = this.getVisible(location, unit.sightRange);
+                for (let i = 0; i < surrounding.length; i++) {
+                    if (this.gameMap.withinMap(surrounding[i])) {
+                        this.addVisibility(
+                            surrounding[i].x, surrounding[i].y, player,
+                            unit.getVisionValue());
+                    }
                 }
             }
             return unit;
@@ -462,9 +467,13 @@ module.exports = class GameState {
                     break;
                 }
             }
-            let surrounding = this.getVisible(location, mapObject.sightRange);
-            for (let i = 0; i < surrounding.length; i++) {
-                this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.owner, mapObject.getVisionValue());
+            
+            // Neutral buildings are owned by undefined
+            if (mapObject.owner !== undefined) {
+                let surrounding = this.getVisible(location, mapObject.sightRange);
+                for (let i = 0; i < surrounding.length; i++) {
+                    this.removeVisibility(surrounding[i].x, surrounding[i].y, mapObject.owner, mapObject.getVisionValue());
+                }
             }
         }
     }
@@ -697,7 +706,7 @@ module.exports = class GameState {
         }
 
         // console.log(nonFullyForfeitedTeams);
-        if (nonFullyForfeitedTeams.length === 1) {
+        if (nonFullyForfeitedTeams.length === 1 && this.gameMap.teams.length > 1) {
             // Only one non-fully forfeited teams left
             return this.getNonForfeitedPlayersFromTeam(nonFullyForfeitedTeams[0]);
         }

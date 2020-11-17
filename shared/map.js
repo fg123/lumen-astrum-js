@@ -98,7 +98,8 @@ const maps = {
     '3p': require('./maps/raidboss.js'),
     '2p': require('./maps/2player.js'),
     '2v2': require('./maps/2v2.js'),
-    'testMap': require('./maps/testMap.js')
+    'testMap': require('./maps/testMap.js'),
+    'pve': require('./maps/pve.js')
 };
 
 module.exports = {

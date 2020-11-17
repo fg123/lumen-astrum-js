@@ -71,7 +71,8 @@ function startServer() {
         '4p': new Queue(4),
         '2p': new Queue(2),
         '3p': new Queue(3),
-        '2v2': new Queue(4)
+        '2v2': new Queue(4),
+        'pve': new Queue(1)
     };
 
     const games = [];
