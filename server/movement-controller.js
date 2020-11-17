@@ -42,7 +42,7 @@ module.exports.movementSort = function (game, nonDeadUnits) {
             noDependencyUnit.add(unit);
         }
     }
-    const immovableIdSet = new Set();
+    /*const immovableIdSet = new Set();
     // Mark all immovable units DFS
     let i = 0;
     while (i < immovableUnits.length) {
@@ -53,10 +53,10 @@ module.exports.movementSort = function (game, nonDeadUnits) {
             immovableUnits.push(...dependentsMap[front.id]);
         }
         i += 1;
-    }
+    }*/
     
     // Every unit is either in the dependency map or in the noDependencyUnit
-    const result = [...noDependencyUnit];
+    const result = [...immovableUnits, ...noDependencyUnit];
     i = 0;
     while (i < result.length) {
         const front = result[i];
