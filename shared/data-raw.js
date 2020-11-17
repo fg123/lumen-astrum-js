@@ -480,7 +480,11 @@ module.exports.units = {
         ],
         "custom": {},
         "icon": "icons/combatEngineerIcon.png",
-        "texture": "units/combatengineer.png"
+        "texture": "units/combatengineer.png",
+        "animation": {
+            "baseLayer": "",
+            "attackAnimation": ""
+        }
     },
     "Reaver": {
         "attackRange": 0,
@@ -501,7 +505,11 @@ module.exports.units = {
             "explodeDamage2": 250
         },
         "icon": "icons/reaverIcon.png",
-        "texture": "units/reaver.png"
+        "texture": "units/reaver.png",
+        "animation": {
+            "baseLayer": "",
+            "attackAnimation": ""
+        }
     },
     "Armed Turret": {
         "attackRange": 3,
@@ -519,7 +527,11 @@ module.exports.units = {
         "options": [],
         "custom": {},
         "icon": "icons/turretIcon.png",
-        "texture": "units/armedturret.png"
+        "texture": "units/armedturret.png",
+        "animation": {
+            "baseLayer": "",
+            "attackAnimation": ""
+        }
     },
     "Golem": {
         "attackRange": 1,
@@ -541,6 +553,48 @@ module.exports.units = {
         "animation": {
             "baseLayer": "units/golem/layers.json",
             "attackAnimation": "units/golem/punch.json"
+        }
+    },
+    "Raider": {
+        "attackRange": 2,
+        "attackSpeed": 0.8,
+        "damage": 500,
+        "description": "Strong infantry unit. High in health and damage.",
+        "health": 750,
+        "moveRange": 3,
+        "shield": 0,
+        "sightRange": 3,
+        "tier": 4,
+        "turnsToBuild": 1,
+        "targetable": true,
+        "options": [],
+        "custom": {},
+        "icon": "icons/icons_18.png",
+        "texture": "units/raider.png",
+        "animation": {
+            "baseLayer": "",
+            "attackAnimation": ""
+        }
+    },
+    "Praetorian": {
+        "attackRange": 3,
+        "attackSpeed": 0.8,
+        "damage": 150,
+        "description": "Strong infantry unit. High in health and damage.",
+        "health": 750,
+        "moveRange": 3,
+        "shield": 0,
+        "sightRange": 5,
+        "tier": 4,
+        "turnsToBuild": 1,
+        "targetable": true,
+        "options": [],
+        "custom": {},
+        "icon": "icons/icons_18.png",
+        "texture": "units/praetorian.png",
+        "animation": {
+            "baseLayer": "",
+            "attackAnimation": ""
         }
     }
 };

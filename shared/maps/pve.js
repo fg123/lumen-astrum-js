@@ -63,20 +63,24 @@ module.exports = {
     teams: [1],
     onMapStart(state) {
         // PVE Soldiers
-        state.insertMapObject(new Tuple(2, 39), 'Armed Turret', undefined);
-        state.insertMapObject(new Tuple(3, 39), 'Armed Turret', undefined);
-        state.insertMapObject(new Tuple(3, 40), 'Armed Turret', undefined);
-        state.insertMapObject(new Tuple(2, 41), 'Armed Turret', undefined);
+        state.insertMapObject(new Tuple(2, 39), 'Marine', undefined);
+        state.insertMapObject(new Tuple(3, 39), 'Marine', undefined);
+        state.insertMapObject(new Tuple(3, 40), 'Marine', undefined);
+        state.insertMapObject(new Tuple(2, 41), 'Marine', undefined);
 
-        state.insertMapObject(new Tuple(26, 22), 'Armed Turret', undefined);
-        state.insertMapObject(new Tuple(25, 22), 'Armed Turret', undefined);
-        state.insertMapObject(new Tuple(25, 23), 'Armed Turret', undefined);
-        state.insertMapObject(new Tuple(26, 24), 'Armed Turret', undefined);
+        state.insertMapObject(new Tuple(26, 22), 'Marine', undefined);
+        state.insertMapObject(new Tuple(25, 22), 'Marine', undefined);
+        state.insertMapObject(new Tuple(25, 23), 'Marine', undefined);
+        state.insertMapObject(new Tuple(26, 24), 'Marine', undefined);
 
         
-        this.retaliate(state, state.insertMapObject(new Tuple(12, 32), 'Marine', undefined));
-        this.retaliate(state, state.insertMapObject(new Tuple(14, 32), 'Marine', undefined));
-        this.retaliate(state, state.insertMapObject(new Tuple(13, 32), 'Golem', undefined));
+        state.insertMapObject(new Tuple(12, 32), 'Marine', undefined);
+        state.insertMapObject(new Tuple(14, 32), 'Marine', undefined);
+        state.insertMapObject(new Tuple(13, 32), 'Golem', undefined);
+
+        
+        this.retaliate(state, state.insertMapObject(new Tuple(6, 5), 'Praetorian', undefined));
+        this.retaliate(state, state.insertMapObject(new Tuple(20, 5), 'Raider', undefined));
     },
     retaliate(state, unit) {
         unit.addModifier(state, unit, new RetaliationModifier());

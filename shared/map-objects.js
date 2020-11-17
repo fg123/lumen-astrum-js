@@ -166,7 +166,7 @@ module.exports.Unit = class extends ModifierHolder {
         /* true indicates a blocking pipeline, only one animation can play */
         this.animationManager = new AnimationManager(true);
    
-        if (this.animation) {
+        if (this.animation && this.animation.baseLayer) {
             this.baseAnimation = new BaseAnimation(this.animation);
         }
 
