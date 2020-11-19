@@ -4,6 +4,7 @@ const { PopupTextAnimation, AttackProjectileAnimation } = require('../client/ani
 const { Resource } = require('../client/resources');
 const Constants = require('./constants');
 const { tupleDistance } = require('./coordinates');
+const { default: PathFinder } = require('./path-finder');
 
 class BaseModifier {
     attackDamage(inAttackDamage) {
@@ -549,6 +550,41 @@ class HurricaneModifier extends BaseModifier {
     }
 };
 
+class ArmouryModifier extends BaseModifier {
+    constructor(armourModifier, armourMultiplier) {
+        super();
+        this.armourModifier = armourModifier;
+        this.armourMultiplier = armourMultiplier;
+    }
+
+    _getName() {
+        return "ArmouryModifier";
+    }
+
+    _getDisplayName() {
+        return "Armour Plates";
+    }
+
+    _getIconIndex() { return 11; }
+
+    _getDescription(state) {
+        return `Unit gains armour plates that block (${this.armourModifier}) attacks per turn!`
+    }
+
+    //Set plates at start of turn to number of armour plates
+    _onActionStart(state) {
+        this.turnPlates = this.armourModifier; 
+
+    }
+    _onTakeDamage(state, attacker, damage) {
+        if (this.turnPlates >= 1 && damage > 0) {
+            this.turnPlates -= 1;
+            return (1 - this.armourMultiplier) * damage;
+        }
+        return damage;
+    }   
+};
+
 // Applied to buildings, lets the building apply buff to units constructed
 class BarracksBuffGiver extends BaseModifier {
     constructor(buffConstructor) {
@@ -590,5 +626,5 @@ module.exports = {
     ArcticTippedModifier,
     FlashPointModifier,
     HurricaneModifier,
-    RetaliationModifier
+    ArmouryModifier
 };

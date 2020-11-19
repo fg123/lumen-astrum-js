@@ -271,7 +271,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "attackDamageMultiplier": 1.3
+            "attackDamageMultiplier": 1.25
         },
         "icon": "icons/artilleryBayIcon.png",
         "texture": "structures/artillerybay.png"
@@ -391,6 +391,22 @@ module.exports.structures = {
         },
         "icon": "icons/staticAmplifierIcon.png",
         "texture": "structures/staticAmplifier.png"
+    },
+    "Armoury": {
+        "description": "Takes 2 turns to build. Produced unit gains an armour plate which blocks the first attack of every turn.",
+        "health": 2500,
+        "shield": 0,
+        "width": 0,
+        "turnsToBuild": 2,
+        "options": [],
+        "sightRange": 1,
+        "targetable": true,
+        "custom": {
+            "armourModifier": 1,
+            "armourMultiplier": 1.00
+        },
+        "icon": "icons/armouryIcon.png",
+        "texture": "structures/armoury.png"
     }
 };
 module.exports.units = {
