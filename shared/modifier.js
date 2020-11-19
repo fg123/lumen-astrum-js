@@ -568,10 +568,10 @@ class HurricaneModifier extends BaseModifier {
 };
 
 class ArmoryModifier extends BaseModifier {
-    constructor(armourModifier, armourMultiplier) {
+    constructor(armorModifier, armorMultiplier) {
         super();
-        this.armourModifier = armourModifier;
-        this.armourMultiplier = armourMultiplier;
+        this.armorModifier = armorModifier;
+        this.armorMultiplier = armorMultiplier;
     }
 
     _getName() {
@@ -585,21 +585,19 @@ class ArmoryModifier extends BaseModifier {
     _getIconIndex() { return 11; }
 
     _getDescription(state) {
-        return `Unit gains armor plates that block (${this.armourModifier}) attacks per turn!`
+        return `Unit gains armor plates that block (${this.armorModifier}) attacks per turn!`
     }
 
-    // Set plates at start of turn to number of armour plates
+    // Set plates at start of turn to number of armor plates
     _onActionStart(state) {
-        console.log("Action Start");
-        this.turnPlates = this.armourModifier; 
+        this.turnPlates = this.armorModifier; 
     }
 
     _onTakeDamage(state, attacker, target, damage) {
         console.log(this.turnPlates);
         if (this.turnPlates >= 1 && damage > 0) {
             this.turnPlates -= 1;
-            console.log('OnTakeDamage', this.armourMultiplier, damage);
-            return (1 - this.armourMultiplier) * damage;
+            return (1 - this.armorMultiplier) * damage;
         }
         return damage;
     }

@@ -167,6 +167,15 @@ module.exports.structures = {
                 "description": "{Static Amplifier}",
                 "icon": "icons/staticAmplifierIcon.png",
                 "command": "build-Static Amplifier"
+            },
+            {
+                "title": "Build Armory",
+                "cost": 1000,
+                "prereq": [],
+                "type": "Structure",
+                "description": "{Armory}",
+                "icon": "icons/armoryIcon.png",
+                "command": "build-Armory"
             }
         ],
         "custom": {},
@@ -393,7 +402,7 @@ module.exports.structures = {
         "texture": "structures/staticAmplifier.png"
     },
     "Armory": {
-        "description": "Takes 2 turns to build. Produced unit gains an armour plate which blocks the first attack of every turn.",
+        "description": "Takes 2 turns to build. Produced unit gains an armor plate which blocks the first attack of every turn.",
         "health": 2500,
         "shield": 0,
         "width": 0,
@@ -402,8 +411,8 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "armourModifier": 1,
-            "armourMultiplier": 1.00
+            "armorModifier": 1,
+            "armorMultiplier": 1
         },
         "icon": "icons/armoryIcon.png",
         "texture": "structures/armory.png"

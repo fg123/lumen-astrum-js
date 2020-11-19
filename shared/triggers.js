@@ -238,7 +238,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
                 b.addModifier(state, this, new BarracksBuffGiver(() => {
-                    return new ArmoryModifier(this.custom.armourModifier, this.custom.armourMultiplier);
+                    return new ArmoryModifier(this.custom.armorModifier, this.custom.armorMultiplier);
                 }), {
                     onlyOne: true
                 });
