@@ -4,7 +4,6 @@ const { PopupTextAnimation, AttackProjectileAnimation } = require('../client/ani
 const { Resource } = require('../client/resources');
 const Constants = require('./constants');
 const { tupleDistance } = require('./coordinates');
-const { default: PathFinder } = require('./path-finder');
 
 class BaseModifier {
     attackDamage(inAttackDamage) {
@@ -46,6 +45,12 @@ class BaseModifier {
     onDetach(target) {
         if (this._onDetach) {
             this._onDetach(target);
+        }
+    }
+
+    draw(context, resourceManager, mapObject, drawnCoord) {
+        if (this._draw) {
+            this._draw(context, resourceManager, mapObject, drawnCoord);
         }
     }
 
@@ -597,7 +602,16 @@ class ArmoryModifier extends BaseModifier {
             return (1 - this.armourMultiplier) * damage;
         }
         return damage;
-    }   
+    }
+
+    _draw(context, resourceManager, mapObject, drawnCoord) {
+        if (this.turnPlates >= 1) {
+            const shieldResource = resourceManager.get(Resource.WHITE_SHIELD);
+            context.drawImage(shieldResource,
+                drawnCoord.x  - shieldResource.width / 2,
+                drawnCoord.y - shieldResource.height / 2);
+        }
+    }
 };
 
 // Applied to buildings, lets the building apply buff to units constructed
@@ -641,5 +655,6 @@ module.exports = {
     ArcticTippedModifier,
     FlashPointModifier,
     HurricaneModifier,
+    RetaliationModifier,
     ArmoryModifier
 };

@@ -22,6 +22,7 @@ module.exports.Resource = {
     UI_ICONS: 'resources/gui/icons.png',
     TIER_ICONS: 'resources/gui/tierIcons.png',
     CURSOR: 'resources/cursor.png',
+    WHITE_SHIELD: 'resources/shield.png',
     WIDTH_1_BUILD: 'resources/structures/width1Build.png',
     WIDTH_0_BUILD: 'resources/structures/width0Build.png',
     WIDTH_1_BUILD_ANIM: 'resources/structures/width1BuildAnimation.png',

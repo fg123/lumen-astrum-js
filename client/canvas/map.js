@@ -648,7 +648,6 @@ module.exports = class MapCanvas {
                                         mapObject.baseAnimation.draw(this.resourceManager, this.context);
                                         this.context.rotate(-currentRotation);
                                         this.context.translate(-drawCoord.x, -drawCoord.y);
-                                        
                                     }
                                     else {
                                         this.drawImage(this.resourceManager.get(mapObject.texture), drawCoord.x, drawCoord.y,
@@ -669,6 +668,11 @@ module.exports = class MapCanvas {
                             // this.context.shadowBlur = 0;
                         }
                         
+                        // Modifier Draws
+                        Object.values(mapObject.modifiers).forEach(m => {
+                            m.draw(this.context, this.resourceManager, mapObject, actualDrawnPosition);
+                        });
+
                         if (mapObject.isUnit && mapObject.turnsUntilBuilt === 0 &&
                             this.state.gameState.isTeammate(mapObject.owner, this.state.player)) {
                             // Draw Unit desired path
