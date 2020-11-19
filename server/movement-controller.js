@@ -65,5 +65,17 @@ module.exports.movementSort = function (game, nonDeadUnits) {
         }
         i += 1;
     }
+    const nonDegenerateNodes = new Set();
+    for (let i = 0; i < result.length; i++) {
+        nonDegenerateNodes.add(result[i].id);
+    }
+
+    for (let i = 0; i < nonDeadUnits.length; i++) {
+        if (!nonDegenerateNodes.has(nonDeadUnits[i].id)) {
+            // Someone is stuck in a cycle UH OH
+            // but they still need to tick!!
+            result.push(nonDeadUnits[i]);
+        }
+    }
     return result;
 };

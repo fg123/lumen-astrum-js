@@ -394,6 +394,10 @@ module.exports = class GameState {
                 target.onDestroy(this, attacker);
             }
         }
+        
+        if (target.currentHealth > target.maxHealth) {
+            target.currentHealth = target.maxHealth;
+        }
         return damageToDeal;
     }
 

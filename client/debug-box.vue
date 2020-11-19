@@ -7,13 +7,16 @@
                     <button @click="cheatKill()">Kill</button>
                     <button @click="cheatDamage(10)">Deal 10</button>
                     <button @click="cheatDamage(50)">Deal 50</button>
+                    <button @click="cheatDamage(-10)">Heal 10</button>
+                    <button @click="cheatDamage(-50)">Heal 50</button>
+                    <button @click="cheatDamage(-10000)">FullHeal</button>
                 </td>
             </tr>
             <tr>
                 <td>
                     <select v-model="selectedPlayer">
-                        <option v-for="p in players" :key="p">
-                            {{ p }}
+                        <option v-for="p in players" :key="p" :value="p">
+                            {{ clientState.gameState.getUsername(p) }}
                         </option>
                     </select>
                     <select v-model="selectedMapObject">
@@ -60,7 +63,7 @@ module.exports = {
         players() {
             if (!this.clientState) return [];
             if (!this.clientState.gameState) return [];
-            return Object.keys(this.clientState.gameState.players).map(k => this.clientState.gameState.getUsername(k));
+            return Object.keys(this.clientState.gameState.players).map(k => k);
         },
         mapObjectNames() {
             return Object.keys(structures).concat(Object.keys(units));
