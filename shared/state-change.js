@@ -696,7 +696,6 @@ class SpawnMapObject extends StateChange {
 
     _simulateStateChange(state) {
         if (!this._verifyStateChange(state)) return;
-        console.log(this.data.owner);
         state.insertMapObject(this.data.posTo, this.data.mapObject, this.data.owner);
     }
 }

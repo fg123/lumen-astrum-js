@@ -412,6 +412,7 @@ const triggers = {
                 this.tickClaimCounter += 1;
                 return true;
             }
+
             this.tickClaimCounter = 0;
 
             let didWeClaim = false;
@@ -479,8 +480,8 @@ const triggers = {
         },
         onActionTick(state) {
             // Every 2 ticks we expand
-            const didWeClaim = this.expandTick(state);
-            const didWeHeal = this.healTick(state);
+            const didWeClaim = this.triggers.expandTick.call(this, state);
+            const didWeHeal = this.triggers.healTick.call(this, state);
             
             return didWeClaim || didWeHeal;
         },

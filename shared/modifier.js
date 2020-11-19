@@ -61,6 +61,18 @@ class BaseModifier {
         }
     }
 
+    onActionStart(state, object) {
+        if (this._onActionStart) {
+            this._onActionStart(state, object);
+        }
+    }
+
+    onPlanningStart(state, object) {
+        if (this._onPlanningStart) {
+            this._onPlanningStart(state, object);
+        }
+    }
+
     onTakingDamage(state, attacker, target, damage) {
         if (this._onTakeDamage) {
             return this._onTakeDamage(state, attacker, target, damage);
@@ -571,14 +583,17 @@ class ArmouryModifier extends BaseModifier {
         return `Unit gains armour plates that block (${this.armourModifier}) attacks per turn!`
     }
 
-    //Set plates at start of turn to number of armour plates
+    // Set plates at start of turn to number of armour plates
     _onActionStart(state) {
+        console.log("Action Start");
         this.turnPlates = this.armourModifier; 
-
     }
-    _onTakeDamage(state, attacker, damage) {
+
+    _onTakeDamage(state, attacker, target, damage) {
+        console.log(this.turnPlates);
         if (this.turnPlates >= 1 && damage > 0) {
             this.turnPlates -= 1;
+            console.log('OnTakeDamage', this.armourMultiplier, damage);
             return (1 - this.armourMultiplier) * damage;
         }
         return damage;

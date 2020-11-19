@@ -57,7 +57,56 @@ class ModifierHolder {
         }
     }
 
+    /** Following are all events that apply to triggers too */
+    onPlanningStart(state) {
+        if (this.triggers.onPlanningStart) {
+            this.triggers.onPlanningStart.call(this, state);
+        }
+        const mapObject = this;
+        Object.values(this.modifiers).forEach(m => {
+            m.onPlanningStart(state, mapObject);
+        });
+    }
+
+    onActionStart(state) {
+        if (this.triggers.onActionStart) {
+            this.triggers.onActionStart.call(this, state);
+        }
+        const mapObject = this;
+        Object.values(this.modifiers).forEach(m => {
+            m.onActionStart(state, mapObject);
+        });
+    }
+    
+    onDestroy(state, attacker) {
+        if (this.triggers.onDestroy) {
+            this.triggers.onDestroy.call(this, state, attacker);
+        }
+    }
+
+    onCreate(state) {
+        if (this.triggers.onCreate) {
+            this.triggers.onCreate.call(this, state);
+        }
+    }
+
+    onTargetAcquire(targets) {
+        if (this.triggers.onTargetAcquire) {
+            this.triggers.onTargetAcquire.call(this, targets);
+        }
+    }
+
+    onActionTick(state) {
+        if (this.triggers.onActionTick) {
+           return this.triggers.onActionTick.call(this, state);
+        }
+        return false;
+    }
+    
     onTakingDamage(state, attacker, damage) {
+        if (this.triggers.onTakingDamage) {
+            this.triggers.onTakingDamage.call(this);
+        }
         let actualDamage = damage;
         Object.values(this.modifiers).forEach(m => {
             const newDamage = m.onTakingDamage(state, attacker, this, actualDamage);
@@ -103,7 +152,7 @@ module.exports.Structure = class extends ModifierHolder {
             this.targetable = true;
         }
 
-        Object.assign(this, triggers[name]);
+        this.triggers = triggers[name] || {};
     }
 
     static isConstructionBuilding(name) {
@@ -182,7 +231,7 @@ module.exports.Unit = class extends ModifierHolder {
         /* This stores any unit specific custom data */
         this.custom = Data.units[name].custom;
 
-        Object.assign(this, triggers[name]);
+        this.triggers = triggers[name] || {};
     }
 
     onLaunchAttack(state, target, damage) {
