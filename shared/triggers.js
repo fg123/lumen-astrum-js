@@ -22,7 +22,7 @@ const {
     FlashPointModifier,
     ArcticTippedModifier,
     HurricaneModifier,
-    ArmouryModifier
+    ArmoryModifier
 } = require('./modifier');
 
 function buffableUnit(u) {
@@ -232,13 +232,13 @@ const triggers = {
             });
         }
     },
-    "Armoury": {
+    "Armory": {
         onActionStart(state) {
             // Add modifier to barracks next to me
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             barracks.forEach(b => {
                 b.addModifier(state, this, new BarracksBuffGiver(() => {
-                    return new ArmouryModifier(this.custom.armourModifier, this.custom.armourMultiplier);
+                    return new ArmoryModifier(this.custom.armourModifier, this.custom.armourMultiplier);
                 }), {
                     onlyOne: true
                 });

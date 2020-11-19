@@ -562,7 +562,7 @@ class HurricaneModifier extends BaseModifier {
     }
 };
 
-class ArmouryModifier extends BaseModifier {
+class ArmoryModifier extends BaseModifier {
     constructor(armourModifier, armourMultiplier) {
         super();
         this.armourModifier = armourModifier;
@@ -570,17 +570,17 @@ class ArmouryModifier extends BaseModifier {
     }
 
     _getName() {
-        return "ArmouryModifier";
+        return "ArmoryModifier";
     }
 
     _getDisplayName() {
-        return "Armour Plates";
+        return "Armor Plates";
     }
 
     _getIconIndex() { return 11; }
 
     _getDescription(state) {
-        return `Unit gains armour plates that block (${this.armourModifier}) attacks per turn!`
+        return `Unit gains armor plates that block (${this.armourModifier}) attacks per turn!`
     }
 
     // Set plates at start of turn to number of armour plates
@@ -641,5 +641,5 @@ module.exports = {
     ArcticTippedModifier,
     FlashPointModifier,
     HurricaneModifier,
-    ArmouryModifier
+    ArmoryModifier
 };

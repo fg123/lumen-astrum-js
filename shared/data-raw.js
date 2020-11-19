@@ -392,7 +392,7 @@ module.exports.structures = {
         "icon": "icons/staticAmplifierIcon.png",
         "texture": "structures/staticAmplifier.png"
     },
-    "Armoury": {
+    "Armory": {
         "description": "Takes 2 turns to build. Produced unit gains an armour plate which blocks the first attack of every turn.",
         "health": 2500,
         "shield": 0,
@@ -405,8 +405,8 @@ module.exports.structures = {
             "armourModifier": 1,
             "armourMultiplier": 1.00
         },
-        "icon": "icons/armouryIcon.png",
-        "texture": "structures/armoury.png"
+        "icon": "icons/armoryIcon.png",
+        "texture": "structures/armory.png"
     }
 };
 module.exports.units = {
