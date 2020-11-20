@@ -138,7 +138,7 @@ module.exports = class MapCanvas {
         }
         this.drawRectangle(healthColor, start + 2, y + 2, healthPercent * 100, 6);
 
-        let smallTickIncrement = (maxHealth > 10000 ? 1000 : (maxHealth > 2000 ? 500 : 100));
+        let smallTickIncrement = (maxHealth > 10000 ? 1000 : (maxHealth > 2500 ? 500 : 100));
         let ten = smallTickIncrement;
         while (ten < maxHealth) {
             const height = ten % 1000 === 0 ? 6 : 3;

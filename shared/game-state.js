@@ -647,6 +647,7 @@ module.exports = class GameState {
             if (difference === 0) {
                 if (ao.enemy.isStructure && bo.enemy.isUnit) return 1;
                 else if (bo.enemy.isStructure && ao.enemy.isUnit) return -1;
+                else return ao.enemy.currentHealth - bo.enemy.currentHealth;
             }
             return difference;
         });
