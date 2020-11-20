@@ -593,6 +593,11 @@ class ArmoryModifier extends BaseModifier {
         this.turnPlates = this.armorModifier; 
     }
 
+    // Also set plates at beginning of Planning for visibility 
+    _onPlanningStart(state) {
+        this.turnPlates = this.armorModifier;
+    }
+
     _onTakeDamage(state, attacker, target, damage) {
         console.log(this.turnPlates);
         if (this.turnPlates >= 1 && damage > 0) {
