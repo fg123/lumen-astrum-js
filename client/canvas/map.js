@@ -669,9 +669,11 @@ module.exports = class MapCanvas {
                         }
                         
                         // Modifier Draws
-                        Object.values(mapObject.modifiers).forEach(m => {
-                            m.draw(this.context, this.resourceManager, mapObject, actualDrawnPosition);
-                        });
+                        if (anyVisible) {
+                            Object.values(mapObject.modifiers).forEach(m => {
+                                m.draw(this.context, this.resourceManager, mapObject, actualDrawnPosition);
+                            });
+                        }
 
                         if (mapObject.isUnit && mapObject.turnsUntilBuilt === 0 &&
                             this.state.gameState.isTeammate(mapObject.owner, this.state.player)) {

@@ -635,7 +635,7 @@ class BarracksBuffGiver extends BaseModifier {
     }
 
     _onSpawnedAnotherUnit(state, spawner, otherUnit) {
-        otherUnit.addModifier(state, spawner, this.buff);
+        otherUnit.addModifier(state, spawner, this.buffConstructor());
     }
 };
 
