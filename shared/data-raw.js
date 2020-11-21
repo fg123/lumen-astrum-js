@@ -301,7 +301,7 @@ module.exports.structures = {
         "texture": "structures/cloudgate.png"
     },
     "Vitality Fountain": {
-        "description": "Takes 2 turns to build. Enhances health of allies by 50%.",
+        "description": "Takes 2 turns to build. Enhances health of allies by 40%.",
         "health": 1200,
         "shield": 0,
         "width": 0,
@@ -310,7 +310,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "healthMultiplier": 1.5
+            "healthMultiplier": 1.4
         },
         "icon": "icons/vitalityIcon.png",
         "texture": "structures/vitalityfountain.png"
@@ -330,7 +330,7 @@ module.exports.structures = {
     },
     "Vampiric Lair": {
         "description": "Takes 2 turns to build. Produced units heal for 5% of damage dealt.",
-        "health": 1200,
+        "health": 1000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -345,7 +345,7 @@ module.exports.structures = {
     },
     "Shauna's Forge": {
         "description": "Takes 2 turns to build. Produced unit's attacks deal 1% of enemy's total health as extra damage.",
-        "health": 1200,
+        "health": 1000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -360,7 +360,7 @@ module.exports.structures = {
     },
     "Flash Point": {
         "description": "Takes 2 turns to build. Produced units blink to their target location if within move range.",
-        "health": 1200,
+        "health": 1000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -373,7 +373,7 @@ module.exports.structures = {
     },
     "Arctic Tower": {
         "description": "Takes 2 turns to build. Produced units stun enemies hit for 0.2s.",
-        "health": 1200,
+        "health": 1000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -387,8 +387,8 @@ module.exports.structures = {
         "texture": "structures/arctictower.png"
     },
     "Static Amplifier": {
-        "description": "Takes 2 turns to build. Produced unit's attacks hit an additional enemy for 15% of their attack damage.",
-        "health": 1200,
+        "description": "Takes 2 turns to build. Produced unit's attacks hit an additional enemy for 15% of attack damage.",
+        "health": 1000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
@@ -403,7 +403,7 @@ module.exports.structures = {
     },
     "Armory": {
         "description": "Takes 2 turns to build. Produced unit gains an armor plate which blocks the first attack of every turn.",
-        "health": 1200,
+        "health": 1000,
         "shield": 0,
         "width": 0,
         "turnsToBuild": 2,
