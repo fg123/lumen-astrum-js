@@ -13,9 +13,14 @@ function shuffle(a) {
 }
 
 module.exports.Queue = class Queue {
-    constructor (partySize) {
+    constructor (partySize, maps) {
         this.queue = [];
         this.partySize = partySize;
+        this.maps = maps;
+    }
+
+    getRandomMap() {
+        return this.maps[Math.floor(Math.random() * this.maps.length)];
     }
 
     joinQueue(userID, socket, elo) {

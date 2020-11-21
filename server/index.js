@@ -68,11 +68,11 @@ function startServer() {
     const disconnectedMidGame = {};
 
     const queues = {
-        '4p': new Queue(4),
-        '2p': new Queue(2),
-        '3p': new Queue(3),
-        '2v2': new Queue(4),
-        'pve': new Queue(1)
+        '4p': new Queue(4, ['4p']),
+        '2p': new Queue(2, ['2p']),
+        '3p': new Queue(3, ['3p']),
+        '2v2': new Queue(4, ['2v2']),
+        'pve': new Queue(1, ['pve'])
     };
 
     const games = [];
@@ -431,6 +431,8 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
             if (connectedUsers[socket.id].username != null &&
                 !connectedUsers[socket.id].inQueue) {
                 
+                const queue = queues[type];
+
                 let startGame = (queuedPlayers) => {
                     const playerMap = {};
                     const gameStartTime = Date.now();
@@ -440,7 +442,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                             username: connectedUsers[p.socket.id].username
                         };
                     });
-                    const game = new Game(playerMap, gameStartTime, handleGameOver, type);
+                    const game = new Game(playerMap, gameStartTime, handleGameOver, queue.getRandomMap());
 
                     queuedPlayers.forEach(p => {
                         connectedUsers[p.socket.id].game = game;
@@ -460,7 +462,6 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                     });
                 };
                 
-                const queue = queues[type];
                 if (queue !== undefined) {
                     console.log(`Joining ${type} queue for: ${connectedUsers[socket.id].username}`);
                     const result = queue.joinQueue(connectedUsers[socket.id].userID,
