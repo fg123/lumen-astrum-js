@@ -666,6 +666,7 @@ class DealDamageStateChange extends StateChange {
 
         const target = state.findTarget(this.data.posTo);
         state.dealDamageToUnit(undefined, target, this.data.damage);
+        state.purgeDeadObjects();
     }
 }
 StateChange.registerSubClass(DealDamageStateChange);

@@ -8,4 +8,18 @@ ACTION
 # Walk to teleporter
 
 PLAN
+# Check we teleported
 CHECK objAt(23, 6) !== undefined
+
+KILL 23 6
+
+BUILD B 23 6 'Marine'
+BUILD A 2 8 'Marine'
+TARGET 2 8 1 6
+
+ACTION
+# Walk to teleporter
+
+PLAN
+# Check we teleported AND killed the b marine
+CHECK objAt(23, 6) !== undefined && objAt(23, 6).owner === 'A'

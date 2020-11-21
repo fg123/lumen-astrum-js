@@ -6,7 +6,7 @@ const splitargs = require('splitargs');
 const Constants = require('../shared/constants');
 const Game = require('../server/game');
 const { setupMap } = require('../shared/map');
-const { PhaseChangeStateChange, BuildStructureStateChange, SetUnitTargetStateChange } = require('../shared/state-change');
+const { PhaseChangeStateChange, BuildStructureStateChange, SetUnitTargetStateChange, DealDamageStateChange } = require('../shared/state-change');
 const { Tuple } = require('../shared/coordinates');
 
 function log(...args) {
@@ -22,7 +22,7 @@ function error(...args) {
 }
 
 const testsToRun = [];
-const verboseMode = false;
+let verboseMode = false;
 for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === '-v') {
         verboseMode = true;
@@ -90,6 +90,11 @@ testsToRun.forEach(f => {
             const structure = parts[4];
             game.processStateChange(BuildStructureStateChange.create(state,
                 player, structure, new Tuple(x, y), state.getCommandBase(player).position));
+        }
+        else if (parts[0] === 'KILL') {
+            const x = parseInt(parts[1]);
+            const y = parseInt(parts[2]);
+            game.processStateChange(DealDamageStateChange.create(state, undefined, new Tuple(x, y), 100000));
         }
         else if (parts[0] === 'TARGET') {
             const x = parseInt(parts[1]);

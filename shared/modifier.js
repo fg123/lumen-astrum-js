@@ -666,7 +666,14 @@ class TeleportModifier extends BaseModifier {
     }
 
     _onPlanningStart(state, mapObject) {
-        state.moveUnit(mapObject.position, new Tuple(this.toX, this.toY));
+        const destination = new Tuple(this.toX, this.toY);
+        const potentialTarget = state.findTarget(destination);
+        if (potentialTarget) {
+            // Ya dead
+            state.dealDamageToUnit(mapObject, potentialTarget, potentialTarget.currentHealth);
+            state.purgeDeadObjects();
+        }
+        state.moveUnit(mapObject.position, destination);
     }
 
 };

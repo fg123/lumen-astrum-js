@@ -423,7 +423,9 @@ const triggers = {
                     if (state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.NONE &&
                         state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.BRUSH &&
                         state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.ROCK && 
-                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.HIGH) {
+                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.HIGH && 
+                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.TELEPORT_IN &&
+                        state.gameMap.data[surrounding[i].y][surrounding[i].x].displayType !== Tiles.TELEPORT_OUT) {
                         // Check no one else has this tile
                         if (!state.isEnemyBuildingRange(surrounding[i].x, surrounding[i].y, this.owner)) {
                             // And we didn't claim it

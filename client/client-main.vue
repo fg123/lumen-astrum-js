@@ -17,11 +17,13 @@
         </div>
         <div class="joinGameDialog">
             <div class="notInQueue" v-if="!inQueue">
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Join 1v1 Queue</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('3p')">Join 3 Player Queue</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('4p')">Join 4 Player Queue</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2v2')">Join 2v2 Queue</gradient-button>
-                <gradient-button medium style="display: block;" @click="joinQueue('pve')">Combat Challenge</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Play 1v1</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('3p')">Play Raid Boss</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('4p')">Play 4 Player</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2v2')">Play 2v2</gradient-button>
+                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('pve')">Combat Challenge</gradient-button>
+                <gradient-button v-if="!isProduction" medium style="display: block;" @click="joinQueue('testMap')">TESTMAP</gradient-button>
+                
             </div>
         </div>
         <div class="inQueue" v-if="inQueue">
