@@ -18,7 +18,9 @@ const Tiles = {
     BIG_MINERAL: 4,
     ROCK: 5,
     HIGH: 6,
-    LOW: 7
+    LOW: 7,
+    TELEPORT_IN: 8,
+    TELEPORT_OUT: 9
 };
 
 const setupMap = (map) => {

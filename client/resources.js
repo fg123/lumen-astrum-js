@@ -14,6 +14,8 @@ module.exports.Resource = {
     ROCK: 'resources/groundTexture/rock.png',
     HIGH_TILE: 'resources/groundTexture/highTile.png',
     LOW_TILE: 'resources/groundTexture/lowTile.png',
+    TELEPORT_IN_TILE: 'resources/groundTexture/teleporterIn.png',
+    TELEPORT_OUT_TILE: 'resources/groundTexture/teleporterOut.png',
     UI_TOP_RIGHT: 'resources/gui/topRightUpdated2.png',
     UI_BOTTOM_LEFT: 'resources/gui/bottomLeft.png',
     UI_BOTTOM_RIGHT: 'resources/gui/bottomRight.png',
@@ -45,5 +47,7 @@ module.exports.tiles = [
     module.exports.Resource.BIG_MINERAL_TILE,
     module.exports.Resource.ROCK,
     module.exports.Resource.HIGH_TILE,
-    module.exports.Resource.LOW_TILE
+    module.exports.Resource.LOW_TILE,
+    module.exports.Resource.TELEPORT_IN_TILE,
+    module.exports.Resource.TELEPORT_OUT_TILE,
 ];

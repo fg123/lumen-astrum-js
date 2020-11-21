@@ -38,7 +38,7 @@ const KEY_W = 87;
 const KEY_A = 65;
 const KEY_S = 83;
 const KEY_D = 68;
-const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56];
+const DIGIT_KEYS = [49, 50, 51, 52, 53, 54, 55, 56, 57, 48];
 
 const CAMERA_SPEED = 20;
 
