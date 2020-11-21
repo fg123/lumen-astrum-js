@@ -4,6 +4,7 @@ const { Resource } = require('./resources');
 const axios = require('axios');
 const Data = require('../shared/data.js');
 const { simulateFrames, loadLayers } = require('../animation/utils');
+const Modifiers = require('../shared/modifier');
 
 // Manages a single instance of all loaded textures, resources, and animations
 module.exports = class ResourceManager {
@@ -125,6 +126,14 @@ module.exports = class ResourceManager {
             if (s.icon) resources.add(s.icon);
             if (s.texture) resources.add(s.texture);
             if (s.animation) this.loadAnimations(s.animation, this.resources, deferArr);
+        });
+        
+        Object.values(Modifiers).forEach(ModConstructor => {
+            const mod = new ModConstructor();
+            const icon = mod.getIcon();
+            if (icon) {
+                resources.add(icon);
+            }
         });
         
         resources.forEach(key => {

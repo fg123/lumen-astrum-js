@@ -356,8 +356,7 @@ module.exports = class MapCanvas {
 
                     const pos = new Tuple(176, screenHeight - 195 + (i * 24));
                     this.context.drawImage(
-                        this.resourceManager.get(Resource.UI_ICONS),
-                        modifier.getIconIndex() * 24, 144, 24, 24,
+                        this.resourceManager.get(modifier.getIcon()),
                         pos.x, pos.y,
                         24, 24);
                     this.drawText(

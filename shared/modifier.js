@@ -112,11 +112,11 @@ class BaseModifier {
         return this._getName();
     }
 
-    getIconIndex() {
-        if (!this._getIconIndex) {
-            throw "Every modifier needs to override _getIconIndex()!";
+    getIcon() {
+        if (!this._getIcon) {
+            throw "Every modifier needs to override _getIcon()!";
         }
-        return this._getIconIndex();
+        return this._getIcon();
     }
 
     getDisplayName() {
@@ -156,7 +156,7 @@ class StunnedModifier extends BaseModifier {
         return this.displayName;
     }
 
-    _getIconIndex() { return 7; }
+    _getIcon() { return "icons/stunnedModifierIcon.png"; }
 
     _getDescription() {
         return `Unit is disabled and cannot attack!`;
@@ -181,7 +181,7 @@ class RetaliationModifier extends BaseModifier {
         return "Retaliation";
     }
 
-    _getIconIndex() { return 11; }
+    _getIcon() { return "icons/icons_74.png"; }
 
     _getDescription() {
         return `Unit will confront their attacker and path towards them!`;
@@ -232,7 +232,7 @@ class StimModifier extends BaseModifier {
         return "Stim!";
     }
 
-    _getIconIndex() { return 0; }
+    _getIcon() { return "icons/stimLabModifierIcon.png"; }
 
     _getDescription() {
         return `Unit attacks ${this.attackSpeedRatio}x faster!`
@@ -257,7 +257,7 @@ class ThievesModifier extends BaseModifier {
         return "You're a thief!";
     }
 
-    _getIconIndex() { return 1; }
+    _getIcon() { return "icons/theivesCaveModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit generates extra gold equal to ${this.damageModifierForGold}x damage dealt!`
@@ -291,7 +291,7 @@ class ArtilleryModifier extends BaseModifier {
         return "BOOM BOOM BOOM!";
     }
 
-    _getIconIndex() { return 2; }
+    _getIcon() { return "icons/artilleryModifierIcon.png"; }
 
     _getDescription() {
         return `Unit deals ${this.attackDamageRatio}x damage!`
@@ -316,7 +316,7 @@ class CloudModifier extends BaseModifier {
         return "Speedy Boi";
     }
 
-    _getIconIndex() { return 3; }
+    _getIcon() { return "icons/cloudGateModifierIcon.png"; }
 
     _getDescription() {
         return `Unit has +${this.moveDelta} move range!`
@@ -353,7 +353,7 @@ class VitalityModifier extends BaseModifier {
         return "Brawler";
     }
 
-    _getIconIndex() { return 4; }
+    _getIcon() { return "icons/vitalityModifierIcon.png"; }
 
     _getDescription() {
         return `Unit has ${this.healthMultiplier}x health!`
@@ -388,7 +388,7 @@ class VampiricModifier extends BaseModifier {
         return "Y'all Succ";
     }
 
-    _getIconIndex() { return 5; }
+    _getIcon() { return "icons/vampiricModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit heals for ${this.healMultiplier}x damage dealt!`
@@ -425,7 +425,7 @@ class SilverBulletModifier extends BaseModifier {
         return "Silver Bullets";
     }
 
-    _getIconIndex() { return 6; }
+    _getIcon() { return "icons/silverBulletModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit deals ${this.healthMultiplier}x enemy max health as extra damage!`
@@ -458,7 +458,7 @@ class ArcticTippedModifier extends BaseModifier {
         return "Ice Tipped Bullets";
     }
 
-    _getIconIndex() { return 9; }
+    _getIcon() { return "icons/arcticTowerModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit attacks stun enemies for ${this.stunDuration}s!`
@@ -487,7 +487,7 @@ class FlashPointModifier extends BaseModifier {
         return "Teleports Behind You";
     }
 
-    _getIconIndex() { return 8; }
+    _getIcon() { return "icons/flashPointModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit blinks to target location instead of moving!`;
@@ -529,7 +529,7 @@ class HurricaneModifier extends BaseModifier {
         return "Electric Bullets";
     }
 
-    _getIconIndex() { return 10; }
+    _getIcon() { return "icons/staticAmplifierModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit fires an additional shot for ${this.bonusDamageModifier}x damage!`
@@ -582,7 +582,7 @@ class ArmoryModifier extends BaseModifier {
         return "Armor Plates";
     }
 
-    _getIconIndex() { return 11; }
+    _getIcon() { return "icons/armoryModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit gains armor plates that block (${this.armorModifier}) attacks per turn!`
@@ -622,7 +622,9 @@ class BarracksBuffGiver extends BaseModifier {
     constructor(buffConstructor) {
         super();
         this.buffConstructor = buffConstructor;
-        this.buff = buffConstructor();
+        if (buffConstructor) {
+            this.buff = buffConstructor();
+        }
     }
 
     _getName() {
@@ -633,7 +635,7 @@ class BarracksBuffGiver extends BaseModifier {
         return "Giver of " + this.buff.getDisplayName();
     }
 
-    _getIconIndex() { return this.buff.getIconIndex(); }
+    _getIcon() { return this.buff ? this.buff.getIcon() : undefined; }
 
     _getDescription(state) {
         return `Constructed units will gain ${this.buff.getDisplayName()}!`;
@@ -659,7 +661,7 @@ class TeleportModifier extends BaseModifier {
         return "Pain, death, nothing phases me.";
     }
 
-    _getIconIndex() { return 8; }
+    _getIcon() { return "icons/flashPointModifierIcon.png"; }
 
     _getDescription(state) {
         return `Unit will teleport at the end of action phase!`;
@@ -678,7 +680,6 @@ class TeleportModifier extends BaseModifier {
 
 };
 module.exports = {
-    BaseModifier,
     StimModifier,
     ThievesModifier,
     ArtilleryModifier,
