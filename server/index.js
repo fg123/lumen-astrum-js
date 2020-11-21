@@ -442,7 +442,8 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                             username: connectedUsers[p.socket.id].username
                         };
                     });
-                    const game = new Game(playerMap, gameStartTime, handleGameOver, queue.getRandomMap());
+                    const map = queue.getRandomMap();
+                    const game = new Game(playerMap, gameStartTime, handleGameOver, map);
 
                     queuedPlayers.forEach(p => {
                         connectedUsers[p.socket.id].game = game;
@@ -458,7 +459,7 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                         p.socket.emit('game-start',
                             gameStartTime,
                             players,
-                            type);
+                            map);
                     });
                 };
                 
