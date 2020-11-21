@@ -1,4 +1,4 @@
-const { Tuple } = require('../coordinates');
+const { Tuple, tupleDistance } = require('../coordinates');
 
 module.exports = {
     data: [
@@ -8,7 +8,7 @@ module.exports = {
         "0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0",
         "0 0 0 1 1 1 1 1 1 3 1 1 1 1 1 3 1 1 1 1 1 1 0 0",
         "0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1",
-        "0 1 1 7 7 7 1 1 1 1 1 1 1 1 1 1 1 1 1 7 7 7 1 1",
+        "0 8 1 7 7 7 1 1 1 1 1 1 1 1 1 1 1 1 1 7 7 7 1 9",
         "0 1 1 7 7 7 1 1 1 1 1 1 4 1 1 1 1 1 1 7 7 7 1 1",
         "0 1 1 1 7 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 7 1 1 1",
         "0 0 1 1 1 1 1 1 1 3 1 1 1 1 1 3 1 1 1 1 1 1 1 0",
@@ -16,11 +16,15 @@ module.exports = {
         "0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0",
         "0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0",
         "0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 0 0 0 0 0 0 0 0 0",
-        "0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0",
+        "0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0"
     ],
     commandCenterLocations: [new Tuple(4, 7), new Tuple(20, 7)],
     movement: [new Tuple(500, 500)],
     movementIndex: 0,
     percentageClaimToWin: 0.45,
-    teams: [1, 2, 3, 4]
+    teams: [1, 2, 3, 4],
+    teleporters: [{
+        in: new Tuple(1, 6),
+        out: new Tuple(23, 6)
+    }]
 };

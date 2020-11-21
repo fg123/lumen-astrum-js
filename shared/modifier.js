@@ -3,7 +3,7 @@
 const { PopupTextAnimation, AttackProjectileAnimation } = require('../client/animation');
 const { Resource } = require('../client/resources');
 const Constants = require('./constants');
-const { tupleDistance } = require('./coordinates');
+const { tupleDistance, Tuple } = require('./coordinates');
 
 class BaseModifier {
     attackDamage(inAttackDamage) {
@@ -644,6 +644,32 @@ class BarracksBuffGiver extends BaseModifier {
     }
 };
 
+class TeleportModifier extends BaseModifier {
+    constructor(x, y) {
+        super();
+        this.toX = x;
+        this.toY = y;
+    }
+
+    _getName() {
+        return "TeleportModifier";
+    }
+
+    _getDisplayName() {
+        return "Pain, death, nothing phases me.";
+    }
+
+    _getIconIndex() { return 8; }
+
+    _getDescription(state) {
+        return `Unit will teleport at the end of action phase!`;
+    }
+
+    _onPlanningStart(state, mapObject) {
+        state.moveUnit(mapObject.position, new Tuple(this.toX, this.toY));
+    }
+
+};
 module.exports = {
     BaseModifier,
     StimModifier,
@@ -659,5 +685,6 @@ module.exports = {
     FlashPointModifier,
     HurricaneModifier,
     RetaliationModifier,
-    ArmoryModifier
+    ArmoryModifier,
+    TeleportModifier
 };

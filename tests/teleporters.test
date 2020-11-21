@@ -1,0 +1,11 @@
+TEST Test that teleporters work 
+
+PLAN
+BUILD A 2 8 'Marine'
+TARGET 2 8 1 6
+
+ACTION
+# Walk to teleporter
+
+PLAN
+CHECK objAt(23, 6) !== undefined

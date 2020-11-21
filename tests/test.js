@@ -114,5 +114,9 @@ testsToRun.forEach(f => {
             const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
             log(fn(game, state, (x, y) => { return state.mapObjects[y][x]; }));
         }
+        else if (parts[0] === 'EXEC') {
+            const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
+            fn(game, state, (x, y) => { return state.mapObjects[y][x]; });
+        }
     }
 });

@@ -153,6 +153,8 @@ module.exports.Structure = class extends ModifierHolder {
         }
 
         this.triggers = triggers[name] || {};
+
+        this.areaTrigger = undefined;
     }
 
     static isConstructionBuilding(name) {

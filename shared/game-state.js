@@ -7,6 +7,7 @@ const { Structure, Unit } = require('../shared/map-objects');
 const { getSurrounding, getReachable, Tuple  } = require('./coordinates');
 const Data = require('./data');
 const { distance } = require('../client/utils');
+const { TeleportModifier } = require('./modifier');
 
 class PlayerState {
     constructor(playerId, playerName, team, gameMap) {
@@ -77,6 +78,7 @@ module.exports = class GameState {
         
         this.mapObjects = [];
         this.occupied = [];
+        this.areaTriggers = [];
 
         this.structures = [];
         this.units = [];
@@ -99,6 +101,7 @@ module.exports = class GameState {
         for (let i = 0; i < gameMap.data.length; i++) {
             this.mapObjects.push([]);
             this.occupied.push([]);
+            this.areaTriggers.push([]);
         }
 
         for (let y = 0; y < gameMap.data.length; y++) {
@@ -123,6 +126,14 @@ module.exports = class GameState {
 
         for (let i = 0; i < gameMap.smallMineralLocations.length; i++) {
             this.insertMapObject(gameMap.smallMineralLocations[i], 'Ether Harvester', undefined);
+        }
+        
+        /* Setup Teleporters */
+        for (let i = 0; i < (gameMap.teleporters || []).length; i++) {
+            const tp = gameMap.teleporters[i];
+            this.setAreaTrigger(tp.in.x, tp.in.y, () => {
+                return new TeleportModifier(tp.out.x, tp.out.y);
+            });
         }
 
         if (gameMap.onMapStart) {
@@ -175,6 +186,10 @@ module.exports = class GameState {
         }
     }
 
+    setAreaTrigger(x, y, buffConstructor) {
+        this.areaTriggers[y][x] = buffConstructor;
+    }
+    
     hasPlayerForfeited(player) {
         if (player === undefined) return false;
         return this.players[player].forfeited;
@@ -541,6 +556,17 @@ module.exports = class GameState {
 
         this.occupied[from.y][from.x] = false;
         this.occupied[to.y][to.x] = to;
+
+        if (unit.areaTrigger) {
+            // We had an area trigger added when we stepped there
+            unit.removeModifier(unit.areaTrigger);
+            unit.areaTrigger = undefined;
+        }
+        
+        if (this.areaTriggers[to.y][to.x]) {
+            unit.areaTrigger = unit.addModifier(this, this.getCommandBase(unit.owner),
+                this.areaTriggers[to.y][to.x]());
+        }
 
         /* Change visibility from previous position to new position */
         let surrounding = this.getVisible(from, unit.sightRange);
