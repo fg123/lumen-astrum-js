@@ -69,7 +69,7 @@ function startServer() {
 
     const queues = {
         '4p': new Queue(4, ['4p']),
-        '2p': new Queue(2, ['2p-duel']),
+        '2p': new Queue(2, ['2p-duel', '2p-anchor', '2p-cornucopia']),
         '3p': new Queue(3, ['3p']),
         '2v2': new Queue(4, ['2v2']),
         'pve': new Queue(1, ['pve'])
