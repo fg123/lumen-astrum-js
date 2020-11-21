@@ -74,7 +74,9 @@ const applyHighGroundGroup = (map, start, group) => {
         nodes.splice(0, 1);
         const tile = map.data[current.y][current.x];
         if (tile.displayType === Tiles.NONE || tile.displayType === Tiles.ROCK ||
-            tile.displayType === Tiles.LOW || tile.highGroundGroup >= 0) {
+            tile.displayType === Tiles.LOW || 
+            tile.displayType === Tiles.MINERAL ||
+            tile.highGroundGroup >= 0) {
             continue;
         }
         Array.prototype.push.apply(nodes, getSurrounding(current, 1).filter(map.withinMap));
