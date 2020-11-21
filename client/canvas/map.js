@@ -751,6 +751,15 @@ module.exports = class MapCanvas {
              * array */
             if (this.state.gameState.phase === Constants.PHASE_PLANNING) {
                 if (this.state.movementMode) {
+                    // If we're in movement mode, we will show teleporter paths
+                    console.log(gameMap.teleporters);
+                    for (let i = 0; i < gameMap.teleporters.length; i++) {
+                        desiredPathsToDraw.push({
+                            from: toDrawCoord(gameMap.teleporters[i].in),
+                            to: toDrawCoord(gameMap.teleporters[i].out),
+                            color: 'dodgerblue'
+                        });
+                    }
                     let isMouseOverOnUnitMoveRange = false;
                     for (let i = 0; i < this.state.unitMoveRange.length; i++) {
                         if (gameMap.withinMap(this.state.unitMoveRange[i]) &&

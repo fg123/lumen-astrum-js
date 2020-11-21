@@ -38,6 +38,10 @@ const setupMap = (map) => {
         map.bigMineralLocations = [];
         map.smallMineralLocations = [];
 
+        if (!map.teleporters) {
+            map.teleporters = [];
+        }
+        
         let nextGroup = 0;
         for (let y = 0; y < map.data.length; y++) {
             for (let x = 0; x < map.data[0].length; x++) {
