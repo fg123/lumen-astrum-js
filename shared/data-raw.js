@@ -116,7 +116,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Thieves' Cave",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Thieves' Cave}",
@@ -125,7 +125,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Vampiric Lair",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Vampiric Lair}",
@@ -134,7 +134,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Shauna's Forge",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Shauna's Forge}",
@@ -143,7 +143,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Flash Point",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Flash Point}",
@@ -152,7 +152,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Arctic Tower",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Arctic Tower}",
@@ -161,7 +161,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Static Amplifier",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Static Amplifier}",
@@ -170,7 +170,7 @@ module.exports.structures = {
             },
             {
                 "title": "Build Armory",
-                "cost": 1000,
+                "cost": 750,
                 "prereq": [],
                 "type": "Structure",
                 "description": "{Armory}",
