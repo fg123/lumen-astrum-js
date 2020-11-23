@@ -6,8 +6,10 @@ const {
 const { Structure, Unit } = require('../shared/map-objects');
 const { getSurrounding, getReachable, Tuple  } = require('./coordinates');
 const Data = require('./data');
-const { distance } = require('../client/utils');
+const { distance, toDrawCoord } = require('../client/utils');
 const { TeleportModifier } = require('./modifier');
+const { AnimationKeys } = require('../client/base-animation');
+const { KeyframeAnimation } = require('../client/animation');
 
 class PlayerState {
     constructor(playerId, playerName, team, gameMap) {
@@ -403,17 +405,29 @@ module.exports = class GameState {
                 console.error('Should not happen! damage', damage, 'damage to deal', damageToDeal);
                 target.currentHealth = 0;
             }
-            /* Kill Unit / Structure */
-            this.deadObjects.push(target.position);
-            if (target.onDestroy) {
-                target.onDestroy(this, attacker);
-            }
+            this.doDeath(target, attacker);
         }
         
         if (target.currentHealth > target.maxHealth) {
             target.currentHealth = target.maxHealth;
         }
         return damageToDeal;
+    }
+
+    doDeath(target, killer) {
+        /* Kill Unit / Structure */
+        this.deadObjects.push(target.position);
+        if (this.clientState && target.baseAnimation) {
+            // Client instantly hides the unit / cleanup could happen any time
+            // so we delegate the death animation to the global animator
+            this.clientState.globalAnimationManager.addAnimation(
+                new KeyframeAnimation(this.clientState.resourceManager,
+                    target.baseAnimation, AnimationKeys.DEATH, target.position)
+            );
+        }
+        if (target.onDestroy) {
+            target.onDestroy(this, killer);
+        }
     }
 
     purgeDeadObjects() {

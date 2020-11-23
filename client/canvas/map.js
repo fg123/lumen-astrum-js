@@ -567,7 +567,7 @@ module.exports = class MapCanvas {
                             drawCoord.x, drawCoord.y);
                     }
                     if (this.ui.currentScreen === this.ui.Screen.GAME &&
-                        this.state.gameState.mapObjects[y][x] && 
+                        this.state.gameState.mapObjects[y][x] &&
                         this.state.gameState.mapObjects[y][x].currentHealth > 0) {
                         const mapObject = this.state.gameState.mapObjects[y][x];
                         const animationManager =

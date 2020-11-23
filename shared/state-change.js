@@ -44,11 +44,9 @@ const { getBaseObject } = require('./data');
 const { Tuple, getSurrounding, tupleDistance } = require('./coordinates');
 const { replenishShield, Tiles } = require('./map');
 const PathFinder = require('./path-finder');
-const Data = require('./data');
-const { default: GameState } = require('./game-state');
 const { StunnedModifier } = require('./modifier');
 const { MoveUnitAnimation } = require('../client/animation');
-const { AnimationKeys } = require('../client/baseAnimation');
+const { AnimationKeys } = require('../client/base-animation');
 
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the

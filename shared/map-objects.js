@@ -1,7 +1,7 @@
 const Data = require('./data');
 const AnimationManager = require('./animation-manager');
 const triggers = require('./triggers');
-const { BaseAnimation } = require('../client/baseAnimation');
+const { BaseAnimation } = require('../client/base-animation');
 
 class ModifierHolder {
     constructor() {

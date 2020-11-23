@@ -66,7 +66,8 @@ const MapSchema = {
 
 const AnimationSchema = {
     'baseLayer': 'animation',
-    'attackAnimation': 'animation'
+    'attackAnimation': 'animation',
+    'deathAnimation': 'animation'
 };
 
 const UnitSchema = {

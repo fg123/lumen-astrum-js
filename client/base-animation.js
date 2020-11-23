@@ -9,6 +9,10 @@ module.exports.BaseAnimation = class BaseAnimation {
         this.frame = 0;
     }
 
+    isPlayingAnimation() {
+        return this.animationKey !== '';
+    }
+
     tick(resourceManager) {
         if (this.animationKey) {
             this.frame += 1;
@@ -17,8 +21,11 @@ module.exports.BaseAnimation = class BaseAnimation {
                 // Check looping
                 this.frame = 0;
                 this.animationKey = '';
+                return false;
             }
+            return true;
         }
+        return false;
     }
     
     draw(resourceManager, context) {
@@ -47,5 +54,6 @@ module.exports.BaseAnimation = class BaseAnimation {
 
 module.exports.AnimationKeys = {
     BASE: '',
-    ATTACK: 'attackAnimation'
+    ATTACK: 'attackAnimation',
+    DEATH: 'deathAnimation'
 };

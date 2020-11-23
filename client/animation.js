@@ -339,7 +339,38 @@ class PopupTextAnimation extends MapObjectAnimation {
     _getPosition() {
         return this.location;
     }
-}
+};
+
+// Draw a keyframe animation from a base animation
+// i.e. in cases where the owner of the base animation dies already
+class KeyframeAnimation extends MapObjectAnimation {
+    constructor(resourceManager, baseAnimation, animationKey, position, onDone = () => {}) {
+        super(onDone);
+        this.resourceManager = resourceManager;
+        this.baseAnimation = baseAnimation;
+        this.animationKey = animationKey;
+        this.position = position;
+
+        this.baseAnimation.startAnimation(animationKey);
+    }
+
+    _tick() {
+        return this.baseAnimation.tick(this.resourceManager);
+    }
+
+    _draw(graphicsManager, position) {
+        graphicsManager.context.translate(position.x, position.y);
+        graphicsManager.context.rotate(this.rotation);
+        this.baseAnimation.draw(this.resourceManager, graphicsManager.context);
+        graphicsManager.context.rotate(-this.rotation);
+        graphicsManager.context.translate(-position.x, -position.y);
+        return true;
+    }
+
+    _getPosition() {
+        return toDrawCoord(this.position);
+    }
+};
 
 module.exports = {
     InPlaceSpriteAnimation,
@@ -347,5 +378,6 @@ module.exports = {
     MoveUnitAnimation,
     AttackProjectileAnimation,
     MuzzleFlashAnimation,
-    PopupTextAnimation
+    PopupTextAnimation,
+    KeyframeAnimation
 };

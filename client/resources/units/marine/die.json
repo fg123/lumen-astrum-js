@@ -1,0 +1,57 @@
+{
+    "duration": 15,
+    "frames": [
+        {
+            "time": 0,
+            "delta": {
+                "leftArm": {},
+                "rightArm": {},
+                "head": {},
+                "gun": {}
+            }
+        },
+        {
+            "time": 7,
+            "delta": {
+                "leftArm": {
+                    "y": 0,
+                    "x": -15,
+                    "rotation": -60
+                },
+                "rightArm": {
+                    "y": 0,
+                    "x": 15,
+                    "rotation": 60
+                },
+                "head": {
+                    "y": 15
+                },
+                "gun": {
+                    "y": -30,
+                    "rotation": 60
+                }
+            }
+        },
+        {
+            "time": 15,
+            "delta": {
+                "leftArm": {
+                    "y": 0,
+                    "x": -70,
+                    "rotation": -180
+                },
+                "rightArm": {
+                    "y": 0,
+                    "x": 70,
+                    "rotation": 180
+                },
+                "head": {},
+                "gun": {
+                    "y": 30,
+                    "rotation": 180,
+                    "x": 20
+                }
+            }
+        }
+    ]
+}

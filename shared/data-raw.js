@@ -461,7 +461,8 @@ module.exports.units = {
         "texture": "units/marine.png",
         "animation": {
             "baseLayer": "units/marine/layers.json",
-            "attackAnimation": "units/marine/shoot.json"
+            "attackAnimation": "units/marine/shoot.json",
+            "deathAnimation": "units/marine/die.json"
         }
     },
     "Engineer": {
