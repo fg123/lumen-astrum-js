@@ -277,8 +277,10 @@ module.exports = class MapCanvas {
                 screenHeight - bottomLeft.height / 2);
             const baseObj = getBaseObject(selectedObject.name);
 
+            const iconX = 64;
+            const iconY = screenHeight - bottomLeft.height + 61;
             this.context.drawImage(this.resourceManager.get(selectedObject.icon),
-                64, screenHeight - bottomLeft.height + 61);
+                iconX, iconY);
 
             // Consider: unit vs structure, enemy vs mine, currently building vs not!
             let name = selectedObject.name;
@@ -397,6 +399,21 @@ module.exports = class MapCanvas {
                     }
                 }
             }
+    
+            // Mouseover Object
+            if (this.inputManager.mouseState.position.x > iconX &&
+                this.inputManager.mouseState.position.x < iconX + 48 &&
+                this.inputManager.mouseState.position.y > iconY &&
+                this.inputManager.mouseState.position.y < iconY + 48) {
+                // Show Dialog
+                const dialogPos = new Tuple(this.inputManager.mouseState.position.x + 30, this.inputManager.mouseState.position.y - 50);
+                const dialogSize = new Tuple(300, 105);
+                this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
+                this.drawText(selectedObject.name, 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
+
+                // Set Description
+                this.drawText(baseObj.description, 'white', 16, dialogPos.x + 5, dialogPos.y + 40, 'left', '', dialogSize.x - 10);
+            }
 
             this.state.hoveredOption = null;
             /* Draw Options */
@@ -432,7 +449,7 @@ module.exports = class MapCanvas {
                         !this.state.hoveredOption) {
                         // Show Dialog
                         const dialogPos = new Tuple(pos.x - 150 + 24, pos.y - 125);
-                        const dialogSize = new Tuple(300, 100);
+                        const dialogSize = new Tuple(300, 105);
                         this.drawRectangle('rgba(0, 0, 0, 0.9)', dialogPos.x, dialogPos.y, dialogSize.x, dialogSize.y);
                         this.drawText(baseObj.options[i].title, 'white', 16, dialogPos.x + 5, dialogPos.y + 20, 'left', 'bold');
                         this.drawText('Ø' + baseObj.options[i].cost, Constants.YELLOW_CHAT_COLOR, 16, dialogPos.x + dialogSize.x - 5, dialogPos.y + 20, 'right', 'bold');
