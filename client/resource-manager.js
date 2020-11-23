@@ -1,4 +1,3 @@
-const $ = require('jquery-browserify');
 const { Resource } = require('./resources');
 
 const axios = require('axios');
@@ -12,7 +11,7 @@ module.exports = class ResourceManager {
         this.resources = {};
         this.deferArr = [];
         this.loadResources(this.deferArr);
-        $.when(...this.deferArr).then(() => {
+        Promise.all(this.deferArr).then(() => {
             onDone(this);
         });
     }
@@ -26,17 +25,19 @@ module.exports = class ResourceManager {
     }
 
     loadResource(location, key, url, deferArr) {
-        const deferred = new $.Deferred();
-        location[key] = new Image();
-        location[key].onload = () => {
-            console.log('Resource loaded: ' + url);
-            deferred.resolve();
-        };
-        location[key].onerror = () => {
-            console.error('Couldn\'t load resource: ' + url);
-        };
-        location[key].src = url;
-        deferArr.push(deferred);
+        deferArr.push(new Promise((resolve, reject) => {
+            location[key] = new Image();
+            location[key].onload = () => {
+                console.log('Resource loaded: ' + url);
+                resolve();
+            };
+            location[key].onerror = () => {
+                console.error('Couldn\'t load resource: ' + url);
+                reject();
+            };
+            
+            location[key].src = url;
+        }));
     }
 
     loadAnimations(animationObj, resources, deferArr) {
@@ -48,63 +49,64 @@ module.exports = class ResourceManager {
         if (animationObj.baseLayer) {
             const baseLayerPath = animationObj.baseLayer;
             const animationBaseDir = baseLayerPath.match(/.*\//)[0];
-            const baseLayerDefer = new $.Deferred();
-            axios.get('/resources/' + baseLayerPath).then((response) => {
-                // Load Base Layer JSON
-                const baseLayer = response.data;
-                const layerDefers = [];
 
-                // Now we load the images in the layers
-                Object.values(baseLayer).forEach((o) => {
-                    const imageUrl = animationBaseDir + o.resource;
-                    this.loadResource(resources, imageUrl, '/resources/' + imageUrl, layerDefers);
-                });
-
-                $.when(...layerDefers).then(() => {
-                    // All the layer resources have loaded in, grab an initialized 
-                    //   base layer state
-                    const baseAnimationState = {};
-                    loadLayers(baseLayer, baseAnimationState, animationBaseDir, (resource) => {
-                        console.log(resource);
-                        return this.resources[resource];
-                    }).then((obj) => {
-                        baseAnimationState.width = obj.width;
-                        baseAnimationState.height = obj.height;
-                        // Base Animation State
-                        resources[animationObj.baseLayer] = baseAnimationState;
-                        console.log('Base Layer Loaded: ', baseLayerPath, baseAnimationState);
-
-                        // Load the rest of the animations
-                        Object.keys(animationObj).forEach((key) => {
-                            if (key === 'baseLayer') {
-                                // Already Handled Above
-                                return;
-                            }
-                            if (!animationObj[key]) return;
-                            // Otherwise it references a JSON file for an animation
-                            const animationDefer = new $.Deferred();
-                            axios.get('/resources/' + animationObj[key]).then((response) => {
-                                // Simulate Frames
-                                console.log(response.data);
-                                const frames = simulateFrames(baseAnimationState, response.data);
-                                console.log('Animation Loaded: ', animationObj[key], frames);
-                                resources[animationObj[key]] = frames;
-                                animationDefer.resolve();
-                            }).catch((error) => {
-                                console.error('Could not load resource ' + animationObj[key], error);
-                            });
-                            deferArr.push(animationDefer);
-                        });
-
-                        baseLayerDefer.resolve();
-                    }).catch(error => {
-                        console.error('Could not load layers', error);
+            deferArr.push(new Promise((resolve, reject) => {
+                axios.get('/resources/' + baseLayerPath).then((response) => {
+                    // Load Base Layer JSON
+                    const baseLayer = response.data;
+                    const layerDefers = [];
+    
+                    // Now we load the images in the layers
+                    Object.values(baseLayer).forEach((o) => {
+                        const imageUrl = animationBaseDir + o.resource;
+                        this.loadResource(resources, imageUrl, '/resources/' + imageUrl, layerDefers);
                     });
+    
+                    Promise.all(layerDefers).then(() => {
+                        // All the layer resources have loaded in, grab an initialized 
+                        //   base layer state
+                        const baseAnimationState = {};
+                        loadLayers(baseLayer, baseAnimationState, animationBaseDir, (resource) => {
+                            console.log(resource);
+                            return this.resources[resource];
+                        }).then((obj) => {
+                            baseAnimationState.width = obj.width;
+                            baseAnimationState.height = obj.height;
+                            // Base Animation State
+                            resources[animationObj.baseLayer] = baseAnimationState;
+                            console.log('Base Layer Loaded: ', baseLayerPath, baseAnimationState);
+    
+                            // Load the rest of the animations
+                            Object.keys(animationObj).forEach((key) => {
+                                if (key === 'baseLayer') {
+                                    // Already Handled Above
+                                    return;
+                                }
+                                if (!animationObj[key]) return;
+                                // Otherwise it references a JSON file for an animation
+                                const animationDefer = new $.Deferred();
+                                axios.get('/resources/' + animationObj[key]).then((response) => {
+                                    // Simulate Frames
+                                    console.log(response.data);
+                                    const frames = simulateFrames(baseAnimationState, response.data);
+                                    console.log('Animation Loaded: ', animationObj[key], frames);
+                                    resources[animationObj[key]] = frames;
+                                    animationDefer.resolve();
+                                }).catch((error) => {
+                                    console.error('Could not load resource ' + animationObj[key], error);
+                                });
+                                deferArr.push(animationDefer);
+                            });
+    
+                            resolve();
+                        }).catch(error => {
+                            console.error('Could not load layers', error);
+                        });
+                    });
+                }).catch((error) => {
+                    console.error('Could not load resource ' + baseLayerPath, error);
                 });
-            }).catch((error) => {
-                console.error('Could not load resource ' + baseLayerPath, error);
-            });
-            deferArr.push(baseLayerDefer);
+            }));
         }
     }
 
@@ -135,7 +137,7 @@ module.exports = class ResourceManager {
                 resources.add(icon);
             }
         });
-        
+
         resources.forEach(key => {
             this.loadResource(this.resources, key, '/resources/' + key, deferArr);
         });
