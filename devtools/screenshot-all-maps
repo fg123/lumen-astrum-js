@@ -1,0 +1,9 @@
+#!/bin/bash
+
+BASE_DIR=shared/maps
+SCREENSHOTS_DIR=client/resources/maps/
+for f in ${BASE_DIR}/*.js; do
+    bf=$(basename $f)
+    bname=${bf%.*}
+    node devtools/map-screenshot.js $f $SCREENSHOTS_DIR/${bname}.png
+done
