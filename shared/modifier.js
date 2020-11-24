@@ -42,9 +42,9 @@ class BaseModifier {
     }
 
     // after the modifier is removed from the target
-    onDetach(target) {
+    onDetach(state, target) {
         if (this._onDetach) {
-            this._onDetach(target);
+            this._onDetach(state, target);
         }
     }
 
@@ -332,7 +332,7 @@ class CloudModifier extends BaseModifier {
         unit.moveRange += this.moveDelta;
     }
 
-    _onDetach(unit) {
+    _onDetach(state, unit) {
         if (unit.moveRange > unit.maxMoveRange) {
             unit.moveRange = unit.maxMoveRange;
         }
@@ -367,7 +367,7 @@ class VitalityModifier extends BaseModifier {
         unit.currentHealth = Math.ceil(unit.currentHealth * this.healthMultiplier);
     }
 
-    _onDetach(unit) {
+    _onDetach(state, unit) {
         if (unit.currentHealth > unit.maxHealth) {
             unit.currentHealth = unit.maxHealth;
         }

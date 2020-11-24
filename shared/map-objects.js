@@ -31,29 +31,20 @@ class ModifierHolder {
         return modifierKey;
     }  
     
-    removeModifierByAdder(adder) {
+    removeModifierByAdder(state, adder) {
         const mods = Object.keys(this.modifiers);
         for (let i = 0; i < mods.length; i++) {
             if (this.modifiers[mods[i]].adder === adder.id) {
-                this.removeModifier(mods[i]);
+                this.removeModifier(state, mods[i]);
             }
         }
     }
 
-    removeModifierByName(modifierName) {
-        const mods = Object.keys(this.modifiers);
-        for (let i = 0; i < mods.length; i++) {
-            if (this.modifiers[mods[i]].getName() === modifierName) {
-                this.removeModifier(mods[i]);
-            }
-        }
-    }
-
-    removeModifier(modifierKey) {
+    removeModifier(state, modifierKey) {
         if (this.modifiers[modifierKey]) {
             const mod = this.modifiers[modifierKey];
             delete this.modifiers[modifierKey];
-            mod.onDetach(this);
+            mod.onDetach(state, this);
         }
     }
 

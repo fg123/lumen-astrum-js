@@ -128,7 +128,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -148,7 +148,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -168,7 +168,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -188,7 +188,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, allConstructors(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -208,7 +208,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -228,7 +228,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -248,7 +248,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -268,7 +268,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -288,7 +288,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -308,7 +308,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
@@ -328,7 +328,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },
