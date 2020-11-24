@@ -176,6 +176,15 @@ module.exports.structures = {
                 "description": "{Armory}",
                 "icon": "icons/armoryIcon.png",
                 "command": "build-Armory"
+            },
+            {
+                "title": "Build Oracle Module",
+                "cost": 750,
+                "prereq": [],
+                "type": "Structure",
+                "description": "{Oracle Module}",
+                "icon": "icons/oracleModuleIcon.png",
+                "command": "build-Oracle Module"
             }
         ],
         "custom": {},

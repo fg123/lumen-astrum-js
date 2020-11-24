@@ -27,13 +27,6 @@ class BaseModifier {
         return inMoveRange;
     }
 
-    sightRange(inSightRange) {
-        if (this._sightRange) {
-            return this._sightRange(inSightRange);
-        }
-        return inSightRange;
-    }
-
     health(inHealth) {
         if (this._health) {
             return this._health(inHealth);
@@ -638,24 +631,20 @@ class OracleModifier extends BaseModifier {
         return "Clairvoyant";
     }
 
-    _getIcon() { return "icons/OracleModuleModifierIcon.png"; }
+    _getIcon() { return "icons/oracleModuleModifierIcon.png"; }
 
     _getDescription() {
         return `Unit has +${this.sightRangeDelta} sight range!`
     }
 
-    _sightRange(inSightRange) {
-        if (inSightRange === 0) return 0;
-        return inSightRange + this.sightRangeDelta;
-    }
-
-    _onAttach(unit) {
+    _onAttach(state, unit) {
         if (unit.sightRange === 0) return;
-        unit.sightRange += this.sightRangeDelta;
+        state.updateSightRange(unit.position, unit.sightRange + this.sightRangeDelta);
     }
 
-    _onDetach(unit) {
-        unit.sightRange -= this.sightRangeDelta;
+    _onDetach(state, unit) {
+        if (unit.sightRange === 0) return;
+        state.updateSightRange(unit.position, unit.sightRange - this.sightRangeDelta);
     }
 };
 
