@@ -416,6 +416,21 @@ module.exports.structures = {
         },
         "icon": "icons/armoryIcon.png",
         "texture": "structures/armory.png"
+    },
+    "Oracle Module": {
+        "description": "Takes 2 turns to build. Produced unit gains +1 sight range.",
+        "health": 1000,
+        "shield": 0,
+        "width": 0,
+        "turnsToBuild": 2,
+        "options": [],
+        "sightRange": 1,
+        "targetable": true,
+        "custom": {
+            "sightRangeDelta": 1
+        },
+        "icon": "icons/oracleModuleIcon.png",
+        "texture": "structures/oracleModule.png"
     }
 };
 module.exports.units = {

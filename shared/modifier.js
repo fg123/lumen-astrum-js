@@ -27,6 +27,13 @@ class BaseModifier {
         return inMoveRange;
     }
 
+    sightRange(inSightRange) {
+        if (this._sightRange) {
+            return this._sightRange(inSightRange);
+        }
+        return inSightRange;
+    }
+
     health(inHealth) {
         if (this._health) {
             return this._health(inHealth);
@@ -617,6 +624,41 @@ class ArmoryModifier extends BaseModifier {
     }
 };
 
+class OracleModifier extends BaseModifier {
+    constructor(sightRangeDelta) {
+        super();
+        this.sightRangeDelta = sightRangeDelta;
+    }
+
+    _getName() {
+        return "OracleModifier";
+    }
+
+    _getDisplayName() {
+        return "Clairvoyant";
+    }
+
+    _getIcon() { return "icons/OracleModuleModifierIcon.png"; }
+
+    _getDescription() {
+        return `Unit has +${this.sightRangeDelta} sight range!`
+    }
+
+    _sightRange(inSightRange) {
+        if (inSightRange === 0) return 0;
+        return inSightRange + this.sightRangeDelta;
+    }
+
+    _onAttach(unit) {
+        if (unit.sightRange === 0) return;
+        unit.sightRange += this.sightRangeDelta;
+    }
+
+    _onDetach(unit) {
+        unit.sightRange -= this.sightRangeDelta;
+    }
+};
+
 // Applied to buildings, lets the building apply buff to units constructed
 class BarracksBuffGiver extends BaseModifier {
     constructor(buffConstructor) {
@@ -694,5 +736,6 @@ module.exports = {
     HurricaneModifier,
     RetaliationModifier,
     ArmoryModifier,
+    OracleModifier,
     TeleportModifier
 };

@@ -22,7 +22,8 @@ const {
     FlashPointModifier,
     ArcticTippedModifier,
     HurricaneModifier,
-    ArmoryModifier
+    ArmoryModifier,
+    OracleModifier
 } = require('./modifier');
 
 function buffableUnit(u) {
@@ -249,6 +250,26 @@ const triggers = {
             const adder = this;
             barracks.forEach(u => {
                 u.removeModifierByAdder(state, adder);
+            });
+        }
+    },
+    "Oracle Module": {
+        onActionStart(state) {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
+                    return new OracleModifier(this.custom.sightRangeDelta);
+                }), {
+                    onlyOne: true
+                });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(adder);
             });
         }
     },
