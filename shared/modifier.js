@@ -34,10 +34,10 @@ class BaseModifier {
         return inHealth;
     }
 
-    onAttach(target) {
+    onAttach(state, target) {
         // Can't make a circular reference here.
         if (this._onAttach) {
-            this._onAttach(target);
+            this._onAttach(state, target);
         }
     }
 
@@ -187,7 +187,7 @@ class RetaliationModifier extends BaseModifier {
         return `Unit will confront their attacker and path towards them!`;
     }
 
-    _onAttach(unit) {
+    _onAttach(state, unit) {
         this.me = unit;
     }
 
@@ -327,7 +327,7 @@ class CloudModifier extends BaseModifier {
         return inMoveRange + this.moveDelta;
     }
 
-    _onAttach(unit) {
+    _onAttach(state, unit) {
         if (unit.moveRange === 0) return;
         unit.moveRange += this.moveDelta;
     }
@@ -363,7 +363,7 @@ class VitalityModifier extends BaseModifier {
         return Math.ceil(inHealth * this.healthMultiplier);
     }
 
-    _onAttach(unit) {
+    _onAttach(state, unit) {
         unit.currentHealth = Math.ceil(unit.currentHealth * this.healthMultiplier);
     }
 

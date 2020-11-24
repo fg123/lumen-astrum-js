@@ -27,7 +27,7 @@ class ModifierHolder {
         modifier.duration = options.duration;
         modifier.attachTime = state.getGameTime();
         this.modifiers[modifierKey] = modifier;
-        modifier.onAttach(this);
+        modifier.onAttach(state, this);
         return modifierKey;
     }  
     
