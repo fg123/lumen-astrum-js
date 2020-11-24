@@ -17,7 +17,8 @@ const Screen = {
     GAME: 'game',
     CLIENT_MAIN: 'clientMain',
     POST_GAME: 'postGame',
-    SERVER_ADMIN: 'serverAdmin'
+    SERVER_ADMIN: 'serverAdmin',
+    IN_QUEUE: 'inQueue'
 };
 
 module.exports = {
@@ -27,7 +28,8 @@ module.exports = {
             currentScreen: Screen.WELCOME,
             socket: io(),
             user: undefined,
-            lastGameOver: undefined
+            lastGameOver: undefined,
+            currentQueue: undefined
         };
     },
     mounted() {
@@ -56,6 +58,9 @@ module.exports = {
             this.currentScreen = Screen.CLIENT_MAIN;
             this.lastGameOver = undefined;
         },
+        goToQueue() {
+            this.currentScreen = Screen.IN_QUEUE;
+        },
         goToServerAdmin() {
             if (this.user.isAdmin) {
                 this.currentScreen = Screen.SERVER_ADMIN;
@@ -72,10 +77,17 @@ module.exports = {
             this.goToClientMain();
         },
         leaveQueue(callback) {
-            this.socket.emit('leave-queue', callback);
+            this.socket.emit('leave-queue', () => {
+                callback();
+                this.currentQueue = undefined;
+            });
         },
-        joinQueue(type, callback) {
-            this.socket.emit('join-queue', type, callback);
+        joinQueue(queue, callback) {
+            console.log(queue);
+            this.socket.emit('join-queue', queue.key, () => {
+                callback();
+                this.currentQueue = queue;
+            });
         }
     },
     components: {
@@ -84,7 +96,8 @@ module.exports = {
         login: require('./login.vue'),
         clientMain: require('./client-main.vue'),
         postGame: require('./post-game.vue'),
-        serverAdmin: require('./server-admin.vue')
+        serverAdmin: require('./server-admin.vue'),
+        inQueue: require('./in-queue.vue')
     }
 };
 </script>

@@ -1,6 +1,8 @@
 const { Tuple } = require('../coordinates');
 
 module.exports = {
+    name: "Duel",
+    image: "/resources/maps/2p-duel.png",
     data: [
         "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0",
         "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 0",

@@ -1,42 +1,58 @@
 <template>
     <dashboard-wrapper v-bind:user="user" v-bind:root="root">
+        <div class="clientWrapper">
+            <div class="changelog">
+                <div style="margin-bottom: 5px; font-weight: bold">Changelog</div>
+                <div class="entry" v-for="(entry, index) in changelog" :key="index">
+                    {{ entry }}
+                </div>
+            </div>
+            <div class="mapInfo">
+                <div v-if="mouseOverQueue !== undefined">
+                    <h1 style="margin-top: 0px">{{ mouseOverQueue.name }}</h1>
+                    <div>
+                        {{ mouseOverQueue.description }}
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; flex-direction: row; width: 100%;">
+                        <div v-for="map in mouseOverQueue.maps" :key="map" style="flex: 1 0 0; max-width: 50%">
+                            <h4>{{ maps[map].name ? maps[map].name : map }}</h4>
+                            <img :src="maps[map].image" style="max-width: 100%; max-height: 100%;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="joinGameDialog">
+                <gradient-button 
+                    v-for="queue in queues"
+                    :key="queue.key"
+                    style="display: block; margin-bottom: 20px"
+                    medium
+                    @click="joinQueue(queue)"
+                    @mouseover="mouseOverQueue = queue;"
+                    @mouseout="mouseOverQueue = undefined;">Play {{ queue.name }}</gradient-button>
+                <gradient-button v-if="!isProduction" medium style="display: block;" @click="joinQueue('testMap')">TESTMAP</gradient-button>
+                
+            </div>
+        </div>
         <div class="adminBtnWrapper">
             <gradient-button small style="display: block" v-if="user.isAdmin" @click="root.goToServerAdmin()">Server</gradient-button>
         </div>
-        <div class="changelog" v-if="!inQueue">
-            <div style="margin-bottom: 5px; font-weight: bold">Changelog</div>
-            <div class="entry" v-for="(entry, index) in changelog" :key="index">
-                {{ entry }}
-            </div>
-        </div>
-        <div class="replays" v-if="!inQueue && !isProduction">
+        
+        <div class="replays" v-if="!isProduction">
             <div style="margin-bottom: 5px; font-weight: bold">Dbg Replays</div>
             <div class="entry" v-for="(replay, index) in replayGames" :key="index">
                 <button @click="loadReplay(replay)">{{ replay }}</button>
             </div>
         </div>
-        <div class="joinGameDialog">
-            <div class="notInQueue" v-if="!inQueue">
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2p')">Play 1v1</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('3p')">Play Raid Boss</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('4p')">Play 4 Player</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('2v2')">Play 2v2</gradient-button>
-                <gradient-button medium style="display: block; margin-bottom: 20px" @click="joinQueue('pve')">Combat Challenge</gradient-button>
-                <gradient-button v-if="!isProduction" medium style="display: block;" @click="joinQueue('testMap')">TESTMAP</gradient-button>
-                
-            </div>
-        </div>
-        <div class="inQueue" v-if="inQueue">
-            <div class="loader"></div>
-            <div style="margin-bottom: 25px;"><b>Looking for a match... ({{ queueTimerText }})</b></div>
-            <div class="button leaveQueue medium" @click="leaveQueue">Leave Queue</div>
-        </div>
+        
     </dashboard-wrapper>
 </template>
 
 <script>
 const Constants = require('../shared/constants');
 const axios = require('axios');
+const queues = require('../shared/queues');
+const { maps } = require('../shared/map');
 
 module.exports = {
     name: 'client-main',
@@ -46,13 +62,12 @@ module.exports = {
     data() {
         return {
             user: this.root.user,
-            inQueue: false,
-            queueTimerBegin: undefined,
-            queueTimer: undefined,
-            queueTimerText: '',
             changelog: [],
             isProduction: Constants.IS_PRODUCTION,
             replayGames: [],
+            queues: queues,
+            mouseOverQueue: undefined,
+            maps: maps
         };
     },
     components: {
@@ -82,22 +97,10 @@ module.exports = {
                 alert(error);
             });
         },
-        leaveQueue() {
-            this.root.leaveQueue(() => {
-                this.inQueue = false;
-                clearInterval(this.queueTimer);
-                this.queueTimer = undefined;
-            });
-        },
         joinQueue(type) {
             this.root.joinQueue(type, () => {
                 console.log('Joined Queue');
-                this.inQueue = true;
-                this.queueTimerBegin = Date.now();
-                this.queueTimer = setInterval(() => {
-                    this.tickTimer();
-                }, 1000);
-                this.tickTimer();
+                this.root.goToQueue();
             });
         },
         tickTimer() {
@@ -115,34 +118,24 @@ div.adminBtnWrapper {
     right: 5px;
 }
 
-div.inQueue {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-div.inQueue {
-    color: #FFF;
-}
-
 div.joinGameDialog {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    transform: translate(0, -50%);
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
-div.changelog {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translate(0, -50%);
+
+div.changelog, div.mapInfo {
     color: #FFF;
-    max-width: 50%;
-    overflow: auto;
+    flex-basis: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
 }
+
+div.mapInfo {
+    margin-right: 25px;
+}
+
 div.replays {
     position: absolute;
     left: 50%;
@@ -152,8 +145,21 @@ div.replays {
     max-width: 50%;
     overflow: auto;
 }
+
 div.entry {
     font-size: 13px;
     font-family: 'Roboto Mono';
 }
+
+div.clientWrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    padding-top: 100px!important;
+    padding-bottom: 100px!important;
+    padding-left: 0px!important;
+    padding-right: 0px!important;
+}
+
 </style>

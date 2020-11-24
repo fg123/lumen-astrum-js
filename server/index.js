@@ -20,6 +20,7 @@ const oauthClient = new OAuth2Client(clientId);
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const { Queue } = require('./queue');
+const dataQueues = require('../shared/queues');
 
 const url = process.env.MONGO_URL || 'mongodb://localhost:27017';
 const dbName = 'lumen';
@@ -68,13 +69,17 @@ function startServer() {
     const disconnectedMidGame = {};
 
     const queues = {
-        '4p': new Queue(4, ['4p']),
+        /*'4p': new Queue(4, ['4p']),
         '2p': new Queue(2, ['2p-duel', '2p-anchor', '2p-cornucopia']),
         '3p': new Queue(3, ['3p']),
         '2v2': new Queue(4, ['2v2']),
-        'pve': new Queue(1, ['pve']),
+        'pve': new Queue(1, ['pve']), */
         'testMap': new Queue(2, ['testMap'])
     };
+
+    dataQueues.forEach(q => {
+        queues[q.key] = new Queue(q.playerCount, q.maps);
+    });
 
     const games = [];
 

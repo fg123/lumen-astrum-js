@@ -1,5 +1,8 @@
 <template>
-    <div class="button" v-bind:class="{ 'large': large, 'medium': !large && medium }" v-on:click="$emit('click')">
+    <div class="button" v-bind:class="{ 'large': large, 'medium': !large && medium }"
+        v-on:click="$emit('click')"
+        v-on:mouseover="$emit('mouseover')"
+        v-on:mouseout="$emit('mouseout')">
         <slot/>
     </div>
 </template>

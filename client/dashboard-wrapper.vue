@@ -78,7 +78,7 @@ div.usernameDisplay:hover {
     cursor: pointer;
 }
 
-div.wrapper > * {
+div.wrapper > div {
     padding: inherit;
 }
 
