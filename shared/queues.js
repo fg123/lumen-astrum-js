@@ -5,11 +5,19 @@ function eloCalculate() {
 module.exports = [
     {
         name: '1v1 - Ranked Solo',
-        key: '2p',
+        key: '2pRanked',
         description: 'Play a ranked, 1v1 on a variety of maps.',
         playerCount: 2,
         maps: ['2p-duel', '2p-anchor', '2p-cornucopia'],
         eloCalculation: eloCalculate
+    },
+    {
+        name: '1v1 - Unranked Solo',
+        key: '2pUnranked',
+        description: 'Play an unranked, 1v1 on experimental maps.',
+        playerCount: 2,
+        maps: ['2p-coliseum'],
+        eloCalculation: undefined
     },
     {
         name: 'Raid Boss',

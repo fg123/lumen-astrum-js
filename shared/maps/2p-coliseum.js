@@ -26,7 +26,7 @@ module.exports = {
         "0 0 0 0 0 0 0 0 6 6 6 6 6 0 0 0 0 0 0 0 0 0 0",
         "0 0 0 0 0 0 0 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 0"
     ],
-    commandCenterLocations: [new Tuple(7, 4), new Tuple(13, 4)],
+    commandCenterLocations: [new Tuple(3, 4), new Tuple(17, 4)],
     movement: [new Tuple(500, 500)],
     movementIndex: 0,
     percentageClaimToWin: 0.6,
