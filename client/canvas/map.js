@@ -318,7 +318,12 @@ module.exports = class MapCanvas {
                             color: selectedObject.maxMoveRange === selectedObject.maxBaseMoveRange ?
                                 'black' : Constants.BLUE_CHAT_COLOR
                         },
-                        selectedObject.attackRange, selectedObject.sightRange]);
+                        selectedObject.attackRange, 
+                        {
+                            text: `${selectedObject.sightRange}`,
+                            color: selectedObject.sightRange === selectedObject.baseSightRange ?
+                                'black' : Constants.BLUE_CHAT_COLOR
+                        }]);
                 }
                 rightSide.forEach((val, index) => {
                     if (typeof val === 'object') {

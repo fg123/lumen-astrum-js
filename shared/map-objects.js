@@ -194,9 +194,7 @@ module.exports.Unit = class extends ModifierHolder {
             this.buffable = true;
         }
 
-
-        /* Sight range changing is complicated because it affects the cached
-         * maps in the game-state. We enforce this to be constant for now */
+        this.baseSightRange = Data.units[name].sightRange;
         this.__sightRange__ = Data.units[name].sightRange;
 
         this.baseAttackDamage = Data.units[name].damage;
@@ -291,6 +289,8 @@ module.exports.Unit = class extends ModifierHolder {
         return maxTime;
     }
 
+    /* Sight range changing is complicated because it affects the cached
+     * maps in the game-state. Use state.updateSightRange to change */
     get sightRange() { return this.__sightRange__; }
     set sightRange(val) { throw new Error('Trying to set readonly property!'); }
     
