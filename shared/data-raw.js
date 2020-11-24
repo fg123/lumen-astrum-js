@@ -439,7 +439,7 @@ module.exports.structures = {
             "sightRangeDelta": 1
         },
         "icon": "icons/oracleModuleIcon.png",
-        "texture": "structures/oracleModule.png"
+        "texture": "structures/oraclemodule.png"
     }
 };
 module.exports.units = {
