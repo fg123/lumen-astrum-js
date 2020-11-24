@@ -35,13 +35,16 @@ client.connect(function(err) {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
     
-    if (Constants.IS_PRODUCTION) {
+    if (Constants.IS_PRODUCTION || process.env.CHANGELOG) {
         console.log('Getting Git Information from GitHub');
         axios.get("https://api.github.com/repos/fg123/lumen-astrum-js/commits")
         .then(function (response) {
             // handle success
             gitChangeLog = response.data.map(commit => {
-                return commit["commit"]["message"];
+                const author = commit["author"]["login"];
+                const message = commit["commit"]["message"];
+                const date = new Date(commit["commit"]["author"]["date"]);
+                return `[${date.toString().replace(/\S+\s(\S+)\s(\d+)\s(\d+)\s.*/,'$2-$1')}] ${author}: ${message}`;
             });
             console.log("Got Git Information");
             startHttpListener();
