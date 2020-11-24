@@ -107,6 +107,7 @@ const maps = {
     '2p-anchor': require('./maps/2p-anchor.js'),
     '2p-duel': require('./maps/2p-duel.js'),
     '2p-cornucopia': require('./maps/2p-cornucopia.js'),
+    '2p-coliseum': require('./maps/2p-cornucopia.js'),
     '2v2': require('./maps/2v2.js'),
     'testMap': require('./maps/testMap.js'),
     'pve': require('./maps/pve.js')
