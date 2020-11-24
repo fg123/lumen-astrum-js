@@ -2,7 +2,7 @@ const { Tuple } = require('../coordinates');
 
 module.exports = {
     name: "Coliseum",
-    image: "/resources/maps/2p-duel.png",
+    image: "/resources/maps/2p-coliseum.png",
     data: [
         "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
         "0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0",
@@ -25,7 +25,7 @@ module.exports = {
         "0 0 0 0 0 0 0 6 6 6 6 6 6 6 0 0 0 0 0 0 0 0 0",
         "0 0 0 0 0 0 0 0 6 6 6 6 6 0 0 0 0 0 0 0 0 0 0",
         "0 0 0 0 0 0 0 0 0 0 4 0 0 0 0 0 0 0 0 0 0 0 0"
-    ],w1
+    ],
     commandCenterLocations: [new Tuple(7, 4), new Tuple(13, 4)],
     movement: [new Tuple(500, 500)],
     movementIndex: 0,
