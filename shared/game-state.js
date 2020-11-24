@@ -559,6 +559,26 @@ module.exports = class GameState {
         );
     }
 
+    updateSightRange(unitPos, newSightRange) {
+        const unit = this.mapObjects[unitPos.y][unitPos.x];
+        if (!unit) return;
+
+        // Remove old visibility
+        let surrounding = this.getVisible(unit.position, unit.sightRange);
+        for (let i = 0; i < surrounding.length; i++) {
+            this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
+        }
+
+        // Add new visibility
+        surrounding = this.getVisible(unit.position, newSightRange);
+        for (let i = 0; i < surrounding.length; i++) {
+            this.addVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
+        }
+
+        // Shh we secretly modify the unmodifier property
+        unit.__sightRange__ = newSightRange;
+    }
+
     moveUnit(from, to) {
         if (from.x === to.x && from.y === to.y) return;
         /* Assumes the coordinates are verified. */

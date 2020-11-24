@@ -106,8 +106,7 @@ testsToRun.forEach(f => {
                 mapObject.owner, new Tuple(x, y), [new Tuple(toX, toY)]));
         }
         else if (parts[0] === 'CHECK') {
-            const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
-            if (!fn(game, state, (x, y) => { return state.mapObjects[y][x]; })) {
+            if (!MakeAndCall(game, state, rest)) {
                 error('Condition failed:', rest);
                 break;
             }
@@ -116,12 +115,15 @@ testsToRun.forEach(f => {
             }
         }
         else if (parts[0] === 'PRINT') {
-            const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
-            log(fn(game, state, (x, y) => { return state.mapObjects[y][x]; }));
+            log(MakeAndCall(game, state, rest));
         }
         else if (parts[0] === 'EXEC') {
-            const fn = new Function('game', 'state', 'objAt', `return ${rest};`);
-            fn(game, state, (x, y) => { return state.mapObjects[y][x]; });
+            MakeAndCall(game, state, rest);
         }
     }
 });
+
+function MakeAndCall(game, state, code) {
+    const fn = new Function('game', 'state', 'objAt', 'Tuple', `return ${code};`);
+    return fn(game, state, (x, y) => { return state.mapObjects[y][x]; }, Tuple);
+}

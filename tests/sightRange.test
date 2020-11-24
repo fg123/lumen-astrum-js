@@ -1,0 +1,9 @@
+TEST Test that sight range changing works
+
+PLAN
+BUILD A 12 2 'Marine'
+CHECK state.isVisible(12, 5, 'A') === false
+EXEC state.updateSightRange(new Tuple(12, 2), 3)
+CHECK state.isVisible(12, 5, 'A') === true
+EXEC state.updateSightRange(new Tuple(12, 2), 2)
+CHECK state.isVisible(12, 5, 'A') === false
