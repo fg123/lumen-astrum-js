@@ -2,7 +2,7 @@
     <dashboard-wrapper v-bind:user="user" v-bind:root="root">
         <div class="clientWrapper">
             <div class="changelog">
-                <div style="margin-bottom: 5px; font-weight: bold">Changelog</div>
+                <h1 style="margin-top: 0px">Changelog</h1>
                 <div class="entry" v-for="(entry, index) in changelog" :key="index">
                     {{ entry }}
                 </div>
@@ -149,6 +149,8 @@ div.replays {
 div.entry {
     font-size: 13px;
     font-family: 'Roboto Mono';
+    padding-left: 25px;
+    text-indent: -25px;
 }
 
 div.clientWrapper {
