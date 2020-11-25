@@ -513,6 +513,7 @@ const triggers = {
                 this.claimedTiles.forEach(t => {
                     state.revokeAllowedBuilding(t.x, t.y, this.owner);
                 });
+                this.claimedTiles = [];
             }
         }
     }
