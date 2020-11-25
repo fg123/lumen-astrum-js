@@ -57,7 +57,8 @@ testsToRun.forEach(f => {
         }
     }, Date.now(), () => {
         game.isGameOver = true;
-    }, 'testMap', {
+    }, 'testMap', undefined,
+    {
         testMode: true,
         verboseMode: verboseMode
     });
