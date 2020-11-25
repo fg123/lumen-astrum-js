@@ -269,7 +269,7 @@ const triggers = {
             const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
             const adder = this;
             barracks.forEach(u => {
-                u.removeModifierByAdder(adder);
+                u.removeModifierByAdder(state, adder);
             });
         }
     },

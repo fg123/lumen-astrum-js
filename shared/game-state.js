@@ -593,7 +593,7 @@ module.exports = class GameState {
 
         if (unit.areaTrigger) {
             // We had an area trigger added when we stepped there
-            unit.removeModifier(unit.areaTrigger);
+            unit.removeModifier(this, unit.areaTrigger);
             unit.areaTrigger = undefined;
         }
         

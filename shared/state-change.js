@@ -426,7 +426,7 @@ class PhaseChangeStateChange extends StateChange {
                     const key = modifiers[i];
                     if (unit.modifiers[key].duration) {
                         // All modifiers that have duration time out after combat!
-                        unit.removeModifier(key);
+                        unit.removeModifier(state, key);
                     }
                 }
             }
@@ -480,7 +480,7 @@ class ActionTickStateChange extends StateChange {
                 const key = modifiers[i];
                 if (unit.modifiers[key].duration && this.timestamp > unit.modifiers[key].attachTime + unit.modifiers[key].duration) {
                     // Modifier has Timed Out
-                    unit.removeModifier(key);
+                    unit.removeModifier(state, key);
                 }
             }
         }
