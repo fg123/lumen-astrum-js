@@ -1,6 +1,4 @@
-function eloCalculate() {
-
-}
+const { eloCalculate } = require('./elo');
 
 module.exports = [
     {
