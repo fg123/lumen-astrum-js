@@ -16,6 +16,7 @@ module.exports = class Game {
         return {
             gameStartTime: this.gameStartTime,
             mapName: this.mapName,
+            queueKey: this.queueKey,
             playerUsernames: this.playerUsernames,
             stateChanges: this.stateChanges
         };
@@ -30,7 +31,7 @@ module.exports = class Game {
             };
         });
 
-        const game = new Game(map, json.gameStartTime, onGameOver, json.mapName);
+        const game = new Game(map, json.gameStartTime, onGameOver, json.mapName, json.queueKey);
         clearTimeout(game.initialTurnPassover);
         for (let i = 0; i < json.stateChanges.length; i++) {
             const stateChange = StateChange.deserialize(json.stateChanges[i]);
@@ -42,7 +43,7 @@ module.exports = class Game {
         return game;
     }
 
-    constructor(playersMap, gameStartTime, onGameOver, mapName, options = {
+    constructor(playersMap, gameStartTime, onGameOver, mapName, queueKey, options = {
         testMode: false,
         // TestMode runs no timers.
         verboseMode: true
@@ -50,6 +51,7 @@ module.exports = class Game {
         // Players is a map of id: {socket:, username:}
 
         this.mapName = mapName;
+        this.queueKey = queueKey;
         this.gameStartTime = gameStartTime;
         this.testMode = options.testMode;
         this.verboseMode = options.verboseMode;
@@ -58,11 +60,13 @@ module.exports = class Game {
         this.onGameOver = onGameOver;
         
         this.sockets = {};
+        this.eloMap = {};
         this.playerUsernames = {};
 
         this.players.forEach(k => {
             this.sockets[k] = playersMap[k].socket;
             this.playerUsernames[k] = playersMap[k].username;
+            this.eloMap[k] = playersMap[k].elo;
         })
         
         const gameMap = setupMap(maps[mapName]);

@@ -21,6 +21,7 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const { Queue } = require('./queue');
 const dataQueues = require('../shared/queues');
+const { eloCalculate } = require('../shared/elo');
 
 const url = process.env.MONGO_URL || 'mongodb://localhost:27017';
 const dbName = 'lumen';
@@ -81,7 +82,7 @@ function startServer() {
     };
 
     dataQueues.forEach(q => {
-        queues[q.key] = new Queue(q.playerCount, q.maps);
+        queues[q.key] = new Queue(q.playerCount, q.maps, q.eloCalculation);
     });
 
     const games = [];
@@ -135,6 +136,43 @@ function startServer() {
         }
     }
 
+    function updateEloValues(game, winners) {
+        const queue = game.queueKey ? queues[game.queueKey] : undefined;
+        if (!queue || !queue.eloCalculation) return;
+
+        const calculateFunction = queue.eloCalculation;
+        const deltas = calculateFunction(game.state.teamMap, winners, game.eloMap);
+//        console.log(deltas);
+        const promises = [];
+        Object.keys(deltas).forEach(pid => {
+            promises.push(new Promise((resolve, reject) => {
+                db.collection('users').updateOne(
+                    {
+                        id: pid
+                    },
+                    {
+                        $inc: {
+                            elo: deltas[pid]
+                        }
+                    }, (err) => {
+                        if (err) {
+                            reject();
+                            return;
+                        }
+                        resolve();
+                    });
+            }));
+        });
+        Promise.all(promises).then(() => {
+            console.log('Updated all elos');
+            game.players.forEach(p => {
+                if (game.sockets[p] !== undefined) {
+                    connectedUsers[game.sockets[p].id].elo += deltas[p];
+                    game.sockets[p].emit('update-elo', connectedUsers[game.sockets[p].id].elo);
+                }
+            });
+        });
+    }
     function handleGameOver(game, winners) {
         if (!game.isGameOver) {
             console.log('Game Over!');
@@ -156,6 +194,8 @@ function startServer() {
                     delete disconnectedMidGame[p];
                 }
             });
+
+            updateEloValues(game, winners);
 
             for (let i = 0; i < games.length; i++) {
                 // If the first 2 matches it's probably correct.
@@ -448,11 +488,12 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                     queuedPlayers.forEach(p => {
                         playerMap[p.userID] = {
                             socket: p.socket,
-                            username: connectedUsers[p.socket.id].username
+                            username: connectedUsers[p.socket.id].username,
+                            elo: p.elo
                         };
                     });
                     const map = queue.getRandomMap();
-                    const game = new Game(playerMap, gameStartTime, handleGameOver, map);
+                    const game = new Game(playerMap, gameStartTime, handleGameOver, map, type);
 
                     queuedPlayers.forEach(p => {
                         connectedUsers[p.socket.id].game = game;

@@ -39,6 +39,9 @@ module.exports = {
         this.socket.on('alert-error', (alert) => {
             window.alert(alert);
         });
+        this.socket.on('update-elo', (elo) => {
+            this.user.elo = elo;
+        });
     },
     methods: {
         getClientState() {

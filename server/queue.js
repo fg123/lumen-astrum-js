@@ -13,10 +13,11 @@ function shuffle(a) {
 }
 
 module.exports.Queue = class Queue {
-    constructor (partySize, maps) {
+    constructor (partySize, maps, eloCalculation) {
         this.queue = [];
         this.partySize = partySize;
         this.maps = maps;
+        this.eloCalculation = eloCalculation;
     }
 
     getRandomMap() {
