@@ -310,7 +310,7 @@ module.exports.structures = {
         "texture": "structures/cloudgate.png"
     },
     "Vitality Fountain": {
-        "description": "Takes 2 turns to build. Enhances health of allies by 40%.",
+        "description": "Takes 2 turns to build. Enhances health of allies by 35%.",
         "health": 1200,
         "shield": 0,
         "width": 0,
@@ -319,7 +319,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "healthMultiplier": 1.4
+            "healthMultiplier": 1.35
         },
         "icon": "icons/vitalityIcon.png",
         "texture": "structures/vitalityfountain.png"
