@@ -9,7 +9,7 @@ const PathFinder = require('../../shared/path-finder');
 const Constants = require('../../shared/constants');
 
 const DRAW_PADDING = 3;
-const FPS_FILTER_STRENGTH = 20;
+const FPS_FILTER_STRENGTH = 10;
 const UNITS_BOTTOM_RIGHT_STATS = ['Health:', 'Attack Damage:', 'Attack Speed:', 'Move Range:', 'Attack Range:', 'Sight Range'];
 const STRUCTURS_BOTTOM_RIGHT_STATS = ['Health:'];
 const SMALL_ALERT_SHOW_TIME = 2 * 1000;
@@ -473,7 +473,7 @@ module.exports = class MapCanvas {
             }
         }
 
-        this.drawText(parseInt(1000 / this.fps.frameTime) + ' fps', 'white', 16, 10, 20, 'left', 'bold');
+        this.drawText(Math.round(1000 / this.fps.frameTime) + ' fps', 'white', 16, 10, 20, 'left', 'bold');
         if (!Constants.IS_PRODUCTION) {
             this.drawText('Camera: (' + this.camera.position.x.toFixed(2) + ', ' +
                 this.camera.position.y.toFixed(2) + ', ' + this.camera.scale.toFixed(2) + ')', 'white', 16, 10,
