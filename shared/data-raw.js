@@ -250,7 +250,7 @@ module.exports.structures = {
         "texture": "structures/gemharvester.png"
     },
     "Stim Lab": {
-        "description": "Takes 2 turns to build. Enhances attack speed of allies by 25%.",
+        "description": "Takes 2 turns to build. Enhances attack speed of allies by 28%.",
         "health": 1200,
         "shield": 0,
         "width": 0,
@@ -259,7 +259,7 @@ module.exports.structures = {
         "sightRange": 1,
         "targetable": true,
         "custom": {
-            "attackSpeedMultiplier": 1.25
+            "attackSpeedMultiplier": 1.28
         },
         "icon": "icons/stimLabIcon.png",
         "texture": "structures/stimlab.png"
