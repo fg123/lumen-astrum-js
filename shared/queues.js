@@ -11,6 +11,14 @@ const queues = [
         eloCalculation: eloCalculate
     },
     {
+        name: '1v1 - HAUNTED',
+        key: '2pHaunted',
+        description: 'LIMITED TIME ONLY HAUNTED MODE',
+        playerCount: 2,
+        maps: ['2p-anchor-ghost'],
+        eloCalculation: undefined
+    },
+    {
         name: '1v1 - Unranked Solo',
         key: '2pUnranked',
         description: 'Play an unranked, 1v1 on experimental maps.',
