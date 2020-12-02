@@ -390,6 +390,9 @@ class PhaseChangeStateChange extends StateChange {
                     structure.onActionStart(state);
                 }
             }
+            if (state.gameMap.onActionStart) {
+                state.gameMap.onActionStart(state);
+            }
         }
         else {
             state.phase = Constants.PHASE_PLANNING;

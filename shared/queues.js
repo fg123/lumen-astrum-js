@@ -1,6 +1,7 @@
 const { eloCalculate } = require('./elo');
+const Constants = require('./constants');
 
-module.exports = [
+const queues = [
     {
         name: '1v1 - Ranked Solo',
         key: '2pRanked',
@@ -40,5 +41,17 @@ module.exports = [
         playerCount: 4,
         maps: ['4p'],
         eloCalculation: undefined
-    },
+    }
 ];
+
+if (!Constants.IS_PRODUCTION) {
+    queues.push( {
+        name: 'TestMap',
+        key: 'testmap',
+        description: 'TESTMAP',
+        playerCount: 2,
+        maps: ['2p-anchor-ghost'],
+        eloCalculation: undefined
+    });
+}
+module.exports = queues;

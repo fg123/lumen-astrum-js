@@ -78,6 +78,12 @@ class BaseModifier {
         }
     }
 
+    onDestroy(state, target, killer) {
+        if (this._onDestroy) {
+            this._onDestroy(state, target, killer);
+        }
+    }
+
     onTakingDamage(state, attacker, target, damage) {
         if (this._onTakeDamage) {
             return this._onTakeDamage(state, attacker, target, damage);
@@ -710,6 +716,120 @@ class TeleportModifier extends BaseModifier {
     }
 
 };
+
+class GhostModifier extends BaseModifier {
+    constructor() {
+        super();
+        this.reductionFactor = 0.25;
+    }
+
+    _getName() {
+        return "GhostModifier";
+    }
+
+    _getDisplayName() {
+        return "I'm a ghost!";
+    }
+
+    _getIcon() { return "icons/ghostModifierIcon.png"; }
+
+    _getDescription() {
+        return `Unit has 25% of all stats and dies at the end of the action phase!`
+    }
+
+    _attackDamage(inAttackDamage) {
+        return Math.ceil(inAttackDamage * this.reductionFactor);
+    }
+
+    _attackSpeed(inAttackSpeed) {
+        return Math.ceil(inAttackSpeed * this.reductionFactor);
+    }
+
+    _health(inHealth) {
+        return Math.ceil(inHealth * this.reductionFactor);
+    }
+
+    _onPlanningStart(state, object) {
+        // Unit dies at planning start
+        state.dealDamageToUnit(undefined, object, object.maxHealth);
+        state.purgeDeadObjects();
+    }
+};
+
+class HauntedModifier extends BaseModifier {
+    constructor(applier) {
+        super();
+        this.applier = applier;
+    }
+
+    _getName() {
+        return "HauntedModifier";
+    }
+
+    _getDisplayName() {
+        return "Haunted!";
+    }
+
+    _getIcon() { return "icons/ghostModifierIcon.png"; }
+
+    _getDescription() {
+        return `Unit will be possessed when killed!`
+    }
+    
+    _onTakeDamage(state, attacker, target, damage) {
+        console.log(attacker, this.applier);
+        console.log(target.currentHealth, damage);
+        if (attacker && target.currentHealth <= damage && attacker.owner === this.applier) {
+            console.log("ABOUT TO KILL");
+            // Practically Killed
+            // Restore Health
+            target.currentHealth = target.maxHealth;
+
+            // Change Owner
+            state.updateOwner(target.position, attacker.owner);
+
+            // Apply Buffs
+            target.addModifier(state, attacker, new GhostModifier());
+            target.addModifier(state, attacker, new RetaliationModifier());
+
+            // Negate Killing Blow
+            return 0;   
+        }
+        return damage;
+    }
+};
+
+class HauntedApplierModifier extends BaseModifier {
+    constructor(applier) {
+        super();
+        this.applier = applier;
+    }
+
+    _getName() {
+        return "HauntedApplierModifier";
+    }
+
+    _getDisplayName() {
+        return "Haunting Blows!";
+    }
+
+    _getIcon() { return "icons/ghostModifierIcon.png"; }
+
+    _getDescription() {
+        return `Units killed will convert!`
+    }
+    
+    _onLaunchAttack(state, attacker, target, damage) {
+        // Ghost can't turn into ghost again
+        if (!target.hasModifier('GhostModifier')) {
+            target.addModifier(state, attacker, new HauntedModifier(attacker.owner), {
+                onlyOne: true,
+                duration: Constants.ACTION_MAX_TIME * 1000
+            });
+        }
+    }
+};
+
 module.exports = {
     StimModifier,
     ThievesModifier,
@@ -726,5 +846,6 @@ module.exports = {
     RetaliationModifier,
     ArmoryModifier,
     OracleModifier,
-    TeleportModifier
+    TeleportModifier,
+    HauntedApplierModifier
 };

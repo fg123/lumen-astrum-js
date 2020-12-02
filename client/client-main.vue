@@ -30,8 +30,6 @@
                     @click="joinQueue(queue)"
                     @mouseover="mouseOverQueue = queue;"
                     @mouseout="mouseOverQueue = undefined;">Play {{ queue.name }}</gradient-button>
-                <gradient-button v-if="!isProduction" medium style="display: block;" @click="joinQueue('testMap')">TESTMAP</gradient-button>
-                
             </div>
         </div>
         <div class="adminBtnWrapper">

@@ -559,6 +559,29 @@ module.exports = class GameState {
         );
     }
 
+    updateOwner(unitPos, newOwner) {
+        const unit = this.mapObjects[unitPos.y][unitPos.x];
+        if (!unit) return;
+
+        if (unit.owner !== undefined) {
+            // Remove old visibility
+            let surrounding = this.getVisible(unit.position, unit.sightRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                this.removeVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
+            }
+        }
+
+        unit.owner = newOwner;
+
+        if (unit.owner !== undefined) {  
+            // Add new visibility
+            let surrounding = this.getVisible(unit.position, unit.sightRange);
+            for (let i = 0; i < surrounding.length; i++) {
+                this.addVisibility(surrounding[i].x, surrounding[i].y, unit.owner, unit.getVisionValue());
+            }
+        }
+    }
+
     updateSightRange(unitPos, newSightRange) {
         const unit = this.mapObjects[unitPos.y][unitPos.x];
         if (!unit) return;

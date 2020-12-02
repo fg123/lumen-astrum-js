@@ -106,6 +106,7 @@ const maps = {
     '3p': require('./maps/raidboss.js'),
     '2p-anchor': require('./maps/2p-anchor.js'),
     '2p-duel': require('./maps/2p-duel.js'),
+    '2p-anchor-ghost': require('./maps/2p-anchor-ghost.js'),
     '2p-cornucopia': require('./maps/2p-cornucopia.js'),
     '2p-coliseum': require('./maps/2p-coliseum.js'),
     '2v2': require('./maps/2v2.js'),

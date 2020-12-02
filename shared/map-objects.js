@@ -48,6 +48,16 @@ class ModifierHolder {
         }
     }
 
+    hasModifier(modifierName) {
+        const mods = Object.keys(this.modifiers);
+        for (let i = 0; i < mods.length; i++) {
+            if (this.modifiers[mods[i]].getName() === modifierName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Following are all events that apply to triggers too */
     onPlanningStart(state) {
         if (this.triggers.onPlanningStart) {
@@ -73,6 +83,9 @@ class ModifierHolder {
         if (this.triggers.onDestroy) {
             this.triggers.onDestroy.call(this, state, attacker);
         }
+        Object.values(this.modifiers).forEach(m => {
+            m.onDestroy(state, this, attacker);
+        });
     }
 
     onCreate(state) {
