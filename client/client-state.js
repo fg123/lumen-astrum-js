@@ -379,15 +379,8 @@ module.exports = class ClientState {
              * that's not properly defined as a prop, so we have to manually
              * push changes over. */
             const gameState = this.gameState;
-            const fakeState = {
-                chatMessages: [],
-                forfeit(player) {},
-                getUsername(player) {
-                    return gameState.getUsername(player);
-                }
-            };
-            change._simulateStateChange(fakeState);
-            const message = fakeState.chatMessages[0];
+            change._simulateStateChange(gameState);
+            const message = this.gameState.chatMessages[this.gameState.chatMessages.length - 1];
             if (this.gameState.isTeammate(this.player, message.author)) {
                 message.color = Constants.BLUE_CHAT_COLOR;
             }

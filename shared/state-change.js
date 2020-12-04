@@ -17,6 +17,14 @@ class StateChange {
         });
     }
 
+    getReceivers(state) {
+        if (this._getReceivers) {
+            return this._getReceivers(state);
+        }
+        // Everyone
+        return Object.keys(state.players);
+    }
+
     verifyStateChange(state) {
         return this._verifyStateChange(state);
     }
@@ -596,24 +604,68 @@ class ChatMessageStateChange extends StateChange {
         return true;
     }
 
+    _getReceivers(state) {
+        let message = this.data.message.trim();
+        let teamSend = false;
+        let teammates = Object.keys(state.players);
+        if (this.from) {
+            teammates = state.teamMap[state.players[this.from].team];
+            // Should we default to team send?
+            if (teammates.length > 1) {
+                // More than 1 player
+                teamSend = true;
+            }
+            
+            if (message && message.startsWith('/team')) {
+                // Send to team only
+                teamSend = true;
+            }
+            else if (message && message.startsWith('/all')) {
+                teamSend = false;
+            }
+        }
+        if (teamSend) {
+            return teammates;
+        }
+        return Object.keys(state.players);
+    }
+
     _simulateStateChange(state) {
-        if (this.data.message === '/ff') {
+        let message = this.data.message.trim();
+        if (message === '/ff') {
             state.forfeit(this.from);
             state.chatMessages.push({
                 author: undefined,
                 content: `${state.getUsername(this.from)} has forfeited!`
             });
+            return;
         }
-        else if (this.data.message === '/crash' &&
+        else if (message === '/crash' &&
                 (state.getUsername(this.from) === 'Arasseo' || state.getUsername(this.from) === 'test')) {
             throw "Intentional crash!";
         }
-        else {
-            state.chatMessages.push({
-                author: this.from,
-                content: this.data.message
-            });
+        let teamSend = false;
+        if (this.from) {
+            const teammates = state.teamMap[state.players[this.from].team];
+            if (teammates.length > 1) {
+                teamSend = true;
+            }
+
+            if (message && message.startsWith('/team')) {
+                teamSend = true;
+                message = message.slice('/team'.length).trim();
+            }
+            else if (message && message.startsWith('/all')) {
+                teamSend = false;
+                message = message.slice('/all'.length).trim();
+            }
         }
+
+        state.chatMessages.push({
+            author: this.from,
+            content: message,
+            teamSend
+        });
     }
 }
 StateChange.registerSubClass(ChatMessageStateChange);

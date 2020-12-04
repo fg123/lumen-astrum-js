@@ -4,8 +4,8 @@
             <div v-for="(message, index) in messages"
                 v-bind:key="index"
                 v-bind:style="{ 'color': !message.author ? message.color: '#fff' }">
-                <template v-if="message.author">
-                    <b v-bind:style="{ 'color': message.color }">{{ game.clientState.gameState.getUsername(message.author) }}</b>:&nbsp;
+                <template v-if="message.author && game.clientState.gameState">
+                    <b v-bind:style="{ 'color': message.color }"><span v-if="message.teamSend">[TEAM]</span><span v-else>[ALL]</span> {{ game.clientState.gameState.getUsername(message.author) }}</b>:&nbsp;
                 </template>
                 {{ message.content }}
             </div>
@@ -78,17 +78,17 @@ module.exports = {
 
 <style>
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #666;
+  background: #ddd;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #ddd;
+  background: #666;
   border-radius: 5px;
 }
 
@@ -102,9 +102,8 @@ div.messages {
     width: 400px;
     height: 150px;
     overflow-y: scroll;
-    font-weight: bold;
     font-size: 14px;
-    word-wrap:break-word;
+    word-wrap: break-word;
     background-color: rgba(0, 0, 0, 0.8);
     color: #fff;
     padding: 2px 6px;

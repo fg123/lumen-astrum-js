@@ -347,7 +347,10 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
                     potentialGame.playerUsernames,
                     potentialGame.mapName);
                 for (let i = 0; i < potentialGame.stateChanges.length; i++) {
-                    socket.emit('state-change', potentialGame.stateChanges[i]);
+                    const receivers = new Set(potentialGame.stateChanges[i].getReceivers(potentialGame.state));
+                    if (receivers.has(userID)) {
+                        socket.emit('state-change', potentialGame.stateChanges[i]);
+                    }
                 }
             }
         };

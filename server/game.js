@@ -119,8 +119,10 @@ module.exports = class Game {
             console.log(stateChange);
         }
         const shouldBroadcastMap = {};
+        const receivers = new Set(stateChange.getReceivers(this.state));
+
         this.players.forEach(p => {
-            shouldBroadcastMap[p] = true;
+            shouldBroadcastMap[p] = receivers.has(p);
         });
 
         stateChange.simulateStateChange(this.state);
