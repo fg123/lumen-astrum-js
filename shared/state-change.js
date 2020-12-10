@@ -55,6 +55,7 @@ const PathFinder = require('./path-finder');
 const { StunnedModifier } = require('./modifier');
 const { MoveUnitAnimation } = require('../client/animation');
 const { AnimationKeys } = require('../client/base-animation');
+const { toDrawCoord } = require('../client/utils');
 
 class BuildStructureStateChange extends StateChange {
     /* Built-by is undefined if from a structure, otherwise the position of the
@@ -576,6 +577,13 @@ class UnitAttackStateChange extends StateChange {
 
         if (state.clientState && unit.baseAnimation) {
             unit.baseAnimation.startAnimation(AnimationKeys.ATTACK);
+        }
+
+        const to = toDrawCoord(this.data.posTo);
+        const from = toDrawCoord(this.data.posFrom);
+
+        if (state.clientState) {
+            unit.rotation = Math.atan2(to.y - from.y, to.x - from.x) + (Math.PI / 2);
         }
     }
 

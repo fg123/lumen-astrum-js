@@ -348,21 +348,6 @@ module.exports = class ClientState {
                     Resource.ATTACK_PROJECTILE
                 )
             );
-            const splashRange = change.getSplashRange(this.gameState);
-            const surrounding = getSurrounding(change.data.posTo, splashRange);
-            for (let i = 0; i < surrounding.length; i++) {
-                if (!surrounding[i].equals(change.data.posTo)) {
-                    this.globalAnimationManager.addAnimation(
-                        new AttackProjectileAnimation(
-                            this.resourceManager,
-                            unit,
-                            change.data.posTo,
-                            surrounding[i],
-                            Resource.ATTACK_PROJECTILE
-                        )
-                    );
-                }
-            }
 
             const attacker = this.gameState.mapObjects[change.data.posFrom.y][change.data.posFrom.x];
             if (attacker && attacker.isUnit && attacker.custom && attacker.custom.muzzleX !== undefined && attacker.custom.muzzleY !== undefined) {

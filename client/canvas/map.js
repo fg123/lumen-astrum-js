@@ -65,28 +65,15 @@ module.exports = class MapCanvas {
                     if (u.animationManager.hasAnimation()) {
                         u.animationManager.tick();
                     }
+                    if (u.baseAnimation) {
+                        u.baseAnimation.tick(this.resourceManager);
+                    }
                 });
                 this.state.gameState.structures.forEach(s => {
                     if (s.animationManager.hasAnimation()) {
                         s.animationManager.tick();
                     }
                 });
-            }
-        }, 1000 / 60);
-
-        // Base Animatino Tick Loop
-        window.setInterval(() => {
-            if (this.state.gameState) {
-                this.state.gameState.units.forEach(u => {
-                    if (u.baseAnimation) {
-                        u.baseAnimation.tick(this.resourceManager);
-                    }
-                });
-                // this.state.gameState.structures.forEach(s => {
-                //     if (s.baseAnimation) {
-                //         s.baseAnimation.tick();
-                //     }
-                // });
             }
         }, 1000 / 60);
     }
@@ -635,6 +622,10 @@ module.exports = class MapCanvas {
                         const currentRotation = mapObject.clientRotation;
                         mapObject.clientRotation = this.interpolateTowards(currentRotation, desiredRotation);
 
+                        if (anyVisible && (mapObject.isStructure || mapObject.moveRange === 0)) {
+                            // Mark as seen
+                            mapObject.hasBeenSeen = true;
+                        }
                         if (animationManager.hasAnimation()) {
                             // Draw any animations in the animation stack
                             const possiblePositionChange =
@@ -649,7 +640,7 @@ module.exports = class MapCanvas {
                                 actualDrawnPosition = possiblePositionChange;
                             }
                         }
-                        else if (anyVisible) {
+                        else if (anyVisible || mapObject.hasBeenSeen) {
                             if (mapObject.turnsUntilBuilt === 0) {
                                 if (mapObject.isStructure) {
                                     // Draw Structure
@@ -718,7 +709,7 @@ module.exports = class MapCanvas {
                                 this.state.player
                             )) {
                                 const drawnCoord = toDrawCoord(surrounding[i]);
-                                if (mapObject.owner !== undefined) {
+                                if (mapObject.owner !== undefined && !mapObject.hasBeenSeen) {
                                     this.drawImage(this.resourceManager.get(
                                         tiles[gameMap.data[surrounding[i].y][surrounding[i].x].displayType - 1]
                                     ), drawnCoord.x, drawnCoord.y);
@@ -814,8 +805,11 @@ module.exports = class MapCanvas {
                     if (targetPoints.length > 0 && !this.state.justEnteredMovementMode) {
                         lastTarget = targetPoints[targetPoints.length - 1];
                     }
-                    const mousePoint = toDrawCoord(this.inputManager.mouseState.tile);
-                    this.drawArrow(toDrawCoord(lastTarget), mousePoint, 15, 3, 'green')
+                    if (!(this.inputManager.mouseState.tile.x === lastTarget.x &&
+                          this.inputManager.mouseState.tile.y === lastTarget.y)) {
+                        const mousePoint = toDrawCoord(this.inputManager.mouseState.tile);
+                        this.drawArrow(toDrawCoord(lastTarget), mousePoint, 15, 3, 'green');
+                    }
                     this.state.cursorMessage = 'Set Target Here';
                     // }
                 }

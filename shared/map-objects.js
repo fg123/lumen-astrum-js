@@ -142,6 +142,7 @@ module.exports.Structure = class extends ModifierHolder {
         this.sightRange = Data.structures[name].sightRange;
         this.isStructure = true;
         this.isUnit = false;
+        this.hasBeenSeen = false;
 
         /* This stores any unit specific custom data */
         this.custom = Data.structures[name].custom;
@@ -215,6 +216,7 @@ module.exports.Unit = class extends ModifierHolder {
 
         this.isStructure = false;
         this.isUnit = true;
+        this.hasBeenSeen = false;
 
         /* true indicates a blocking pipeline, only one animation can play */
         this.animationManager = new AnimationManager(true);
