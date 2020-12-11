@@ -23,7 +23,8 @@ const {
     ArcticTippedModifier,
     HurricaneModifier,
     ArmoryModifier,
-    OracleModifier
+    OracleModifier,
+    RampingBlowsModifier
 } = require('./modifier');
 
 function buffableUnit(u) {
@@ -340,6 +341,26 @@ const triggers = {
             barracks.forEach(b => {
                 b.addModifier(state, this, new BarracksBuffGiver(() => {
                     return new ArcticTippedModifier(this.custom.stunDuration);
+                }), {
+                    onlyOne: true
+                });
+            });
+        },
+        onDestroy(state) {
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            const adder = this;
+            barracks.forEach(u => {
+                u.removeModifierByAdder(state, adder);
+            });
+        }
+    },
+    "Argoyle's Tower": {
+        onActionStart(state) {
+            // Add modifier to barracks next to me
+            const barracks = state.getStructuresOnMyTeam(this.owner, rangeOneBarracks(this));
+            barracks.forEach(b => {
+                b.addModifier(state, this, new BarracksBuffGiver(() => {
+                    return new RampingBlowsModifier(this.custom.damageGain);
                 }), {
                     onlyOne: true
                 });

@@ -480,6 +480,40 @@ class ArcticTippedModifier extends BaseModifier {
     }
 };
 
+class RampingBlowsModifier extends BaseModifier {
+    constructor(damageGain) {
+        super();
+        this.damageGain = damageGain;
+        this.buildUp = 0;
+    }
+
+    _getName() {
+        return "RampingBlowsModifier";
+    }
+
+    _getDisplayName() {
+        return "Ramping Blows";
+    }
+
+    _getIcon() { return "icons/rampingBulletsModifierIcon.png"; }
+
+    _getDescription(state) {
+        return `Unit gains ${this.damageGain} damage per attack!`
+    }
+
+    _onLaunchAttack(state, attacker, target, damage) { 
+        this.buildUp += this.damageGain;
+    }
+    
+    _onActionStart() {
+        this.buildUp = 0;
+    }
+
+    _attackDamage(inAttackDamage) {
+        return inAttackDamage + this.buildUp;
+    }
+};
+
 class FlashPointModifier extends BaseModifier {
     constructor() {
         super();
@@ -847,5 +881,6 @@ module.exports = {
     ArmoryModifier,
     OracleModifier,
     TeleportModifier,
-    HauntedApplierModifier
+    HauntedApplierModifier,
+    RampingBlowsModifier
 };

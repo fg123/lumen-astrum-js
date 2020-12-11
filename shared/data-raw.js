@@ -151,13 +151,13 @@ module.exports.structures = {
                 "command": "build-Flash Point"
             },
             {
-                "title": "Build Arctic Tower",
+                "title": "Build Argoyle's Tower",
                 "cost": 750,
                 "prereq": [],
                 "type": "Structure",
-                "description": "{Arctic Tower}",
-                "icon": "icons/arcticTowerIcon.png",
-                "command": "build-Arctic Tower"
+                "description": "{Argoyle's Tower}",
+                "icon": "icons/argoylesTower.png",
+                "command": "build-Argoyle's Tower"
             },
             {
                 "title": "Build Static Amplifier",
@@ -440,6 +440,21 @@ module.exports.structures = {
         },
         "icon": "icons/oracleModuleIcon.png",
         "texture": "structures/oraclemodule.png"
+    },
+    "Argoyle's Tower": {
+        "description": "Takes 2 turns to build. Produced units gain 1 attack damage per attack (resets each action phase).",
+        "health": 1000,
+        "shield": 0,
+        "width": 0,
+        "turnsToBuild": 2,
+        "sightRange": 1,
+        "options": [],
+        "targetable": true,
+        "custom": {
+            "damageGain": 1
+        },
+        "icon": "icons/argoylesTower.png",
+        "texture": "structures/argoylesTower.png"
     }
 };
 module.exports.units = {
@@ -623,11 +638,12 @@ module.exports.units = {
         "targetable": true,
         "options": [],
         "custom": {},
-        "icon": "icons/icons_18.png",
+        "icon": "icons/placeholderBig.png",
         "texture": "units/raider.png",
         "animation": {
             "baseLayer": "",
-            "attackAnimation": ""
+            "attackAnimation": "",
+            "deathAnimation": ""
         }
     },
     "Praetorian": {
@@ -644,7 +660,7 @@ module.exports.units = {
         "targetable": true,
         "options": [],
         "custom": {},
-        "icon": "icons/icons_18.png",
+        "icon": "icons/placeholderBig.png",
         "texture": "units/praetorian.png",
         "animation": {
             "baseLayer": "",
