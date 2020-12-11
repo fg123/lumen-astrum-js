@@ -855,7 +855,7 @@ class HauntedApplierModifier extends BaseModifier {
     
     _onLaunchAttack(state, attacker, target, damage) {
         // Ghost can't turn into ghost again
-        if (!target.hasModifier('GhostModifier')) {
+        if (!target.hasModifier('GhostModifier') && target.isUnit) {
             target.addModifier(state, attacker, new HauntedModifier(attacker.owner), {
                 onlyOne: true,
                 duration: Constants.ACTION_MAX_TIME * 1000
