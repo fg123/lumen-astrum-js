@@ -442,7 +442,7 @@ module.exports.structures = {
         "texture": "structures/oraclemodule.png"
     },
     "Argoyle's Tower": {
-        "description": "Takes 2 turns to build. Produced units gain 1 attack damage per attack (resets each action phase).",
+        "description": "Takes 2 turns to build. Produced units gain 2 attack damage per attack (resets each action phase).",
         "health": 1000,
         "shield": 0,
         "width": 0,
@@ -451,7 +451,7 @@ module.exports.structures = {
         "options": [],
         "targetable": true,
         "custom": {
-            "damageGain": 1
+            "damageGain": 2
         },
         "icon": "icons/argoylesTower.png",
         "texture": "structures/argoylesTower.png"
