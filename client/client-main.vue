@@ -112,7 +112,7 @@ module.exports = {
                 alert(error);
             });
         }
-        axios.get('/games/user/' + this.user.username).then((response) => {
+        axios.get('/games/user/' + this.user.userID).then((response) => {
             this.matchHistory = response.data;
             console.log("MATCH HISTORY", this.matchHistory);
         }).catch((error) => {
