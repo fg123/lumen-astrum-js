@@ -7,8 +7,8 @@
                     {{ entry }}
                 </div>
             </div>
-            <div class="mapInfo">
-                <div v-if="mouseOverQueue !== undefined">
+            <div class="matchHistory">
+                <div class="mapInfo" v-if="mouseOverQueue !== undefined">
                     <h1 style="margin-top: 0px">{{ mouseOverQueue.name }}</h1>
                     <div>
                         {{ mouseOverQueue.description }}
@@ -17,6 +17,31 @@
                         <div v-for="map in mouseOverQueue.maps" :key="map" style="flex: 1 0 0; max-width: 50%">
                             <h4>{{ maps[map].name ? maps[map].name : map }}</h4>
                             <img :src="maps[map].image" style="max-width: 100%; max-height: 100%;" />
+                        </div>
+                    </div>
+                </div>
+                <h1 style="margin-top: 0px">Match History</h1>
+                <div class="matchListWrapper">
+                    <div class="matchListContainer">
+                        <div v-for="(game, index) in matchHistory"
+                            :key="index"
+                            v-bind:class="[
+                                'matchHistoryEntry',
+                                game.winners.indexOf(user.userID) >= 0 ? 'victory' : 'defeat']">
+                            <div class="status">
+                                {{ game.winners.indexOf(user.userID) >= 0 ? "Victory" : "Defeat"}}
+                                ({{
+                                    (game.eloDelta[user.userID] > 0 ? "+" : "") + game.eloDelta[user.userID]
+                                }})
+                            </div>
+                            <div class="queueMapInfo">
+                                <div>{{ findQueue(game.queueKey).name }}</div>
+                                <div>{{ maps[game.mapName].name }}</div>
+                            </div>
+                            <div class="datePlayerInfo">
+                                <div>{{ Object.values(game.playerUsernames).join(', ') }}</div>
+                                <div>{{ new Date(game.gameStartTime).toLocaleString("en-US")}}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -63,6 +88,7 @@ module.exports = {
             changelog: [],
             isProduction: Constants.IS_PRODUCTION,
             replayGames: [],
+            matchHistory: [],
             queues: queues,
             mouseOverQueue: undefined,
             maps: maps
@@ -86,6 +112,12 @@ module.exports = {
                 alert(error);
             });
         }
+        axios.get('/games/user/' + this.user.username).then((response) => {
+            this.matchHistory = response.data;
+            console.log("MATCH HISTORY", this.matchHistory);
+        }).catch((error) => {
+            alert(error);
+        });
     },
     methods: {
         loadReplay(replay) {
@@ -101,6 +133,14 @@ module.exports = {
                 this.root.goToQueue();
             });
         },
+        findQueue(id) {
+            for (let i = 0; i < this.queues.length; i++) {
+                if (this.queues[i].key === id) {
+                    return this.queues[i];
+                }
+            }
+            throw "Invalid queue id";
+        },
         tickTimer() {
             const time = new Date(Date.now() - this.queueTimerBegin);
             this.queueTimerText = ('0' + time.getMinutes()).slice(-2) + ':' + ('0' + (time.getSeconds() + 1)).slice(-2);
@@ -110,6 +150,56 @@ module.exports = {
 </script>
 
 <style>
+div.matchHistoryEntry {
+    height: 100px;
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    align-items: center;
+    border: 2px solid white;
+    font-family: Prompt;
+    text-transform: uppercase;
+    margin-bottom: 10px
+}
+
+div.matchListWrapper {
+    overflow-y: scroll;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+div.matchListContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 10px;
+}
+
+div.matchHistoryEntry div.status {
+    font-size: 32px;
+    font-weight: bold;
+    width: 240px;
+}
+
+div.queueMapInfo, div.datePlayerInfo {
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+div.datePlayerInfo {
+    text-align: right;
+    flex-grow: 1;
+}
+
+div.victory {
+    background: linear-gradient(0.25turn, #2a8c00, #000, #000);
+}
+
+div.defeat {
+    background: linear-gradient(0.25turn, #CC0000, #000, #000);
+}
+
 div.adminBtnWrapper {
     position: absolute;
     bottom: 5px;
@@ -123,15 +213,27 @@ div.joinGameDialog {
     justify-content: center;
 }
 
-div.changelog, div.mapInfo {
+div.changelog, div.matchHistory {
     color: #FFF;
     flex-basis: 0;
     flex-grow: 1;
     flex-shrink: 0;
 }
 
-div.mapInfo {
+div.matchHistory {
     margin-right: 25px;
+    position: relative;
+}
+
+div.mapInfo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #000;
+    padding: 10px;
+    z-index: 1000;
+    border: 1px solid white;
+    border-radius: 10px;
 }
 
 div.replays {

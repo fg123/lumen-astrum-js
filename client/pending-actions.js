@@ -37,7 +37,7 @@ class PlaceUnitPendingAction extends PendingAction {
             mapCanvas.state.player,
             this.unitName,
             mapCanvas.state.inputManager.mouseState.tile,
-            mapCanvas.state.selectedObject
+            mapCanvas.state.selectedObject.position
         ).verifyStateChange(mapCanvas.state.gameState);
 
         let baseObj = getBaseObject(mapCanvas.state.selectedObject.name);
@@ -92,7 +92,7 @@ class PlaceUnitPendingAction extends PendingAction {
                     state.player,
                     this.unitName,
                     state.inputManager.mouseState.tile,
-                    state.selectedObject
+                    state.selectedObject.position
                 )
             );
         }

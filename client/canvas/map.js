@@ -539,16 +539,18 @@ module.exports = class MapCanvas {
         const gameMap = this.state.getMap();
         const healthbarsToDraw = [];
         const desiredPathsToDraw = [];
-        for (let y = Math.max(0, this.drawContext.topLeftVisible.y);
-            y < Math.min(gameMap.data.length, this.drawContext.bottomRightVisible.y); y++) {
-            for (let x = Math.max(0, this.drawContext.topLeftVisible.x);
-                x < Math.min(gameMap.data[0].length, this.drawContext.bottomRightVisible.x); x++) {
+        const yStart = Math.max(0, this.drawContext.topLeftVisible.y);
+        const yEnd = Math.min(gameMap.data.length, this.drawContext.bottomRightVisible.y);
+        const xStart = Math.max(0, this.drawContext.topLeftVisible.x);
+        const xEnd = Math.min(gameMap.data[0].length, this.drawContext.bottomRightVisible.x);
+        for (let y = yStart; y < yEnd; y++) {
+            for (let x = xStart; x < xEnd; x++) {
                 this.context.globalAlpha = 1;
                 if (gameMap.data[y][x].displayType !== 0) {
                     const drawCoord = toDrawCoord(x, y);
+                    this.context.globalCompositeOperation = 'destination-over';
                     if (this.ui.currentScreen !== this.ui.Screen.GAME ||
                         this.state.gameState.isVisible(x, y, this.state.player)) {
-                        this.context.globalCompositeOperation = 'destination-over';
                         // Overlays
                         // Drawn first because of Destination Over
                         if (this.hasSelectedConstructionBuildingAndIsAllowed(x, y)) {
@@ -561,20 +563,14 @@ module.exports = class MapCanvas {
                                     drawCoord.x, drawCoord.y);
                             }
                         }
-
-                        this.drawImage(this.resourceManager.get(
-                            tiles[gameMap.data[y][x].displayType - 1]
-                        ), drawCoord.x, drawCoord.y);
-
-                        this.context.globalCompositeOperation = 'source-over';
                     }
-                    else {
-                        this.drawImage(this.resourceManager.get(
-                            tiles[gameMap.data[y][x].displayType - 1]
-                        ), drawCoord.x, drawCoord.y);
-                        this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
-                            drawCoord.x, drawCoord.y);
-                    }
+
+                    // Draw map tile
+                    this.drawImage(this.resourceManager.get(
+                        tiles[gameMap.data[y][x].displayType - 1]
+                    ), drawCoord.x, drawCoord.y);
+
+                    this.context.globalCompositeOperation = 'source-over';
                     if (this.ui.currentScreen === this.ui.Screen.GAME &&
                         this.state.gameState.mapObjects[y][x] &&
                         this.state.gameState.mapObjects[y][x].currentHealth > 0) {
@@ -700,24 +696,6 @@ module.exports = class MapCanvas {
                                 lastDrawn = toDrawCoord(mapObject.targetPoints[i]);
                             }
                         }
-                        // Now we hide any bits of a building that isn't supposed to be
-                        // showing
-                        for (let i = 0; i < surrounding.length; i++) {
-                            if (!this.state.gameState.isVisible(
-                                surrounding[i].x,
-                                surrounding[i].y,
-                                this.state.player
-                            )) {
-                                const drawnCoord = toDrawCoord(surrounding[i]);
-                                if (mapObject.owner !== undefined && !mapObject.hasBeenSeen) {
-                                    this.drawImage(this.resourceManager.get(
-                                        tiles[gameMap.data[surrounding[i].y][surrounding[i].x].displayType - 1]
-                                    ), drawnCoord.x, drawnCoord.y);
-                                }
-                                this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
-                                    drawnCoord.x, drawnCoord.y);
-                            }
-                        }
 
                         if (allVisible) {
                             healthbarsToDraw.push({
@@ -731,7 +709,20 @@ module.exports = class MapCanvas {
                 }
             }
         }
-        
+        // Draw Fog of War
+        for (let y = yStart; y < yEnd; y++) {
+            for (let x = xStart; x < xEnd; x++) {
+                this.context.globalAlpha = 1;
+                if (gameMap.data[y][x].displayType !== 0) {
+                    if (this.ui.currentScreen === this.ui.Screen.GAME &&
+                        !this.state.gameState.isVisible(x, y, this.state.player)) {
+                        const drawCoord = toDrawCoord(x, y);
+                        this.drawImage(this.resourceManager.get(Resource.FOG_OF_WAR),
+                            drawCoord.x, drawCoord.y);
+                    }
+                }
+            }
+        }
         if (this.state.gameState) {
             const outposts = this.state.gameState.players[this.state.player].deploymentOutpostCache;
             for (let i = 0; i < outposts.length; i++) {
@@ -764,7 +755,6 @@ module.exports = class MapCanvas {
             if (this.state.gameState.phase === Constants.PHASE_PLANNING) {
                 if (this.state.movementMode) {
                     // If we're in movement mode, we will show teleporter paths
-                    console.log(gameMap.teleporters);
                     for (let i = 0; i < gameMap.teleporters.length; i++) {
                         desiredPathsToDraw.push({
                             from: toDrawCoord(gameMap.teleporters[i].in),

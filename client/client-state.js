@@ -304,7 +304,9 @@ module.exports = class ClientState {
 
                 /* Spawn Animations for buildings being constructed */
                 const animationSpawner = mapObject => {
-                    if (mapObject.turnsUntilBuilt === 1) {
+                    if (mapObject.turnsUntilBuilt === 1 &&
+                        this.gameState.isVisible(mapObject.position.x,
+                            mapObject.position.y, this.player)) {
                         /* About to turn, let's start an animation. */
                         if (mapObject.width === 1) {
                             mapObject.animationManager.addAnimation(

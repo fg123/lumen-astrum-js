@@ -149,20 +149,20 @@ class BuildStructureStateChange extends StateChange {
 StateChange.registerSubClass(BuildStructureStateChange);
 
 class SpawnUnitStateChange extends StateChange {
-    static create(state, from, unitName, position, fromBuilding) {
+    static create(state, from, unitName, position, builtBy) {
         return new SpawnUnitStateChange(
             StateChange.create(
                 state, from, 'SpawnUnitStateChange', {
                     unitName: unitName,
                     position: position,
-                    fromBuilding: fromBuilding
+                    builtBy: builtBy
                 }
             )
         );
     }
 
-    getOptionToBuild() {
-        let building = getBaseObject(this.data.fromBuilding.name);
+    getOptionToBuild(builtBy) {
+        let building = getBaseObject(builtBy.name);
         if (!building) {
             return undefined;
         }
@@ -174,7 +174,9 @@ class SpawnUnitStateChange extends StateChange {
     _verifyStateChange(state) {
         if (state.phase !== Constants.PHASE_PLANNING) return false;
         if (state.hasPlayerForfeited(this.from)) return false;
-        const option = this.getOptionToBuild();
+        const builtBy = state.mapObjects[this.data.builtBy.y][this.data.builtBy.x];
+
+        const option = this.getOptionToBuild(builtBy);
         if (!option) {
             return false;
         }
@@ -188,13 +190,13 @@ class SpawnUnitStateChange extends StateChange {
             return false;
         }
 
-        if (this.data.fromBuilding.turnsUntilBuilt !== 0) {
+        if (builtBy.turnsUntilBuilt !== 0) {
             return false;
         }
 
         let surrounding = getSurrounding(
-            this.data.fromBuilding.position,
-            this.data.fromBuilding.width + 1);
+            builtBy.position,
+            builtBy.width + 1);
         for (let i = 0; i < surrounding.length; i++) {
             if (state.gameMap.withinMap(surrounding[i]) &&
                 !state.occupied[surrounding[i].y][surrounding[i].x] &&
@@ -212,10 +214,9 @@ class SpawnUnitStateChange extends StateChange {
         const spawned = state.insertMapObject(this.data.position,
             this.data.unitName,
             this.from);
-            
-        const fromBuilding = state.mapObjects[this.data.fromBuilding.position.y][this.data.fromBuilding.position.x];
-        fromBuilding.onSpawnedAnotherUnit(state, spawned);
-        state.changeGold(this.from, -(this.getOptionToBuild().cost));
+        const builtBy = state.mapObjects[this.data.builtBy.y][this.data.builtBy.x];
+        builtBy.onSpawnedAnotherUnit(state, spawned);
+        state.changeGold(this.from, -(this.getOptionToBuild(builtBy).cost));
     }
 }
 StateChange.registerSubClass(SpawnUnitStateChange);
@@ -450,13 +451,10 @@ class PhaseChangeStateChange extends StateChange {
 StateChange.registerSubClass(PhaseChangeStateChange);
 
 class ActionTickStateChange extends StateChange {
-    // TickTime from Server
-    static create(state, from, tickTime) {
+    static create(state, from) {
         return new ActionTickStateChange(
             StateChange.create(
-                state, from, 'ActionTickStateChange', {
-                    tickTime: tickTime
-                }
+                state, from, 'ActionTickStateChange', { }
             )
         );
     }

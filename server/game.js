@@ -10,15 +10,18 @@ const {
 } = require('../shared/state-change');
 const { maps, setupMap } = require('../shared/map');
 const { movementSort } = require('./movement-controller');
+const { v4:uuid } = require('uuid');
 
 module.exports = class Game {
     toJson() {
         return {
+            id: this.id,
             gameStartTime: this.gameStartTime,
             mapName: this.mapName,
             queueKey: this.queueKey,
             playerUsernames: this.playerUsernames,
-            stateChanges: this.stateChanges
+            stateChanges: this.stateChanges,
+            players: this.players
         };
     }
 
@@ -49,7 +52,7 @@ module.exports = class Game {
         verboseMode: true
     }) {
         // Players is a map of id: {socket:, username:}
-
+        this.id = uuid();
         this.mapName = mapName;
         this.queueKey = queueKey;
         this.gameStartTime = gameStartTime;
@@ -229,7 +232,7 @@ module.exports = class Game {
             }
             let currentTime = this.state.getGameTime();
             
-            this.processStateChange(ActionTickStateChange.create(this.state, undefined, currentTime));
+            this.processStateChange(ActionTickStateChange.create(this.state, undefined));
             
             let nonDeadUnits = [];
             for (let j = 0; j < this.state.units.length; j++) {

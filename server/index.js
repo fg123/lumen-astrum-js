@@ -36,6 +36,16 @@ client.connect(function(err) {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
     
+    db.collection('users').createIndex({
+        "id": 1
+    }, {
+        unique: true
+    });
+    db.collection('games').createIndex({
+        "players": 1,
+        "id": 1
+    });
+    console.log('Index created!');
     if (Constants.IS_PRODUCTION || process.env.CHANGELOG) {
         console.log('Getting Git Information from GitHub');
         axios.get("https://api.github.com/repos/fg123/lumen-astrum-js/commits")
@@ -136,6 +146,18 @@ function startServer() {
         }
     }
 
+    function writeGameToDatabase(game, eloDelta, winners) {
+        const gameJson = game.toJson();
+        gameJson.eloDelta = eloDelta;
+        gameJson.winners = winners;
+        db.collection('games').insertOne(gameJson, function(err) {
+            if (err) {
+                console.log('DB Error: ' + err);
+                return;
+            }
+        });
+    }
+
     function updateEloValues(game, winners) {
         const queue = game.queueKey ? queues[game.queueKey] : undefined;
         if (!queue || !queue.eloCalculation) return;
@@ -172,9 +194,13 @@ function startServer() {
                 }
             });
         });
+        return deltas;
     }
+
     function handleGameOver(game, winners) {
         if (!game.isGameOver) {
+            game.isGameOver = true;
+            
             console.log('Game Over!');
 
             const gameOver = {
@@ -185,7 +211,6 @@ function startServer() {
                     s.emit('game-over', gameOver);
                 }
             });
-            game.isGameOver = true;
             game.players.forEach(p => {
                 if (game.sockets[p] !== undefined) {
                     connectedUsers[game.sockets[p].id].game = null;
@@ -195,7 +220,7 @@ function startServer() {
                 }
             });
 
-            updateEloValues(game, winners);
+            const deltas = updateEloValues(game, winners);
 
             for (let i = 0; i < games.length; i++) {
                 // If the first 2 matches it's probably correct.
@@ -205,6 +230,8 @@ function startServer() {
                     break;
                 }
             }
+
+            writeGameToDatabase(game, deltas, winners);
         }
     }
     app.use(bodyParser.json());
@@ -263,6 +290,28 @@ module.exports.units = ${JSON.stringify(units, null, "    ")};`);
 
     app.use('/dumps', express.static(__dirname + '/../dumps'));
     app.use('/dumps', serveIndex(__dirname + '/../dumps'));
+
+    app.get('/games/user/:user', function (req, res) {
+        db.collection('games').find({
+            players: { $in: [req.params.user] }
+        }, { 
+            projection: {
+                stateChanges: 0
+            }
+        }).sort({
+            gameStartTime: -1
+        }).toArray(function(err, games) {
+            res.send(games);
+        });
+    });
+
+    app.get('/games/:id', function (req, res) {
+        db.collection('games').find({
+            id: req.params.id
+        }).toArray(function(err, games) {
+            res.send(games[0]);
+        });
+    });
 
     function createNewUser(id, name, email, picture) {
         return {
