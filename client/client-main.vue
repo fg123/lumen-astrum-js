@@ -30,9 +30,10 @@
                                 game.winners.indexOf(user.userID) >= 0 ? 'victory' : 'defeat']">
                             <div class="status">
                                 {{ game.winners.indexOf(user.userID) >= 0 ? "Victory" : "Defeat"}}
+                                <span v-if="game.eloDelta">
                                 ({{
                                     (game.eloDelta[user.userID] > 0 ? "+" : "") + game.eloDelta[user.userID]
-                                }})
+                                }})</span>
                             </div>
                             <div class="queueMapInfo">
                                 <div>{{ findQueue(game.queueKey).name }}</div>
