@@ -618,7 +618,7 @@ module.exports = class MapCanvas {
                         const currentRotation = mapObject.clientRotation;
                         mapObject.clientRotation = this.interpolateTowards(currentRotation, desiredRotation);
 
-                        if (anyVisible && (mapObject.isStructure || mapObject.moveRange === 0)) {
+                        if (anyVisible && (mapObject.isStructure || mapObject.maxMoveRange === 0)) {
                             // Mark as seen
                             mapObject.hasBeenSeen = true;
                         }
