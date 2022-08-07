@@ -11,3 +11,5 @@ devtools/dist/map-editor/main.js
 dump.json
 dumps/
 game-*.json
+
+db/
