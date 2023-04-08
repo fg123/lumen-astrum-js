@@ -10,30 +10,31 @@ const queues = [
         maps: ['2p-duel', '2p-anchor', '2p-cornucopia'],
         eloCalculation: eloCalculate
     },
-    {
-        name: '1v1 - HAUNTED',
-        key: '2pHaunted',
-        description: 'LIMITED TIME ONLY HAUNTED MODE',
-        playerCount: 2,
-        maps: ['2p-anchor-ghost'],
-        eloCalculation: undefined
-    },
+    // {
+    //     name: '1v1 - HAUNTED',
+    //     key: '2pHaunted',
+    //     description: 'LIMITED TIME ONLY HAUNTED MODE',
+    //     playerCount: 2,
+    //     maps: ['2p-anchor-ghost'],
+    //     eloCalculation: undefined
+    // },
     {
         name: '1v1 - Unranked Solo',
         key: '2pUnranked',
         description: 'Play an unranked, 1v1 on experimental maps.',
         playerCount: 2,
-        maps: ['2p-coliseum'],
+        // maps: ['2p-coliseum'],
+        maps: ['2p-duel', '2p-anchor', '2p-cornucopia'],
         eloCalculation: undefined
     },
-    {
-        name: 'Raid Boss',
-        key: '3p',
-        description: 'Play the 2v1 Raidboss mode!',
-        playerCount: 3,
-        maps: ['3p'],
-        eloCalculation: undefined
-    },
+    // {
+    //     name: 'Raid Boss',
+    //     key: '3p',
+    //     description: 'Play the 2v1 Raidboss mode!',
+    //     playerCount: 3,
+    //     maps: ['3p'],
+    //     eloCalculation: undefined
+    // },
     {
         name: '2v2 - Ranked Duo',
         key: '2v2',
